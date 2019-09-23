@@ -3,8 +3,8 @@
 #include <string>
 #include <SDL.h>
 
-constexpr int SCREEN_WIDTH = 640;
-constexpr int SCREEN_HEIGHT = 480;
+constexpr int SCREEN_WIDTH = 1280;
+constexpr int SCREEN_HEIGHT = 720;
 
 // Function declarations
 bool init();
@@ -70,7 +70,7 @@ int main() {
 	}
 
 	// Load media
-	gImg = loadImage("images/cs1666.bmp");
+	gImg = loadImage("images/Alec_Img.bmp");
 
 	// Apply the image
 	SDL_BlitSurface(gImg, NULL, gScreenSurface, NULL );
