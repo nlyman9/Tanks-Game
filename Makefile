@@ -11,7 +11,7 @@ all: $(OUT_NAMES)
 %.o: %.cpp
 	$(CC) $^ $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $@
 
-unix: $(CPP_FILES)
+linux: $(CPP_FILES)
 	$(CC) $^ $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $(UNIXMAIN)
 
 
