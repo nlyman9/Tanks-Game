@@ -19,4 +19,4 @@ mac: sdl2_bmp.cpp
 	$(CC) $(MACFLAGS) $^ -o $(UNIXMAIN)
 
 clean:
-	rm -f *.o mac main
+	rm -f *.o main
