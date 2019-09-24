@@ -19,7 +19,7 @@ constexpr int SCREEN_HEIGHT = 720;
 bool init();
 SDL_Texture* loadImage(std::string fname);
 void close();
-void jakobCredits(int indexA, int indexB);
+void jakobCredits(SDL_Texture*  picture, SDL_Texture* hitmarker);
 
 // Globals
 SDL_Window* gWindow = nullptr;
@@ -161,24 +161,25 @@ int main() {
 	#endif // __APPLE__
 
 	// Load media
-	gTex.push_back(loadImage("images/Alec_Img.bmp"));
-	gTex.push_back(loadImage("images/jakob.png"));
-	gTex.push_back(loadImage("images/hitmarker.png"));
+	gTex.push_back(loadImage("images/adam_Img.bmp"));	// index 0
+	gTex.push_back(loadImage("images/Alec_Img.bmp"));	// index 1
+	gTex.push_back(loadImage("images/Njl26 Credits Picture.bmp"));	// index 4
 
-	// Render first image
-	SDL_RenderClear(gRenderer);
-	SDL_RenderCopy(gRenderer, gTex[0], NULL, NULL);
-	SDL_RenderPresent(gRenderer);
-	SDL_Delay(3000);
+	for(auto image : gTex) {
+		SDL_RenderClear(gRenderer);
+		SDL_RenderCopy(gRenderer, image, NULL, NULL);
+		SDL_RenderPresent(gRenderer);
+		SDL_Delay(3000);
+	}
 
-	jakobCredits(1, 2);
+	jakobCredits(loadImage("images/jakob_img.png"), loadImage("images/jakob_hitmarker.png"));
 
 	/* END Jakob's Credit Scene */
 
 	close();
 }
 
-void jakobCredits(int indexA, int indexB) {
+void jakobCredits(SDL_Texture*  picture, SDL_Texture* hitmarker) {
 	// Position of hitmarkers
 	std::vector<SDL_Rect> pos; 
 	pos.push_back({320, 250, 60, 80});
@@ -191,19 +192,18 @@ void jakobCredits(int indexA, int indexB) {
 	/* CODE */
 	// Render jakob.bmp first
 	SDL_RenderClear(gRenderer);
-	SDL_RenderCopy(gRenderer, gTex[indexA], NULL, NULL);
+	SDL_RenderCopy(gRenderer, picture, NULL, NULL);
 	SDL_RenderPresent(gRenderer);
 
 	SDL_Delay(2500);
 
 	// Create texture of jakob.bmp so I can write other things on it
 	SDL_Texture* back = SDL_CreateTexture(gRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, SCREEN_WIDTH, SCREEN_HEIGHT);
-	// Set the target to render to, (the texture labled back)
-	SDL_SetRenderTarget(gRenderer, back);
-	// Render the image to the texture
-	SDL_RenderCopy(gRenderer, gTex[indexA], NULL, NULL);
 	for (int i = 0; i < 6; i++) {
+		// Set target to sdl texture back
 		SDL_SetRenderTarget(gRenderer, back);
+		// Redraw the first image first.
+		SDL_RenderCopy(gRenderer, picture, NULL, NULL);
 		
 		// Wait 0.5 seconds
 		if (i < 5) 
@@ -216,7 +216,7 @@ void jakobCredits(int indexA, int indexB) {
 		Mix_PlayChannel(-1, gSound, 0); 
 
 		// Render hit marker on background
-		SDL_RenderCopy(gRenderer, gTex[indexB], NULL, &(pos[i]));
+		SDL_RenderCopy(gRenderer, hitmarker, NULL, &(pos[i]));
 
 		// Render edited texture 'back' to screen.
 		SDL_SetRenderTarget(gRenderer, NULL);
