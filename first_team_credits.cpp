@@ -42,7 +42,7 @@ bool init() {
 		std::cout << "Warning: Linear texture filtering not enabled!" << std::endl;
 	}
 
-    gWindow = SDL_CreateWindow("Hello world!", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+    gWindow = SDL_CreateWindow("CS1666: The First Team", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
 	if (gWindow == nullptr) {
 		std::cout << "Window could not be created! SDL_Error: " << SDL_GetError() << std::endl;
 		return  false;
@@ -161,9 +161,15 @@ int main() {
 	#endif // __APPLE__
 
 	// Load media
-	gTex.push_back(loadImage("images/adam_Img.bmp"));	// index 0
+	gTex.push_back(loadImage("images/cs1666_adamibrahim.bmp"));	// index 0
 	gTex.push_back(loadImage("images/Alec_Img.bmp"));	// index 1
-	gTex.push_back(loadImage("images/Njl26 Credits Picture.bmp"));	// index 4
+	gTex.push_back(loadImage("images/Njl26 Credits Picture.bmp"));	// index 2
+	gTex.push_back(loadImage("images/AlexClewell_cs1666.bmp"));
+	gTex.push_back(loadImage("images/brendanmarani_picture.bmp"));
+	gTex.push_back(loadImage("images/CS1666_BenKurzyna.bmp"));
+	gTex.push_back(loadImage("images/danny_credit.bmp"));
+	gTex.push_back(loadImage("images/dtm32.bmp"));
+	gTex.push_back(loadImage("images/ecm53.bmp"));
 
 	for(auto image : gTex) {
 		SDL_RenderClear(gRenderer);
