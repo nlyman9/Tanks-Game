@@ -76,12 +76,6 @@ bool init() {
         return false;
     }
 
-	int audFlags = MIX_INIT_MP3;
-	retFlags = Mix_Init(audFlags);
-	if (audFlags != retFlags) {
-		std::cout << "SDL could not initialize MP3! SDL_Error: " << SDL_GetError() << std::endl;
-		return false;
-	}
 
 	if (Mix_OpenAudio( 22050, MIX_DEFAULT_FORMAT, 2, 4096 ) == -1)
     {
@@ -89,6 +83,13 @@ bool init() {
         return false;    
     }
 
+	int audFlags = MIX_INIT_MP3;
+	retFlags = Mix_Init(audFlags);
+	if (audFlags != retFlags) {
+		std::cout << "SDL could not initialize MP3! SDL_Error: " << SDL_GetError() << std::endl;
+		return false;
+	}
+	
 	gSound = Mix_LoadWAV( "sounds/jakob_theme.mp3" );
 
 	if (gSound == nullptr) {
