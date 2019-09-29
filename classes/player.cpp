@@ -62,7 +62,7 @@ void Player::update() {
  * @return false - failed to move player 
  */
 bool Player::move(int x, int y) {
-
+    return false;
 }
 
 /**
@@ -75,19 +75,19 @@ bool Player::move(int x, int y) {
  * @return false - failed to place player 
  */
 bool Player::place(int x, int y) {
-
+    return false;
 }
 
 /* Player Specific Functions */
 
 bool Player::fire() {
-
+    return false;
 }
 
 bool Player::rotatePlayer(float theta) {
-
+    return false;
 }
 
 bool Player::rotateTurret(float theta) {
-
+    return false;
 }
