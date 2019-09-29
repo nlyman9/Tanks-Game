@@ -1,0 +1,9 @@
+/home/apc47/Documents/my_fork/cs1666-First-Team/build/CMakeFiles/rebuild_cache.dir
+/home/apc47/Documents/my_fork/cs1666-First-Team/build/CMakeFiles/Tanks.dir
+/home/apc47/Documents/my_fork/cs1666-First-Team/build/CMakeFiles/edit_cache.dir
+/home/apc47/Documents/my_fork/cs1666-First-Team/build/resources/CMakeFiles/rebuild_cache.dir
+/home/apc47/Documents/my_fork/cs1666-First-Team/build/resources/CMakeFiles/edit_cache.dir
+/home/apc47/Documents/my_fork/cs1666-First-Team/build/resources/images/CMakeFiles/rebuild_cache.dir
+/home/apc47/Documents/my_fork/cs1666-First-Team/build/resources/images/CMakeFiles/edit_cache.dir
+/home/apc47/Documents/my_fork/cs1666-First-Team/build/resources/sounds/CMakeFiles/rebuild_cache.dir
+/home/apc47/Documents/my_fork/cs1666-First-Team/build/resources/sounds/CMakeFiles/edit_cache.dir
