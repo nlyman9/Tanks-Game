@@ -181,30 +181,32 @@ int main() {
 			if (e.type == SDL_QUIT) {
 				gameon = false;
 			}
-			else if(e.type == SDL_KEYDOWN) {
-				switch(e.key.keysym.sym) {
-                    case SDLK_ESCAPE:
-                        display_credits();
-                        break;
-					case SDLK_w:
-						y_vel -= 1;
-						break;
-
-					case SDLK_a:
-						x_vel -= 1;
-						break;
-
-					case SDLK_s:
-						y_vel += 1;
-						break;
-
-					case SDLK_d:
-						x_vel += 1;
-						break;
-				}
-			}
-			
+            else if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE){
+                display_credits();
+            }		
 		}
+        //check key states
+        const Uint8* currentKeyStates = SDL_GetKeyboardState( NULL );
+        //y movement
+        if( currentKeyStates[SDL_SCANCODE_W]){
+            y_vel--;
+        }else if( currentKeyStates[ SDL_SCANCODE_S ] ){
+            y_vel++;
+        }else if(y_vel > 0){
+            y_vel--;
+        }else if(y_vel < 0){
+            y_vel++;
+        }
+        //x movement
+        if( currentKeyStates[ SDL_SCANCODE_A ] ){
+            x_vel--;
+        }else if( currentKeyStates[ SDL_SCANCODE_D ] ){
+            x_vel++;
+        }else if(x_vel > 0){
+            x_vel--;
+        }else if(x_vel < 0){
+            x_vel++;
+        }
 
         //cap movement speed
         if(x_vel > MAX_SPEED){
