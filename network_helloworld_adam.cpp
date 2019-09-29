@@ -6,20 +6,22 @@
 #include <netinet/in.h> 
 #include <arpa/inet.h>
 #include <string.h> 
+#include <string>
 #include <iostream>
 #define PORT 8080 
 
 int main(int argc, char const *argv[]) 
 { 
     bool host = true;
-    char* s = new char[24];
+
+    std::string s;
     
     std::cin >> s;
 
-    if(strcmp(s, "host") == 0){
+    if(s == "host"){
         std::cout << "hosting\n" << std::flush;
         host = true;
-    }else if(strcmp(s, "client") == 0){
+    }else if(s == "client"){
         std::cout << "trying to connect\n" << std::flush;
         host = false;
     }
@@ -31,7 +33,7 @@ int main(int argc, char const *argv[])
         int opt = 1; 
         int addrlen = sizeof(address); 
         char buffer[1024] = {0}; 
-        char *hello = "Hello from server\n"; 
+        std::string hello = "Hello from server\n"; 
         
         // Creating socket file descriptor 
         if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) 
@@ -72,7 +74,7 @@ int main(int argc, char const *argv[])
         } 
         valread = read( ssocket , buffer, 1024); 
         std::cout << buffer;
-        send(ssocket , hello , strlen(hello) , 0 ); 
+        send(ssocket , hello.c_str() , hello.size() , 0 ); 
         std::cout << "Hello message sent\n"; 
         return 0; 
     }
@@ -80,7 +82,7 @@ int main(int argc, char const *argv[])
     else{
         int sk = 0, valread; 
         struct sockaddr_in serv_addr; 
-        char *hello = "Hello from client\n"; 
+        std::string hello = "Hello from client\n"; 
         char buffer[1024] = {0}; 
         if ((sk = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
         { 
@@ -103,7 +105,7 @@ int main(int argc, char const *argv[])
             std::cout << "\nConnection Failed \n"; 
             return -1; 
         } 
-        send(sk , hello , strlen(hello) , 0 ); 
+        send(sk , hello.c_str() , hello.size() , 0 ); 
         std::cout << "Hello message sent\n"; 
         valread = read( sk , buffer, 1024); 
         std::cout << buffer ; 
