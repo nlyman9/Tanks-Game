@@ -4,6 +4,7 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_mixer.h>
+#include <SDL_ttf.h>
 
 constexpr int SCREEN_WIDTH = 640;
 constexpr int SCREEN_HEIGHT = 480;
@@ -175,6 +176,7 @@ int main() {
 
 	SDL_Event e;
 	bool gameon = true;
+
 	while(gameon) {
 
 		while(SDL_PollEvent(&e)) {
@@ -185,6 +187,7 @@ int main() {
                 display_credits();
             }		
 		}
+
         //check key states
         const Uint8* currentKeyStates = SDL_GetKeyboardState( NULL );
         //y movement
@@ -192,7 +195,8 @@ int main() {
             y_vel--;
         }else if( currentKeyStates[ SDL_SCANCODE_S ] ){
             y_vel++;
-        }else if(y_vel > 0){
+        }//if the player is not move in the y axis reduce speed
+        else if(y_vel > 0){
             y_vel--;
         }else if(y_vel < 0){
             y_vel++;
@@ -202,7 +206,9 @@ int main() {
             x_vel--;
         }else if( currentKeyStates[ SDL_SCANCODE_D ] ){
             x_vel++;
-        }else if(x_vel > 0){
+        }
+        //if no key is pressed then reduce speed
+        else if(x_vel > 0){
             x_vel--;
         }else if(x_vel < 0){
             x_vel++;

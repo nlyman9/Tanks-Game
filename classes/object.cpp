@@ -1,4 +1,3 @@
-#include "../headers/object.h"
 #include <iostream>
 
 class OBJECT{

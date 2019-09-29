@@ -7,7 +7,7 @@ class Player{
     public:
         Player(Sprite sprite, Sprite turret, int x, int y); //constructor, initialize the x, y, and sprite
         int x, y, lives; //x and y coordinates, health points left
-        Weapon weapon; //equipped weapon
+        Weapon weapon; //equipped weapon/or projectile to fire? Projectile projectile maybe-
         bool Fire(); //return true if the player fired successfully
         bool Rotate(float angle); //rotate the object
         bool RotateTurret(float angle); //rotate the turret
