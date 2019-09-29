@@ -10,19 +10,15 @@
  */
 #include "../headers/player.hpp"
 
-// COMMENTED OUT BECAUSE SPRITE DNE yet
-// /**
-//  * @brief Construct a new Player:: Player object
-//  * 
-//  * @param sprite 
-//  * @param turret 
-//  * @param x 
-//  * @param y 
-//  */
-// Player::Player(Sprite sprite, Sprite turret, int x, int y)
-// {
-// }
-Player::Player(int x, int y) : x{x}, y{y} {}
+/**
+ * @brief Construct a new Player:: Player object
+ * 
+ * @param sprite 
+ * @param turret 
+ * @param x 
+ * @param y 
+ */
+Player::Player(Sprite sprite, Sprite turret, int x, int y) : sprite{sprite}, turret{turret}, x{x}, y{y} {}
 
 /**
  * @brief Destroy the Player:: Player object

@@ -10,17 +10,20 @@
  */
 #include "object.hpp"
 
+// TODO figure out Weapon object
+using Weapon = UNDEFINED;
+
 #ifndef PLAYER_HPP
 #define PLAYER_HPP  
 class Player : public OBJECT {
     private:
         /* data */
-        //Sprite sprite;
-        //Sprite turret;
-        //Weapon weapon; //equipped weapon/or projectile to fire? Projectile projectile maybe-
+        Sprite sprite;
+        Sprite turret;
+        Weapon weapon; //equipped weapon/or projectile to fire? Projectile projectile maybe-
         int x, y, lives; //x and y coordinates, health points left
     public:
-        //Player(Sprite sprite, Sprite turret, int x, int y); //constructor, initialize the x, y, and sprite
+        Player(Sprite sprite, Sprite turret, int x, int y); //constructor, initialize the x, y, and sprite
         Player(int x, int y); //constructor, initialize the x, y, and sprite
 
         void draw(float update_lag) override;
