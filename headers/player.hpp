@@ -21,7 +21,7 @@ class Player : public OBJECT {
         int x, y, lives; //x and y coordinates, health points left
     public:
         //Player(Sprite sprite, Sprite turret, int x, int y); //constructor, initialize the x, y, and sprite
-        Player(int x, int y) : ; //constructor, initialize the x, y, and sprite
+        Player(int x, int y); //constructor, initialize the x, y, and sprite
 
         void draw(float update_lag) override;
         void update() override;

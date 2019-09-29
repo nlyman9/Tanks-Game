@@ -22,9 +22,7 @@
 // Player::Player(Sprite sprite, Sprite turret, int x, int y)
 // {
 // }
-Player::Player(int x, int y) {
-
-}
+Player::Player(int x, int y) : x{x}, y{y} {}
 
 /**
  * @brief Destroy the Player:: Player object
