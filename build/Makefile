@@ -48,7 +48,7 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/apc47/Documents/my_fork/cs1666-First-Team
+CMAKE_SOURCE_DIR = /home/apc47/Documents/my_fork/cs1666-First-Team/source
 
 # The top-level build directory on which CMake was run.
 CMAKE_BINARY_DIR = /home/apc47/Documents/my_fork/cs1666-First-Team/build
@@ -111,44 +111,69 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named Tanks
+# Target rules for targets named Game
 
 # Build rule for target.
-Tanks: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 Tanks
-.PHONY : Tanks
+Game: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 Game
+.PHONY : Game
 
 # fast build rule for target.
-Tanks/fast:
-	$(MAKE) -f CMakeFiles/Tanks.dir/build.make CMakeFiles/Tanks.dir/build
-.PHONY : Tanks/fast
+Game/fast:
+	$(MAKE) -f app/CMakeFiles/Game.dir/build.make app/CMakeFiles/Game.dir/build
+.PHONY : Game/fast
 
-GameStartUp.o: GameStartUp.cpp.o
+#=============================================================================
+# Target rules for targets named Credits
 
-.PHONY : GameStartUp.o
+# Build rule for target.
+Credits: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 Credits
+.PHONY : Credits
 
-# target to build an object file
-GameStartUp.cpp.o:
-	$(MAKE) -f CMakeFiles/Tanks.dir/build.make CMakeFiles/Tanks.dir/GameStartUp.cpp.o
-.PHONY : GameStartUp.cpp.o
+# fast build rule for target.
+Credits/fast:
+	$(MAKE) -f app/Credits/CMakeFiles/Credits.dir/build.make app/Credits/CMakeFiles/Credits.dir/build
+.PHONY : Credits/fast
 
-GameStartUp.i: GameStartUp.cpp.i
+#=============================================================================
+# Target rules for targets named Object
 
-.PHONY : GameStartUp.i
+# Build rule for target.
+Object: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 Object
+.PHONY : Object
 
-# target to preprocess a source file
-GameStartUp.cpp.i:
-	$(MAKE) -f CMakeFiles/Tanks.dir/build.make CMakeFiles/Tanks.dir/GameStartUp.cpp.i
-.PHONY : GameStartUp.cpp.i
+# fast build rule for target.
+Object/fast:
+	$(MAKE) -f app/Object/CMakeFiles/Object.dir/build.make app/Object/CMakeFiles/Object.dir/build
+.PHONY : Object/fast
 
-GameStartUp.s: GameStartUp.cpp.s
+#=============================================================================
+# Target rules for targets named Player
 
-.PHONY : GameStartUp.s
+# Build rule for target.
+Player: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 Player
+.PHONY : Player
 
-# target to generate assembly for a file
-GameStartUp.cpp.s:
-	$(MAKE) -f CMakeFiles/Tanks.dir/build.make CMakeFiles/Tanks.dir/GameStartUp.cpp.s
-.PHONY : GameStartUp.cpp.s
+# fast build rule for target.
+Player/fast:
+	$(MAKE) -f app/Player/CMakeFiles/Player.dir/build.make app/Player/CMakeFiles/Player.dir/build
+.PHONY : Player/fast
+
+#=============================================================================
+# Target rules for targets named GameLoop
+
+# Build rule for target.
+GameLoop: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 GameLoop
+.PHONY : GameLoop
+
+# fast build rule for target.
+GameLoop/fast:
+	$(MAKE) -f app/GameLoop/CMakeFiles/GameLoop.dir/build.make app/GameLoop/CMakeFiles/GameLoop.dir/build
+.PHONY : GameLoop/fast
 
 # Help Target
 help:
@@ -157,11 +182,12 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... rebuild_cache"
-	@echo "... Tanks"
 	@echo "... edit_cache"
-	@echo "... GameStartUp.o"
-	@echo "... GameStartUp.i"
-	@echo "... GameStartUp.s"
+	@echo "... Game"
+	@echo "... Credits"
+	@echo "... Object"
+	@echo "... Player"
+	@echo "... GameLoop"
 .PHONY : help
 
 
