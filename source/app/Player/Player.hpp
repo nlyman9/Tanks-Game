@@ -9,6 +9,9 @@
  * 
  */
 #include "Object.hpp"
+#include "NetworkController.hpp"
+#include "KeyboardController.hpp"
+#include "AIController.hpp"
 
 // TODO figure out Weapon object
 using Weapon = UNDEFINED;
@@ -25,6 +28,7 @@ class Player : public OBJECT {
         Sprite turret;
         Weapon weapon; //equipped weapon/or projectile to fire? Projectile projectile maybe-
         int x, y, lives; //x and y coordinates, health points left
+        KeyboardController controller; 
     public:
         Player(Sprite sprite, Sprite turret, int x, int y); //constructor, initialize the x, y, and sprite
         Player(int x, int y); //constructor, initialize the x, y, and sprite

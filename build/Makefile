@@ -175,6 +175,19 @@ GameLoop/fast:
 	$(MAKE) -f app/GameLoop/CMakeFiles/GameLoop.dir/build.make app/GameLoop/CMakeFiles/GameLoop.dir/build
 .PHONY : GameLoop/fast
 
+#=============================================================================
+# Target rules for targets named Controllers
+
+# Build rule for target.
+Controllers: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 Controllers
+.PHONY : Controllers
+
+# fast build rule for target.
+Controllers/fast:
+	$(MAKE) -f app/Controllers/CMakeFiles/Controllers.dir/build.make app/Controllers/CMakeFiles/Controllers.dir/build
+.PHONY : Controllers/fast
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -188,6 +201,7 @@ help:
 	@echo "... Object"
 	@echo "... Player"
 	@echo "... GameLoop"
+	@echo "... Controllers"
 .PHONY : help
 
 
