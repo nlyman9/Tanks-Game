@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <SDL.h>
+#include <cmath>
 
 constexpr int SCREEN_WIDTH = 1080;
 constexpr int SCREEN_HEIGHT = 720;
@@ -58,6 +59,45 @@ void close() {
 	SDL_Quit();
 }
 
+
+bool checkPos(int playX, int playY, int enemX, int enemY) {
+       
+	double  stepOne = (double) (pow((playX - enemX), 2)+pow((playY - enemY), 2));
+
+ 	double distanceAway =  (pow(stepOne, .5));	
+	
+	if(distanceAway < 200.0) {
+		return true;
+	}
+	return false;
+}
+
+
+bool checkWall(int x, int y) {
+	
+	//left wall
+	if(x <= 20) {
+		return true;
+	}
+	//right wall
+	else if(x >= SCREEN_WIDTH - 2*BOX_WIDTH) {
+		return true;
+	}
+	//top wall
+	else if(y <= 20) {
+		return true;
+	}
+	//bottom wall
+	else if(y >= SCREEN_HEIGHT - 2*BOX_HEIGHT) {
+		return true;
+	}
+	else {
+		return false;
+
+	}
+}
+
+
 int main() {
 	if (!init()) {
 		std::cout <<  "Failed to initialize!" << std::endl;
@@ -77,8 +117,8 @@ int main() {
 
 
 	//Enemy box
-	int x_enemy_pos = SCREEN_WIDTH - BOX_WIDTH;
-	int y_enemy_pos = SCREEN_HEIGHT - BOX_HEIGHT;
+	int x_enemy_pos = SCREEN_WIDTH/2 - BOX_WIDTH/2;
+	int y_enemy_pos = SCREEN_HEIGHT/2 - BOX_HEIGHT/2;
 
 	// Current velocity of the box
 	// Start off at reset
@@ -157,23 +197,96 @@ int main() {
 		if(y_pos > SCREEN_HEIGHT - BOX_HEIGHT) {
 			y_pos = SCREEN_HEIGHT - BOX_HEIGHT;
 		}
+			
 
-		x_enemy_pos += -x_vel;
-		y_enemy_pos += -y_vel;
+		//Checking if enemy should move away
+		bool retreat;
+		retreat = checkPos(x_pos, y_pos, x_enemy_pos, y_enemy_pos);
+			
+				
+		bool nearWall;
+		nearWall = checkWall(x_enemy_pos, y_enemy_pos);
 
-		if(x_enemy_pos > SCREEN_WIDTH - BOX_WIDTH) {
-                        x_enemy_pos = SCREEN_WIDTH - BOX_WIDTH;
-                }
-                if(x_enemy_pos < 0){
-                        x_enemy_pos = 0;
-                }
-                if(y_enemy_pos < 0){
-                        y_enemy_pos = 0;
-                }
-                if(y_enemy_pos > SCREEN_HEIGHT - BOX_HEIGHT) {
-                        y_enemy_pos = SCREEN_HEIGHT - BOX_HEIGHT;
-                }
+		
+		if(!retreat) {
+			
+			//go to center
+			
+			if(x_enemy_pos <= SCREEN_WIDTH/2) {
+				x_enemy_pos += MAX_VELOCITY;
+			}
+			else{
+				x_enemy_pos += -MAX_VELOCITY;
+			}
+			if(y_enemy_pos <= SCREEN_HEIGHT/2) {
+				y_enemy_pos += MAX_VELOCITY;
+			}
+			else{
+				y_enemy_pos += -MAX_VELOCITY;
+			}
+		
+		}
+		else{
+			
+			//run away but not near wall
+			if(!nearWall) {
+				if(x_pos >= x_enemy_pos) {
+					x_enemy_pos += -MAX_VELOCITY;
+				}
+				else{
+					x_enemy_pos += MAX_VELOCITY;
+				}
+				if(y_pos >= y_enemy_pos) {
+					y_enemy_pos += -MAX_VELOCITY;
+				}
+				else{
+					y_enemy_pos += MAX_VELOCITY;
+				}
+			}
+			else {
+			//run away and on wall
+				
+			
+				if(x_enemy_pos == 20 || x_enemy_pos == SCREEN_WIDTH - 2*BOX_WIDTH){	
+					if(y_pos >= y_enemy_pos) {
+                                                y_enemy_pos += -MAX_VELOCITY;
+                                        }
+                                        else {
+                                                y_enemy_pos += MAX_VELOCITY;
+                                        }
 
+			
+				}
+				if(y_enemy_pos == 20 || y_enemy_pos == SCREEN_HEIGHT - 2*BOX_HEIGHT) {
+
+					if(x_pos >= x_enemy_pos) {
+                                                x_enemy_pos += -MAX_VELOCITY;
+                                        }
+                                        else{
+                                               x_enemy_pos += MAX_VELOCITY;
+                                        }
+
+				}	
+
+			}
+
+		}
+		
+		
+		
+		if(x_enemy_pos > SCREEN_WIDTH - 2*BOX_WIDTH) {
+                        x_enemy_pos = SCREEN_WIDTH - 2*BOX_WIDTH;
+                }
+                if(x_enemy_pos < 20){
+                        x_enemy_pos = 20;
+                }
+                if(y_enemy_pos < 20){
+                        y_enemy_pos = 20;
+                }
+                if(y_enemy_pos > SCREEN_HEIGHT - 2*BOX_HEIGHT) {
+                        y_enemy_pos = SCREEN_HEIGHT - 2*BOX_HEIGHT;
+                }
+		
 		
 		
 		// Draw box
@@ -198,3 +311,4 @@ int main() {
 	// Out of game loop, clean up
 	close();
 }
+
