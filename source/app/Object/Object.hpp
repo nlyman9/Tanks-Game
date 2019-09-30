@@ -8,14 +8,22 @@
  * @copyright Copyright (c) 2019
  * 
  */
+
+/**
+ * @brief UNDEFINED means the object/type has not been defined/implemented yet
+ * 
+ * UNDEFINED = bool -> Essentially should be void but it doesn't work.
+ */
+using UNDEFINED = bool;
+using Sprite = UNDEFINED;
+
+
 #ifndef OBJECT_HPP
 #define OBJECT_HPP  
-
 #include <iostream>
-
 class OBJECT {
     private:
-        //Sprite sprite;
+        Sprite sprite;
         int x, y;
     public:
 
@@ -62,6 +70,6 @@ class OBJECT {
 };
 
 OBJECT::~OBJECT() {
-    std::cout << "Object destructor" << std::endl;
+    std::cout << "Object destructor";
 }
 #endif
