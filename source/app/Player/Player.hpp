@@ -8,7 +8,10 @@
  * @copyright Copyright (c) 2019
  * 
  */
-#include "object.hpp"
+#include "Object.hpp"
+
+// TODO figure out Weapon object
+using Weapon = UNDEFINED;
 
 // TODO figure out Weapon object
 using Weapon = UNDEFINED;

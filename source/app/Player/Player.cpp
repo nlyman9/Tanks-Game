@@ -8,7 +8,7 @@
  * @copyright Copyright (c) 2019
  * 
  */
-#include "../headers/player.hpp"
+#include "Player.hpp"
 
 /**
  * @brief Construct a new Player:: Player object
