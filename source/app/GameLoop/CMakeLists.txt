@@ -10,6 +10,7 @@ target_link_libraries(GameLoop
   SDL2
   SDL2_image
   SDL2_mixer
+  sndio
 )
 
 target_include_directories(GameLoop
