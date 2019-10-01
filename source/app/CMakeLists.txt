@@ -3,6 +3,9 @@ add_subdirectory(Object)
 add_subdirectory(Player)
 add_subdirectory(GameLoop)
 add_subdirectory(Controllers)
+add_subdirectory(Sprite)
+add_subdirectory(Tile)
+add_subdirectory(Projectile)
 
 link_directories(${PROJECT_SOURCE_DIR}/libraries/)
 
