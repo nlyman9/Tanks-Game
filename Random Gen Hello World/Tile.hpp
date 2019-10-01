@@ -19,6 +19,7 @@ class Tile : public OBJECT {
 
     private:
         int x, y;
+        bool destroyed;
 
 };
 
