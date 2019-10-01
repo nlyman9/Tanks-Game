@@ -7,6 +7,7 @@
 constexpr int SCREEN_WIDTH = 1280;
 constexpr int SCREEN_HEIGHT = 720;
 constexpr int TILE_SIZE = 48;
+constexpr int BORDER_GAP = 16;
 
 // Function declarations
 bool init();
@@ -95,7 +96,7 @@ int main() {
 		return 1;
 	}
 	
-	gTileSheet = loadImage("tiles.png");
+	gTileSheet = loadImage("../source/res/images/tiles.png");
 	
 	for (int i = 0; i < 3; i++) {
 		gTileRects[i].x = i * TILE_SIZE;
@@ -118,36 +119,42 @@ int main() {
 		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
 		SDL_RenderClear(gRenderer);
 
-		for (int x = 1; x * TILE_SIZE < SCREEN_WIDTH - TILE_SIZE; x++) {
-			for (int y = 1; y * TILE_SIZE < SCREEN_HEIGHT - TILE_SIZE; y++) {
-				cur_out = { x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE};
+		//FROM BORDERGAP + TILE SIZE TO GET INTERIOR OF MAP
+		//x represents the pixels of the screen, not the tile index anymore
+		for (int x = BORDER_GAP + TILE_SIZE; x < SCREEN_WIDTH - BORDER_GAP - TILE_SIZE; x+=TILE_SIZE) {
+			for (int y = TILE_SIZE; y < SCREEN_HEIGHT - TILE_SIZE; y+=TILE_SIZE) {
+				cur_out = { x, y, TILE_SIZE, TILE_SIZE};
 				SDL_RenderCopy(gRenderer, gTileSheet, &gTileRects[0], &cur_out);
 			}
 		}
 		
-		c = 0;
-		while (c * TILE_SIZE < SCREEN_WIDTH) {
-			cur_out = {c * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE};
+		//GENERATES TOP BORDER
+		c = BORDER_GAP;
+		while (c < SCREEN_WIDTH - BORDER_GAP) {
+			cur_out = {c, 0, TILE_SIZE, TILE_SIZE};
 			SDL_RenderCopy(gRenderer, gTileSheet, &gTileRects[2], &cur_out);
-			c += 1;
+			c += TILE_SIZE;
 		}
+		//GENERATES LEFT BORDER
 		c = 0;
-		while (c * TILE_SIZE < SCREEN_HEIGHT) {
-			cur_out = {0, c * TILE_SIZE, TILE_SIZE, TILE_SIZE};
+		while (c < SCREEN_HEIGHT) {
+			cur_out = {BORDER_GAP, c, TILE_SIZE, TILE_SIZE};
 			SDL_RenderCopy(gRenderer, gTileSheet, &gTileRects[2], &cur_out);
-			c += 1;
+			c += TILE_SIZE;
 		}
-		c = 0;
-		while (c * TILE_SIZE < SCREEN_WIDTH) {
-			cur_out = {c * TILE_SIZE, SCREEN_HEIGHT - TILE_SIZE, TILE_SIZE, TILE_SIZE};
+		//GENERATES BOTTOM BORDER
+		c = BORDER_GAP;
+		while (c < SCREEN_WIDTH - BORDER_GAP) {
+			cur_out = {c, SCREEN_HEIGHT - TILE_SIZE, TILE_SIZE, TILE_SIZE};
 			SDL_RenderCopy(gRenderer, gTileSheet, &gTileRects[2], &cur_out);
-			c += 1;
+			c += TILE_SIZE;
 		}
+		//GENERATES RIGHT BORDER
 		c = 0;
-		while (c * TILE_SIZE < SCREEN_HEIGHT) {
-			cur_out = {SCREEN_WIDTH - TILE_SIZE, c * TILE_SIZE, TILE_SIZE, TILE_SIZE};
+		while (c < SCREEN_HEIGHT) {
+			cur_out = {SCREEN_WIDTH - TILE_SIZE - BORDER_GAP, c, TILE_SIZE, TILE_SIZE};
 			SDL_RenderCopy(gRenderer, gTileSheet, &gTileRects[2], &cur_out);
-			c += 1;
+			c += TILE_SIZE;
 		}
 
 		SDL_RenderPresent(gRenderer);
