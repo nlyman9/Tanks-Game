@@ -16,9 +16,6 @@
 // TODO figure out Weapon object
 using Weapon = UNDEFINED;
 
-// TODO figure out Weapon object
-using Weapon = UNDEFINED;
-
 #ifndef PLAYER_HPP
 #define PLAYER_HPP  
 class Player : public OBJECT {
