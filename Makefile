@@ -6,4 +6,4 @@ Game: Tests/game.cpp
 	$(CC) $^ $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $@
 
 clean:
-	rm *.o
+	rm Game
