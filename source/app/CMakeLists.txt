@@ -13,8 +13,11 @@ add_executable(Game
   game.cpp
 )
 
+link_directories(${PROJECT_SOURCE_DIR}/libraries/)
+
 target_link_libraries(Game
   PRIVATE
   Credits
   GameLoop
+  sndio
 )
