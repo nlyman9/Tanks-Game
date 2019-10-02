@@ -10,4 +10,4 @@ all: $(OUT_NAMES)
 	$(CC) $^ $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $@
 
 clean:
-	rm *.o
+	rm -f *.o
