@@ -8,6 +8,8 @@ target_link_libraries(GameLoop
   PRIVATE
   Render
   Credits
+  Player
+  Enemy
   SDL2
   SDL2_image
 )

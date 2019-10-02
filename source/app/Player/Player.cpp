@@ -43,7 +43,83 @@ void Player::draw(float update_lag) {
  *  Overrides base class OBJECT
  * 
  */
-void Player::update() {
+void Player::update(SDL_Event e) {
+    if (e.type == SDL_KEYDOWN)
+			{
+				switch (e.key.keysym.sym)
+				{
+				case SDLK_w:
+					y_vel -= MAX_VELOCITY;
+					break;
+
+				case SDLK_a:
+					x_vel -= MAX_VELOCITY;
+					break;
+
+				case SDLK_s:
+					y_vel += MAX_VELOCITY;
+					break;
+
+				case SDLK_d:
+					x_vel += MAX_VELOCITY;
+					break;
+				}
+			}
+			else if (e.type == SDL_KEYUP)
+			{
+				switch (e.key.keysym.sym)
+				{
+				case SDLK_w:
+					y_vel = 0;
+					break;
+				case SDLK_a:
+					x_vel = 0;
+					break;
+				case SDLK_s:
+					y_vel = 0;
+					break;
+				case SDLK_d:
+					x_vel = 0;
+					break;
+				}
+			}
+		}
+
+		// Move box
+		if (x_vel > MAX_VELOCITY)
+		{
+			x_vel = MAX_VELOCITY;
+		}
+		if (x_vel < -MAX_VELOCITY)
+		{
+			x_vel = -MAX_VELOCITY;
+		}
+		if (y_vel > MAX_VELOCITY)
+		{
+			y_vel = MAX_VELOCITY;
+		}
+		if (y_vel < -MAX_VELOCITY)
+		{
+			y_vel = -MAX_VELOCITY;
+		}
+		x_pos += x_vel;
+		y_pos += y_vel;
+		if (x_pos > SCREEN_WIDTH - BOX_WIDTH)
+		{
+			x_pos = SCREEN_WIDTH - BOX_WIDTH;
+		}
+		if (x_pos < 0)
+		{
+			x_pos = 0;
+		}
+		if (y_pos < 0)
+		{
+			y_pos = 0;
+		}
+		if (y_pos > SCREEN_HEIGHT - BOX_HEIGHT)
+		{
+			y_pos = SCREEN_HEIGHT - BOX_HEIGHT;
+		}
 
 }
 

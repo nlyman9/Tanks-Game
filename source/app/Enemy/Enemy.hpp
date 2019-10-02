@@ -17,6 +17,7 @@
 class Enemy : public OBJECT {
     private:
         /* data */
+        Enemy(SDL_Window* window, SDL_Renderer* renderer) : gWindow{window}, gRenderer{renderer} {};
         Sprite sprite;
         Sprite turret;
         Weapon weapon; 
