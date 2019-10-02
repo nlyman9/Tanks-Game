@@ -9,7 +9,7 @@ class Render {
         mainLoop::GameLoop* gloop;
 
         Render(mainLoop::GameLoop* gl):gloop{gl} {
-            gTileSheet = loadImage("../source/res/images/tiles.png");
+            gTileSheet = loadImage("source/res/images/tiles.png");
             for (int i = 0; i < 3; i++) {
                 gTileRects[i].x = i * TILE_SIZE;
                 gTileRects[i].y = 0;
@@ -17,6 +17,7 @@ class Render {
                 gTileRects[i].h = TILE_SIZE;
             }
         };
+
         SDL_Texture* loadImage(std::string fname) {
             SDL_Texture* newText = nullptr;
 
