@@ -1,2 +1,0 @@
-/usr/bin/ar qc libCredits.a  CMakeFiles/Credits.dir/Credits.cpp.o
-/usr/bin/ranlib libCredits.a

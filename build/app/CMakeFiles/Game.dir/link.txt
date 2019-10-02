@@ -1,1 +1,0 @@
-/usr/bin/c++     CMakeFiles/Game.dir/game.cpp.o  -o ../bin/Game  -L/mnt/e/test/working/cs1666-First-Team/source/libraries -Wl,-rpath,/mnt/e/test/working/cs1666-First-Team/source/libraries Credits/libCredits.a GameLoop/libGameLoop.a -lsndio Render/libRender.a GameLoop/libGameLoop.a Render/libRender.a Credits/libCredits.a -lSDL2 -lSDL2_image -lSDL2_mixer -lsndio -lmad 

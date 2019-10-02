@@ -1,2 +1,0 @@
-/usr/bin/ar qc libControllers.a  CMakeFiles/Controllers.dir/AIController.cpp.o CMakeFiles/Controllers.dir/KeyboardController.cpp.o CMakeFiles/Controllers.dir/NetworkController.cpp.o
-/usr/bin/ranlib libControllers.a
