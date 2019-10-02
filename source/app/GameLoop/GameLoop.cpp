@@ -73,7 +73,7 @@ int GameLoop::run() {
 				gameon = false;
 			}
 			else if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE){
-					Credits c(gWindow, gRenderer, gTex, gSound);
+					Credits c(gWindow, gRenderer, gTex);
 					c.playCredits();
 			}		
 		}

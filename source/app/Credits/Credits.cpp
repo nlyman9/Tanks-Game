@@ -8,11 +8,9 @@
 #ifdef __APPLE__ 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-#include <SDL2_mixer/SDL_mixer.h>
 #else
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-#include <SDL2/SDL_mixer.h>
 #include <SDL2/SDL_ttf.h>
 
 #endif // __APPLE__
@@ -42,16 +40,13 @@ void Credits::close() {
 		i = nullptr;
 	}
 
-	Mix_FreeChunk(gSound);
 
 	SDL_DestroyRenderer(gRenderer);
 	SDL_DestroyWindow(gWindow);
 	gWindow = nullptr;
 	gRenderer = nullptr;
-	gSound = nullptr;
 
 	// Quit SDL subsystems
-	Mix_Quit();
 	IMG_Quit();
 	SDL_Quit();
 }
@@ -128,9 +123,6 @@ void Credits::jakobCredits(SDL_Texture*  picture, SDL_Texture* hitmarker) {
 			SDL_Delay(200);  
 		else 
 			SDL_Delay(750);
-
-		// Play audio
-		Mix_PlayChannel(-1, gSound, 0); 
 
 		// Render hit marker on background
 		SDL_RenderCopy(gRenderer, hitmarker, NULL, &(pos[i]));

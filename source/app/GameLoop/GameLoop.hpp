@@ -3,7 +3,6 @@
 
 #include <iostream>
 #include <vector>
-#include <SDL2/SDL_mixer.h>
 #include <SDL2/SDL.h>
 
 class GameLoop {
@@ -14,7 +13,6 @@ class GameLoop {
     // SDL_Window* getWindows();
     // SDL_Renderer* getRenderer();
     // std::vector<SDL_Texture*> getTextures();
-    // Mix_Chunk* getSound();
 
   private:
     bool init();
@@ -23,7 +21,6 @@ class GameLoop {
     SDL_Window* gWindow;
     SDL_Renderer* gRenderer;
     std::vector<SDL_Texture*> gTex;
-    Mix_Chunk* gSound;
 
     const int SCREEN_WIDTH = 640;
     const int SCREEN_HEIGHT = 480;
