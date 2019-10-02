@@ -1,18 +1,18 @@
-add_library(GameLoop
+add_library(Render
   STATIC
-  GameLoop.hpp
-  GameLoop.cpp
+  Render.hpp
+  Render.cpp
 )
 
-target_link_libraries(GameLoop
+target_link_libraries(Render
   PRIVATE
-  Render
   Credits
   SDL2
   SDL2_image
   SDL2_mixer
   sndio
   mad
+ GameLoop
 )
 
 target_include_directories(GameLoop

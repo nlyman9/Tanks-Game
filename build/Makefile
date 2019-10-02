@@ -48,10 +48,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/apc47/Documents/master_repo/cs1666-First-Team/source
+CMAKE_SOURCE_DIR = /mnt/e/test/working/cs1666-First-Team/source
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/apc47/Documents/master_repo/cs1666-First-Team/build
+CMAKE_BINARY_DIR = /mnt/e/test/working/cs1666-First-Team/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -80,9 +80,9 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/apc47/Documents/master_repo/cs1666-First-Team/build/CMakeFiles /home/apc47/Documents/master_repo/cs1666-First-Team/build/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/e/test/working/cs1666-First-Team/build/CMakeFiles /mnt/e/test/working/cs1666-First-Team/build/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/apc47/Documents/master_repo/cs1666-First-Team/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/e/test/working/cs1666-First-Team/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -188,6 +188,58 @@ Controllers/fast:
 	$(MAKE) -f app/Controllers/CMakeFiles/Controllers.dir/build.make app/Controllers/CMakeFiles/Controllers.dir/build
 .PHONY : Controllers/fast
 
+#=============================================================================
+# Target rules for targets named Sprite
+
+# Build rule for target.
+Sprite: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 Sprite
+.PHONY : Sprite
+
+# fast build rule for target.
+Sprite/fast:
+	$(MAKE) -f app/Sprite/CMakeFiles/Sprite.dir/build.make app/Sprite/CMakeFiles/Sprite.dir/build
+.PHONY : Sprite/fast
+
+#=============================================================================
+# Target rules for targets named Tile
+
+# Build rule for target.
+Tile: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 Tile
+.PHONY : Tile
+
+# fast build rule for target.
+Tile/fast:
+	$(MAKE) -f app/Tile/CMakeFiles/Tile.dir/build.make app/Tile/CMakeFiles/Tile.dir/build
+.PHONY : Tile/fast
+
+#=============================================================================
+# Target rules for targets named Projectile
+
+# Build rule for target.
+Projectile: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 Projectile
+.PHONY : Projectile
+
+# fast build rule for target.
+Projectile/fast:
+	$(MAKE) -f app/Projectile/CMakeFiles/Projectile.dir/build.make app/Projectile/CMakeFiles/Projectile.dir/build
+.PHONY : Projectile/fast
+
+#=============================================================================
+# Target rules for targets named Render
+
+# Build rule for target.
+Render: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 Render
+.PHONY : Render
+
+# fast build rule for target.
+Render/fast:
+	$(MAKE) -f app/Render/CMakeFiles/Render.dir/build.make app/Render/CMakeFiles/Render.dir/build
+.PHONY : Render/fast
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -202,6 +254,10 @@ help:
 	@echo "... Player"
 	@echo "... GameLoop"
 	@echo "... Controllers"
+	@echo "... Sprite"
+	@echo "... Tile"
+	@echo "... Projectile"
+	@echo "... Render"
 .PHONY : help
 
 

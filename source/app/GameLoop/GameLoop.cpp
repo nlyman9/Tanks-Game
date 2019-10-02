@@ -2,6 +2,8 @@
 #include <SDL2/SDL.h>
 #include <iostream>
 #include "Credits.hpp"
+#include "Render.hpp"
+using namespace mainLoop;
 
 GameLoop::~GameLoop() {
 	close();
@@ -45,111 +47,228 @@ void GameLoop::close() {
 	// Quit SDL subsystems
 	SDL_Quit();
 }
+bool checkPos(int playX, int playY, int enemX, int enemY) {
+       
+	double  stepOne = (double) (pow((playX - enemX), 2)+pow((playY - enemY), 2));
 
+ 	double distanceAway =  (pow(stepOne, .5));	
+	
+	if(distanceAway < 200.0) {
+		return true;
+	}
+	return false;
+}
+bool checkWall(int x, int y) {
+	
+	//left wall
+	if(x <= 20) {
+		return true;
+	}
+	//right wall
+	else if(x >= SCREEN_WIDTH - 2*BOX_WIDTH) {
+		return true;
+	}
+	//top wall
+	else if(y <= 20) {
+		return true;
+	}
+	//bottom wall
+	else if(y >= SCREEN_HEIGHT - 2*BOX_HEIGHT) {
+		return true;
+	}
+	else {
+		return false;
+
+	}
+}
 int GameLoop::run() {
   if (!init()) {
 		std::cout <<  "Failed to initialize!" << std::endl;
 		close();
 		return 1;
 	}
-
+	Render render(this);
+	SDL_Event e;
+	bool gameon = true;
 	// Current position to render the box
 	// Start off with it in the middle
-	int x_pos = SCREEN_WIDTH/2 - BOX_WIDTH/2;
-	int y_pos = SCREEN_HEIGHT/2 - BOX_HEIGHT/2;
+	x_pos = 0;
+	y_pos = 0;
+	
+
+	//Start position of obstacle - middle
+	x_obst_pos = SCREEN_WIDTH/2 - OBST_WIDTH/2;
+	y_obst_pos = SCREEN_HEIGHT/2 - OBST_HEIGHT/2;
+
+
+	//Enemy box
+	x_enemy_pos = SCREEN_WIDTH/2 - BOX_WIDTH/2;
+	y_enemy_pos = SCREEN_HEIGHT/2 - BOX_HEIGHT/2;
 
 	// Current velocity of the box
 	// Start off at reset
-	int x_vel = 0;
-	int y_vel = 0;
-
-	SDL_Event e;
-	bool gameon = true;
+	x_vel = 0;
+	y_vel = 0;
+	
 
 	while(gameon) {
-
 		while(SDL_PollEvent(&e)) {
 			if (e.type == SDL_QUIT) {
 				gameon = false;
 			}
-			else if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE){
-					Credits c(gWindow, gRenderer, gTex, gSound);
-					c.playCredits();
-			}		
+			
+			else if(e.type == SDL_KEYDOWN) {
+				switch(e.key.keysym.sym) {
+					case SDLK_w:
+						y_vel -= MAX_VELOCITY;
+						break;
+
+					case SDLK_a:
+						x_vel -= MAX_VELOCITY;
+						break;
+
+					case SDLK_s:
+						y_vel += MAX_VELOCITY;
+						break;
+
+					case SDLK_d:
+						x_vel += MAX_VELOCITY;
+						break;
+				}
+			}
+			else if(e.type == SDL_KEYUP) {
+				switch(e.key.keysym.sym) {
+					case SDLK_w:
+						y_vel = 0;
+						break;
+					case SDLK_a:
+						x_vel = 0;
+						break;
+					case SDLK_s:
+						y_vel = 0;
+						break;
+					case SDLK_d:
+						x_vel = 0; 
+						break;
+				}
+			}
 		}
-
-        //check key states
-        const Uint8* currentKeyStates = SDL_GetKeyboardState( NULL );
-        //y movement
-        if( currentKeyStates[SDL_SCANCODE_W]){
-            y_vel--;
-        }else if( currentKeyStates[ SDL_SCANCODE_S ] ){
-            y_vel++;
-        }//if the player is not move in the y axis reduce speed
-        else if(y_vel > 0){
-            y_vel--;
-        }else if(y_vel < 0){
-            y_vel++;
-        }
-        //x movement
-        if( currentKeyStates[ SDL_SCANCODE_A ] ){
-            x_vel--;
-        }else if( currentKeyStates[ SDL_SCANCODE_D ] ){
-            x_vel++;
-        }
-        //if no key is pressed then reduce speed
-        else if(x_vel > 0){
-            x_vel--;
-        }else if(x_vel < 0){
-            x_vel++;
-        }
-
-        //cap movement speed
-        if(x_vel > MAX_SPEED){
-            x_vel = MAX_SPEED;
-        }else if(x_vel < -MAX_SPEED){
-            x_vel = -MAX_SPEED;
-        }
-        if(y_vel > MAX_SPEED){
-            y_vel = MAX_SPEED;
-        }else if(y_vel < -MAX_SPEED){
-            y_vel = -MAX_SPEED;
-        }
-
+		
 		// Move box
+		if(x_vel > MAX_VELOCITY) {
+			x_vel = MAX_VELOCITY;
+		}
+		if(x_vel < -MAX_VELOCITY) {
+			x_vel = -MAX_VELOCITY;
+		}
+		if(y_vel > MAX_VELOCITY) {
+			y_vel = MAX_VELOCITY;
+		}
+		if(y_vel < -MAX_VELOCITY) {
+			y_vel = -MAX_VELOCITY;
+		}
 		x_pos += x_vel;
 		y_pos += y_vel;
+		if(x_pos > SCREEN_WIDTH - BOX_WIDTH) {
+			x_pos = SCREEN_WIDTH - BOX_WIDTH;
+		}
+		if(x_pos < 0){
+			x_pos = 0;
+		}
+		if(y_pos < 0){
+			y_pos = 0;
+		}
+		if(y_pos > SCREEN_HEIGHT - BOX_HEIGHT) {
+			y_pos = SCREEN_HEIGHT - BOX_HEIGHT;
+		}
 
-        //check boundaries
-        if(x_pos < 0){
-            x_pos = 0;
-            x_vel = 0;
-        }else if(x_pos > (SCREEN_WIDTH - BOX_WIDTH)){
-            x_pos = SCREEN_WIDTH - BOX_WIDTH;
-            x_vel = 0;
-        }
-        if(y_pos < 0){
-            y_pos = 0;
-            y_vel = 0;
-        }else if(y_pos > (SCREEN_HEIGHT - BOX_HEIGHT)){
-            y_pos = SCREEN_HEIGHT - BOX_HEIGHT;
-            y_vel = 0;
-        }
+		//Checking if enemy should move away
+		bool retreat;
+		retreat = checkPos(x_pos, y_pos, x_enemy_pos, y_enemy_pos);
+			
+				
+		bool nearWall;
+		nearWall = checkWall(x_enemy_pos, y_enemy_pos);
+
 		
-		// Draw box
-		// Clear black
-		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
-		SDL_RenderClear(gRenderer);
+		if(!retreat) {
+			
+			//go to center
+			
+			if(x_enemy_pos <= SCREEN_WIDTH/2) {
+				x_enemy_pos += MAX_VELOCITY;
+			}
+			else{
+				x_enemy_pos += -MAX_VELOCITY;
+			}
+			if(y_enemy_pos <= SCREEN_HEIGHT/2) {
+				y_enemy_pos += MAX_VELOCITY;
+			}
+			else{
+				y_enemy_pos += -MAX_VELOCITY;
+			}
 		
-		// Cyan box
-        SDL_SetRenderDrawColor(gRenderer, 0x00, 0xFF, 0xFF, 0xFF);
-		SDL_Rect fillRect = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
-		SDL_RenderFillRect(gRenderer, &fillRect);
+		}
+		else{
+			
+			//run away but not near wall
+			if(!nearWall) {
+				if(x_pos >= x_enemy_pos) {
+					x_enemy_pos += -MAX_VELOCITY;
+				}
+				else{
+					x_enemy_pos += MAX_VELOCITY;
+				}
+				if(y_pos >= y_enemy_pos) {
+					y_enemy_pos += -MAX_VELOCITY;
+				}
+				else{
+					y_enemy_pos += MAX_VELOCITY;
+				}
+			}
+			else {
+			//run away and on wall
+			
 		
-        SDL_RenderPresent(gRenderer);
+			if(x_enemy_pos == 20 || x_enemy_pos == SCREEN_WIDTH - 2*BOX_WIDTH){	
+				if(y_pos >= y_enemy_pos) {
+											y_enemy_pos += -MAX_VELOCITY;
+									}
+									else {
+											y_enemy_pos += MAX_VELOCITY;
+									}
+
+		
+			}
+			if(y_enemy_pos == 20 || y_enemy_pos == SCREEN_HEIGHT - 2*BOX_HEIGHT) {
+
+				if(x_pos >= x_enemy_pos) {
+											x_enemy_pos += -MAX_VELOCITY;
+									}
+									else{
+											x_enemy_pos += MAX_VELOCITY;
+									}
+
+			}	
+
+		}
+
+		}
+		
+		if(x_enemy_pos > SCREEN_WIDTH - 2*BOX_WIDTH) {
+			x_enemy_pos = SCREEN_WIDTH - 2*BOX_WIDTH;
+		}
+		if(x_enemy_pos < 20){
+			x_enemy_pos = 20;
+		}
+		if(y_enemy_pos < 20){
+			y_enemy_pos = 20;
+		}
+		if(y_enemy_pos > SCREEN_HEIGHT - 2*BOX_HEIGHT) {
+			y_enemy_pos = SCREEN_HEIGHT - 2*BOX_HEIGHT;
+		}	
+		
+		render.run();
 
 	}
-
-	// Out of game loop, clean up
-	close();
 }
