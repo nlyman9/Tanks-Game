@@ -1,0 +1,14 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/mnt/e/test/working/cs1666-First-Team/source/app/Controllers/AIController.cpp
+
+/mnt/e/test/working/cs1666-First-Team/source/app/Controllers/KeyboardController.cpp
+
+/mnt/e/test/working/cs1666-First-Team/source/app/Controllers/NetworkController.cpp
+

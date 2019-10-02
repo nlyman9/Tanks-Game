@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/mnt/e/test/working/cs1666-First-Team/source/app/GameLoop/./GameLoop.hpp
+SDL2/SDL.h
+-
+iostream
+-
+vector
+-
+
+/mnt/e/test/working/cs1666-First-Team/source/app/game.cpp
+GameLoop.hpp
+/mnt/e/test/working/cs1666-First-Team/source/app/GameLoop.hpp
+
