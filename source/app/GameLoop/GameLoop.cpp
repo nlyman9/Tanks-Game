@@ -108,23 +108,10 @@ int GameLoop::run()
 	Render *render = new Render(this);
 	SDL_Event e;
 	bool gameon = true;
-	// Current position to render the box
-	// Start off with it in the middle
-	x_pos = 0;
-	y_pos = 0;
 
 	//Start position of obstacle - middle
 	x_obst_pos = SCREEN_WIDTH / 2 - OBST_WIDTH / 2;
 	y_obst_pos = SCREEN_HEIGHT / 2 - OBST_HEIGHT / 2;
-
-	//Enemy box
-	x_enemy_pos = SCREEN_WIDTH / 2 - BOX_WIDTH / 2;
-	y_enemy_pos = SCREEN_HEIGHT / 2 - BOX_HEIGHT / 2;
-
-	// Current velocity of the box
-	// Start off at reset
-	x_vel = 0;
-	y_vel = 0;
 
 	Player player(gWindow, gRenderer);
 	Enemy enemy(gWindow, gRenderer);
@@ -141,105 +128,10 @@ int GameLoop::run()
 			{
 				player.update(e);
 			}
-		//Checking if enemy should move away
-		bool retreat;
-		retreat = checkPos(x_pos, y_pos, x_enemy_pos, y_enemy_pos);
+			
+			enemy.update(player.getX(), player.getY());
 
-		bool nearWall;
-		nearWall = checkWall(x_enemy_pos, y_enemy_pos);
-
-		if (!retreat)
-		{
-
-			//go to center
-
-			if (x_enemy_pos <= SCREEN_WIDTH / 2)
-			{
-				x_enemy_pos += MAX_VELOCITY;
-			}
-			else
-			{
-				x_enemy_pos += -MAX_VELOCITY;
-			}
-			if (y_enemy_pos <= SCREEN_HEIGHT / 2)
-			{
-				y_enemy_pos += MAX_VELOCITY;
-			}
-			else
-			{
-				y_enemy_pos += -MAX_VELOCITY;
-			}
+			render->run();
 		}
-		else
-		{
-
-			//run away but not near wall
-			if (!nearWall)
-			{
-				if (x_pos >= x_enemy_pos)
-				{
-					x_enemy_pos += -MAX_VELOCITY;
-				}
-				else
-				{
-					x_enemy_pos += MAX_VELOCITY;
-				}
-				if (y_pos >= y_enemy_pos)
-				{
-					y_enemy_pos += -MAX_VELOCITY;
-				}
-				else
-				{
-					y_enemy_pos += MAX_VELOCITY;
-				}
-			}
-			else
-			{
-				//run away and on wall
-
-				if (x_enemy_pos == 20 || x_enemy_pos == SCREEN_WIDTH - 2 * BOX_WIDTH)
-				{
-					if (y_pos >= y_enemy_pos)
-					{
-						y_enemy_pos += -MAX_VELOCITY;
-					}
-					else
-					{
-						y_enemy_pos += MAX_VELOCITY;
-					}
-				}
-				if (y_enemy_pos == 20 || y_enemy_pos == SCREEN_HEIGHT - 2 * BOX_HEIGHT)
-				{
-
-					if (x_pos >= x_enemy_pos)
-					{
-						x_enemy_pos += -MAX_VELOCITY;
-					}
-					else
-					{
-						x_enemy_pos += MAX_VELOCITY;
-					}
-				}
-			}
-		}
-
-		if (x_enemy_pos > SCREEN_WIDTH - 2 * BOX_WIDTH)
-		{
-			x_enemy_pos = SCREEN_WIDTH - 2 * BOX_WIDTH;
-		}
-		if (x_enemy_pos < 20)
-		{
-			x_enemy_pos = 20;
-		}
-		if (y_enemy_pos < 20)
-		{
-			y_enemy_pos = 20;
-		}
-		if (y_enemy_pos > SCREEN_HEIGHT - 2 * BOX_HEIGHT)
-		{
-			y_enemy_pos = SCREEN_HEIGHT - 2 * BOX_HEIGHT;
-		}
-
-		render->run();
 	}
 }

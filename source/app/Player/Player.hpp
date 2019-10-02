@@ -13,6 +13,8 @@
 #include "KeyboardController.hpp"
 #include "AIController.hpp"
 
+constexpr int SCREEN_WIDTH = 1280;
+constexpr int SCREEN_HEIGHT = 720;
 // TODO figure out Weapon object
 using Weapon = UNDEFINED;
 
@@ -20,6 +22,14 @@ using Weapon = UNDEFINED;
 #define PLAYER_HPP  
 class Player : public OBJECT {
     private:
+    	// Current velocity of the box
+        // Start off at reset
+        x_vel = 0;
+        y_vel = 0;
+        // Current position to render the box
+        // Start off with it in the middle
+        x_pos = 0;
+        y_pos = 0;
         /* data */
         Sprite sprite;
         Sprite turret;
@@ -39,6 +49,9 @@ class Player : public OBJECT {
         bool fire(); //return true if the player fired successfully
         bool rotatePlayer(float theta); //rotate the object
         bool rotateTurret(float theta); //rotate the turret
+
+        int getX(); //return the current X coordinate
+        int gety(); //return the current Y coordinate
 
         ~Player();
 };
