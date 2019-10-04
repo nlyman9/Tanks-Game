@@ -46,7 +46,7 @@ bool Render::init()
 	// Set renderer draw/clear color
 	SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
 
-	gTileSheet = loadImage("res/images/tiles.png");
+	gTileSheet = loadImage("source/res/images/tiles.png");
 	for (int i = 0; i < 3; i++) {
 			gTileRects[i].x = i * TILE_SIZE;
 			gTileRects[i].y = 0;
