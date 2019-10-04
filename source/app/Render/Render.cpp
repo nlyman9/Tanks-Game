@@ -46,7 +46,34 @@ bool Render::init()
 	// Set renderer draw/clear color
 	SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
 
+	gTileSheet = loadImage("res/images/tiles.png");
+	for (int i = 0; i < 3; i++) {
+			gTileRects[i].x = i * TILE_SIZE;
+			gTileRects[i].y = 0;
+			gTileRects[i].w = TILE_SIZE;
+			gTileRects[i].h = TILE_SIZE;
+	}
+
 	return true;
+}
+
+SDL_Texture* Render::loadImage(std::string fname) {
+	SDL_Texture* newText = nullptr;
+
+	SDL_Surface* startSurf = IMG_Load(fname.c_str());
+	if (startSurf == nullptr) {
+			std::cout << "Unable to load image " << fname << "! SDL Error: " << SDL_GetError() << std::endl;
+			return nullptr;
+	}
+
+	newText = SDL_CreateTextureFromSurface(gRenderer, startSurf);
+	if (newText == nullptr) {
+			std::cout << "Unable to create texture from " << fname << "! SDL Error: " << SDL_GetError() << std::endl;
+	}
+
+	SDL_FreeSurface(startSurf);
+
+	return newText;
 }
 
 void Render::close() {
