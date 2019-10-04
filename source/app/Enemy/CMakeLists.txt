@@ -1,4 +1,4 @@
-add_library(Player
+add_library(Enemy
   STATIC
   Enemy.hpp
   Enemy.cpp

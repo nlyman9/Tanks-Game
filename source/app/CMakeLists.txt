@@ -7,6 +7,7 @@ add_subdirectory(Sprite)
 add_subdirectory(Tile)
 add_subdirectory(Projectile)
 add_subdirectory(Render)
+add_subdirectory(Enemy)
 
 add_executable(Game
   game.cpp
