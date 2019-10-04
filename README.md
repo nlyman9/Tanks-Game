@@ -11,4 +11,4 @@ Run `sh setup.sh` to install the following libraries
 * SDL2 ttf
 # Running the Game
 1. Run `sh build_game.sh`
-2. ./build/bin/Game
+2. `./build/bin/Game`
