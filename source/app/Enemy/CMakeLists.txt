@@ -7,6 +7,8 @@ add_library(Enemy
 target_link_libraries(Enemy
   PRIVATE
   Object
+  Player
+  Constants
 )
 
 target_include_directories(Enemy

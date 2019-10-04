@@ -11,6 +11,7 @@ target_link_libraries(Render
   Constants
   Player
   Object
+  Enemy
 )
 
 target_include_directories(Render

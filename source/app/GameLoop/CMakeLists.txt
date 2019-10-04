@@ -10,6 +10,7 @@ target_link_libraries(GameLoop
   Object
   Player
   Constants
+  Enemy
 )
 
 target_include_directories(GameLoop

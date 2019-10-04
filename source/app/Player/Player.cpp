@@ -27,9 +27,7 @@ Player::Player(int x, int y) :  x_pos{x}, y_pos{y} {}
  * @brief Destroy the Player:: Player object
  * 
  */
-Player::~Player() {
-    
-}
+Player::~Player() {}
 
 /**
  * @brief draws the player object 

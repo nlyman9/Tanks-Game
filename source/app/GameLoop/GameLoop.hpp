@@ -5,6 +5,7 @@
 #include <vector>
 #include "Player.hpp"
 #include "Render.hpp"
+#include "Enemy.hpp"
 
 class GameLoop {
   public:

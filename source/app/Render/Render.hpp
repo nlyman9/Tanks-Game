@@ -3,9 +3,10 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-#include "Player.hpp"
-#include "Constants.hpp"
 #include <vector>
+#include "Constants.hpp"
+#include "Player.hpp"
+#include "Enemy.hpp"
 
 class Render {
     public:
@@ -17,8 +18,9 @@ class Render {
         SDL_Rect gTileRects[3];
         SDL_Rect cur_out;
         Player* gPlayer;
+        Enemy* gEnemy;
 
-        Render(Player* player): gPlayer{player} {}
+        Render(Player* player, Enemy* enemy): gPlayer{player}, gEnemy{enemy} {}
         ~Render();
         int run();
         bool init();

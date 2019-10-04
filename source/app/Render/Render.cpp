@@ -140,8 +140,8 @@ int Render::run() {
 	// SDL_Rect fillRect_obst = {gloop->x_obst_pos, gloop->y_obst_pos, OBST_WIDTH, OBST_HEIGHT};
 	// SDL_RenderFillRect(gloop->gRenderer, &fillRect_obst);
 
-	// SDL_SetRenderDrawColor(gloop->gRenderer, 0xff, 0x00, 0x00, 0xff);
-	// SDL_Rect enemyRect = {gloop->x_enemy_pos, gloop->y_enemy_pos, BOX_WIDTH, BOX_HEIGHT};
-	// SDL_RenderFillRect(gloop->gRenderer, &enemyRect);
+	SDL_SetRenderDrawColor(gRenderer, 0xff, 0x00, 0x00, 0xff);
+	SDL_Rect enemyRect = {gEnemy->getX(), gEnemy->getY(), BOX_WIDTH, BOX_HEIGHT};
+	SDL_RenderFillRect(gRenderer, &enemyRect);
 	SDL_RenderPresent(gRenderer);
 }
