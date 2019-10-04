@@ -9,7 +9,7 @@ const int OBST_WIDTH = 70;
 const int OBST_HEIGHT = 40;
 const int BOX_WIDTH = 20;
 const int BOX_HEIGHT = 20;
-const int MAX_VELOCITY = 1;
+const int MAX_VELOCITY = 5;
 const int TILE_SIZE = 48;
 
 #endif

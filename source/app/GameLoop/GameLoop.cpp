@@ -3,9 +3,7 @@
 #include "Constants.hpp"
 
 
-GameLoop::~GameLoop() {
-	init();
-}
+GameLoop::~GameLoop() {}
 
 /**
  * @brief Initialize properties for Gameloop
@@ -16,7 +14,10 @@ GameLoop::~GameLoop() {
 bool GameLoop::init() {
 	player = new Player(0, 0);
 	enemies.push_back(new Enemy(SCREEN_WIDTH / 2 - BOX_WIDTH / 2, SCREEN_HEIGHT / 2 - BOX_HEIGHT / 2, player));
-	Render *render = new Render(player, enemies);
+	enemies.push_back(new Enemy(SCREEN_WIDTH - BOX_WIDTH / 2, SCREEN_HEIGHT / 2 - BOX_HEIGHT / 2, player));
+	enemies.push_back(new Enemy(SCREEN_WIDTH / 2 - BOX_WIDTH / 2, SCREEN_HEIGHT - BOX_HEIGHT / 2, player));
+	render = new Render(player, enemies);
+	render->init();
 
 	isGameOn = true;
 }
@@ -24,10 +25,6 @@ bool GameLoop::init() {
 int GameLoop::run()
 {
 	SDL_Event e;
-
-	// //Start position of obstacle - middle
-	// x_obst_pos = SCREEN_WIDTH / 2 - OBST_WIDTH / 2;
-	// y_obst_pos = SCREEN_HEIGHT / 2 - OBST_HEIGHT / 2;
 
 	while (isGameOn)
 	{

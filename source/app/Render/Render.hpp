@@ -10,14 +10,6 @@
 
 class Render {
     public:
-        std::vector<SDL_Texture*> gTex;
-        SDL_Window* gWindow;
-        SDL_Renderer* gRenderer;
-
-        SDL_Texture* gTileSheet;
-        SDL_Rect gTileRects[3];
-        SDL_Rect cur_out;
-        Player* gPlayer;
         std::vector<Enemy *> gEnemies;
 
         Render(Player* player, std::vector<Enemy*> enemies): gPlayer{player}, gEnemies{enemies} {}
@@ -26,6 +18,16 @@ class Render {
         bool init();
         void close();
     private:
-       SDL_Texture* loadImage(std::string fname);
+
+        std::vector<SDL_Texture*> gTex;
+        SDL_Window* gWindow;
+        SDL_Renderer* gRenderer;
+
+        SDL_Texture* gTileSheet;
+        SDL_Rect gTileRects[3];
+        SDL_Rect cur_out;
+        Player* gPlayer;
+
+        SDL_Texture* loadImage(std::string fname);
 };
 #endif
