@@ -7,7 +7,6 @@ add_library(Player
 target_link_libraries(Player
   PRIVATE
   Object
-  Controllers
 )
 
 target_include_directories(Player

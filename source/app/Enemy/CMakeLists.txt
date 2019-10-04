@@ -7,7 +7,6 @@ add_library(Enemy
 target_link_libraries(Enemy
   PRIVATE
   Object
-  Controllers
 )
 
 target_include_directories(Enemy

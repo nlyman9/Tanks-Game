@@ -19,7 +19,6 @@ class Enemy : public OBJECT {
         /* data */
         Sprite sprite;
         Sprite turret;
-        Weapon weapon; 
         int x, y;
 		//	just wondering if we want to put some kind of custom acceleration on enemies?
 		//	this is just a note for the future since the online pitt library won't let me open the book I found
