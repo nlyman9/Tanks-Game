@@ -18,9 +18,9 @@ class Render {
         SDL_Rect gTileRects[3];
         SDL_Rect cur_out;
         Player* gPlayer;
-        Enemy* gEnemy;
+        std::vector<Enemy *> gEnemies;
 
-        Render(Player* player, Enemy* enemy): gPlayer{player}, gEnemy{enemy} {}
+        Render(Player* player, std::vector<Enemy*> enemies): gPlayer{player}, gEnemies{enemies} {}
         ~Render();
         int run();
         bool init();
