@@ -10,6 +10,7 @@ target_link_libraries(GameLoop
   Credits
   Player
   Enemy
+  Constants
   SDL2
   SDL2_image
 )

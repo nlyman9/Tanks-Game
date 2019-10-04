@@ -7,6 +7,7 @@ add_library(Player
 target_link_libraries(Player
   PRIVATE
   Object
+  Constants
 )
 
 target_include_directories(Player

@@ -5,6 +5,7 @@
 #include <SDL2/SDL_image.h>
 #include "Render.hpp"
 #include "GameLoop.hpp"
+#include "Constants.hpp"
 using namespace mainLoop;
 
 GameLoop* gloop;
@@ -22,7 +23,7 @@ int Render::run() {
 		int c;
 		SDL_Rect cur_out;
 
-        SDL_SetRenderDrawColor(gloop->gRenderer, 0x00, 0x00, 0x00, 0xFF);
+    SDL_SetRenderDrawColor(gloop->gRenderer, 0x00, 0x00, 0x00, 0xFF);
 		SDL_RenderClear(gloop->gRenderer);
 
 		//FROM BORDERGAP + TILE SIZE TO GET INTERIOR OF MAP
@@ -64,11 +65,11 @@ int Render::run() {
 		}
 		// Draw box
 		SDL_SetRenderDrawColor(gloop->gRenderer, 0x00, 0x00, 0x00, 0xFF);
-		SDL_Rect fillRect = {gloop->x_pos, gloop->y_pos, BOX_WIDTH, BOX_HEIGHT};
-		SDL_RenderFillRect(gloop->gRenderer, &fillRect);
+		SDL_Rect fillRect = {gPlayer->getX(), gPlayer->getY(), BOX_WIDTH, BOX_HEIGHT};
+		SDL_RenderFillRect(gloop->gRenderer, &fil+lRect);
 
 		SDL_SetRenderDrawColor(gloop->gRenderer, 0xff, 0x00, 0xff, 0xff);
-        SDL_Rect fillRect_obst = {gloop->x_obst_pos, gloop->y_obst_pos, OBST_WIDTH, OBST_HEIGHT};
+    SDL_Rect fillRect_obst = {gloop->x_obst_pos, gloop->y_obst_pos, OBST_WIDTH, OBST_HEIGHT};
 		SDL_RenderFillRect(gloop->gRenderer, &fillRect_obst);
 
 		SDL_SetRenderDrawColor(gloop->gRenderer, 0xff, 0x00, 0x00, 0xff);

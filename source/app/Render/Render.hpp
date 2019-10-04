@@ -1,14 +1,16 @@
 #ifndef RENDER_HPP
 #define RENDER_HPP
 #include "GameLoop.hpp"
+#include "Player.hpp"
 class Render {
     public:
         SDL_Texture* gTileSheet;
         SDL_Rect gTileRects[3];
         SDL_Rect cur_out;
         mainLoop::GameLoop* gloop;
+        Player* gPlayer;
 
-        Render(mainLoop::GameLoop* gl):gloop{gl} {
+        Render(mainLoop::GameLoop* gl, Player* player):gloop{gl}, gPlayer{player} {
             gTileSheet = loadImage("source/res/images/tiles.png");
             for (int i = 0; i < 3; i++) {
                 gTileRects[i].x = i * TILE_SIZE;

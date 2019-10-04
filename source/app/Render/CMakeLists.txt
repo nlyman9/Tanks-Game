@@ -10,6 +10,8 @@ target_link_libraries(Render
   SDL2
   SDL2_image
   GameLoop
+  Constants
+  Player
 )
 
 target_include_directories(GameLoop
