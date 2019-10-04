@@ -14,5 +14,5 @@ Run `sh setup.sh` to install the following libraries
 * madlib
 
 # Running the Game
-1. Run `sh build_game.sh` to build the executable
-2. Run `./build/bin/Game` to run the executable
+1. Run Make
+2. ./Game

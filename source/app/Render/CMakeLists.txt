@@ -9,10 +9,7 @@ target_link_libraries(Render
   Credits
   SDL2
   SDL2_image
-  SDL2_mixer
-  sndio
-  mad
- GameLoop
+  GameLoop
 )
 
 target_include_directories(GameLoop
