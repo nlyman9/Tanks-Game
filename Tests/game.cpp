@@ -136,7 +136,7 @@ int main() {
 		return 1;
 	}
 	
-	gTileSheet = loadImage("source/res/images/tiles.png");
+	gTileSheet = loadImage("res/images/tiles.png");
 	
 	for (int i = 0; i < 3; i++) {
 		gTileRects[i].x = i * TILE_SIZE;

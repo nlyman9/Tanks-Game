@@ -5,14 +5,11 @@ add_library(GameLoop
 )
 
 target_link_libraries(GameLoop
-  PRIVATE
+  PUBLIC
   Render
-  Credits
+  Object
   Player
-  Enemy
   Constants
-  SDL2
-  SDL2_image
 )
 
 target_include_directories(GameLoop

@@ -1,17 +1,25 @@
 #ifndef RENDER_HPP
 #define RENDER_HPP
-#include "GameLoop.hpp"
+
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include "Player.hpp"
+#include "Constants.hpp"
+#include <vector>
+
 class Render {
     public:
+        std::vector<SDL_Texture*> gTex;
+        SDL_Window* gWindow;
+        SDL_Renderer* gRenderer;
+
         SDL_Texture* gTileSheet;
         SDL_Rect gTileRects[3];
         SDL_Rect cur_out;
-        mainLoop::GameLoop* gloop;
         Player* gPlayer;
 
-        Render(mainLoop::GameLoop* gl, Player* player):gloop{gl}, gPlayer{player} {
-            gTileSheet = loadImage("source/res/images/tiles.png");
+        Render(Player* player): gPlayer{player} {
+            gTileSheet = loadImage("res/images/tiles.png");
             for (int i = 0; i < 3; i++) {
                 gTileRects[i].x = i * TILE_SIZE;
                 gTileRects[i].y = 0;
@@ -29,7 +37,7 @@ class Render {
                 return nullptr;
             }
 
-            newText = SDL_CreateTextureFromSurface(gloop->gRenderer, startSurf);
+            newText = SDL_CreateTextureFromSurface(gRenderer, startSurf);
             if (newText == nullptr) {
                 std::cout << "Unable to create texture from " << fname << "! SDL Error: " << SDL_GetError() << std::endl;
             }
@@ -40,5 +48,7 @@ class Render {
         }
         ~Render();
         int run();
+        bool init();
+        void close();
 };
 #endif

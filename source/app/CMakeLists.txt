@@ -1,7 +1,7 @@
 add_subdirectory(Credits)
+add_subdirectory(GameLoop)
 add_subdirectory(Object)
 add_subdirectory(Player)
-add_subdirectory(GameLoop)
 add_subdirectory(Networking)
 add_subdirectory(Sprite)
 add_subdirectory(Tile)
@@ -16,6 +16,5 @@ add_executable(Game
 
 target_link_libraries(Game
   PRIVATE
-  Credits
   GameLoop
 )

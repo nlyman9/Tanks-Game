@@ -21,6 +21,8 @@
  */
 Player::Player(Sprite sprite, Sprite turret, int x, int y) : sprite{sprite}, turret{turret}, x_pos{x}, y_pos{y} {}
 
+Player::Player(int x, int y) :  x_pos{x}, y_pos{y} {}
+
 /**
  * @brief Destroy the Player:: Player object
  * 

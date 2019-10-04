@@ -1,62 +1,9 @@
-#include <SDL2/SDL.h>
 #include <iostream>
 #include "GameLoop.hpp"
-#include "Credits.hpp"
-#include "Render.hpp"
 #include "Constants.hpp"
-#include "Player.hpp"
 
-using namespace mainLoop;
+GameLoop::~GameLoop() = default;
 
-GameLoop::~GameLoop()
-{
-	close();
-}
-
-bool GameLoop::init()
-{
-	if (SDL_Init(SDL_INIT_VIDEO) < 0)
-	{
-		std::cout << "SDL could not initialize! SDL_Error: " << SDL_GetError() << std::endl;
-		return false;
-	}
-
-	if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1"))
-	{
-		std::cout << "Warning: Linear texture filtering not enabled!" << std::endl;
-	}
-
-	gWindow = SDL_CreateWindow("Hello world!", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-	if (gWindow == nullptr)
-	{
-		std::cout << "Window could not be created! SDL_Error: " << SDL_GetError() << std::endl;
-		return false;
-	}
-
-	// Adding VSync to avoid absurd framerates
-	gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-	if (gRenderer == nullptr)
-	{
-		std::cout << "Renderer could not be created! SDL_Error: " << SDL_GetError() << std::endl;
-		return false;
-	}
-
-	// Set renderer draw/clear color
-	SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
-
-	return true;
-}
-
-void GameLoop::close()
-{
-	SDL_DestroyRenderer(gRenderer);
-	SDL_DestroyWindow(gWindow);
-	gWindow = nullptr;
-	gRenderer = nullptr;
-
-	// Quit SDL subsystems
-	SDL_Quit();
-}
 bool checkPos(int playX, int playY, int enemX, int enemY)
 {
 
@@ -70,6 +17,7 @@ bool checkPos(int playX, int playY, int enemX, int enemY)
 	}
 	return false;
 }
+
 bool checkWall(int x, int y)
 {
 
@@ -98,19 +46,15 @@ bool checkWall(int x, int y)
 		return false;
 	}
 }
+
 int GameLoop::run()
 {
-	if (!init())
-	{
-		std::cout << "Failed to initialize!" << std::endl;
-		close();
-		return 1;
-	}
 	SDL_Event e;
 	bool gameon = true;
 
 	Player player(0,0);
-	Render *render = new Render(this, &player);
+	Render *render = new Render(&player);
+	render->init();
 
 	//Start position of obstacle - middle
 	x_obst_pos = SCREEN_WIDTH / 2 - OBST_WIDTH / 2;
@@ -132,8 +76,10 @@ int GameLoop::run()
 			{
 				player.getEvent(e);
 			}
-
+		}
 		//Checking if enemy should move away
+		int x_pos = player.getX();
+		int y_pos = player.getY();
 		bool retreat;
 		retreat = checkPos(x_pos, y_pos, x_enemy_pos, y_enemy_pos);
 
