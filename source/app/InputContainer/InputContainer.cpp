@@ -1,9 +1,0 @@
-
-
-class InputContainer {
-  public:
-    
-  private:
-
-
-};

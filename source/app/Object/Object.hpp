@@ -66,10 +66,7 @@ class OBJECT {
          */
         virtual bool place(int x, int y) = 0;
 
-        virtual ~OBJECT() = 0; //destructor
+        // virtual ~OBJECT() = 0; //destructor
 };
 
-OBJECT::~OBJECT() {
-    std::cout << "Object destructor";
-}
 #endif
