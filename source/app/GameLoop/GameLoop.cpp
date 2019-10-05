@@ -71,9 +71,9 @@ int GameLoop::run()
 
 		// 3. Render
 		// Render everything 
-		render->run();
+		render->draw(lag_time / MS_PER_UPDATE);
 	}
 
 	// Exit normally
-	return(0);
+	return 0;
 }

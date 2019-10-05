@@ -14,8 +14,19 @@ Enemy::~Enemy() {}
  * 
  * @param update_lag - the value to extrapolate by
  */
-void Enemy::draw(float update_lag) {
+void Enemy::draw(SDL_Renderer *gRenderer, double update_lag) {
 
+  // Extrapolate the x and y positions 
+  // "Solves" stuck in the middle rendering.
+  // TODO change MAX_VELOCITY to the enemy's velocity
+  
+  // int x_pos = this->getX() + this->x_velocity * update_lag;
+  // int y_pos = this->getY() + this->y_velocity * update_lag;
+
+  // Render enemy
+  SDL_SetRenderDrawColor(gRenderer, 0xff, 0x00, 0x00, 0xff);
+  SDL_Rect enemyRect = {this->getX(), this->getY(), BOX_WIDTH, BOX_HEIGHT};
+	SDL_RenderFillRect(gRenderer, &enemyRect);
 }
 
 /**

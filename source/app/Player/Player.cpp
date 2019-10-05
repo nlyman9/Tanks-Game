@@ -35,8 +35,16 @@ Player::~Player() {}
  * 
  * @param update_lag - the value to extrapolate by
  */
-void Player::draw(float update_lag) {
+void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
+    // Extrapolate the x and y positions 
+    // "Solves" stuck in the middle rendering.
+    int x_pos = this->getX() + this->x_vel * update_lag;
+    int y_pos = this->getY() + this->y_vel * update_lag;
 
+    // Render to screen (gRenderer)
+    SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
+	SDL_Rect fillRect = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
+	SDL_RenderFillRect(gRenderer, &fillRect);
 }
 
 /**
