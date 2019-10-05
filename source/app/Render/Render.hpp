@@ -14,7 +14,8 @@ class Render {
 
         Render(Player* player, std::vector<Enemy*> enemies): gPlayer{player}, gEnemies{enemies} {}
         ~Render();
-        int run();
+        //int run(); now is
+        int draw(double update_lag);
         bool init();
         void close();
     private:

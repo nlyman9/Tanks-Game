@@ -34,8 +34,8 @@ bool Render::init()
 		return false;
 	}
 
-	// Adding VSync to avoid absurd framerates
-	gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+	// SEt up rendered with out vsync
+	gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
 	if (gRenderer == nullptr)
 	{
 		std::cout << "Renderer could not be created! SDL_Error: " << SDL_GetError() << std::endl;
@@ -85,7 +85,7 @@ void Render::close() {
 	SDL_Quit();
 }
 
-int Render::run() {
+int Render::draw(double update_lag) {
 		
 	int c;
 	SDL_Rect cur_out;
@@ -130,21 +130,21 @@ int Render::run() {
 		SDL_RenderCopy(gRenderer, gTileSheet, &gTileRects[2], &cur_out);
 		c += TILE_SIZE;
 	}
-	// Draw box
-	SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
-	SDL_Rect fillRect = {gPlayer->getX(), gPlayer->getY(), BOX_WIDTH, BOX_HEIGHT};
-	SDL_RenderFillRect(gRenderer, &fillRect);
+
+	// Render player
+	gPlayer->draw(gRenderer, update_lag);
+
+	// Render all the enemies
+	for (auto enemy: gEnemies) {
+		enemy->draw(gRenderer, update_lag);
+	}
 
 	// SDL_SetRenderDrawColor(gRenderer, 0xff, 0x00, 0xff, 0xff);
 	// SDL_Rect fillRect_obst = {gloop->x_obst_pos, gloop->y_obst_pos, OBST_WIDTH, OBST_HEIGHT};
 	// SDL_RenderFillRect(gloop->gRenderer, &fillRect_obst);
 
-	// Render all the enemies
-	for (auto enemy: gEnemies) {
-		SDL_SetRenderDrawColor(gRenderer, 0xff, 0x00, 0x00, 0xff);
-		SDL_Rect enemyRect = {enemy->getX(), enemy->getY(), BOX_WIDTH, BOX_HEIGHT};
-		SDL_RenderFillRect(gRenderer, &enemyRect);
-	}
-
 	SDL_RenderPresent(gRenderer);
+
+	// Success?
+	return 0;
 }

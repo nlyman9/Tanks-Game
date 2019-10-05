@@ -1,12 +1,14 @@
 #include <iostream>
+#include <chrono>
 #include "GameLoop.hpp"
 #include "Constants.hpp"
-
 
 GameLoop::~GameLoop() {}
 
 /**
  * @brief Initialize properties for Gameloop
+ * 		Initializes player and enemies
+ * 		Initializes the Renderer to render the game screen (Wrapper for SDL_Render)
  * 
  * @return true - Initialized successfully
  * @return false - Failed to initialize
@@ -20,14 +22,29 @@ bool GameLoop::init() {
 	render->init();
 
 	isGameOn = true;
+
+	// Initialized successfully
+	return true;
 }
 
+/**
+ * @brief The actual GameLoop
+ * 
+ */
 int GameLoop::run()
 {
 	SDL_Event e;
-
+	previous_time = std::chrono::system_clock::now(); // get current time of system
+	lag_time = 0.0;	// Set duration of time to 0
 	while (isGameOn)
 	{
+		current_time = std::chrono::system_clock::now();
+		elapsed_time = current_time - previous_time;
+		previous_time = current_time;
+		lag_time += elapsed_time.count();
+		
+
+		// 1. Process input
 		while (SDL_PollEvent(&e))
 		{
 			if (e.type == SDL_QUIT)
@@ -40,10 +57,23 @@ int GameLoop::run()
 			}
 		}
 		
-		for (auto enemy: enemies) {
-			enemy->updatePos();
+		// 2. Update
+		// Update if time since last update is >= MS_PER_UPDATE
+		while(lag_time >= MS_PER_UPDATE) {
+			player->update();
+			
+			for (auto enemy: enemies) {
+				enemy->update();
+			}
+
+			lag_time -= MS_PER_UPDATE;
 		}
 
-		render->run();
+		// 3. Render
+		// Render everything 
+		render->draw(lag_time / MS_PER_UPDATE);
 	}
+
+	// Exit normally
+	return 0;
 }
