@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <chrono>
 #include "Player.hpp"
 #include "Render.hpp"
 #include "Enemy.hpp"
@@ -20,6 +21,19 @@ class GameLoop {
     Player *player;
     std::vector<Enemy *> enemies;
     bool isGameOn;
-};
 
+    // Time delta of (current_time) - (previous_time)
+    // The ratio sets the duration to calculate in Miliseconds
+    std::chrono::duration<double, std::ratio<1, 1000>> elapsed_time;
+
+    // Time since last update
+    // May be a sumation of elapsed times on fast computers.
+    double lag_time;
+    
+    // Previous time step of the gameloop
+    std::chrono::system_clock::time_point previous_time;
+
+    // Current time step of the gameloop
+    std::chrono::system_clock::time_point current_time;
+};
 #endif

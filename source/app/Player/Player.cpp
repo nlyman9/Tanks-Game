@@ -45,7 +45,27 @@ void Player::draw(float update_lag) {
  * 
  */
 void Player::update() {
+    // Move player
+    x_pos += x_vel;
+    y_pos += y_vel;
 
+    // Check he isn't moving outside of the map
+    if (x_pos > SCREEN_WIDTH - BOX_WIDTH)
+    {
+        x_pos = SCREEN_WIDTH - BOX_WIDTH;
+    }
+    if (x_pos < 0)
+    {
+        x_pos = 0;
+    }
+    if (y_pos < 0)
+    {
+        y_pos = 0;
+    }
+    if (y_pos > SCREEN_HEIGHT - BOX_HEIGHT)
+    {
+        y_pos = SCREEN_HEIGHT - BOX_HEIGHT;
+    }
 }
 
 /**
@@ -89,6 +109,7 @@ bool Player::rotateTurret(float theta) {
     return false;
 }
 
+// TODO - Change to scancodes?
 void Player::getEvent(SDL_Event e) {
     if (e.type == SDL_KEYDOWN)
     {
@@ -146,24 +167,6 @@ void Player::getEvent(SDL_Event e) {
     if (y_vel < -MAX_VELOCITY)
     {
         y_vel = -MAX_VELOCITY;
-    }
-    x_pos += x_vel;
-    y_pos += y_vel;
-    if (x_pos > SCREEN_WIDTH - BOX_WIDTH)
-    {
-        x_pos = SCREEN_WIDTH - BOX_WIDTH;
-    }
-    if (x_pos < 0)
-    {
-        x_pos = 0;
-    }
-    if (y_pos < 0)
-    {
-        y_pos = 0;
-    }
-    if (y_pos > SCREEN_HEIGHT - BOX_HEIGHT)
-    {
-        y_pos = SCREEN_HEIGHT - BOX_HEIGHT;
     }
 }
 

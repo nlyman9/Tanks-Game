@@ -34,8 +34,8 @@ bool Render::init()
 		return false;
 	}
 
-	// Adding VSync to avoid absurd framerates
-	gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+	// SEt up rendered with out vsync
+	gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
 	if (gRenderer == nullptr)
 	{
 		std::cout << "Renderer could not be created! SDL_Error: " << SDL_GetError() << std::endl;

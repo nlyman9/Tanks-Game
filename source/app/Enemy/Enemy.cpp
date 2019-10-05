@@ -24,7 +24,7 @@ void Enemy::draw(float update_lag) {
  * 
  */
 void Enemy::update() {
-
+  updatePos();
 }
 
 /**
