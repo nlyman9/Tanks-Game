@@ -25,7 +25,7 @@ std::vector<int> *unpackMap(std::vector<char> mapPacked){
 		}
 		//std::cout << '\n';
 	}
-	//std::vector<unsigned int> retVal;
+	std::vector<int> *retVal = new std::vector<int>();
 	int tmp = 0;
 	i = 0;
 	//std::cout << "Converting to int array\n";
@@ -35,7 +35,7 @@ std::vector<int> *unpackMap(std::vector<char> mapPacked){
 		//std::cout << "curr is : " << curr << '\n';
 		tmp = (tmp) | (curr << (2-i));
 		if(i == 2){
-			retVal.push_back(tmp);
+			retVal->push_back(tmp);
 			//std::cout << tmp << '\n';
 			//for(unsigned int j = 1 << 31; j > 0; j = j/2){
 			//	(tmp & j)? std::cout << 1: std::cout << 0;
@@ -46,6 +46,7 @@ std::vector<int> *unpackMap(std::vector<char> mapPacked){
 		}
 		i++;
 	}
+    return retVal;
 }
 int main() {
     int status;
