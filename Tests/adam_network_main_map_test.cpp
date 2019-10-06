@@ -40,10 +40,10 @@ std::vector<char> *packMap(std::vector<int> map)
         Rules for each tile
         bit     descr     integer rep
         000 - Passable      -  0
-        001 - wall/obstacle -  1
-        010 - destroyed ob  -  2
-        011 - hole          -  3
-        100 - bomb tile     -  4
+        001 - hole          -  1
+        010 - wall/obstacle -  2
+        011 - bomb tile     -  3
+        100 - destroyed ob  -  4
         101 - UNUSED        -  5
         110 - UNUSED        -  6
         111 - UNUSED        -  7
