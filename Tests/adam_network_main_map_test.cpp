@@ -69,29 +69,20 @@ std::vector<char> *packMap(std::vector<int> map)
 	char* temp = new char;
 	for(auto currInSet : workingSet){
 		//std::cout << currInSet;
-		if(((i+1) % 8) == 0 && i != 0){ //mod with 8 because that is the size of a char
-			//std::cout << '\n';
-			*temp = *temp | ((char) currInSet << i);
+		*temp = *temp | ((char) currInSet << (7-i));
+		if(((i+1) % 8) == 0 && i != 0){
 			mapPacked->push_back(*temp);
 			temp = new char;
-			i = -1; //set to -1 because it will be incremented when the loop ends
-		}else{
-			*temp = *temp | (((char)currInSet) << i);
-			//std::cout << (int)(*temp | (((char)currInSet) << i)) << '\n';	
+			i = -1;
 		}
 		i++;
 	}
-	//std::cout << "\n  TEST   \n";
-	if(i+1 < 8) 
+	if(i+1 < 8 && i != 0) 
         mapPacked->push_back(*temp); //push back the last temp if the above array did not align
-	std::cout << "Binary Representation of map : \n";
-	for(auto curr : *mapPacked){
-		std::cout << (int)(curr & 1) << (int)(curr >> 1 & 1) << (int)(curr >> 2 & 1) << (int)(curr >> 3 & 1) << (int)(curr >> 4 & 1) << (int)(curr >> 5 & 1) << (int)(curr >> 6 & 1) << (int)(curr >> 7 & 1) << '\n';
-	}
-    /*
-        IMPORTANT!
-        NOTE the actual binary representation is BACKWARDS.
-    */
+	//std::cout << "Binary Representation of map : \n";
+	//for(auto curr : *mapPacked){
+	//	std::cout << (int)(curr >> 7 & 1) << (int)(curr >> 6 & 1) << (int)(curr >> 5 & 1) << (int)(curr >> 4 & 1) << (int)(curr >> 3 & 1) << (int)(curr >> 2 & 1) << (int)(curr >> 1 & 1) << (int)(curr & 1) << '\n';
+	//}
     return mapPacked;
 }
 // get sockaddr, IPv4 or IPv6:
