@@ -29,7 +29,7 @@ public:
     }
 };
 
-std::vector<char> *packMap(std::vector<int> map)
+std::vector<char> *packMap(std::vector<int> map, std::vector<char>* mapPacked)
 {
     /*
         bring in an array of int representing the map
@@ -54,31 +54,33 @@ std::vector<char> *packMap(std::vector<int> map)
         I need to isolate the bits and push them in to the workingSet bool array
     */
     std::vector<bool> workingSet;
-    std::vector<char> mapPacked = new std::vector<char>();
     for (auto curr : map)
     {
         workingSet.push_back((bool)(curr >> 2 & 1));
+        //std::cout << (curr >> 2 & 1);
         workingSet.push_back((bool)((curr >> 1) & 1));
+        //std::cout << (curr >> 1 & 1);
         workingSet.push_back((bool)((curr) & 1));
+        //std::cout << (curr & 1);
 	}
     /*
         working set is a bool vector, but I need to return a char array
         so I need to take every 8 bools and pack them into a char
     */
    	int i = 0;
-	char* temp = new char;
+	char temp = 0;
 	for(auto currInSet : workingSet){
 		//std::cout << currInSet;
-		*temp = *temp | ((char) currInSet << (7-i));
-		if(((i+1) % 8) == 0 && i != 0){
-			mapPacked->push_back(*temp);
-			temp = new char;
+		temp = temp | ((char) currInSet << (7-i));
+		if((i == 7) && i != 0){
+			mapPacked->push_back(temp);
+			temp = 0;
 			i = -1;
 		}
 		i++;
 	}
 	if(i+1 < 8 && i != 0) 
-        mapPacked->push_back(*temp); //push back the last temp if the above array did not align
+        mapPacked->push_back(temp); //push back the last temp if the above array did not align
 	//std::cout << "Binary Representation of map : \n";
 	//for(auto curr : *mapPacked){
 	//	std::cout << (int)(curr >> 7 & 1) << (int)(curr >> 6 & 1) << (int)(curr >> 5 & 1) << (int)(curr >> 4 & 1) << (int)(curr >> 3 & 1) << (int)(curr >> 2 & 1) << (int)(curr >> 1 & 1) << (int)(curr & 1) << '\n';
@@ -98,6 +100,16 @@ void *get_in_addr(struct sockaddr *sa)
 
 int main()
 {
+    std::vector<int>* test = new std::vector<int>();
+    std::vector<char>* test2 = new std::vector<char>();
+    for(int i = 0; i < 405; i++){
+        test->push_back(i % 3);
+    }
+    packMap(*test, test2);
+    //std::cout << "test\n";
+    //for(auto curr : *test2){
+	//	std::cout << (int)(curr >> 7 & 1) << (int)(curr >> 6 & 1) << (int)(curr >> 5 & 1) << (int)(curr >> 4 & 1) << (int)(curr >> 3 & 1) << (int)(curr >> 2 & 1) << (int)(curr >> 1 & 1) << (int)(curr & 1) << '\n';
+	//}
     // Set structs and variables for the internet
     int status;
     struct addrinfo hints;

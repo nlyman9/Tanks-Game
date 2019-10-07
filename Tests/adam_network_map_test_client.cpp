@@ -14,11 +14,12 @@
 #include <iostream>
 #include <vector>
 #include <unistd.h>
+
 std::vector<int> *unpackMap(std::vector<char> mapPacked){
     //std::cout << "UNPACKING\n";
 	std::vector<bool> workSet;
     //first turn the packed map into a bool array
-	for(auto curr : *mapPacked){
+	for(auto curr : mapPacked){
 		for(int i = 0; i < 8; i++){
 			workSet.push_back((curr >> (7 - i)) & 1);
 			//std::cout << (int) ((curr >> (7 - i)) & 1);
@@ -27,7 +28,7 @@ std::vector<int> *unpackMap(std::vector<char> mapPacked){
 	}
 	std::vector<int> *retVal = new std::vector<int>();
 	int tmp = 0;
-	i = 0;
+	int i = 0;
 	//std::cout << "Converting to int array\n";
     //cycle through the bool array
     //every 3 bools is one int
