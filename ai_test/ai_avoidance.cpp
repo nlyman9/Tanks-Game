@@ -1,10 +1,11 @@
 #include <iostream>
+#include <complex>
 #include <vector>
 #include <string>
 #include <SDL.h>
 
-constexpr int SCREEN_WIDTH = 640;
-constexpr int SCREEN_HEIGHT = 480;
+constexpr int SCREEN_WIDTH = 1280;
+constexpr int SCREEN_HEIGHT = 720;
 constexpr int BOX_WIDTH = 20;
 constexpr int BOX_HEIGHT = 20;
 
@@ -88,7 +89,7 @@ int main() {
 	int y_deltav = 0;
 
 	// Static box
-	SDL_Rect staticBox = {SCREEN_WIDTH/2 + (2 * BOX_WIDTH), SCREEN_HEIGHT/2 - BOX_HEIGHT/2, BOX_WIDTH, BOX_HEIGHT};
+	SDL_Rect staticBox = {SCREEN_WIDTH/2 + (2 * BOX_WIDTH), SCREEN_HEIGHT/2 - BOX_HEIGHT/2, (2 * BOX_WIDTH), (10 * BOX_HEIGHT)};
 
 
 	// Enemy box
@@ -103,12 +104,12 @@ int main() {
 	int x_ai
 	*/
 	// AI detection box
-	int x_ai_detect = 0;
-	int y_ai_detect = 0;
+	SDL_Rect detectBox = {0, SCREEN_HEIGHT/2, BOX_WIDTH, BOX_HEIGHT};
+	//int x_ai_detect = 0;
+	//int y_ai_detect = 0;
 	
 	// AI destination
-	int x_ai_des = SCREEN_WIDTH;
-	int y_ai_des = SCREEN_HEIGHT/2;
+	SDL_Rect destBox = {SCREEN_WIDTH - BOX_WIDTH, SCREEN_HEIGHT/2, BOX_WIDTH, BOX_HEIGHT};
 
 	SDL_Event e;
 	bool gameon = true;
@@ -170,14 +171,98 @@ int main() {
 			moveBox.x -= x_vel;
 		
 		// Modify AI box state
-		if (aiBox.x > x_ai_des)
-			x_ai_deltav -= 1;
-		if (aiBox.y > y_ai_des)
-			y_ai_deltav -= 1;
-		if (aiBox.x < x_ai_des)
-			x_ai_deltav += 1;
-		if (aiBox.y < y_ai_des)
-			y_ai_deltav += 1;
+		
+		x_ai_deltav = 0;
+		y_ai_deltav = 0;
+		int x_dist = destBox.x - aiBox.x;
+		int y_dist = destBox.y - aiBox.y;
+		
+		bool x_detect = check_collision(&detectBox, &staticBox);
+		
+		
+		if (x_detect)
+		{
+			//std::cout << "obstacle detected";
+			//slow down
+			if(x_ai_vel > 0)
+				x_ai_deltav = -1;
+			else if (x_ai_vel < 0)
+				x_ai_deltav = 1;
+			/*
+			if(y_ai_vel > 0)
+				y_ai_deltav = -1;
+			else if (y_ai_vel < 0)
+				y_ai_deltav = 1;
+			*/
+			
+			if(aiBox.y + BOX_HEIGHT > staticBox.y + (staticBox.h / 2))
+			{
+				y_ai_deltav = 1;
+			}
+			else
+				y_ai_deltav = -1;
+			
+		}
+		else
+		{
+			
+			if (x_dist != 0 && y_dist == 0)
+			{
+				if (x_dist > 0)
+					x_ai_deltav += 1;
+				else
+					x_ai_deltav -= 1;
+			}
+			else if (x_dist == 0 && y_dist != 0)
+			{	
+				if (y_dist > 0)
+					y_ai_deltav += 1;
+				else
+					y_ai_deltav -= 1;
+			}
+			else if (x_dist > 0 && y_dist > 0)
+			{
+				if(x_dist >= y_dist)
+					x_ai_deltav += 1;
+				else
+					y_ai_deltav += 1;
+			}
+			else if (x_dist > 0 && y_dist < 0)
+			{
+				if(x_dist >= -y_dist)
+					x_ai_deltav += 1;
+				else
+					y_ai_deltav -= 1;
+			}
+			else if (x_dist < 0 && y_dist < 0)
+			{
+				if(-x_dist >= y_dist)
+					x_ai_deltav -= 1;
+				else
+					y_ai_deltav -= 1;
+				
+			}
+			else if (x_dist < 0 && y_dist > 0)
+			{
+				if(-x_dist >= -y_dist)
+					x_ai_deltav -= 1;
+				else
+					y_ai_deltav += 1;
+			}
+		}
+		
+		if (x_ai_deltav == 0) {
+			if (x_ai_vel > 0)
+				x_ai_deltav = -1;
+			else if (x_ai_vel < 0)
+				x_ai_deltav = 1;
+		}
+		if (y_ai_deltav == 0) {
+			if (y_ai_vel > 0)
+				y_ai_deltav = -1;
+			else if (y_ai_vel < 0)
+				y_ai_deltav = 1;
+		}
 		
 		x_ai_vel += x_ai_deltav;
 		y_ai_vel += y_ai_deltav;
@@ -202,10 +287,24 @@ int main() {
 		aiBox.x += x_ai_vel;
 		if (aiBox.x < 0 || (aiBox.x + BOX_WIDTH > SCREEN_WIDTH) || check_collision(&staticBox, &aiBox))
 			aiBox.x -= x_ai_vel;
+		
+		// Modify detection box
+		detectBox.x = aiBox.x;
+		detectBox.y = aiBox.y;
+		detectBox.w = aiBox.w * 3;
+		//detectBox.h = y_ai_vel * 10;
 	
 		// Clear black
 		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
 		SDL_RenderClear(gRenderer);
+		
+		// Green detection box
+		SDL_SetRenderDrawColor(gRenderer, 0x00, 0xFF, 0x00, 0xFF);
+		SDL_RenderFillRect(gRenderer, &destBox);
+		
+		// White detection box
+		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+		SDL_RenderFillRect(gRenderer, &detectBox);
 		
 		// Cyan move box
 		SDL_SetRenderDrawColor(gRenderer, 0x00, 0xFF, 0xFF, 0xFF);
@@ -214,6 +313,10 @@ int main() {
 		// Red static box
 		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0x00, 0xFF);
 		SDL_RenderFillRect(gRenderer, &staticBox);
+		
+		// White detection box
+		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+		SDL_RenderFillRect(gRenderer, &detectBox);
 		
 		// Magenta AI box
 		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0xFF, 0xFF);
