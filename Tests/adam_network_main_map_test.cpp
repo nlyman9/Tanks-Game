@@ -101,15 +101,19 @@ void *get_in_addr(struct sockaddr *sa)
 int main()
 {
     std::vector<int>* test = new std::vector<int>();
-    std::vector<char>* test2 = new std::vector<char>();
+    std::vector<char> test2;
+    //create a map that just cycles through the tiles
     for(int i = 0; i < 405; i++){
         test->push_back(i % 3);
     }
-    packMap(*test, test2);
-    //std::cout << "test\n";
-    //for(auto curr : *test2){
-	//	std::cout << (int)(curr >> 7 & 1) << (int)(curr >> 6 & 1) << (int)(curr >> 5 & 1) << (int)(curr >> 4 & 1) << (int)(curr >> 3 & 1) << (int)(curr >> 2 & 1) << (int)(curr >> 1 & 1) << (int)(curr & 1) << '\n';
-	//}
+    packMap(*test, &test2);
+    //std::cout << "Binary Representation of map : \n";
+	for(auto curr : test2){
+		std::cout << (int)(curr >> 7 & 1) << (int)(curr >> 6 & 1) << (int)(curr >> 5 & 1) << (int)(curr >> 4 & 1) << (int)(curr >> 3 & 1) << (int)(curr >> 2 & 1) << (int)(curr >> 1 & 1) << (int)(curr & 1) << '\n';
+	}
+    //test 2 is our packed map
+    delete test; //delete the map from memory
+    std::cout << (int) test2.size() << "\n";
     // Set structs and variables for the internet
     int status;
     struct addrinfo hints;
@@ -203,7 +207,8 @@ int main()
                 { // if listenerfd is in set, we have a new connection
                     addr_len = sizeof(remoteaddr);
                     newfd = accept(listenerfd, (struct sockaddr *)&remoteaddr, &addr_len);
-
+                    
+                    
                     if (newfd == -1)
                     {
                         // Failed to accept
@@ -220,6 +225,8 @@ int main()
                         printf("New connection from %s on socket %d.\n",
                                inet_ntop(remoteaddr.ss_family, &remoteaddr, remoteIP, INET_ADDRSTRLEN),
                                newfd);
+                        //new connection so need to send map data here accepted so send data
+                        send(newfd, test2.data(), test2.size(), 0);
                     }
                 }
                 else

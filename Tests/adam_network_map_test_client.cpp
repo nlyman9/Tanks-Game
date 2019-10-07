@@ -15,7 +15,8 @@
 #include <vector>
 #include <unistd.h>
 
-std::vector<int> *unpackMap(std::vector<char> mapPacked){
+
+std::vector<int> *unpackMap(std::vector<char> mapPacked, std::vector<int> *map){
     //std::cout << "UNPACKING\n";
 	std::vector<bool> workSet;
     //first turn the packed map into a bool array
@@ -26,7 +27,6 @@ std::vector<int> *unpackMap(std::vector<char> mapPacked){
 		}
 		//std::cout << '\n';
 	}
-	std::vector<int> *retVal = new std::vector<int>();
 	int tmp = 0;
 	int i = 0;
 	//std::cout << "Converting to int array\n";
@@ -36,7 +36,7 @@ std::vector<int> *unpackMap(std::vector<char> mapPacked){
 		//std::cout << "curr is : " << curr << '\n';
 		tmp = (tmp) | (curr << (2-i));
 		if(i == 2){
-			retVal->push_back(tmp);
+			map->push_back(tmp);
 			//std::cout << tmp << '\n';
 			//for(unsigned int j = 1 << 31; j > 0; j = j/2){
 			//	(tmp & j)? std::cout << 1: std::cout << 0;
@@ -47,7 +47,7 @@ std::vector<int> *unpackMap(std::vector<char> mapPacked){
 		}
 		i++;
 	}
-    return retVal;
+    return map;
 }
 int main() {
     int status;
@@ -109,11 +109,19 @@ int main() {
                 close(sockfd);
                 exit(10);
             } else {
-                printf("%s", buffer);
+                //recieved data
+                //for this test only recieving the map data
+                std::vector<char> test(buffer, buffer + (sizeof(buffer)/sizeof(buffer[0])));
+                std::vector<int> map;
+                unpackMap(test, &map);
+                for(auto x: map){
+                    std::cout << (int) x << "\n";
+                }
             }
         } else if (fgets(buffer, 100, stdin) != NULL) { // get input from user
             // Check for user input in the terminal 
             //printf("%s", buffer);
+            //send data
             send(sockfd, buffer, 100, 0);
         }
 
