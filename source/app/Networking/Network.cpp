@@ -1,13 +1,4 @@
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <stdlib.h>
-#include <netdb.h>
-#include <cstring>
-#include <iostream>
-#include <vector>
-#include <unistd.h>
+#include "Network.hpp"
 class Network{
     public:
     void sender(int fd, std::vector<int>* buffer, size_t t, int flags, int csFlag){
@@ -19,7 +10,7 @@ class Network{
                 sendMap(fd, buffer, t, flags, csFlag); //delete buffer
                 delete buffer;
                 break;
-            //case 2: //certain type of compression?
+            //case 2: 
             default:
                 send(fd, buffer->data, t, flags);
                 break;
@@ -28,19 +19,29 @@ class Network{
     void sender(int fd, std::vector<char>* buffer, size_t t, int flags, int csFlag){
         switch(csFlag){
             case 0:
-                send(fd, buffer->data, t, flags); //assume already compressed
+                send(fd, buffer->data, t, flags); 
                 break;
             case 1:
-                send(fd, buffer->data, t, flags); //assume already compressed and delete
+                send(fd, buffer->data, t, flags); //already compressed and delete
                 delete buffer;
                 break;
-            //case 2: //compression if neccessary?
+            //case 2: 
             default:
-                send(fd, buffer->data, t, flags);
+                send(fd, buffer->data, t, flags); 
                 break;
         }
     }
     private:
+    class packetHeader{
+        //to be filled out
+        public:
+        char header[headersize];
+    };
+    void createPacket(packetHeader* hdr, char* buffer, int size){
+        char packet[size];
+        strcat(packet, hdr->header);
+        strcat(packet, buffer);
+    }
     std::vector<char> *packMap(std::vector<int>* map, std::vector<char>* mapPacked)
     {
     
