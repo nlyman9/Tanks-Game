@@ -11,6 +11,7 @@ and may not be redistributed without written permission.*/
 //Screen dimension constants
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
+const int DEG = 5;
 
 //Texture wrapper class
 class LTexture
@@ -314,11 +315,11 @@ int main( int argc, char* args[] )
 						switch( e.key.keysym.sym )
 						{
 							case SDLK_a:
-							degrees -= 10;
+							degrees -= DEG;
 							break;
 							
 							case SDLK_d:
-							degrees += 10;
+							degrees += DEG;
 							break;
 
 							case SDLK_q:
