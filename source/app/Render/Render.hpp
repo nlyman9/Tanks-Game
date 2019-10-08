@@ -7,6 +7,7 @@
 #include "Constants.hpp"
 #include "Player.hpp"
 #include "Enemy.hpp"
+#include "lines_map.hpp"
 
 class Render {
     public:
