@@ -4,13 +4,14 @@
 #include <SDL2/SDL_image.h>
 #include "Render.hpp"
 #include <time.h>
+#include "../MapGeneration/mirror.hpp"
 
 SDL_Texture* gTileSheet;
 SDL_Rect gTileRects[3];
 std::vector<SDL_Texture*> gTex;
 SDL_Rect cur_out;
 SDL_Texture* loadImage(std::string fname);
-int tile_map[24][13];
+int** tile_map;
 
 Render::~Render() {
   close();
@@ -79,6 +80,7 @@ bool Render::init()
 			tile_map[6][10] = 2;
 			break;
 		case mirror:
+			tile_map = generate_mirror();
 			tile_map[14][10] = 2;
 			break;
 	}
