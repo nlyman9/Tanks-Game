@@ -32,16 +32,20 @@ class Network{
         }
     }
     private:
-    class packetHeader{
+    //class packetHeader{
         //to be filled out
-        public:
-        char header[headersize];
-    };
-    void createPacket(packetHeader* hdr, char* buffer, int size){
-        char packet[size];
-        strcat(packet, hdr->header);
-        strcat(packet, buffer);
-    }
+        //public:
+        //char header[headersize];
+        //private:
+        //int headersize = tbd
+    //};
+    //void createPacket(packetHeader* hdr, char* buffer, char* packet){
+    //    strcat(packet, hdr->header);
+    //    strcat(packet, buffer);
+    //}
+    //idea: change to n - bit compression
+    //functions ideas: packInt : packChar - pack a vector of ints or chars
+    //change it to take in N bits you want to pack to?
     std::vector<char> *packMap(std::vector<int>* map, std::vector<char>* mapPacked)
     {
     
@@ -52,7 +56,6 @@ class Network{
             workingSet.push_back((bool)((curr >> 1) & 1));
             workingSet.push_back((bool)((curr) & 1));
         }
-
         int i = 0;
         char temp = 0;
         for(auto currInSet : workingSet){
@@ -74,6 +77,24 @@ class Network{
         std::vector<char>* mapPacked = new std::vector<char>();   
         packMap(map, mapPacked);
         std::cout << (int) mapPacked->size() << "\n";
-        send(fd, mapPacked->data, t, 0);
+        //createPacket(some header, mapPacked->data, some packet)
+        //send(fd, some packet, t, 0)
+        send(fd, mapPacked->data, t, flags);
     }
-}
+    /*
+    Function Ideas:
+
+    int? initNetworkClient(){} call this before game loop to initialize client - connect to server
+    int? initNetworkMain(){} call this in the main server ?? or make this the main server code ?? or make a seperate main server code ??
+
+    bool? checkPacket(){} bring in the buffer and sort out if data was recieved and the packet was sent in its entirety
+    void resolvePacket(){} reads the packet header and splits/decides what to do with the data
+
+    Ideas for packet header:
+
+    type - tells what type of data is sent - 0 keystroke data 1 absolute data 2 delta data  - 2 bits?
+    data - what is the data for? playerN? movement? position? map? -- could also use this to resolve the data type - ints? chars? vector?
+    compression type - is the data compressed? 0 - no compression 1 - 1bit per field 2 - 2 bits per field etc
+    size - the size of the packet
+    */
+};
