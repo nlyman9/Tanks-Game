@@ -23,9 +23,10 @@ void close();
 SDL_Window* gWindow = nullptr;
 SDL_Renderer* gRenderer = nullptr;
 SDL_Texture* gTileSheet;
+SDL_Texture* gTank;
 SDL_Rect gTileRects[3];
 
-bool init() {	
+bool init() {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		std::cout << "SDL could not initialize! SDL_Error: " << SDL_GetError() << std::endl;
 		return false;
@@ -34,7 +35,7 @@ bool init() {
 	if(!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1")) {
 		std::cout << "Warning: Linear texture filtering not enabled!" << std::endl;
 	}
-	
+
 	gWindow = SDL_CreateWindow("Tiling", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
 	if (gWindow == nullptr) {
 		std::cout << "Window could not be created! SDL_Error: " << SDL_GetError() << std::endl;
@@ -43,7 +44,7 @@ bool init() {
 
 	// Adding VSync to avoid absurd framerates
 	gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-	if (gRenderer == nullptr) {	
+	if (gRenderer == nullptr) {
 		std::cout << "Renderer could not be created! SDL_Error: " << SDL_GetError() << std::endl;
 		return  false;
 	}
@@ -57,7 +58,7 @@ bool init() {
 
 	// Set renderer draw/clear color
 	SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
-			
+
 	return true;
 }
 
@@ -88,17 +89,19 @@ void close() {
 	gRenderer = nullptr;
 
 	SDL_DestroyTexture(gTileSheet);
+	SDL_DestroyTexture(gTank);
 	gTileSheet = nullptr;
+	gTank = nullptr;
 
 	// Quit SDL subsystems
 	SDL_Quit();
 }
 bool checkPos(int playX, int playY, int enemX, int enemY) {
-       
+
 	double  stepOne = (double) (pow((playX - enemX), 2)+pow((playY - enemY), 2));
 
- 	double distanceAway =  (pow(stepOne, .5));	
-	
+ 	double distanceAway =  (pow(stepOne, .5));
+
 	if(distanceAway < 200.0) {
 		return true;
 	}
@@ -106,7 +109,7 @@ bool checkPos(int playX, int playY, int enemX, int enemY) {
 }
 
 bool checkWall(int x, int y) {
-	
+
 	//left wall
 	if(x <= 20) {
 		return true;
@@ -135,9 +138,10 @@ int main() {
 		close();
 		return 1;
 	}
-	
-	gTileSheet = loadImage("res/images/tiles.png");
-	
+
+	gTileSheet = loadImage("source/res/images/tiles.png");
+	gTank = loadImage("source/res/images/red_tank.png");
+
 	for (int i = 0; i < 3; i++) {
 		gTileRects[i].x = i * TILE_SIZE;
 		gTileRects[i].y = 0;
@@ -150,12 +154,12 @@ int main() {
 	int c;
 	SDL_Rect cur_out;
 
-	
+
 	// Current position to render the box
 	// Start off with it in the middle
 	int x_pos = 0;
 	int y_pos = 0;
-	
+
 
 	//Start position of obstacle - middle
 	int x_obst_pos = SCREEN_WIDTH/2 - OBST_WIDTH/2;
@@ -170,14 +174,14 @@ int main() {
 	// Start off at reset
 	int x_vel = 0;
 	int y_vel = 0;
-	
+
 
 	while(gameon) {
 		while(SDL_PollEvent(&e)) {
 			if (e.type == SDL_QUIT) {
 				gameon = false;
 			}
-			
+
 			else if(e.type == SDL_KEYDOWN) {
 				switch(e.key.keysym.sym) {
 					case SDLK_w:
@@ -209,12 +213,12 @@ int main() {
 						y_vel = 0;
 						break;
 					case SDLK_d:
-						x_vel = 0; 
+						x_vel = 0;
 						break;
 				}
 			}
 		}
-		
+
 		// Move box
 		if(x_vel > MAX_VELOCITY) {
 			x_vel = MAX_VELOCITY;
@@ -246,16 +250,16 @@ int main() {
 		//Checking if enemy should move away
 		bool retreat;
 		retreat = checkPos(x_pos, y_pos, x_enemy_pos, y_enemy_pos);
-			
-				
+
+
 		bool nearWall;
 		nearWall = checkWall(x_enemy_pos, y_enemy_pos);
 
-		
+
 		if(!retreat) {
-			
+
 			//go to center
-			
+
 			if(x_enemy_pos <= SCREEN_WIDTH/2) {
 				x_enemy_pos += MAX_VELOCITY;
 			}
@@ -268,10 +272,10 @@ int main() {
 			else{
 				y_enemy_pos += -MAX_VELOCITY;
 			}
-		
+
 		}
 		else{
-			
+
 			//run away but not near wall
 			if(!nearWall) {
 				if(x_pos >= x_enemy_pos) {
@@ -289,9 +293,9 @@ int main() {
 			}
 			else {
 			//run away and on wall
-			
-		
-			if(x_enemy_pos == 20 || x_enemy_pos == SCREEN_WIDTH - 2*BOX_WIDTH){	
+
+
+			if(x_enemy_pos == 20 || x_enemy_pos == SCREEN_WIDTH - 2*BOX_WIDTH){
 				if(y_pos >= y_enemy_pos) {
 											y_enemy_pos += -MAX_VELOCITY;
 									}
@@ -299,7 +303,7 @@ int main() {
 											y_enemy_pos += MAX_VELOCITY;
 									}
 
-		
+
 			}
 			if(y_enemy_pos == 20 || y_enemy_pos == SCREEN_HEIGHT - 2*BOX_HEIGHT) {
 
@@ -310,12 +314,12 @@ int main() {
 											x_enemy_pos += MAX_VELOCITY;
 									}
 
-			}	
+			}
 
 		}
 
 		}
-		
+
 		if(x_enemy_pos > SCREEN_WIDTH - 2*BOX_WIDTH) {
 			x_enemy_pos = SCREEN_WIDTH - 2*BOX_WIDTH;
 		}
@@ -340,7 +344,7 @@ int main() {
 				SDL_RenderCopy(gRenderer, gTileSheet, &gTileRects[0], &cur_out);
 			}
 		}
-		
+
 		//GENERATES TOP BORDER
 		c = BORDER_GAP;
 		while (c < SCREEN_WIDTH - BORDER_GAP) {
@@ -374,13 +378,14 @@ int main() {
 		SDL_Rect fillRect = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
 		SDL_RenderFillRect(gRenderer, &fillRect);
 
-		SDL_SetRenderDrawColor(gRenderer, 0xff, 0x00, 0xff, 0xff);
-        SDL_Rect fillRect_obst = {x_obst_pos, y_obst_pos, OBST_WIDTH, OBST_HEIGHT};
-		SDL_RenderFillRect(gRenderer, &fillRect_obst);
+		//SDL_SetRenderDrawColor(gRenderer, 0xff, 0x00, 0xff, 0xff);
+    //SDL_Rect fillRect_obst = {x_obst_pos, y_obst_pos, OBST_WIDTH, OBST_HEIGHT};
+		//SDL_RenderFillRect(gRenderer, &fillRect_obst);
 
 		SDL_SetRenderDrawColor(gRenderer, 0xff, 0x00, 0x00, 0xff);
 		SDL_Rect enemyRect = {x_enemy_pos, y_enemy_pos, BOX_WIDTH, BOX_HEIGHT};
-		SDL_RenderFillRect(gRenderer, &enemyRect);
+		//SDL_RenderFillRect(gRenderer, &enemyRect);
+		SDL_RenderCopy(gRenderer, gTank, NULL, &enemyRect);
 		SDL_RenderPresent(gRenderer);
 	}
 
