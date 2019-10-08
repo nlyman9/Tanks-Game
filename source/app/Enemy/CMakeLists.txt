@@ -8,6 +8,7 @@ target_link_libraries(Enemy
   PRIVATE
   Object
   Player
+  Sprite
   Constants
 )
 

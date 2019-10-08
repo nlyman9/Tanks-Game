@@ -9,19 +9,13 @@
  * 
  */
 
-#ifndef OBJECT_HPP
-#define OBJECT_HPP  
+#ifndef SPRITE_HPP
+#define SPRITE_HPP  
 #include <iostream>
 
-#ifdef __APPLE__ 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#else
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
-
-#endif // __APPLE__
 
 class Sprite {
     private:
@@ -29,6 +23,11 @@ class Sprite {
         // TODO?:
         // png size
     public:
+        Sprite(SDL_Renderer *gRenderer, std::string fname) {
+            if(!loadImage(gRenderer, fname)) {
+                exit(0);
+            }
+        }
 
         /**
          * @brief load image of sprite
@@ -38,19 +37,23 @@ class Sprite {
          * @return true  - image load success 
          * @return false - image load fail 
          */
-        virtual bool loadImage(std::string fname);
+        bool loadImage(SDL_Renderer *gRenderer, std::string fname);
+
 
         /**
          * @brief return sprite texture
          * 
          * @return SDL_Texture* 
          */
-        virtual SDL_Texture* getImage();
+        SDL_Texture* getTexture();
 
-        virtual ~Sprite() = 0; //destructor
+        /**
+         * @brief set sprite texture to argument
+         * 
+         * @return void
+         */
+        void setTexture(SDL_Texture *new_texture);
+
+        ~Sprite(); //destructor
 };
-
-Sprite::~Sprite() {
-    std::cout << "Sprite destructor";
-}
 #endif

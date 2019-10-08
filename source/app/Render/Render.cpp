@@ -148,3 +148,7 @@ int Render::draw(double update_lag) {
 	// Success?
 	return 0;
 }
+
+SDL_Renderer* Render::getRenderer() {
+	return gRenderer;
+}

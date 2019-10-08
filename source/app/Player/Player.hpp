@@ -17,11 +17,10 @@
 class Player : public OBJECT {
     private:
         /* data */
-        Sprite sprite;
-        Sprite turret;
-        int x_pos, y_pos, x_vel, y_vel, lives; //x and y coordinates, health points left
+        Sprite *turret;
+        int x_vel, y_vel, lives; //x and y coordinates, health points left
     public:
-        Player(Sprite sprite, Sprite turret, int x, int y); //constructor, initialize the x, y, and sprite
+        Player(Sprite *sprite, Sprite *turret, int x, int y); //constructor, initialize the x, y, and sprite
         Player(int x, int y); //constructor, initialize the x, snd y
 
         void draw(SDL_Renderer *gRenderer, double update_lag) override;
@@ -34,8 +33,6 @@ class Player : public OBJECT {
         bool rotateTurret(float theta); //rotate the turret
 
         void getEvent(SDL_Event e);
-        int getX();
-        int getY();
 
         ~Player();
 };

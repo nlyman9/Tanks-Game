@@ -2,6 +2,7 @@
 #include <chrono>
 #include "GameLoop.hpp"
 #include "Constants.hpp"
+#include "Sprite.hpp"
 
 GameLoop::~GameLoop() {}
 
@@ -14,12 +15,16 @@ GameLoop::~GameLoop() {}
  * @return false - Failed to initialize
  */
 bool GameLoop::init() {
+
 	player = new Player(0, 0);
 	enemies.push_back(new Enemy(SCREEN_WIDTH / 2 - BOX_WIDTH / 2, SCREEN_HEIGHT / 2 - BOX_HEIGHT / 2, player));
 	enemies.push_back(new Enemy(SCREEN_WIDTH - BOX_WIDTH / 2, SCREEN_HEIGHT / 2 - BOX_HEIGHT / 2, player));
 	enemies.push_back(new Enemy(SCREEN_WIDTH / 2 - BOX_WIDTH / 2, SCREEN_HEIGHT - BOX_HEIGHT / 2, player));
 	render = new Render(player, enemies);
 	render->init();
+
+	Sprite *player_tank = new Sprite(render->getRenderer(), "source/res/images/red_tank.png");
+	player->setSprite(player_tank);
 
 	isGameOn = true;
 

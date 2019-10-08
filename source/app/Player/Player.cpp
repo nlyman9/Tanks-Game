@@ -19,9 +19,14 @@
  * @param x 
  * @param y 
  */
-Player::Player(Sprite sprite, Sprite turret, int x, int y) : sprite{sprite}, turret{turret}, x_pos{x}, y_pos{y} {}
+Player::Player(Sprite *sprite, Sprite *turret, int x, int y) {
+    setSprite(sprite);
+    setPos(x, y);
+}
 
-Player::Player(int x, int y) :  x_pos{x}, y_pos{y} {}
+Player::Player(int x, int y) {
+    setPos(x, y);
+}
 
 /**
  * @brief Destroy the Player:: Player object
@@ -42,9 +47,13 @@ void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
     int y_pos = this->getY() + this->y_vel * update_lag;
 
     // Render to screen (gRenderer)
-    SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
-	SDL_Rect fillRect = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
-	SDL_RenderFillRect(gRenderer, &fillRect);
+    // SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
+	// SDL_Rect fillRect = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
+	// SDL_RenderFillRect(gRenderer, &fillRect);
+
+    SDL_Rect src = {0, 0, 48, 48};
+    SDL_Rect dst = {x_pos, y_pos, 39, 48};
+    SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), &src, &dst, 0, NULL, SDL_FLIP_NONE);
 }
 
 /**
@@ -54,25 +63,24 @@ void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
  */
 void Player::update() {
     // Move player
-    x_pos += x_vel;
-    y_pos += y_vel;
+    setPos(getX() + x_vel, getY() + y_vel);
 
     // Check he isn't moving outside of the map
-    if (x_pos > SCREEN_WIDTH - BOX_WIDTH)
+    if (getX() > SCREEN_WIDTH - BOX_WIDTH)
     {
-        x_pos = SCREEN_WIDTH - BOX_WIDTH;
+        setX(SCREEN_WIDTH - BOX_WIDTH);
     }
-    if (x_pos < 0)
+    if (getX()  < 0)
     {
-        x_pos = 0;
+        setX(0);
     }
-    if (y_pos < 0)
+    if (getY() < 0)
     {
-        y_pos = 0;
+        setY(0);
     }
-    if (y_pos > SCREEN_HEIGHT - BOX_HEIGHT)
+    if (getY()  > SCREEN_HEIGHT - BOX_HEIGHT)
     {
-        y_pos = SCREEN_HEIGHT - BOX_HEIGHT;
+        setY(SCREEN_HEIGHT - BOX_HEIGHT);
     }
 }
 
@@ -176,12 +184,4 @@ void Player::getEvent(SDL_Event e) {
     {
         y_vel = -MAX_VELOCITY;
     }
-}
-
-int Player::getX() {
-    return x_pos;
-}
-
-int Player::getY() {
-    return y_pos;
 }

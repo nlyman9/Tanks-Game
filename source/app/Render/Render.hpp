@@ -18,6 +18,8 @@ class Render {
         int draw(double update_lag);
         bool init();
         void close();
+
+        SDL_Renderer* getRenderer();
     private:
 
         std::vector<SDL_Texture*> gTex;

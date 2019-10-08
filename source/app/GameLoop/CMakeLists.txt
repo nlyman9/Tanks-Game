@@ -11,6 +11,7 @@ target_link_libraries(GameLoop
   Player
   Constants
   Enemy
+  Sprite
 )
 
 target_include_directories(GameLoop

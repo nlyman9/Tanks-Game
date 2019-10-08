@@ -8,6 +8,7 @@ target_link_libraries(Player
   PRIVATE
   Object
   Constants
+  Sprite
   SDL2
 )
 
