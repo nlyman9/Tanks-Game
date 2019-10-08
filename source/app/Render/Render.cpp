@@ -56,24 +56,45 @@ bool Render::init()
 	}
 
 	// Fill 2D tile array of tiles with all 0s
-	for (int i = 0; i < 24; i++) {
-		for(int j = 0; j < 13; j++ ) {
-			tile_map[i][j] = 0;
-		}
-	}
+	//for (int i = 0; i < 24; i++) {
+		//for(int j = 0; j < 13; j++ ) {
+			//tile_map[i][j] = 0;
+		//}
+	//}
+	//small randomly generated thing
+	
 
 
 	// Select map generation technique
-	enum map_types { destructible, holes, maze, mirror };
+	enum map_types { destructible, holes, lines, maze, mirror };
 	srand(time(NULL));
 
-	switch(rand() % 4)
+	// switch(rand() % 4)
+	switch(lines)
 	{
 		case destructible:
 			tile_map[4][4] = 2;
 			break;
 		case holes:
 			tile_map[1][1] = 2;
+			break;
+		case lines:
+			srand(time(NULL));
+			int random_index;
+			for(int i = 0; i < 13; i++) {
+				random_index = rand() % 24;
+
+				for(int j = 0; j < 24; j++) {
+					if(i % 2 != 0) {
+						if(j == random_index)
+							tile_map[j][i] = 0;
+						else
+							tile_map[j][i] = 2;
+					}
+					else
+						tile_map[j][i] = 0;
+				}
+			}
 			break;
 		case maze:
 			tile_map[6][10] = 2;
