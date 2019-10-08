@@ -9,7 +9,7 @@ constexpr int Y_HIGH = 13;
 
 int room[X_WIDE][Y_HIGH];
 
-int** lines_map () {
+int** linesMap () {
 	//initialize random seed
 	srand(time(NULL));
 	int random_index;
