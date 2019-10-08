@@ -1,4 +1,4 @@
-add_library(mirror
+add_library(MapGeneration
   STATIC
   mirror_map.hpp
   mirror_map.cpp
@@ -6,12 +6,12 @@ add_library(mirror
   line_map.cpp
 )
 
-target_link_libraries(mirror
+target_link_libraries(MapGeneration
   PRIVATE
   Render
 )
 
-target_include_directories(mirror
+target_include_directories(MapGeneration
   PUBLIC
   .
 )

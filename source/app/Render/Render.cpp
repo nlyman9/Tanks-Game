@@ -4,7 +4,8 @@
 #include <SDL2/SDL_image.h>
 #include "Render.hpp"
 #include <time.h>
-#include "../MapGeneration/mirror.hpp"
+#include "../MapGeneration/mirror_map.hpp"
+#include "../MapGeneration/line_map.hpp"
 
 SDL_Texture* gTileSheet;
 SDL_Rect gTileRects[3];
@@ -74,11 +75,11 @@ bool Render::init()
 
 
 	// Select map generation technique
-	enum map_types { destructible, holes, lines, maze, mirror };
+	enum map_types { destructible, holes, line, maze, mirror };
 	srand(time(NULL));
 
 	// switch(rand() % 4)
-	switch(mirror)
+	switch(line)
 	{
 		case destructible:
 			tile_map[4][4] = 2;
@@ -86,29 +87,14 @@ bool Render::init()
 		case holes:
 			tile_map[1][1] = 2;
 			break;
-		case lines:
-			srand(time(NULL));
-			// int random_index;
-			// for(int i = 0; i < 13; i++) {
-			// 	random_index = rand() % 24;
-
-			// 	for(int j = 0; j < 24; j++) {
-			// 		if(i % 2 != 0) {
-			// 			if(j == random_index)
-			// 				tile_map[j][i] = 0;
-			// 			else
-			// 				tile_map[j][i] = 2;
-			// 		}
-			// 		else
-			// 			tile_map[j][i] = 0;
-			// 	}
-			// }
+		case line:
+			tile_map = generateLineMap();
 			break;
 		case maze:
 			tile_map[6][10] = 2;
 			break;
 		case mirror:
-			tile_map = Mirror::generate();
+			tile_map = generateMirrorMap();
 			tile_map[14][10] = 2;
 			break;
 	}
