@@ -28,7 +28,8 @@ void close();
 SDL_Window* gWindow = nullptr;
 SDL_Renderer* gRenderer = nullptr;
 SDL_Texture* gTileSheet;
-SDL_Texture* gTank;
+SDL_Texture* gTank_Red;
+SDL_Texture* gTank_Blue;
 SDL_Rect gTileRects[3];
 //true for testing bottom right to top left, false top left to bottom right
 bool dir = true;
@@ -96,9 +97,11 @@ void close() {
 	gRenderer = nullptr;
 
 	SDL_DestroyTexture(gTileSheet);
-	SDL_DestroyTexture(gTank);
+	SDL_DestroyTexture(gTank_Red);
+	SDL_DestroyTexture(gTank_Blue);
 	gTileSheet = nullptr;
-	gTank = nullptr;
+	gTank_Red = nullptr;
+	gTank_Blue = nullptr;
 
 	// Quit SDL subsystems
 	SDL_Quit();
@@ -166,7 +169,8 @@ int main() {
 	}
 
 	gTileSheet = loadImage("../source/res/images/tiles.png");
-	gTank = loadImage("../source/res/images/red_tank.png");
+	gTank_Red = loadImage("../source/res/images/red_tank.png");
+	gTank_Blue = loadImage("../source/res/images/blue_tank.png");
 
 	for (int i = 0; i < 3; i++) {
 		gTileRects[i].x = i * TILE_SIZE;
@@ -477,7 +481,8 @@ int main() {
 		//Render player box
 		SDL_SetRenderDrawColor(gRenderer, 0x00, 0xFF, 0xFF, 0xFF);
 		SDL_Rect fillRect = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
-		SDL_RenderFillRect(gRenderer, &fillRect);
+		//SDL_RenderFillRect(gRenderer, &fillRect);
+		SDL_RenderCopy(gRenderer, gTank_Blue, NULL, &fillRect);
 		//Render obstacle 1
 		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0xFF, 0xFF);
 		SDL_RenderFillRect(gRenderer, &obst);
@@ -490,9 +495,9 @@ int main() {
 		//Render enemy box
 		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0x00, 0xFF);
 		SDL_Rect enemy_box = {x_enemy_pos, y_enemy_pos, BOX_WIDTH, BOX_HEIGHT};
-		SDL_RenderFillRect(gRenderer, &enemy_box);
+		//SDL_RenderFillRect(gRenderer, &enemy_box);
+		SDL_RenderCopy(gRenderer, gTank_Red, NULL, &enemy_box);
 
-		SDL_RenderCopy(gRenderer, gTank, NULL, &enemy_box);
 		SDL_RenderPresent(gRenderer);
 	} //end of game loop
 
