@@ -10,6 +10,10 @@ constexpr int TILE_SIZE = 48;
 constexpr int BORDER_GAP = 16;
 constexpr int OBST_WIDTH = 70;
 constexpr int OBST_HEIGHT = 40;
+constexpr int OBST_1_WIDTH = 150;
+constexpr int OBST_1_HEIGHT = 150;
+constexpr int OBST_2_WIDTH = 20;
+constexpr int OBST_2_HEIGHT = 100;
 constexpr int BOX_WIDTH = 20;
 constexpr int BOX_HEIGHT = 20;
 constexpr int MAX_VELOCITY = 1;
@@ -157,8 +161,8 @@ int main() {
 
 	// Current position to render the box
 	// Start off with it in the middle
-	int x_pos = 0;
-	int y_pos = 0;
+	int x_pos = 75;
+	int y_pos = 60;
 
 
 	//Start position of obstacle - middle
@@ -166,9 +170,17 @@ int main() {
 	int y_obst_pos = SCREEN_HEIGHT/2 - OBST_HEIGHT/2;
 
 
+	//start position of OBST_1
+	int x_obst_1_pos = 900;
+	int y_obst_1_pos = 450;
+
+	//start position of OBST_2
+	int x_obst_2_pos = 200;
+	int y_obst_2_pos = 150;
+
 	//Enemy box
-	int x_enemy_pos = SCREEN_WIDTH/2 - BOX_WIDTH/2;
-	int y_enemy_pos = SCREEN_HEIGHT/2 - BOX_HEIGHT/2;
+	int x_enemy_pos = SCREEN_WIDTH - BOX_WIDTH/2 - 75;
+	int y_enemy_pos = SCREEN_HEIGHT - BOX_HEIGHT/2 - 60;
 
 	// Current velocity of the box
 	// Start off at reset
@@ -374,13 +386,21 @@ int main() {
 			c += TILE_SIZE;
 		}
 		// Draw box
-		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
+		SDL_SetRenderDrawColor(gRenderer, 0x00, 0xff, 0xff, 0xFF);
 		SDL_Rect fillRect = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
 		SDL_RenderFillRect(gRenderer, &fillRect);
 
-		//SDL_SetRenderDrawColor(gRenderer, 0xff, 0x00, 0xff, 0xff);
-    //SDL_Rect fillRect_obst = {x_obst_pos, y_obst_pos, OBST_WIDTH, OBST_HEIGHT};
-		//SDL_RenderFillRect(gRenderer, &fillRect_obst);
+		SDL_SetRenderDrawColor(gRenderer, 0xff, 0x00, 0xff, 0xff);
+    SDL_Rect fillRect_obst = {x_obst_pos, y_obst_pos, OBST_WIDTH, OBST_HEIGHT};
+		SDL_RenderFillRect(gRenderer, &fillRect_obst);
+
+		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0xff, 0xff);
+    SDL_Rect fillRect_obst_1 = {x_obst_1_pos, y_obst_1_pos, OBST_1_WIDTH, OBST_1_HEIGHT};
+		SDL_RenderFillRect(gRenderer, &fillRect_obst_1);
+
+		SDL_SetRenderDrawColor(gRenderer, 0x00, 0xff, 0x00, 0xff);
+		SDL_Rect fillRect_obst_2 = {x_obst_2_pos, y_obst_2_pos, OBST_2_WIDTH, OBST_2_HEIGHT};
+		SDL_RenderFillRect(gRenderer, &fillRect_obst_2);
 
 		SDL_SetRenderDrawColor(gRenderer, 0xff, 0x00, 0x00, 0xff);
 		SDL_Rect enemyRect = {x_enemy_pos, y_enemy_pos, BOX_WIDTH, BOX_HEIGHT};
