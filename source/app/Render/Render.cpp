@@ -101,6 +101,20 @@ int Render::draw(double update_lag) {
 		}
 	}
 
+	// Select map generation technique
+	string map_types[2] = { "DESTRUCTIBLE", "HOLES", "MAZE", "MIRROR" };
+	switch(map_types[rand() % map_types.length])
+	{
+		case "DESTRUCTIBLE":
+			break;
+		case "HOLES":
+			break;
+		case "MAZE":
+			break;
+		case "MIRROR":
+			break;
+	}
+
 	// Render array of tiles
 	for (int x = BORDER_GAP + TILE_SIZE, i = 0; x < SCREEN_WIDTH - BORDER_GAP - TILE_SIZE; x+=TILE_SIZE, i++) {
 		for (int y = TILE_SIZE, j = 0; y < SCREEN_HEIGHT - TILE_SIZE; y+=TILE_SIZE, j++) {
