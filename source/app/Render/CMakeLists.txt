@@ -12,7 +12,7 @@ target_link_libraries(Render
   Player
   Object
   Enemy
-  mirror
+  MapGeneration
 )
 
 target_include_directories(Render

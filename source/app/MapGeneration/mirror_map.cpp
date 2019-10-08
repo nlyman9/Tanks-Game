@@ -2,7 +2,7 @@
 #include <time.h>
 #include <math.h>
 
-#include "mirror.hpp"
+#include "mirror_map.hpp"
 
 int** generateMirrorMap() //tile_map is 24x13
 {

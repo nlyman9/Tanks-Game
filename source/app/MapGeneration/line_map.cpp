@@ -2,6 +2,7 @@
 #include <string.h>
 #include <math.h>
 #include <stdio.h>
+#include "line_map.hpp"
 
 using namespace std;
 
@@ -10,7 +11,7 @@ constexpr int Y_HIGH = 13;
 
 int room[X_WIDE][Y_HIGH];
 
-int** linesMap () {
+int** generateLineMap() {
 	// make empty room array
 	int** array = 0;
     array = new int*[24];
@@ -35,12 +36,12 @@ int** linesMap () {
 		for(int j = 0; j < 24; j++) {
 			if(i % 2 != 0) {
 				if(j == random_index)
-					tile_map[j][i] = 0;
+					room[j][i] = 0;
 				else
-					tile_map[j][i] = 2;
+					room[j][i] = 2;
 			}
 			else
-				tile_map[j][i] = 0;
+				room[j][i] = 0;
 		}
 	}
 	return room;
