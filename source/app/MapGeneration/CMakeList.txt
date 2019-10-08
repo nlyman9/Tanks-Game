@@ -1,0 +1,15 @@
+add_library(mirror
+  STATIC
+  mirror.hpp
+  mirror.cpp
+)
+
+target_link_libraries(mirror
+  PRIVATE
+  Render
+)
+
+target_include_directories(mirror
+  PUBLIC
+  .
+)
