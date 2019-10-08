@@ -21,6 +21,7 @@ constexpr int MAX_VELOCITY = 1;
 // Function declarations
 bool init();
 SDL_Texture* loadImage(std::string fname);
+bool check_vicinity(SDL_Rect* a, SDL_Rect* b);
 void close();
 
 // Globals
@@ -29,6 +30,8 @@ SDL_Renderer* gRenderer = nullptr;
 SDL_Texture* gTileSheet;
 SDL_Texture* gTank;
 SDL_Rect gTileRects[3];
+//true for testing bottom right to top left, false top left to bottom right
+bool dir = true;
 
 bool init() {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -100,7 +103,7 @@ void close() {
 	// Quit SDL subsystems
 	SDL_Quit();
 }
-bool checkPos(int playX, int playY, int enemX, int enemY) {
+bool checkDistFrom(int playX, int playY, int enemX, int enemY) {
 
 	double  stepOne = (double) (pow((playX - enemX), 2)+pow((playY - enemY), 2));
 
@@ -112,6 +115,25 @@ bool checkPos(int playX, int playY, int enemX, int enemY) {
 	return false;
 }
 
+//Evaluates to true if a Rect a edge is within 8 pixels of an edge of Rect b
+bool check_vicinity(SDL_Rect* a, SDL_Rect* b) {
+	// Check vertical overlap
+	if (a->y + a->h <= b->y - 8)
+		return false;
+	if (a->y >= b->y + b->h + 8)
+		return false;
+
+	// Check horizontal overlap
+	if (a->x >= b->x + b->w + 8)
+		return false;
+	if (a->x + a->w <= b->x - 8)
+		return false;
+
+	// Must overlap in both
+	return true;
+}
+
+//check if coordinate x or coordinate y results to box being along a wall
 bool checkWall(int x, int y) {
 
 	//left wall
@@ -143,8 +165,8 @@ int main() {
 		return 1;
 	}
 
-	gTileSheet = loadImage("source/res/images/tiles.png");
-	gTank = loadImage("source/res/images/red_tank.png");
+	gTileSheet = loadImage("../source/res/images/tiles.png");
+	gTank = loadImage("../source/res/images/red_tank.png");
 
 	for (int i = 0; i < 3; i++) {
 		gTileRects[i].x = i * TILE_SIZE;
@@ -158,7 +180,6 @@ int main() {
 	int c;
 	SDL_Rect cur_out;
 
-
 	// Current position to render the box
 	// Start off with it in the middle
 	int x_pos = 75;
@@ -168,19 +189,28 @@ int main() {
 	//Start position of obstacle - middle
 	int x_obst_pos = SCREEN_WIDTH/2 - OBST_WIDTH/2;
 	int y_obst_pos = SCREEN_HEIGHT/2 - OBST_HEIGHT/2;
-
+	//initialize OBST rect
+	SDL_Rect obst = {x_obst_pos, y_obst_pos, OBST_WIDTH, OBST_HEIGHT};
 
 	//start position of OBST_1
 	int x_obst_1_pos = 900;
 	int y_obst_1_pos = 450;
+	//Initialize OBST_1 rect
+	SDL_Rect obst_1 = {x_obst_1_pos, y_obst_1_pos, OBST_1_WIDTH, OBST_1_HEIGHT};
 
 	//start position of OBST_2
 	int x_obst_2_pos = 200;
 	int y_obst_2_pos = 150;
+	//Initialize OBST_2 rect
+	SDL_Rect obst_2 = {x_obst_2_pos, y_obst_2_pos, OBST_2_WIDTH, OBST_2_HEIGHT};
 
-	//Enemy box
+	//Enemy box start position
 	int x_enemy_pos = SCREEN_WIDTH - BOX_WIDTH/2 - 75;
 	int y_enemy_pos = SCREEN_HEIGHT - BOX_HEIGHT/2 - 60;
+	int enemy_start_x = x_enemy_pos;
+	int enemy_start_y = y_enemy_pos;
+	//Initialize enemy box
+	SDL_Rect enemy_box = {x_enemy_pos, y_enemy_pos, BOX_WIDTH, BOX_HEIGHT};
 
 	// Current velocity of the box
 	// Start off at reset
@@ -260,14 +290,15 @@ int main() {
 		}
 
 		//Checking if enemy should move away
-		bool retreat;
-		retreat = checkPos(x_pos, y_pos, x_enemy_pos, y_enemy_pos);
+		//bool retreat;
+		//retreat = checkDistFrom(x_pos, y_pos, x_enemy_pos, y_enemy_pos);
 
 
 		bool nearWall;
 		nearWall = checkWall(x_enemy_pos, y_enemy_pos);
 
-
+		//Make enemy avoid player when player gets too close and return to center otherwise
+		/*-----------------------------------------------------------------------------------
 		if(!retreat) {
 
 			//go to center
@@ -327,10 +358,68 @@ int main() {
 									}
 
 			}
+		}
+		---------------------------------------------------------------------------------*/
 
+	//Make enemy move from bottom right to upper left while avoiding obstacles
+		//Move enemy box to the top left
+		if (dir) {
+			if (x_enemy_pos != 75)
+				x_enemy_pos += -MAX_VELOCITY;
+			if (y_enemy_pos != 60)
+				y_enemy_pos += -MAX_VELOCITY;
+		}
+		//Move enemy box to the bottom right
+		else {
+			if (x_enemy_pos != enemy_start_x)
+				x_enemy_pos += MAX_VELOCITY;
+			if (y_enemy_pos != enemy_start_y)
+				y_enemy_pos += MAX_VELOCITY;
 		}
 
+		enemy_box = {x_enemy_pos, y_enemy_pos, BOX_WIDTH, BOX_HEIGHT};
+		//Enemy box is within 8 pixels of an obstacle
+		if (check_vicinity(&enemy_box, &obst)) {
+			//correct by going down a pixel
+			if (dir) {
+				x_enemy_pos += MAX_VELOCITY;
+				y_enemy_pos += 2;
+			}
+			//correct by going up a pixel
+			else {
+				x_enemy_pos += -MAX_VELOCITY;
+				y_enemy_pos -= 2;
+			}
 		}
+		else if (check_vicinity(&enemy_box, &obst_1)) {
+			//correct by going down a pixel
+			if (dir) {
+				x_enemy_pos += MAX_VELOCITY;
+				y_enemy_pos += 2;
+			}
+			//correct by going up a pixel
+			else {
+				x_enemy_pos += -MAX_VELOCITY;
+				y_enemy_pos -= 2;
+			}
+		}
+		else if (check_vicinity(&enemy_box, &obst_2)) {
+			//correct by going down a pixel
+			if (dir) {
+				x_enemy_pos += MAX_VELOCITY;
+				y_enemy_pos += 2;
+			}
+			//correct by going up a pixel
+			else {
+				x_enemy_pos += -MAX_VELOCITY;
+				y_enemy_pos -= 2;
+			}
+		}
+		//Set direction
+		if (y_enemy_pos == 60 && x_enemy_pos == 75)
+			dir = false;
+		if (y_enemy_pos == enemy_start_y && x_enemy_pos == enemy_start_x)
+			dir = true;
 
 		if(x_enemy_pos > SCREEN_WIDTH - 2*BOX_WIDTH) {
 			x_enemy_pos = SCREEN_WIDTH - 2*BOX_WIDTH;
@@ -385,29 +474,27 @@ int main() {
 			SDL_RenderCopy(gRenderer, gTileSheet, &gTileRects[2], &cur_out);
 			c += TILE_SIZE;
 		}
-		// Draw box
-		SDL_SetRenderDrawColor(gRenderer, 0x00, 0xff, 0xff, 0xFF);
+		//Render player box
+		SDL_SetRenderDrawColor(gRenderer, 0x00, 0xFF, 0xFF, 0xFF);
 		SDL_Rect fillRect = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
 		SDL_RenderFillRect(gRenderer, &fillRect);
+		//Render obstacle 1
+		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0xFF, 0xFF);
+		SDL_RenderFillRect(gRenderer, &obst);
+		//Render obstacle 2
+		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0xFF, 0xFF);
+		SDL_RenderFillRect(gRenderer, &obst_1);
+		//Render obstacle 3
+		SDL_SetRenderDrawColor(gRenderer, 0x00, 0xFF, 0x00, 0xFF);
+		SDL_RenderFillRect(gRenderer, &obst_2);
+		//Render enemy box
+		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0x00, 0xFF);
+		SDL_Rect enemy_box = {x_enemy_pos, y_enemy_pos, BOX_WIDTH, BOX_HEIGHT};
+		SDL_RenderFillRect(gRenderer, &enemy_box);
 
-		SDL_SetRenderDrawColor(gRenderer, 0xff, 0x00, 0xff, 0xff);
-    SDL_Rect fillRect_obst = {x_obst_pos, y_obst_pos, OBST_WIDTH, OBST_HEIGHT};
-		SDL_RenderFillRect(gRenderer, &fillRect_obst);
-
-		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0xff, 0xff);
-    SDL_Rect fillRect_obst_1 = {x_obst_1_pos, y_obst_1_pos, OBST_1_WIDTH, OBST_1_HEIGHT};
-		SDL_RenderFillRect(gRenderer, &fillRect_obst_1);
-
-		SDL_SetRenderDrawColor(gRenderer, 0x00, 0xff, 0x00, 0xff);
-		SDL_Rect fillRect_obst_2 = {x_obst_2_pos, y_obst_2_pos, OBST_2_WIDTH, OBST_2_HEIGHT};
-		SDL_RenderFillRect(gRenderer, &fillRect_obst_2);
-
-		SDL_SetRenderDrawColor(gRenderer, 0xff, 0x00, 0x00, 0xff);
-		SDL_Rect enemyRect = {x_enemy_pos, y_enemy_pos, BOX_WIDTH, BOX_HEIGHT};
-		//SDL_RenderFillRect(gRenderer, &enemyRect);
-		SDL_RenderCopy(gRenderer, gTank, NULL, &enemyRect);
+		SDL_RenderCopy(gRenderer, gTank, NULL, &enemy_box);
 		SDL_RenderPresent(gRenderer);
-	}
+	} //end of game loop
 
 	close();
 }
