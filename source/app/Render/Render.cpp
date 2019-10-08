@@ -93,12 +93,19 @@ int Render::draw(double update_lag) {
 	SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
 	SDL_RenderClear(gRenderer);
 
-	//FROM BORDERGAP + TILE SIZE TO GET INTERIOR OF MAP
-	//x represents the pixels of the screen, not the tile index anymore
-	for (int x = BORDER_GAP + TILE_SIZE; x < SCREEN_WIDTH - BORDER_GAP - TILE_SIZE; x+=TILE_SIZE) {
-		for (int y = TILE_SIZE; y < SCREEN_HEIGHT - TILE_SIZE; y+=TILE_SIZE) {
+	// Fill 2D array of tiles with all 0s
+	int block_render[24][13];
+	for (int i = 0; i < 24; i++) {
+		for(int j = 0; j < 13; j++ ) {
+			block_render[i][j] = 0;
+		}
+	}
+
+	// Render array of tiles
+	for (int x = BORDER_GAP + TILE_SIZE, i = 0; x < SCREEN_WIDTH - BORDER_GAP - TILE_SIZE; x+=TILE_SIZE, i++) {
+		for (int y = TILE_SIZE, j = 0; y < SCREEN_HEIGHT - TILE_SIZE; y+=TILE_SIZE, j++) {
 			cur_out = { x, y, TILE_SIZE, TILE_SIZE};
-			SDL_RenderCopy(gRenderer, gTileSheet, &gTileRects[0], &cur_out);
+			SDL_RenderCopy(gRenderer, gTileSheet, &gTileRects[block_render[i][j]], &cur_out);
 		}
 	}
 	
