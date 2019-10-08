@@ -30,12 +30,26 @@ int** generateLineMap() {
 	//initialize random seed
 	srand(time(NULL));
 	int random_index;
+	int random_index_bonus;
 	for(int i = 0; i < 13; i++) {
 		random_index = rand() % 24;
+		if(rand() % 3 == 0)
+		{
+			random_index_bonus = rand() % 24;
+			if(abs(random_index_bonus - random_index) == 1)
+			{
+				random_index_bonus = -1;
+			}
+		}
+		else
+		{
+			random_index_bonus = -1;
+		}
+		
 
 		for(int j = 0; j < 24; j++) {
 			if(i % 2 != 0) {
-				if(j == random_index)
+				if(j == random_index || j == random_index_bonus)
 					room[j][i] = 0;
 				else
 					room[j][i] = 2;
