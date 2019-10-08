@@ -6,13 +6,15 @@ add_library(Render
 
 target_link_libraries(Render
   PRIVATE
-  Credits
   SDL2
   SDL2_image
-  GameLoop
+  Constants
+  Player
+  Object
+  Enemy
 )
 
-target_include_directories(GameLoop
+target_include_directories(Render
   PUBLIC
   .
 )

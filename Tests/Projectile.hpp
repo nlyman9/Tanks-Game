@@ -3,10 +3,11 @@
 //Definitely lost writing this and am basing it off of the Enemy.hpp file (ty Danny)
 //Feel free to update file wherever you see improvements
 
-#include "Object.hpp"
 
 #ifndef PROJECTILE_HPP
 #define PROJECTILE_HPP
+
+#include "Object.hpp"
 
 class Enemy : public OBJECT {
     private:

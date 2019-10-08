@@ -9,6 +9,7 @@
  * 
  */
 #include "Player.hpp"
+#include "Constants.hpp"
 
 /**
  * @brief Construct a new Player:: Player object
@@ -18,15 +19,15 @@
  * @param x 
  * @param y 
  */
-Player::Player(Sprite sprite, Sprite turret, int x, int y) : sprite{sprite}, turret{turret}, x{x}, y{y} {}
+Player::Player(Sprite sprite, Sprite turret, int x, int y) : sprite{sprite}, turret{turret}, x_pos{x}, y_pos{y} {}
+
+Player::Player(int x, int y) :  x_pos{x}, y_pos{y} {}
 
 /**
  * @brief Destroy the Player:: Player object
  * 
  */
-Player::~Player() {
-    
-}
+Player::~Player() {}
 
 /**
  * @brief draws the player object 
@@ -34,8 +35,16 @@ Player::~Player() {
  * 
  * @param update_lag - the value to extrapolate by
  */
-void Player::draw(float update_lag) {
+void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
+    // Extrapolate the x and y positions 
+    // "Solves" stuck in the middle rendering.
+    int x_pos = this->getX() + this->x_vel * update_lag;
+    int y_pos = this->getY() + this->y_vel * update_lag;
 
+    // Render to screen (gRenderer)
+    SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
+	SDL_Rect fillRect = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
+	SDL_RenderFillRect(gRenderer, &fillRect);
 }
 
 /**
@@ -44,7 +53,27 @@ void Player::draw(float update_lag) {
  * 
  */
 void Player::update() {
+    // Move player
+    x_pos += x_vel;
+    y_pos += y_vel;
 
+    // Check he isn't moving outside of the map
+    if (x_pos > SCREEN_WIDTH - BOX_WIDTH)
+    {
+        x_pos = SCREEN_WIDTH - BOX_WIDTH;
+    }
+    if (x_pos < 0)
+    {
+        x_pos = 0;
+    }
+    if (y_pos < 0)
+    {
+        y_pos = 0;
+    }
+    if (y_pos > SCREEN_HEIGHT - BOX_HEIGHT)
+    {
+        y_pos = SCREEN_HEIGHT - BOX_HEIGHT;
+    }
 }
 
 /**
@@ -86,4 +115,73 @@ bool Player::rotatePlayer(float theta) {
 
 bool Player::rotateTurret(float theta) {
     return false;
+}
+
+// TODO - Change to scancodes?
+void Player::getEvent(SDL_Event e) {
+    if (e.type == SDL_KEYDOWN)
+    {
+        switch (e.key.keysym.sym)
+        {
+        case SDLK_w:
+            y_vel -= MAX_VELOCITY;
+            break;
+
+        case SDLK_a:
+            x_vel -= MAX_VELOCITY;
+            break;
+
+        case SDLK_s:
+            y_vel += MAX_VELOCITY;
+            break;
+
+        case SDLK_d:
+            x_vel += MAX_VELOCITY;
+            break;
+        }
+    }
+    else if (e.type == SDL_KEYUP)
+    {
+        switch (e.key.keysym.sym)
+        {
+        case SDLK_w:
+            y_vel = 0;
+            break;
+        case SDLK_a:
+            x_vel = 0;
+            break;
+        case SDLK_s:
+            y_vel = 0;
+            break;
+        case SDLK_d:
+            x_vel = 0;
+            break;
+        }
+    }
+
+    // Move box
+    if (x_vel > MAX_VELOCITY)
+    {
+        x_vel = MAX_VELOCITY;
+    }
+    if (x_vel < -MAX_VELOCITY)
+    {
+        x_vel = -MAX_VELOCITY;
+    }
+    if (y_vel > MAX_VELOCITY)
+    {
+        y_vel = MAX_VELOCITY;
+    }
+    if (y_vel < -MAX_VELOCITY)
+    {
+        y_vel = -MAX_VELOCITY;
+    }
+}
+
+int Player::getX() {
+    return x_pos;
+}
+
+int Player::getY() {
+    return y_pos;
 }

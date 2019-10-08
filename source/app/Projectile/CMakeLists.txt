@@ -7,7 +7,6 @@ add_library(Projectile
 target_link_libraries(Projectile
   PRIVATE
   Object
-  Controllers
 )
 
 target_include_directories(Projectile

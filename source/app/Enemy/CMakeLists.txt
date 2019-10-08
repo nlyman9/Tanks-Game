@@ -1,4 +1,4 @@
-add_library(Player
+add_library(Enemy
   STATIC
   Enemy.hpp
   Enemy.cpp
@@ -7,7 +7,8 @@ add_library(Player
 target_link_libraries(Enemy
   PRIVATE
   Object
-  Controllers
+  Player
+  Constants
 )
 
 target_include_directories(Enemy

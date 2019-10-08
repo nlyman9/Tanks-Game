@@ -21,10 +21,14 @@ using Sprite = UNDEFINED;
 #ifndef OBJECT_HPP
 #define OBJECT_HPP  
 #include <iostream>
+#include <SDL2/SDL.h>
 class OBJECT {
     private:
         Sprite sprite;
-        int x, y;
+        struct pos {
+            int x;
+            int y;
+        };
     public:
 
         /**
@@ -42,7 +46,9 @@ class OBJECT {
          *  Helps solve the "stuck in the middle" problem of rendering a frame 
          *  in-between two updates.
          */
-        virtual void draw(float update_lag) = 0;
+        virtual void draw(SDL_Renderer *gRenderer, double update_lag) = 0;
+
+        // virtual struct pos* getPos() = 0;
 
         /**
          * @brief move the object an offset from its current x-y position
@@ -66,10 +72,7 @@ class OBJECT {
          */
         virtual bool place(int x, int y) = 0;
 
-        virtual ~OBJECT() = 0; //destructor
+        // virtual ~OBJECT() = 0; //destructor
 };
 
-OBJECT::~OBJECT() {
-    std::cout << "Object destructor";
-}
 #endif
