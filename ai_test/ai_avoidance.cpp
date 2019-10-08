@@ -104,7 +104,8 @@ int main() {
 	int x_ai
 	*/
 	// AI detection box
-	SDL_Rect detectBox = {0, SCREEN_HEIGHT/2, BOX_WIDTH, BOX_HEIGHT};
+	SDL_Rect x_detectBox = {0, SCREEN_HEIGHT/2, BOX_WIDTH, BOX_HEIGHT};
+	SDL_Rect y_detectBox = {0, SCREEN_HEIGHT/2, BOX_WIDTH, BOX_HEIGHT};
 	//int x_ai_detect = 0;
 	//int y_ai_detect = 0;
 	
@@ -177,23 +178,16 @@ int main() {
 		int x_dist = destBox.x - aiBox.x;
 		int y_dist = destBox.y - aiBox.y;
 		
-		bool x_detect = check_collision(&detectBox, &staticBox);
-		
+		bool x_detect = check_collision(&x_detectBox, &staticBox);
+		bool y_detect = check_collision(&y_detectBox, &staticBox);
 		
 		if (x_detect)
 		{
-			//std::cout << "obstacle detected";
 			//slow down
 			if(x_ai_vel > 0)
 				x_ai_deltav = -1;
 			else if (x_ai_vel < 0)
 				x_ai_deltav = 1;
-			/*
-			if(y_ai_vel > 0)
-				y_ai_deltav = -1;
-			else if (y_ai_vel < 0)
-				y_ai_deltav = 1;
-			*/
 			
 			if(aiBox.y + BOX_HEIGHT > staticBox.y + (staticBox.h / 2))
 			{
@@ -203,7 +197,23 @@ int main() {
 				y_ai_deltav = -1;
 			
 		}
-		else
+		if (y_detect)
+		{
+			if(y_ai_vel > 0)
+				y_ai_deltav = -1;
+			else if (y_ai_vel < 0)
+				y_ai_deltav = 1;
+			
+			if(aiBox.x + BOX_WIDTH > staticBox.x + (staticBox.w / 2))
+			{
+				x_ai_deltav = 1;
+			}
+			else
+				x_ai_deltav = -1;
+			
+		}
+		
+		if(x_detect == false && y_detect == false)
 		{
 			
 			if (x_dist != 0 && y_dist == 0)
@@ -289,10 +299,42 @@ int main() {
 			aiBox.x -= x_ai_vel;
 		
 		// Modify detection box
-		detectBox.x = aiBox.x;
-		detectBox.y = aiBox.y;
-		detectBox.w = aiBox.w * 3;
-		//detectBox.h = y_ai_vel * 10;
+		if(x_ai_vel > 0)
+		{
+			x_detectBox.x = aiBox.x;
+			x_detectBox.y = aiBox.y;
+			x_detectBox.w = aiBox.w * 3;
+		}
+		else if (x_ai_vel < 0)
+		{
+			x_detectBox.x = aiBox.x - (aiBox.w * 3);
+			x_detectBox.y = aiBox.y;
+			x_detectBox.w = aiBox.w * 3;
+		}
+		else
+		{
+			x_detectBox.x = aiBox.x;
+			x_detectBox.y = aiBox.y;
+			x_detectBox.w = aiBox.w;
+		}
+		if(y_ai_vel > 0)
+		{
+			y_detectBox.x = aiBox.x;
+			y_detectBox.y = aiBox.y;
+			y_detectBox.h = aiBox.h * 3;
+		}
+		else if (y_ai_vel < 0)
+		{
+			y_detectBox.x = aiBox.x;
+			y_detectBox.y = aiBox.y - (aiBox.h * 3);
+			y_detectBox.h = aiBox.h * 3;
+		}
+		else
+		{
+			y_detectBox.x = aiBox.x;
+			y_detectBox.y = aiBox.y;
+			y_detectBox.h = aiBox.h;
+		}
 	
 		// Clear black
 		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
@@ -304,7 +346,10 @@ int main() {
 		
 		// White detection box
 		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-		SDL_RenderFillRect(gRenderer, &detectBox);
+		SDL_RenderFillRect(gRenderer, &x_detectBox);
+		
+		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+		SDL_RenderFillRect(gRenderer, &y_detectBox);
 		
 		// Cyan move box
 		SDL_SetRenderDrawColor(gRenderer, 0x00, 0xFF, 0xFF, 0xFF);
@@ -313,10 +358,6 @@ int main() {
 		// Red static box
 		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0x00, 0xFF);
 		SDL_RenderFillRect(gRenderer, &staticBox);
-		
-		// White detection box
-		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-		SDL_RenderFillRect(gRenderer, &detectBox);
 		
 		// Magenta AI box
 		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0xFF, 0xFF);
