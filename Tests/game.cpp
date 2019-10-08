@@ -22,6 +22,7 @@ constexpr int MAX_VELOCITY = 1;
 bool init();
 SDL_Texture* loadImage(std::string fname);
 bool check_vicinity(SDL_Rect* a, SDL_Rect* b);
+bool player_vicinity(SDL_Rect* a, SDL_Rect* b);
 void close();
 
 // Globals
@@ -136,6 +137,24 @@ bool check_vicinity(SDL_Rect* a, SDL_Rect* b) {
 	return true;
 }
 
+//Return true if rect a is colliding with rect b
+bool player_vicinity(SDL_Rect* a, SDL_Rect* b) {
+	// Check vertical overlap
+	if (a->y + a->h <= b->y)
+		return false;
+	if (a->y >= b->y + b->h)
+		return false;
+
+	// Check horizontal overlap
+	if (a->x >= b->x + b->w)
+		return false;
+	if (a->x + a->w <= b->x)
+		return false;
+
+	// Must overlap in both
+	return true;
+}
+
 //check if coordinate x or coordinate y results to box being along a wall
 bool checkWall(int x, int y) {
 
@@ -188,7 +207,6 @@ int main() {
 	// Start off with it in the middle
 	int x_pos = 75;
 	int y_pos = 60;
-
 
 	//Start position of obstacle - middle
 	int x_obst_pos = SCREEN_WIDTH/2 - OBST_WIDTH/2;
@@ -280,6 +298,14 @@ int main() {
 		}
 		x_pos += x_vel;
 		y_pos += y_vel;
+		//Ensure box doesn't collide with obstacles
+		SDL_Rect player_collide = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
+		if (player_vicinity(&player_collide, &obst) || player_vicinity(&player_collide, &obst_1) || player_vicinity(&player_collide, &obst_2)) {
+			x_pos -= x_vel;
+			y_pos -= y_vel;
+		}
+
+		//Prevent the box from going offscreen
 		if(x_pos > SCREEN_WIDTH - BOX_WIDTH) {
 			x_pos = SCREEN_WIDTH - BOX_WIDTH;
 		}
@@ -425,6 +451,7 @@ int main() {
 		if (y_enemy_pos == enemy_start_y && x_enemy_pos == enemy_start_x)
 			dir = true;
 
+		//Ensure enemy doesn't go offscreen
 		if(x_enemy_pos > SCREEN_WIDTH - 2*BOX_WIDTH) {
 			x_enemy_pos = SCREEN_WIDTH - 2*BOX_WIDTH;
 		}
