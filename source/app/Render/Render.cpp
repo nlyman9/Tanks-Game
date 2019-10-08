@@ -57,11 +57,18 @@ bool Render::init()
 	}
 
 	// Fill 2D tile array of tiles with all 0s
-	//for (int i = 0; i < 24; i++) {
-		//for(int j = 0; j < 13; j++ ) {
-			//tile_map[i][j] = 0;
-		//}
-	//}
+	// int** array = 0;
+	tile_map = new int*[24];
+
+	for(int j = 0; j < 24; j++)
+	{
+		tile_map[j] = new int[13];
+		for(int h = 0; h < 13; h++)
+		{
+			tile_map[j][h] = 0;
+		}
+	}
+
 	//small randomly generated thing
 	
 
@@ -71,7 +78,7 @@ bool Render::init()
 	srand(time(NULL));
 
 	// switch(rand() % 4)
-	switch(lines)
+	switch(mirror)
 	{
 		case destructible:
 			tile_map[4][4] = 2;
@@ -81,27 +88,27 @@ bool Render::init()
 			break;
 		case lines:
 			srand(time(NULL));
-			int random_index;
-			for(int i = 0; i < 13; i++) {
-				random_index = rand() % 24;
+			// int random_index;
+			// for(int i = 0; i < 13; i++) {
+			// 	random_index = rand() % 24;
 
-				for(int j = 0; j < 24; j++) {
-					if(i % 2 != 0) {
-						if(j == random_index)
-							tile_map[j][i] = 0;
-						else
-							tile_map[j][i] = 2;
-					}
-					else
-						tile_map[j][i] = 0;
-				}
-			}
+			// 	for(int j = 0; j < 24; j++) {
+			// 		if(i % 2 != 0) {
+			// 			if(j == random_index)
+			// 				tile_map[j][i] = 0;
+			// 			else
+			// 				tile_map[j][i] = 2;
+			// 		}
+			// 		else
+			// 			tile_map[j][i] = 0;
+			// 	}
+			// }
 			break;
 		case maze:
 			tile_map[6][10] = 2;
 			break;
 		case mirror:
-			tile_map = generate_mirror();
+			tile_map = Mirror::generate();
 			tile_map[14][10] = 2;
 			break;
 	}

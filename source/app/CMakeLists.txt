@@ -9,6 +9,7 @@ add_subdirectory(Projectile)
 add_subdirectory(Render)
 add_subdirectory(Enemy)
 add_subdirectory(Constants)
+add_subdirectory(MapGeneration)
 
 add_executable(Game
   game.cpp

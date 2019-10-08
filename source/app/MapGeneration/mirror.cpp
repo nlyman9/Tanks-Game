@@ -6,15 +6,15 @@
 
 // namespace mirror
 // {
-    int** generate_mirror() //tile_map is 24x13
+    int** Mirror::generate() //tile_map is 24x13
     {
         int** array = 0;
-        array = new int*[13];
+        array = new int*[24];
 
-        for(int j = 0; j < 13; j++)
+        for(int j = 0; j < 24; j++)
         {
-            array[j] = new int[24];
-            for(int h = 0; h < 24; h++)
+            array[j] = new int[13];
+            for(int h = 0; h < 13; h++)
             {
                 array[j][h] = 0;
             }

@@ -5,6 +5,10 @@
 // {
 //     int** mirror::generate();
 // }
-int** generate_mirror();
+class Mirror
+{
+    public:
+        int** generate();
+}
 
 #endif
