@@ -1,9 +1,9 @@
 add_library(mirror
   STATIC
-  mirror.hpp
-  mirror.cpp
-  lines_map.hpp
-  lines_map.cpp
+  mirror_map.hpp
+  mirror_map.cpp
+  line_map.hpp
+  line_map.cpp
 )
 
 target_link_libraries(mirror
