@@ -13,7 +13,10 @@
 constexpr int headersize = 20; //dont know what to put this as yet
 class Network{
     public:
-    void sender(int fd, std::vector<int>* buffer, size_t t, int flags, int csFlag);
-    void sender(int fd, std::vector<char>* buffer, size_t t, int flags, int csFlag);
+        void sender(int fd, std::vector<int>* buffer, size_t t, int flags, int csFlag);
+        void sender(int fd, std::vector<char>* buffer, size_t t, int flags, int csFlag);
+    private:
+        std::vector<char>* packMap(std::vector<int>* map, std::vector<char>* mapPacked);
+        void sendMap(int fd, std::vector<int>* map, size_t t, int flags, int csFlag);
 };
 #endif
