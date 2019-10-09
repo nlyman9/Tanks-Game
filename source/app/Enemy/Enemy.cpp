@@ -20,12 +20,12 @@ void Enemy::draw(SDL_Renderer *gRenderer, double update_lag) {
   // "Solves" stuck in the middle rendering.
   // TODO change MAX_VELOCITY to the enemy's velocity
   
-  // int x_pos = this->getX() + this->x_velocity * update_lag;
-  // int y_pos = this->getY() + this->y_velocity * update_lag;
+  // int x_pos = getX() + x_velocity * update_lag;
+  // int y_pos = getY() + y_velocity * update_lag;
 
   // Render enemy
   SDL_SetRenderDrawColor(gRenderer, 0xff, 0x00, 0x00, 0xff);
-  SDL_Rect enemyRect = {this->getX(), this->getY(), BOX_WIDTH, BOX_HEIGHT};
+  SDL_Rect enemyRect = {getX(), getY(), BOX_WIDTH, BOX_HEIGHT};
 	SDL_RenderFillRect(gRenderer, &enemyRect);
 }
 

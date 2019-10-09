@@ -9,6 +9,7 @@ add_subdirectory(Projectile)
 add_subdirectory(Render)
 add_subdirectory(Enemy)
 add_subdirectory(Constants)
+add_subdirectory(StartUpMenu)
 
 add_executable(Game
   game.cpp
@@ -16,5 +17,5 @@ add_executable(Game
 
 target_link_libraries(Game
   PRIVATE
-  GameLoop
+  StartUpMenu
 )

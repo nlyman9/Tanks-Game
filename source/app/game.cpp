@@ -1,8 +1,7 @@
-#include "GameLoop.hpp"
+#include "StartUpMenu.hpp"
 
 int main() {
-	GameLoop gameLoop;
-	gameLoop.init();
-	gameLoop.run();
+	StartUpMenu startUpMenu;
+	startUpMenu.launch();
 	return 0;
 }

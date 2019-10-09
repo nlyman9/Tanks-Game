@@ -43,8 +43,8 @@ Player::~Player() {}
 void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
     // Extrapolate the x and y positions 
     // "Solves" stuck in the middle rendering.
-    int x_pos = this->getX() + this->x_vel * update_lag;
-    int y_pos = this->getY() + this->y_vel * update_lag;
+    int x_pos = getX() + x_vel * update_lag;
+    int y_pos = getY() + y_vel * update_lag;
 
     // Render to screen (gRenderer)
     // SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
