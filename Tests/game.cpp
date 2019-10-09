@@ -12,12 +12,6 @@ constexpr int SCREEN_WIDTH = 1280;
 constexpr int SCREEN_HEIGHT = 720;
 constexpr int TILE_SIZE = 48;
 constexpr int BORDER_GAP = 16;
-constexpr int OBST_WIDTH = 70;
-constexpr int OBST_HEIGHT = 40;
-constexpr int OBST_1_WIDTH = 150;
-constexpr int OBST_1_HEIGHT = 150;
-constexpr int OBST_2_WIDTH = 20;
-constexpr int OBST_2_HEIGHT = 100;
 constexpr int BOX_WIDTH = 20;
 constexpr int BOX_HEIGHT = 20;
 constexpr int MAX_VELOCITY = 1;
@@ -40,9 +34,11 @@ SDL_Texture* gTank_Blue;
 SDL_Rect gTileRects[3];
 //true for testing bottom right to top left, false top left to bottom right
 bool dir = true;
+bool left = true;
 int** tile_map;
 std::vector<SDL_Texture*> gTex;
 SDL_Rect cur_out;
+SDL_Rect* tileArray;
 
 
 bool init() {
@@ -256,15 +252,15 @@ bool checkDistFrom(int playX, int playY, int enemX, int enemY) {
 //Evaluates to true if a Rect a edge is within 8 pixels of an edge of Rect b
 bool check_vicinity(SDL_Rect* a, SDL_Rect* b) {
 	// Check vertical overlap
-	if (a->y + a->h <= b->y - 8)
+	if (a->y + a->h <= b->y - 2)
 		return false;
-	if (a->y >= b->y + b->h + 8)
+	if (a->y >= b->y + b->h + 2)
 		return false;
 
 	// Check horizontal overlap
-	if (a->x >= b->x + b->w + 8)
+	if (a->x >= b->x + b->w + 2)
 		return false;
-	if (a->x + a->w <= b->x - 8)
+	if (a->x + a->w <= b->x - 2)
 		return false;
 
 	// Must overlap in both
@@ -332,6 +328,17 @@ int main() {
 		gTileRects[i].h = TILE_SIZE;
 	}
 
+	tileArray = new SDL_Rect[312];
+	int count = 0;
+	for (int x = BORDER_GAP + TILE_SIZE, i = 0; x < SCREEN_WIDTH - BORDER_GAP - TILE_SIZE; x+=TILE_SIZE, i++) {
+		for (int y = TILE_SIZE, j = 0; y < SCREEN_HEIGHT - TILE_SIZE; y+=TILE_SIZE, j++) {
+			cur_out = { x, y, TILE_SIZE, TILE_SIZE};
+			if(tile_map[i][j] == 2){
+				tileArray[count++] = cur_out;
+			}
+		}
+	}
+
 	SDL_Event e;
 	bool gameon = true;
 	int c;
@@ -341,24 +348,6 @@ int main() {
 	// Start off with it in the middle
 	int x_pos = 75;
 	int y_pos = 60;
-
-	//Start position of obstacle - middle
-	int x_obst_pos = SCREEN_WIDTH/2 - OBST_WIDTH/2;
-	int y_obst_pos = SCREEN_HEIGHT/2 - OBST_HEIGHT/2;
-	//initialize OBST rect
-	SDL_Rect obst = {x_obst_pos, y_obst_pos, OBST_WIDTH, OBST_HEIGHT};
-
-	//start position of OBST_1
-	int x_obst_1_pos = 900;
-	int y_obst_1_pos = 450;
-	//Initialize OBST_1 rect
-	SDL_Rect obst_1 = {x_obst_1_pos, y_obst_1_pos, OBST_1_WIDTH, OBST_1_HEIGHT};
-
-	//start position of OBST_2
-	int x_obst_2_pos = 200;
-	int y_obst_2_pos = 150;
-	//Initialize OBST_2 rect
-	SDL_Rect obst_2 = {x_obst_2_pos, y_obst_2_pos, OBST_2_WIDTH, OBST_2_HEIGHT};
 
 	//Enemy box start position
 	int x_enemy_pos = SCREEN_WIDTH - BOX_WIDTH/2 - 75;
@@ -373,6 +362,7 @@ int main() {
 	int x_vel = 0;
 	int y_vel = 0;
 
+	printf("x = %d, y = %d\n", (x_enemy_pos%23 + 2), (14 - y_enemy_pos % 12));
 
 	while(gameon) {
 		while(SDL_PollEvent(&e)) {
@@ -432,22 +422,25 @@ int main() {
 		}
 		x_pos += x_vel;
 		y_pos += y_vel;
-		//Ensure box doesn't collide with obstacles
+
 		SDL_Rect player_collide = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
-		if (player_vicinity(&player_collide, &obst) || player_vicinity(&player_collide, &obst_1) || player_vicinity(&player_collide, &obst_2)) {
-			x_pos -= x_vel;
-			y_pos -= y_vel;
+		for(int i = 0; i < 312; i++){
+			cur_out = tileArray[i];
+			if(player_vicinity(&player_collide, &cur_out)){
+				x_pos -= x_vel;
+				y_pos -= y_vel;
+			}
 		}
 
 		//Prevent the box from going offscreen
-		if(x_pos > SCREEN_WIDTH - BOX_WIDTH) {
-			x_pos = SCREEN_WIDTH - BOX_WIDTH;
+		if(x_pos > SCREEN_WIDTH - 2*BOX_WIDTH - TILE_SIZE) {
+			x_pos = SCREEN_WIDTH - 2*BOX_WIDTH - TILE_SIZE;
 		}
-		if(x_pos < 0){
-			x_pos = 0;
+		if(x_pos < TILE_SIZE + BOX_WIDTH){
+			x_pos = TILE_SIZE + BOX_WIDTH;
 		}
-		if(y_pos < 0){
-			y_pos = 0;
+		if(y_pos < TILE_SIZE){
+			y_pos = TILE_SIZE;
 		}
 		if(y_pos > SCREEN_HEIGHT - BOX_HEIGHT) {
 			y_pos = SCREEN_HEIGHT - BOX_HEIGHT;
@@ -524,7 +517,7 @@ int main() {
 			}
 		}
 		---------------------------------------------------------------------------------*/
-
+/*
 	//Make enemy move from bottom right to upper left while avoiding obstacles
 		//Move enemy box to the top left
 		if (dir) {
@@ -543,57 +536,77 @@ int main() {
 
 		enemy_box = {x_enemy_pos, y_enemy_pos, BOX_WIDTH, BOX_HEIGHT};
 		//Enemy box is within 8 pixels of an obstacle
-		if (check_vicinity(&enemy_box, &obst)) {
-			//correct by going down a pixel
-			if (dir) {
-				x_enemy_pos += MAX_VELOCITY;
-				y_enemy_pos += 2;
-			}
-			//correct by going up a pixel
-			else {
-				x_enemy_pos += -MAX_VELOCITY;
-				y_enemy_pos -= 2;
-			}
-		}
-		else if (check_vicinity(&enemy_box, &obst_1)) {
-			//correct by going down a pixel
-			if (dir) {
-				x_enemy_pos += MAX_VELOCITY;
-				y_enemy_pos += 2;
-			}
-			//correct by going up a pixel
-			else {
-				x_enemy_pos += -MAX_VELOCITY;
-				y_enemy_pos -= 2;
+		for(int i = 0; i < 312; i++){
+			cur_out = tileArray[i];
+			if(check_vicinity(&enemy_box, &cur_out)){
+				if (dir) {
+					x_enemy_pos += MAX_VELOCITY;
+					y_enemy_pos += 2;
+				}
+				//correct by going up a pixel
+				else {
+					x_enemy_pos += -MAX_VELOCITY;
+					y_enemy_pos -= 2;
+				}
 			}
 		}
-		else if (check_vicinity(&enemy_box, &obst_2)) {
-			//correct by going down a pixel
-			if (dir) {
-				x_enemy_pos += MAX_VELOCITY;
-				y_enemy_pos += 2;
+*/
+
+		if(left) {
+			/*if(tile_map[15][12] != 2){
+				x_enemy_pos -= MAX_VELOCITY;
+				//y_enemy_pos -= 3;
 			}
-			//correct by going up a pixel
-			else {
-				x_enemy_pos += -MAX_VELOCITY;
-				y_enemy_pos -= 2;
+			else{
+				y_enemy_pos -= 3;
+			}*/
+			x_enemy_pos -= MAX_VELOCITY;
+			y_enemy_pos -= 3;
+		}
+		else{
+			x_enemy_pos += MAX_VELOCITY;
+			y_enemy_pos -= 3;
+		}
+
+		if(x_enemy_pos == 75){
+			left = false;
+		}
+		if(x_enemy_pos == enemy_start_x){
+			left = true;
+		}
+
+		enemy_box = {x_enemy_pos, y_enemy_pos, BOX_WIDTH, BOX_HEIGHT};
+		//Enemy box is within 8 pixels of an obstacle
+		for(int i = 0; i < 312; i++){
+			cur_out = tileArray[i];
+			if(check_vicinity(&enemy_box, &cur_out)){
+				if (left) {
+					//x_enemy_pos += MAX_VELOCITY;
+					y_enemy_pos += 3;
+				}
+				//correct by going up a pixel
+				else {
+					//x_enemy_pos += -MAX_VELOCITY;
+					y_enemy_pos += 3;
+				}
 			}
 		}
+/*
 		//Set direction
 		if (y_enemy_pos == 60 && x_enemy_pos == 75)
 			dir = false;
 		if (y_enemy_pos == enemy_start_y && x_enemy_pos == enemy_start_x)
 			dir = true;
-
+*/
 		//Ensure enemy doesn't go offscreen
 		if(x_enemy_pos > SCREEN_WIDTH - 2*BOX_WIDTH) {
 			x_enemy_pos = SCREEN_WIDTH - 2*BOX_WIDTH;
 		}
-		if(x_enemy_pos < 20){
-			x_enemy_pos = 20;
+		if(x_enemy_pos < TILE_SIZE){
+			x_enemy_pos = TILE_SIZE;
 		}
-		if(y_enemy_pos < 20){
-			y_enemy_pos = 20;
+		if(y_enemy_pos < TILE_SIZE){
+			y_enemy_pos = TILE_SIZE;
 		}
 		if(y_enemy_pos > SCREEN_HEIGHT - 2*BOX_HEIGHT) {
 			y_enemy_pos = SCREEN_HEIGHT - 2*BOX_HEIGHT;
@@ -601,14 +614,6 @@ int main() {
 
 		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
 		SDL_RenderClear(gRenderer);
-
-		// Render array of tiles
-		for (int x = BORDER_GAP + TILE_SIZE, i = 0; x < SCREEN_WIDTH - BORDER_GAP - TILE_SIZE; x+=TILE_SIZE, i++) {
-			for (int y = TILE_SIZE, j = 0; y < SCREEN_HEIGHT - TILE_SIZE; y+=TILE_SIZE, j++) {
-				cur_out = { x, y, TILE_SIZE, TILE_SIZE};
-				SDL_RenderCopy(gRenderer, gTileSheet, &gTileRects[tile_map[i][j]], &cur_out);
-			}
-		}
 
 		//FROM BORDERGAP + TILE SIZE TO GET INTERIOR OF MAP
 		//x represents the pixels of the screen, not the tile index anymore
@@ -659,16 +664,7 @@ int main() {
 		SDL_SetRenderDrawColor(gRenderer, 0x00, 0xFF, 0xFF, 0xFF);
 		SDL_Rect fillRect = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
 		SDL_RenderCopy(gRenderer, gTank_Blue, NULL, &fillRect);
-		//Render obstacle 1
-		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0xFF, 0xFF);
-		SDL_RenderFillRect(gRenderer, &obst);
-		//Render obstacle 2
-		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0xFF, 0xFF);
-		SDL_RenderFillRect(gRenderer, &obst_1);
-		//Render obstacle 3
-		SDL_SetRenderDrawColor(gRenderer, 0x00, 0xFF, 0x00, 0xFF);
-		SDL_RenderFillRect(gRenderer, &obst_2);
-		//Render enemy box
+
 		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0x00, 0xFF);
 		SDL_Rect enemy_box = {x_enemy_pos, y_enemy_pos, BOX_WIDTH, BOX_HEIGHT};
 		//SDL_RenderFillRect(gRenderer, &enemy_box);
