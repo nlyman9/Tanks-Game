@@ -362,7 +362,7 @@ int main() {
 	int x_vel = 0;
 	int y_vel = 0;
 
-	printf("x = %d, y = %d\n", (x_enemy_pos%23 + 2), (14 - y_enemy_pos % 12));
+	printf("x = %d, y = %d\n", (x_enemy_pos%25), (14 - y_enemy_pos % 12));
 
 	while(gameon) {
 		while(SDL_PollEvent(&e)) {
