@@ -310,6 +310,46 @@ bool checkWall(int x, int y) {
 	}
 }
 
+int xArrPosL(int pos){
+	int lowBound = TILE_SIZE-20;
+	int upBound = TILE_SIZE*2-20;
+	for(int i = 0; i < 24; i++){
+		if(pos <= upBound && pos >= lowBound){
+			return i;
+		}
+		lowBound += TILE_SIZE;
+		upBound += TILE_SIZE;
+	}
+	return 23;
+}
+
+int xArrPosR(int pos){
+	int lowBound = TILE_SIZE+25;
+	int upBound = TILE_SIZE*2+25;
+	for(int i = 0; i < 24; i++){
+		if(pos <= upBound && pos >= lowBound){
+			return i;
+		}
+		lowBound += TILE_SIZE;
+		upBound += TILE_SIZE;
+	}
+	return 23;
+}
+
+int yArrPos(int pos){
+	int lowBound = TILE_SIZE-30;
+	int upBound = TILE_SIZE*2-30;
+	for(int i = 0; i < 12; i++){
+		if(pos <= upBound && pos >= lowBound){
+			return i - 1;
+		}
+		lowBound += TILE_SIZE;
+		upBound += TILE_SIZE;
+	}
+	return 11;
+
+}
+
 int main() {
 	if (!init()) {
 		std::cout <<  "Failed to initialize!" << std::endl;
@@ -353,7 +393,7 @@ int main() {
 	int x_enemy_pos = SCREEN_WIDTH - BOX_WIDTH/2 - 75;
 	int y_enemy_pos = SCREEN_HEIGHT - BOX_HEIGHT/2 - 60;
 	int enemy_start_x = x_enemy_pos;
-	int enemy_start_y = y_enemy_pos;
+	//int enemy_start_y = y_enemy_pos;
 	//Initialize enemy box
 	SDL_Rect enemy_box = {x_enemy_pos, y_enemy_pos, BOX_WIDTH, BOX_HEIGHT};
 
@@ -361,8 +401,6 @@ int main() {
 	// Start off at reset
 	int x_vel = 0;
 	int y_vel = 0;
-
-	printf("x = %d, y = %d\n", (x_enemy_pos%25), (14 - y_enemy_pos % 12));
 
 	while(gameon) {
 		while(SDL_PollEvent(&e)) {
@@ -551,21 +589,22 @@ int main() {
 			}
 		}
 */
-
 		if(left) {
-			/*if(tile_map[15][12] != 2){
+			if(tile_map[xArrPosL(x_enemy_pos)][yArrPos(y_enemy_pos)] == 2){
 				x_enemy_pos -= MAX_VELOCITY;
-				//y_enemy_pos -= 3;
 			}
 			else{
-				y_enemy_pos -= 3;
-			}*/
-			x_enemy_pos -= MAX_VELOCITY;
-			y_enemy_pos -= 3;
+				y_enemy_pos -= MAX_VELOCITY;
+			}
+
 		}
 		else{
-			x_enemy_pos += MAX_VELOCITY;
-			y_enemy_pos -= 3;
+			if(tile_map[xArrPosR(x_enemy_pos)][yArrPos(y_enemy_pos)] == 2){
+				x_enemy_pos += MAX_VELOCITY;
+			}
+			else{
+				y_enemy_pos -= MAX_VELOCITY;
+			}
 		}
 
 		if(x_enemy_pos == 75){
