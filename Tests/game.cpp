@@ -480,8 +480,8 @@ int main() {
 		if(y_pos < TILE_SIZE){
 			y_pos = TILE_SIZE;
 		}
-		if(y_pos > SCREEN_HEIGHT - BOX_HEIGHT) {
-			y_pos = SCREEN_HEIGHT - BOX_HEIGHT;
+		if(y_pos > SCREEN_HEIGHT - BOX_HEIGHT - TILE_SIZE) {
+			y_pos = SCREEN_HEIGHT - BOX_HEIGHT - TILE_SIZE;
 		}
 
 		//Checking if enemy should move away
