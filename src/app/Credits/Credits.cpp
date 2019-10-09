@@ -68,15 +68,15 @@ int Credits::playCredits() {
 	#endif // __APPLE__
 
 	// Load media
-	gTex.push_back(loadImage("source/res/images/cs1666_adamibrahim.bmp"));	// index 0
-	gTex.push_back(loadImage("source/res/images/Alec_Img.bmp"));	// index 1
-	gTex.push_back(loadImage("source/res/images/Njl26 Credits Picture.bmp"));	// index 2
-	gTex.push_back(loadImage("source/res/images/AlexClewell_cs1666.bmp"));
-	gTex.push_back(loadImage("source/res/images/brendanmarani_picture.bmp"));
-	gTex.push_back(loadImage("source/res/images/CS1666_BenKurzyna.bmp"));
-	gTex.push_back(loadImage("source/res/images/danny_credit.bmp"));
-	gTex.push_back(loadImage("source/res/images/dtm32.bmp"));
-	gTex.push_back(loadImage("source/res/images/ecm53.bmp"));
+	gTex.push_back(loadImage("src/res/images/cs1666_adamibrahim.bmp"));	// index 0
+	gTex.push_back(loadImage("src/res/images/Alec_Img.bmp"));	// index 1
+	gTex.push_back(loadImage("src/res/images/Njl26 Credits Picture.bmp"));	// index 2
+	gTex.push_back(loadImage("src/res/images/AlexClewell_cs1666.bmp"));
+	gTex.push_back(loadImage("src/res/images/brendanmarani_picture.bmp"));
+	gTex.push_back(loadImage("src/res/images/CS1666_BenKurzyna.bmp"));
+	gTex.push_back(loadImage("src/res/images/danny_credit.bmp"));
+	gTex.push_back(loadImage("src/res/images/dtm32.bmp"));
+	gTex.push_back(loadImage("src/res/images/ecm53.bmp"));
 
 	for(auto image : gTex) {
 		SDL_RenderClear(gRenderer);
@@ -85,7 +85,7 @@ int Credits::playCredits() {
 		SDL_Delay(3000);
 	}
 
-	jakobCredits(loadImage("source/res/images/jakob_img.png"), loadImage("source/res/images/jakob_hitmarker.png"));
+	jakobCredits(loadImage("src/res/images/jakob_img.png"), loadImage("src/res/images/jakob_hitmarker.png"));
 
 	/* END Jakob's Credit Scene */
 

@@ -74,7 +74,7 @@ bool init() {
 	// Set renderer draw/clear color
 	SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
 
-	gTileSheet = loadImage("source/res/images/tiles.png");
+	gTileSheet = loadImage("src/res/images/tiles.png");
 	for (int i = 0; i < 3; i++) {
 			gTileRects[i].x = i * TILE_SIZE;
 			gTileRects[i].y = 0;
@@ -357,9 +357,9 @@ int main() {
 		return 1;
 	}
 
-	gTileSheet = loadImage("source/res/images/tiles.png");
-	gTank_Red = loadImage("source/res/images/red_tank.png");
-	gTank_Blue = loadImage("source/res/images/blue_tank.png");
+	gTileSheet = loadImage("src/res/images/tiles.png");
+	gTank_Red = loadImage("src/res/images/red_tank.png");
+	gTank_Blue = loadImage("src/res/images/blue_tank.png");
 
 	for (int i = 0; i < 3; i++) {
 		gTileRects[i].x = i * TILE_SIZE;

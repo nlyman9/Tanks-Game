@@ -13,3 +13,8 @@ Run `sh setup.sh` to install the following libraries
 # Running the Game
 1. Run `sh build_game.sh`
 2. `./build/bin/Game`
+# Running the Game w/out a Shell Script
+1. `mkdir build`
+2. `cd build`
+3. `cmake ../src -DMAC=0`
+4. `make`
