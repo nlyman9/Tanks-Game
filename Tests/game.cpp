@@ -14,7 +14,7 @@ constexpr int TILE_SIZE = 48;
 constexpr int BORDER_GAP = 16;
 constexpr int BOX_WIDTH = 20;
 constexpr int BOX_HEIGHT = 20;
-constexpr int MAX_VELOCITY = 1;
+constexpr int MAX_VELOCITY = 2;
 
 // Function declarations
 bool init();
