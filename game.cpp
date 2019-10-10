@@ -435,7 +435,7 @@ int main() {
 						x_vel += MAX_VELOCITY;
 						break;
 
-					case SDLK_r:
+					case SDLK_SPACE:
 						for(int i = 0; i < 3; i++){
 							if(!bullet_fire[i]){
 								x_bullet_pos[i] = x_pos + BOX_WIDTH/2;
