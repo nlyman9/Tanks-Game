@@ -17,18 +17,18 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 
+
 class Sprite {
     private:
         SDL_Texture* texture;
-        // TODO?:
+        SDL_Renderer *gRenderer;
+        std::string gFname;
+        // TODO?
         // png size
     public:
         Sprite(){};
-        Sprite(SDL_Renderer *gRenderer, std::string fname) {
-            if(!loadImage(gRenderer, fname)) {
-                exit(0);
-            }
-        };
+        Sprite(SDL_Renderer *gRenderer, std::string fname);
+        void init();
 
         /**
          * @brief load image of sprite
@@ -38,7 +38,7 @@ class Sprite {
          * @return true  - image load success 
          * @return false - image load fail 
          */
-        bool loadImage(SDL_Renderer *gRenderer, std::string fname);
+        bool loadImage();
 
 
         /**

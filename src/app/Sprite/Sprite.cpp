@@ -1,24 +1,30 @@
+
 #include "Sprite.hpp"
 
-bool Sprite::loadImage(SDL_Renderer *gRenderer, std::string fname) {
-    SDL_Texture* newText = nullptr;
+Sprite::Sprite(SDL_Renderer *renderer, std::string fname) : gRenderer{renderer}, gFname{fname} {}
 
-	SDL_Surface* startSurf = IMG_Load(fname.c_str());
+void Sprite::init() {
+	if(!loadImage()) {
+			exit(0);
+	}
+}
+
+bool Sprite::loadImage() {
+  SDL_Texture* newText = nullptr;
+	SDL_Surface* startSurf = IMG_Load(gFname.c_str());
 	if (startSurf == nullptr) {
-			std::cout << "Unable to load image " << fname << "! SDL Error: " << SDL_GetError() << std::endl;
+			std::cout << "Unable to load image " << gFname << "! SDL Error: " << SDL_GetError() << std::endl;
 			return 0;
 	}
-
 	newText = SDL_CreateTextureFromSurface(gRenderer, startSurf);
 	if (newText == nullptr) {
-			std::cout << "Unable to create texture from " << fname << "! SDL Error: " << SDL_GetError() << std::endl;
+			std::cout << "Unable to create texture from " << gFname << "! SDL Error: " << SDL_GetError() << std::endl;
             return 0;
 	}
-
 	SDL_FreeSurface(startSurf);
 
 	texture = newText;
-    return 1;
+  return 1;
 }
 
 SDL_Texture* Sprite::getTexture() {
