@@ -1,34 +1,139 @@
-#include "Object.hpp"
+/**
+ * @file object.hpp
+ * @author Networking Team (Adam Alec Jakob)
+ * @brief Header for abstract object class for general entities in the game
+ * @version 0.1
+ * @date 2019-09-29
+ * 
+ * @copyright Copyright (c) 2019
+ * 
+ */
 
-Sprite* OBJECT::getSprite() {
-    return sprite;
-}
+/**
+ * @brief UNDEFINED means the object/type has not been defined/implemented yet
+ * 
+ * UNDEFINED = bool -> Essentially should be void but it doesn't work.
+ */
+//using UNDEFINED = bool;
+//using Sprite = UNDEFINED;
 
-struct position OBJECT::getPos() {
-    return pos;
-}
 
-int OBJECT::getX() {
-    return pos.x;
-}
+#ifndef OBJECT_HPP
+#define OBJECT_HPP  
+#include <iostream>
+#include <SDL2/SDL.h>
+#include "Constants.hpp"
+#include "Sprite.hpp"
 
-int OBJECT::getY() {
-    return pos.y;
-}
+class OBJECT {
+    private:
+        Sprite sprite;
+        struct pos {
+            int x;
+            int y;
+        }position;
+        SDL_Rect box;
+    public:
+        SDL_Rect* get_box(){
+            SDL_Rect* box = &this->box;
+            box->x = get_pos().x;
+            box->y = get_pos().y;
+            return box;
+        }
+        struct pos get_pos(){
+            return this->position;
+        }
+        /**
+         * @brief Updates the object at a fixed timestep;
+         * 
+         * Fixed timesteps allow for updates to be deterministic.
+         */
+        virtual void update() = 0;
 
-void OBJECT::setSprite(Sprite *new_sprite) {
-    sprite = new_sprite;
-}
+        /**
+         * @brief draw the object to the screen; uses float parameter for extrapolation.
+         * 
+         * @param update_lag (float) {Jakob -> "We can change the name, I can't think of a good one."}
+         *  The value used to exptrapolate; should be in range of [0.0, 1.0)
+         *  Helps solve the "stuck in the middle" problem of rendering a frame 
+         *  in-between two updates.
+         */
+        virtual void draw(SDL_Renderer *gRenderer, double update_lag) = 0;
 
-void OBJECT::setPos(int x, int y) {
-    pos.x = x;
-    pos.y = y;
-}
+        // virtual struct pos* getPos() = 0;
 
-void OBJECT::setX(int x) {
-    pos.x = x;
-}
+        /**
+         * @brief move the object an offset from its current x-y position
+         * 
+         * @param x - how much to move object's current x position by
+         * @param y - how much to move object's current y position by
+         * 
+         * @return true  - moved object succesfully 
+         * @return false - failed to move object 
+         */
+        virtual bool move(int x, int y) = 0;
 
-void OBJECT::setY(int y) {
-    pos.y = y;
-}
+        /**
+         * @brief place/teleport an object to a 2D location
+         * 
+         * @param x - set x position
+         * @param y - set y position
+         * 
+         * @return true  - placed player succesfully 
+         * @return false - failed to place player 
+         */
+        virtual bool place(int x, int y) = 0;
+        
+        bool check_collision(OBJECT* B){
+            SDL_Rect* a;
+            a = this->get_box();
+            SDL_Rect* b;
+            b = B->get_box();
+
+            // Check vertical overlap
+            if (a->y + a->h <= b->y - 2)
+                return false;
+
+            if (a->y >= b->y + b->h + 2)
+                return false;
+
+            // Check horizontal overlap
+            if (a->x >= b->x + b->w + 2)
+                return false;
+
+            if (a->x + a->w <= b->x - 2)
+                return false;
+
+            // Must overlap in both
+            return true;
+        }
+
+        bool check_bounds(){
+            //left wall
+            struct pos position = this->get_pos();
+            int x = position.x;
+            int y = position.y;
+
+            if(x <= 20) {
+                return true;
+            }
+            //right wall
+            else if(x >= SCREEN_WIDTH - 2*BOX_WIDTH) {
+                return true;
+            }
+            //top wall
+            else if(y <= 20) {
+                return true;
+            }
+            //bottom wall
+            else if(y >= SCREEN_HEIGHT - 2*BOX_HEIGHT) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        // virtual ~OBJECT() = 0; //destructor of parent class always gets called - we can set this to a print for testing to see when things get destroyed
+};
+
+#endif

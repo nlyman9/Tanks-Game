@@ -15,23 +15,20 @@
  * UNDEFINED = bool -> Essentially should be void but it doesn't work.
  */
 using UNDEFINED = bool;
+using Sprite = UNDEFINED;
 
 
 #ifndef OBJECT_HPP
 #define OBJECT_HPP  
 #include <iostream>
 #include <SDL2/SDL.h>
-#include "Sprite.hpp"
-
-struct position {
-    int x;
-    int y;
-};
-
 class OBJECT {
     private:
-        Sprite *sprite;
-        struct position pos;
+        Sprite sprite;
+        struct pos {
+            int x;
+            int y;
+        };
     public:
 
         /**
@@ -50,6 +47,8 @@ class OBJECT {
          *  in-between two updates.
          */
         virtual void draw(SDL_Renderer *gRenderer, double update_lag) = 0;
+
+        // virtual struct pos* getPos() = 0;
 
         /**
          * @brief move the object an offset from its current x-y position
@@ -72,17 +71,7 @@ class OBJECT {
          * @return false - failed to place player 
          */
         virtual bool place(int x, int y) = 0;
-
-        Sprite* getSprite();
-        struct position getPos();
-        int getX();
-        int getY();
-
-        void setSprite(Sprite *new_sprite);
-        void setPos(int x, int y);
-        void setX(int x);
-        void setY(int y);
-
+        virtual bool check_collision(OBJECT* A, OBJECT* B) = 0;
         // virtual ~OBJECT() = 0; //destructor
 };
 

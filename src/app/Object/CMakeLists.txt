@@ -4,13 +4,12 @@ add_library(Object
   Object.cpp
 )
 
-target_link_libraries(Object
-  PRIVATE
-  Sprite
-  SDL2
-)
-
 target_include_directories(Object
   PUBLIC
   .
+)
+target_link_libraries(
+  PUBLIC
+  Constants
+  Sprite
 )
