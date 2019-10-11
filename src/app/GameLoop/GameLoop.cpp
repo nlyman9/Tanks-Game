@@ -26,7 +26,15 @@ bool GameLoop::init() {
 	Sprite *player_tank = new Sprite(render->getRenderer(), "src/res/images/red_tank.png");
 	player_tank->init();
 
+	Sprite *enemy_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
+	enemy_tank->init();
+
 	player->setSprite(player_tank);
+	for (auto enemy : enemies) {
+		enemy->setSprite(enemy_tank);
+	}
+
+
 	
 
 	isGameOn = true;
