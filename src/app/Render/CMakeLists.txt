@@ -13,6 +13,7 @@ target_link_libraries(Render
   Object
   Sprite
   Enemy
+  MapGeneration
 )
 
 target_include_directories(Render
