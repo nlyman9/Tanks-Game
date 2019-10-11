@@ -24,9 +24,9 @@ void Enemy::draw(SDL_Renderer *gRenderer, double update_lag) {
   // int y_pos = getY() + y_velocity * update_lag;
 
   // Render enemy
-  SDL_SetRenderDrawColor(gRenderer, 0xff, 0x00, 0x00, 0xff);
-  SDL_Rect enemyRect = {getX(), getY(), BOX_WIDTH, BOX_HEIGHT};
-	SDL_RenderFillRect(gRenderer, &enemyRect);
+  SDL_Rect src = {0, 0, 48, 48};
+  SDL_Rect dst = {x_enemy_pos, y_enemy_pos, 39, 48};
+  SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), &src, &dst, 0, NULL, SDL_FLIP_NONE);
 }
 
 /**
