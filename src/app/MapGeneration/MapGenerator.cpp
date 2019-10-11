@@ -1,17 +1,29 @@
+#include "MapGenerator.hpp"
 #include <time.h>
-#include <string.h>
 #include <math.h>
-#include <stdio.h>
-#include "line_map.hpp"
 
-using namespace std;
+int** MapGenerator::generateMirrorMap() //tile_map is 24x13
+{
+    int** array = 0;
+    array = new int*[24];
 
-constexpr int X_WIDE = 24;
-constexpr int Y_HIGH = 13;
+    for(int i = 0; i < 24; i++)
+    {
+        array[i] = new int[13];
+        for(int j = 0; j < 13; j++)
+        {
+            array[i][j] = 0;
+        }
+    }
 
-int room[X_WIDE][Y_HIGH];
+    srand(time(NULL));
 
-int** generateLineMap() {
+    array[13][10] = 2;
+
+    return array;
+}
+
+int** MapGenerator::generateLineMap() {
 	// make empty room array
 	int** array = 0;
     array = new int*[24];

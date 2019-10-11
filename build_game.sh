@@ -1,9 +1,10 @@
-if [ "$1" = "-m" ]; then
+if [ "$1" = "-c" ]; then
   cd build
-  cmake ../src -DMAC=1
+  rm -rf *
+  cmake ../src
   make
 else
   cd build
-  cmake ../src -DMAC=0
+  cmake ../src
   make
 fi

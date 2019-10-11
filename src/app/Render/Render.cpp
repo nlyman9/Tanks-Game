@@ -2,10 +2,10 @@
 #include <string>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-#include "Render.hpp"
 #include <time.h>
-#include "../MapGeneration/mirror_map.hpp"
-#include "../MapGeneration/line_map.hpp"
+
+#include "Render.hpp"
+#include "MapGenerator.hpp"
 
 SDL_Texture* gTileSheet;
 SDL_Rect gTileRects[3];
@@ -49,7 +49,7 @@ bool Render::init()
 	// Set renderer draw/clear color
 	SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
 
-	gTileSheet = loadImage("source/res/images/tiles.png");
+	gTileSheet = loadImage("src/res/images/tiles.png");
 	for (int i = 0; i < 3; i++) {
 			gTileRects[i].x = i * TILE_SIZE;
 			gTileRects[i].y = 0;
@@ -71,7 +71,7 @@ bool Render::init()
 	}
 
 	//small randomly generated thing
-	
+	MapGenerator* mapGen = new MapGenerator();
 
 
 	// Select map generation technique
@@ -88,13 +88,13 @@ bool Render::init()
 			tile_map[1][1] = 2;
 			break;
 		case line:
-			tile_map = generateLineMap();
+			tile_map = mapGen->generateLineMap();
 			break;
 		case maze:
 			tile_map[6][10] = 2;
 			break;
 		case mirror:
-			tile_map = generateMirrorMap();
+			tile_map = mapGen->generateMirrorMap();
 			tile_map[14][10] = 2;
 			break;
 	}
