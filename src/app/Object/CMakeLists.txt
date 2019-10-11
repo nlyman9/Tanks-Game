@@ -8,7 +8,7 @@ target_include_directories(Object
   PUBLIC
   .
 )
-target_link_libraries(
+target_link_libraries(Object
   PUBLIC
   Constants
   Sprite

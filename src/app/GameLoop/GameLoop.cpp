@@ -15,16 +15,17 @@ GameLoop::~GameLoop() {}
  * @return false - Failed to initialize
  */
 bool GameLoop::init() {
+	Sprite *player_tank = new Sprite(render->getRenderer(), "src/res/images/red_tank.png");
 
-	player = new Player(0, 0);
+	player = new Player(player_tank, nullptr, 0, 0);
+	
 	enemies.push_back(new Enemy(SCREEN_WIDTH / 2 - BOX_WIDTH / 2, SCREEN_HEIGHT / 2 - BOX_HEIGHT / 2, player));
 	enemies.push_back(new Enemy(SCREEN_WIDTH - BOX_WIDTH / 2, SCREEN_HEIGHT / 2 - BOX_HEIGHT / 2, player));
 	enemies.push_back(new Enemy(SCREEN_WIDTH / 2 - BOX_WIDTH / 2, SCREEN_HEIGHT - BOX_HEIGHT / 2, player));
 	render = new Render(player, enemies);
 	render->init();
 
-	Sprite *player_tank = new Sprite(render->getRenderer(), "src/res/images/red_tank.png");
-	player->setSprite(player_tank);
+	
 
 	isGameOn = true;
 

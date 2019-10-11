@@ -15,30 +15,43 @@
  * UNDEFINED = bool -> Essentially should be void but it doesn't work.
  */
 using UNDEFINED = bool;
-using Sprite = UNDEFINED;
-
 
 #ifndef OBJECT_HPP
-#define OBJECT_HPP  
+#define OBJECT_HPP
 #include <iostream>
 #include <SDL2/SDL.h>
-class OBJECT {
-    private:
-        Sprite sprite;
-        struct pos {
-            int x;
-            int y;
-        };
-    public:
+#include "Sprite.hpp"
 
-        /**
+class OBJECT
+{
+private:
+    Sprite sprite;
+    int x;
+    int y;
+    SDL_Rect *box;
+
+public:
+    OBJECT(){};
+    bool check_collision(OBJECT *B);
+    SDL_Rect *get_box();
+    bool check_bounds();
+    void setSprite(Sprite *new_sprite);
+
+    void setPos(int x, int y);
+    void setX(int x);
+    void setY(int y);
+    int getX();
+    int getY();
+    
+    Sprite* getSprite();
+    /**
          * @brief Updates the object at a fixed timestep;
          * 
          * Fixed timesteps allow for updates to be deterministic.
          */
-        virtual void update() = 0;
+    virtual void update() = 0;
 
-        /**
+    /**
          * @brief draw the object to the screen; uses float parameter for extrapolation.
          * 
          * @param update_lag (float) {Jakob -> "We can change the name, I can't think of a good one."}
@@ -46,11 +59,11 @@ class OBJECT {
          *  Helps solve the "stuck in the middle" problem of rendering a frame 
          *  in-between two updates.
          */
-        virtual void draw(SDL_Renderer *gRenderer, double update_lag) = 0;
+    virtual void draw(SDL_Renderer *gRenderer, double update_lag) = 0;
 
-        // virtual struct pos* getPos() = 0;
+    // virtual struct pos* getPos() = 0;
 
-        /**
+    /**
          * @brief move the object an offset from its current x-y position
          * 
          * @param x - how much to move object's current x position by
@@ -59,9 +72,9 @@ class OBJECT {
          * @return true  - moved object succesfully 
          * @return false - failed to move object 
          */
-        virtual bool move(int x, int y) = 0;
+    virtual bool move(int x, int y) = 0;
 
-        /**
+    /**
          * @brief place/teleport an object to a 2D location
          * 
          * @param x - set x position
@@ -70,9 +83,8 @@ class OBJECT {
          * @return true  - placed player succesfully 
          * @return false - failed to place player 
          */
-        virtual bool place(int x, int y) = 0;
-        virtual bool check_collision(OBJECT* A, OBJECT* B) = 0;
-        // virtual ~OBJECT() = 0; //destructor
+    virtual bool place(int x, int y) = 0;
+    ~OBJECT(); //destructor
 };
 
 #endif

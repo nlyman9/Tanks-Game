@@ -23,11 +23,12 @@ class Sprite {
         // TODO?:
         // png size
     public:
+        Sprite(){};
         Sprite(SDL_Renderer *gRenderer, std::string fname) {
             if(!loadImage(gRenderer, fname)) {
                 exit(0);
             }
-        }
+        };
 
         /**
          * @brief load image of sprite
@@ -54,6 +55,6 @@ class Sprite {
          */
         void setTexture(SDL_Texture *new_texture);
 
-        ~Sprite(); //destructor
+        ~Sprite(){}; //destructor
 };
 #endif
