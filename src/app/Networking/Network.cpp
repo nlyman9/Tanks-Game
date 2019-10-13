@@ -72,6 +72,78 @@ std::vector<char>* Network::packMap(std::vector<int>* map, std::vector<char>* ma
 
     return mapPacked;
 }
+std::vector<char>* Network::pack(std::vector<int>* x, std::vector<char>* packed, int bits)
+{   
+    std::vector<bool> workingSet;
+    for (auto curr : *x)
+    {
+        int i;
+        for(i = 0; i < bits; i++){
+            workingSet.push_back((bool) (curr >> (bits - i - 1) & 1));
+        }
+    }
+    int i = 0;
+    char temp = 0;
+    for(auto currInSet : workingSet){
+        temp = temp | ((char) currInSet << (7-i));
+        if(i == 7){
+            packed->push_back(temp);
+            temp = 0;
+            i = -1;
+        }
+        i++;
+    }
+    if(i != 0) 
+        packed->push_back(temp); 
+
+    return packed;
+}
+std::vector<int> *Network::unpack(std::vector<char>* packed, std::vector<int> *unPacked, int bits){
+	std::vector<bool> workSet;
+    int i;
+	for(auto curr : *packed){
+		for(i = 0; i < 8; i++){
+			workSet.push_back((curr >> (7 - i)) & 1);
+		}
+	}
+    i = 0;
+	int tmp = 0;
+	for(auto curr : workSet){
+		tmp = (tmp) | (curr << (bits - 1 - i));
+		if(i == (bits - 1)){
+			unPacked->push_back(tmp);
+			tmp = 0;
+			i = -1;
+		}
+		i++;
+	}
+    return unPacked;
+}
+std::vector<int> *Network::unpack(std::vector<char>* packed, std::vector<int> *unPacked, int bits, int numbers){
+	std::vector<bool> workSet;
+    int i;
+	for(auto curr : *packed){
+		for(i = 0; i < 8; i++){
+			workSet.push_back((curr >> (7 - i)) & 1);
+		}
+	}
+    i = 0;
+	int tmp = 0;
+    int z = 0;
+	for(auto curr : workSet){
+        if(z == numbers)
+            break;
+		tmp = (tmp) | (curr << (bits - 1 - i));
+		if(i == (bits - 1)){
+			unPacked->push_back(tmp);
+			tmp = 0;
+			i = -1;
+            z++;
+		}
+		i++;
+	}
+    return unPacked;
+}
 void Network::sendMap(int fd, std::vector<int>* map, size_t t, int flags, int csFlag){
     //create a char array to send it in
     std::vector<char>* mapPacked = new std::vector<char>();   
