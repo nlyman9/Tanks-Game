@@ -17,6 +17,7 @@ constexpr int BOX_HEIGHT = 20;
 constexpr int BULLET_WIDTH = 4;
 constexpr int BULLET_HEIGHT = 6;
 constexpr int MAX_VELOCITY = 1;
+constexpr int BULLET_VELOCITY = 2;
 
 // Function declarations
 bool init();
@@ -38,6 +39,7 @@ SDL_Rect gTileRects[3];
 bool dir = true;
 bool left = true;
 bool bullet_fire[3] = {false, false, false};
+bool enemy_bullet_fire = false;
 int** tile_map;
 std::vector<SDL_Texture*> gTex;
 SDL_Rect cur_out;
@@ -353,6 +355,15 @@ int yArrPos(int pos){
 
 }
 
+bool shouldShoot(int x_player, int x_enemy, int y_player, int y_enemy){
+	int cannon = x_enemy - BOX_WIDTH/2;
+	int x_player_rightEdge = x_player + BOX_WIDTH;
+	if(cannon <= x_player_rightEdge && cannon >= x_player && y_player < y_enemy){
+		return true;
+	}
+	return false;
+}
+
 int main() {
 	if (!init()) {
 		std::cout <<  "Failed to initialize!" << std::endl;
@@ -400,7 +411,7 @@ int main() {
 	//int enemy_start_y = y_enemy_pos;
 	//Initialize enemy box
 	SDL_Rect enemy_box = {x_enemy_pos, y_enemy_pos, BOX_WIDTH, BOX_HEIGHT};
-
+	SDL_Rect player_box = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
 	// Current velocity of the box
 	// Start off at reset
 	int x_vel = 0;
@@ -408,8 +419,9 @@ int main() {
 
 	int x_bullet_pos[3];
 	int y_bullet_pos[3];
-	//int x_bullet_vel = 0;
-	//int y_bullet_vel = 0;
+
+	int x_enemy_bullet_pos;
+	int y_enemy_bullet_pos;
 
 	while(gameon) {
 		while(SDL_PollEvent(&e)) {
@@ -435,7 +447,7 @@ int main() {
 						x_vel += MAX_VELOCITY;
 						break;
 
-					case SDLK_r:
+					case SDLK_SPACE:
 						for(int i = 0; i < 3; i++){
 							if(!bullet_fire[i]){
 								x_bullet_pos[i] = x_pos + BOX_WIDTH/2;
@@ -464,13 +476,37 @@ int main() {
 			}
 		}
 
+		if(shouldShoot(x_pos, x_enemy_pos, y_pos, y_enemy_pos) && !enemy_bullet_fire){
+			printf("enemy fired\n");
+			enemy_bullet_fire = true;
+			x_enemy_bullet_pos = x_enemy_pos + BOX_WIDTH/2;
+			y_enemy_bullet_pos = y_enemy_pos;
+		}
+
+		if(enemy_bullet_fire){
+			y_enemy_bullet_pos -= BULLET_VELOCITY;
+		}
+
+		if(enemy_bullet_fire){
+			SDL_Rect bullet_collide = {x_enemy_bullet_pos, y_enemy_bullet_pos, BULLET_WIDTH, BULLET_HEIGHT};
+			for(int j = 0; j < 312; j++){
+				cur_out = tileArray[j];
+				if(player_vicinity(&bullet_collide, &cur_out)){
+					enemy_bullet_fire = false;
+				}
+			}
+			if(y_enemy_bullet_pos == TILE_SIZE){
+				enemy_bullet_fire = false;
+			}
+		}
+
 		for(int i = 0; i < 3; i++){
 			if(bullet_fire[i]){
 				if(y_bullet_pos[i] == TILE_SIZE){
 						bullet_fire[i] = false;
 				}
 				else{
-					y_bullet_pos[i] -= MAX_VELOCITY;
+					y_bullet_pos[i] -= BULLET_VELOCITY;
 				}
 			}
 		}
@@ -484,6 +520,25 @@ int main() {
 						bullet_fire[i] = false;
 					}
 				}
+			}
+		}
+
+		for(int i = 0; i < 3; i++){
+			if(bullet_fire[i]){
+				SDL_Rect bullet_collide = {x_bullet_pos[i], y_bullet_pos[i], BULLET_WIDTH, BULLET_HEIGHT};
+				if(player_vicinity(&bullet_collide, &enemy_box)){
+					printf("YOU WIN\n");
+					bullet_fire[i] = false;
+				}
+			}
+		}
+
+
+		if(enemy_bullet_fire){
+			SDL_Rect enemy_bullet_collide = {x_enemy_bullet_pos, y_enemy_bullet_pos, BULLET_WIDTH, BULLET_HEIGHT};
+			if(player_vicinity(&enemy_bullet_collide, &player_box)){
+				printf("ENEMY WINS\n");
+				enemy_bullet_fire = false;
 			}
 		}
 
@@ -503,10 +558,10 @@ int main() {
 		x_pos += x_vel;
 		y_pos += y_vel;
 
-		SDL_Rect player_collide = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
+		player_box = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
 		for(int i = 0; i < 312; i++){
 			cur_out = tileArray[i];
-			if(player_vicinity(&player_collide, &cur_out)){
+			if(player_vicinity(&player_box, &cur_out)){
 				x_pos -= x_vel;
 				y_pos -= y_vel;
 			}
@@ -757,6 +812,12 @@ int main() {
 				SDL_Rect bullet = {x_bullet_pos[i], y_bullet_pos[i], BULLET_WIDTH, BULLET_HEIGHT};
 				SDL_RenderFillRect(gRenderer, &bullet);
 			}
+		}
+
+		if(enemy_bullet_fire){
+			SDL_SetRenderDrawColor(gRenderer, 0xff, 0x00, 0x00, 0xff);
+			SDL_Rect enemy_bullet = {x_enemy_bullet_pos, y_enemy_bullet_pos, BULLET_WIDTH, BULLET_HEIGHT};
+			SDL_RenderFillRect(gRenderer, &enemy_bullet);
 		}
 		SDL_RenderPresent(gRenderer);
 	} //end of game loop
