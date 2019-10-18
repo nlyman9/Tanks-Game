@@ -21,6 +21,7 @@ using UNDEFINED = bool;
 #include <iostream>
 #include <SDL2/SDL.h>
 #include "Sprite.hpp"
+#include "Constants.hpp"
 
 class OBJECT
 {
@@ -28,11 +29,12 @@ private:
     Sprite sprite;
     int x;
     int y;
-    SDL_Rect *box;
+    SDL_Rect box;
 
 public:
-    OBJECT(){};
+    OBJECT() {};
     bool check_collision(OBJECT *B);
+    bool check_collision(SDL_Rect *B);
     SDL_Rect *get_box();
     bool check_bounds();
     void setSprite(Sprite *new_sprite);
@@ -59,7 +61,7 @@ public:
          *  Helps solve the "stuck in the middle" problem of rendering a frame 
          *  in-between two updates.
          */
-    virtual void draw(SDL_Renderer *gRenderer, double update_lag) = 0;
+    virtual void draw(SDL_Renderer *gRenderer, double update_lag, SDL_Rect* obstacless) = 0;
 
     // virtual struct pos* getPos() = 0;
 

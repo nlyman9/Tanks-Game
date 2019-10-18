@@ -40,11 +40,20 @@ Player::~Player() {}
  * 
  * @param update_lag - the value to extrapolate by
  */
-void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
+void Player::draw(SDL_Renderer *gRenderer, double update_lag, SDL_Rect* obstacles) {
     // Extrapolate the x and y positions 
     // "Solves" stuck in the middle rendering.
     int x_pos = getX() + x_vel * update_lag;
     int y_pos = getY() + y_vel * update_lag;
+
+    for(int i = 0; i < 312; i++){
+        SDL_Rect* cur_out = &obstacles[i];
+        get_box(); // required to update box
+        if(check_collision(cur_out)){
+            x_pos -= x_vel * update_lag;
+            y_pos -= y_vel * update_lag;
+        }
+    }
 
     // Render to screen (gRenderer)
     // SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
@@ -183,5 +192,6 @@ void Player::getEvent(SDL_Event e) {
     if (y_vel < -MAX_VELOCITY)
     {
         y_vel = -MAX_VELOCITY;
+ 
     }
 }

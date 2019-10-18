@@ -15,11 +15,10 @@ GameLoop::~GameLoop() {}
  * @return false - Failed to initialize
  */
 bool GameLoop::init() {
-	player = new Player(0, 0);
-	
-	enemies.push_back(new Enemy(SCREEN_WIDTH / 2 - BOX_WIDTH / 2, SCREEN_HEIGHT / 2 - BOX_HEIGHT / 2, player));
-	enemies.push_back(new Enemy(SCREEN_WIDTH - BOX_WIDTH / 2, SCREEN_HEIGHT / 2 - BOX_HEIGHT / 2, player));
-	enemies.push_back(new Enemy(SCREEN_WIDTH / 2 - BOX_WIDTH / 2, SCREEN_HEIGHT - BOX_HEIGHT / 2, player));
+	player = new Player(75, 50);
+	// enemies.push_back(new Enemy(SCREEN_WIDTH / 2 - BOX_WIDTH / 2, SCREEN_HEIGHT / 2 - BOX_HEIGHT / 2, player));
+	// enemies.push_back(new Enemy(SCREEN_WIDTH - BOX_WIDTH / 2, SCREEN_HEIGHT / 2 - BOX_HEIGHT / 2, player));
+	// enemies.push_back(new Enemy(SCREEN_WIDTH / 2 - BOX_WIDTH / 2, SCREEN_HEIGHT - BOX_HEIGHT / 2, player));
 	render = new Render(player, enemies);
 	render->init();
 
@@ -29,13 +28,11 @@ bool GameLoop::init() {
 	Sprite *enemy_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
 	enemy_tank->init();
 
+	std::cout << "sprite init" << std::endl;
 	player->setSprite(player_tank);
-	for (auto enemy : enemies) {
-		enemy->setSprite(enemy_tank);
-	}
-
-
-	
+	// for (auto enemy : enemies) {
+	// 	enemy->setSprite(enemy_tank);
+	// }
 
 	isGameOn = true;
 

@@ -23,7 +23,7 @@ class Player : public OBJECT {
         Player(Sprite *sprite, Sprite *turret, int x, int y); //constructor, initialize the x, y, and sprite
         Player(int x, int y); //constructor, initialize the x, snd y
 
-        void draw(SDL_Renderer *gRenderer, double update_lag) override;
+        void draw(SDL_Renderer *gRenderer, double update_lag, SDL_Rect* obstacles) override;
         void update() override;
         bool move(int x, int y) override; //move x offset from current x and y offset from current y
         bool place(int x, int y) override; //place/teleport to an x and y

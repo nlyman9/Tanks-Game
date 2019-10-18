@@ -14,7 +14,7 @@ Enemy::~Enemy() {}
  * 
  * @param update_lag - the value to extrapolate by
  */
-void Enemy::draw(SDL_Renderer *gRenderer, double update_lag) {
+void Enemy::draw(SDL_Renderer *gRenderer, double update_lag, SDL_Rect* obstacles) {
 
   // Extrapolate the x and y positions 
   // "Solves" stuck in the middle rendering.

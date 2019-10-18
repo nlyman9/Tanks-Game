@@ -28,8 +28,9 @@ class Render {
 
         SDL_Texture* gTileSheet;
         SDL_Rect gTileRects[3];
-        SDL_Rect cur_out;
         Player* gPlayer;
+
+        SDL_Rect* tileArray;
 
         SDL_Texture* loadImage(std::string fname);
 };

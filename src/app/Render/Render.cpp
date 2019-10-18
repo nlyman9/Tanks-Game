@@ -73,7 +73,6 @@ bool Render::init()
 	//small randomly generated thing
 	MapGenerator* mapGen = new MapGenerator();
 
-
 	// Select map generation technique
 	enum map_types { destructible, holes, line, maze, mirror };
 	srand(time(NULL));
@@ -97,6 +96,18 @@ bool Render::init()
 			tile_map = mapGen->generateMirrorMap();
 			tile_map[14][10] = 2;
 			break;
+	}
+
+	
+	tileArray = new SDL_Rect[312];
+	int count = 0;
+	for (int x = BORDER_GAP + TILE_SIZE, i = 0; x < SCREEN_WIDTH - BORDER_GAP - TILE_SIZE; x+=TILE_SIZE, i++) {
+		for (int y = TILE_SIZE, j = 0; y < SCREEN_HEIGHT - TILE_SIZE; y+=TILE_SIZE, j++) {
+			SDL_Rect cur_out = { x, y, TILE_SIZE, TILE_SIZE};
+			if(tile_map[i][j] == 2){
+				tileArray[count++] = cur_out;
+			}
+		}
 	}
 
 	return true;
@@ -177,11 +188,11 @@ int Render::draw(double update_lag) {
 	}
 
 	// Render player
-	gPlayer->draw(gRenderer, update_lag);
+	gPlayer->draw(gRenderer, update_lag, tileArray);
 
 	// Render all the enemies
 	for (auto enemy: gEnemies) {
-		enemy->draw(gRenderer, update_lag);
+		enemy->draw(gRenderer, update_lag, tileArray);
 	}
 
 	// SDL_SetRenderDrawColor(gRenderer, 0xff, 0x00, 0xff, 0xff);
