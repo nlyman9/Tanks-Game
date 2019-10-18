@@ -10,6 +10,17 @@ Run `sh setup.sh` to install the following libraries
 * SDL2 Image
 * SDL2 ttf
 * SDL2 Mixer
+
+# Building the Game w/out a Shell Script
+1. `mkdir build`
+2. `cd build`
+3. Build types:
+  *  `cmake ../src -c` for a clean build 
+  * `cmake ../src` for a rebuild 
+4. `make`
+
+# Build the Game w/ a Shell Script
+* Run `sh build_game.sh`
+
 # Running the Game
-1. Run `sh build_game.sh`
-2. `./build/bin/Game`
+* `./build/bin/Game`

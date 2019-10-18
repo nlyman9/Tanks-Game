@@ -3,11 +3,14 @@
 #include <string>
 #include <SDL.h>
 #include <SDL_image.h>
+#include <time.h>
 
 constexpr int SCREEN_WIDTH = 1280;
 constexpr int SCREEN_HEIGHT = 720;
 constexpr int TILE_SIZE = 48;
 constexpr int BORDER_GAP = 16;
+constexpr int X_WIDE = 24;
+constexpr int Y_HIGH = 13;
 
 // Function declarations
 bool init();
@@ -96,7 +99,7 @@ int main() {
 		return 1;
 	}
 	
-	gTileSheet = loadImage("../source/res/images/tiles.png");
+	gTileSheet = loadImage("../src/res/images/tiles.png");
 	
 	for (int i = 0; i < 3; i++) {
 		gTileRects[i].x = i * TILE_SIZE;
@@ -118,6 +121,8 @@ int main() {
 		
 		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
 		SDL_RenderClear(gRenderer);
+
+		// enum { floor = gTileRects[0], hole = gTileRects[1], wall = gTileRects[2], bomb = gTileRects[3] };
 
 		//FROM BORDERGAP + TILE SIZE TO GET INTERIOR OF MAP
 		//x represents the pixels of the screen, not the tile index anymore
@@ -155,6 +160,35 @@ int main() {
 			cur_out = {SCREEN_WIDTH - TILE_SIZE - BORDER_GAP, c, TILE_SIZE, TILE_SIZE};
 			SDL_RenderCopy(gRenderer, gTileSheet, &gTileRects[2], &cur_out);
 			c += TILE_SIZE;
+		}
+		
+		/**		SIMPLE Random Generation
+		 * 	- Pick a side to generate on (side one (0 - 11) or side two (12 - 24))
+		 * 	- Pick a random x,y in that side
+		 * 	- Generate a 3x3 box around that x,y
+		 * 
+		 * 
+		 *
+		 * 
+		 */
+		
+		srand(time(NULL));
+
+		int maze[X_WIDE][Y_HIGH];
+		int side = rand() % 2; // 0 = (0-11), 1 = (12-24
+		int x_coord = (side == 0) ? rand() % 11 : (rand() % 12) + 12;
+		int y_coord = rand() % 13; 
+
+		for (int x = 0; x < X_WIDE; x++) {
+			for (int y = 0; y < Y_HIGH; y++) {
+				maze[x][y] = rand() % 2;
+				cur_out = {BORDER_GAP + TILE_SIZE + (x*TILE_SIZE), TILE_SIZE + (y*TILE_SIZE), TILE_SIZE, TILE_SIZE};
+				if (maze[x][y] == 0) {
+					SDL_RenderCopy(gRenderer, gTileSheet, &gTileRects[0], &cur_out);
+				} else if (maze[x][y] == 1) {
+					SDL_RenderCopy(gRenderer, gTileSheet, &gTileRects[2], &cur_out);
+				}
+			}
 		}
 
 		SDL_RenderPresent(gRenderer);
