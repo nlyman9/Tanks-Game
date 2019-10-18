@@ -12,6 +12,7 @@
 #define PLAYER_HPP 
 
 #include <vector>
+#include <cmath>
 #include <SDL2/SDL.h>
 #include "Object.hpp"
 
@@ -19,7 +20,13 @@ class Player : public OBJECT {
     private:
         /* data */
         Sprite *turret;
-        int x_vel, y_vel, lives; //x and y coordinates, health points left
+        float x_vel, y_vel; // x and y velocity
+        int lives; //health points left
+        int theta = 0;
+        float x_deltav = 0;
+        float y_deltav = 0;
+        int velocity = 0;
+        int delta_velocity = 0;
     public:
         Player(Sprite *sprite, Sprite *turret, int x, int y); //constructor, initialize the x, y, and sprite
         Player(int x, int y); //constructor, initialize the x, snd y

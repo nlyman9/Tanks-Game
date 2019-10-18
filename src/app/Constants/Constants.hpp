@@ -14,6 +14,7 @@ const int TILE_SIZE = 48;
 const int FPS = 60;
 const double MS_PER_UPDATE = 1000/FPS;  // 1000 MS divided by FPS
 const int NUM_OBSTACLES = 312;
+const int PHI = 15;
 
 #endif
 

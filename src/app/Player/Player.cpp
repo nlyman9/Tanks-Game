@@ -51,8 +51,11 @@ void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
 	// SDL_Rect fillRect = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
 	// SDL_RenderFillRect(gRenderer, &fillRect);
 
-    SDL_Rect pos = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
-    SDL_RenderCopy(gRenderer, getSprite()->getTexture(), NULL, &pos);
+    // SDL_Rect pos = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
+    // SDL_RenderCopy(gRenderer, getSprite()->getTexture(), NULL, &pos);
+    SDL_Rect src = {0, 0, 20, 20};
+    SDL_Rect* dst = get_box();
+    SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), &src, dst, theta, NULL, SDL_FLIP_NONE);
 }
 
 /**
@@ -65,11 +68,22 @@ void Player::update() {
 
     setPos(getX() + x_vel, getY() + y_vel);
 
+    SDL_Rect* overlap;
     SDL_Rect* box = get_box(); // required to update box
     for(auto obstacle : obstacles) {
-        if(check_collision(&obstacle)){
-            setX(getX() - x_vel);
-            setY(getY() - y_vel);
+        overlap = check_collision(&obstacle);
+        if(overlap != nullptr) {
+            std::cout << overlap->h << " " << overlap->w << " " << theta << std::endl;
+            if(abs(theta) > 0 && abs(theta) < 180) {
+                setY(getY() - overlap->h - 1);
+            } else if(abs(theta) > 180 && abs(theta) < 0) {
+                setY(getY() + overlap->h + 1);
+            }
+            if(abs(theta) > 90 && abs(theta) < 270) {
+                setX(getX() - overlap->w - 1);
+            } else if(abs(theta) > 270 && abs(theta) < 90) {
+                setX(getX() + overlap->w + 1);
+            }
         }
     }
 
@@ -135,62 +149,85 @@ bool Player::rotateTurret(float theta) {
 
 // TODO - Change to scancodes?
 void Player::getEvent(SDL_Event e) {
-    if (e.type == SDL_KEYDOWN)
-    {
-        switch (e.key.keysym.sym)
-        {
-        case SDLK_w:
-            y_vel -= MAX_VELOCITY;
-            break;
 
-        case SDLK_a:
-            x_vel -= MAX_VELOCITY;
-            break;
+    delta_velocity = 0;
+    x_deltav = 0;
+    y_deltav = 0;
 
-        case SDLK_s:
-            y_vel += MAX_VELOCITY;
-            break;
-
-        case SDLK_d:
-            x_vel += MAX_VELOCITY;
-            break;
-        }
+    const Uint8* keystate = SDL_GetKeyboardState(nullptr);
+    if (keystate[SDL_SCANCODE_W]) {
+        delta_velocity += 1;
+        x_deltav += delta_velocity * cos((theta * M_PI) / 180);
+        y_deltav += delta_velocity * sin((theta * M_PI) / 180);
     }
-    else if (e.type == SDL_KEYUP)
-    {
-        switch (e.key.keysym.sym)
-        {
-        case SDLK_w:
-            y_vel = 0;
-            break;
-        case SDLK_a:
-            x_vel = 0;
-            break;
-        case SDLK_s:
-            y_vel = 0;
-            break;
-        case SDLK_d:
-            x_vel = 0;
-            break;
-        }
+    if (keystate[SDL_SCANCODE_A]) {
+        theta -= PHI;
     }
+    if (keystate[SDL_SCANCODE_S]) {
+        delta_velocity -= 1;
+        x_deltav += delta_velocity * cos((-theta * M_PI) / 180);
+        y_deltav += delta_velocity * sin((-theta * M_PI) / 180);
+    }
+    if (keystate[SDL_SCANCODE_D]) {
+        theta += PHI;
+    }
+
+    theta %= 360;
+
+	if (delta_velocity == 0) {
+        // No user-supplied "push", return to rest
+        if (velocity > 0)
+            delta_velocity = -1;
+        else if (velocity < 0)
+            delta_velocity = 1;
+    }
+
+    if (x_deltav == 0) {
+        // No user-supplied "push", return to rest
+        if (x_vel > 0)
+            x_deltav = -1;
+        else if (x_vel < 0)
+            x_deltav = 1;
+    }
+
+    if (y_deltav == 0) {
+        // No user-supplied "push", return to rest
+        if (y_vel > 0)
+            y_deltav = -1;
+        else if (y_vel < 0)
+            y_deltav = 1;
+    }
+
+    // Speed up/slow down
+    velocity += delta_velocity;
+    x_vel += x_deltav;
+    y_vel += y_deltav;
 
     // Move box
-    if (x_vel > MAX_VELOCITY)
+    if (velocity > MAX_VELOCITY)
+    {
+        velocity = MAX_VELOCITY;
+    }
+    if (velocity < -MAX_VELOCITY)
+    {
+        velocity = -MAX_VELOCITY;
+    }
+
+    if(x_vel > MAX_VELOCITY) 
     {
         x_vel = MAX_VELOCITY;
     }
-    if (x_vel < -MAX_VELOCITY)
+    if(x_vel < -MAX_VELOCITY) 
     {
         x_vel = -MAX_VELOCITY;
     }
-    if (y_vel > MAX_VELOCITY)
+
+    if(y_vel > MAX_VELOCITY) 
     {
         y_vel = MAX_VELOCITY;
     }
-    if (y_vel < -MAX_VELOCITY)
+    if(y_vel < -MAX_VELOCITY) 
     {
         y_vel = -MAX_VELOCITY;
- 
     }
 }

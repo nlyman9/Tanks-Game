@@ -26,51 +26,22 @@ SDL_Rect* OBJECT::get_box()
     return &box;
 }
 
-bool OBJECT::check_collision(OBJECT *B)
+SDL_Rect* OBJECT::check_collision(OBJECT *B)
 {
-    SDL_Rect *a = &box;
-    SDL_Rect *b;
-    b = B->get_box();
-
-    // Check vertical overlap
-    if (a->y + a->h <= b->y)
-        return false;
-
-    if (a->y >= b->y + b->h)
-        return false;
-
-    // Check horizontal overlap
-    if (a->x >= b->x + b->w)
-        return false;
-
-    if (a->x + a->w <= b->x)
-        return false;
-
-    // Must overlap in both
-    return true;
+    SDL_Rect* overlap = new SDL_Rect;
+    if(SDL_IntersectRect(&box, B->get_box(), overlap)) {
+        return overlap;
+    }
+    return nullptr;
 }
 
-bool OBJECT::check_collision(SDL_Rect *B)
+SDL_Rect* OBJECT::check_collision(SDL_Rect *B)
 {
-    SDL_Rect *a = &box;
-    SDL_Rect *b = B;
-
-    // Check vertical overlap
-    if (a->y + a->h <= b->y)
-        return false;
-
-    if (a->y >= b->y + b->h)
-        return false;
-
-    // Check horizontal overlap
-    if (a->x >= b->x + b->w)
-        return false;
-
-    if (a->x + a->w <= b->x)
-        return false;
-
-    // Must overlap in both
-    return true;
+    SDL_Rect* overlap = new SDL_Rect;
+    if(SDL_IntersectRect(&box, B, overlap)) {
+        return overlap;
+    }
+    return nullptr;
 }
 
 bool OBJECT::check_bounds()

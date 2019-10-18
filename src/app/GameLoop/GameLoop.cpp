@@ -121,11 +121,9 @@ int GameLoop::run()
 			{
 				isGameOn = false;
 			}
-			else 
-			{
-				player->getEvent(e);
-			}
 		}
+		
+		player->getEvent(e);
 		
 		// 2. Update
 		// Update if time since last update is >= MS_PER_UPDATE
