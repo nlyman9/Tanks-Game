@@ -23,13 +23,17 @@ class Enemy : public OBJECT {
         // Sprite turret;
         int x_enemy_pos, y_enemy_pos;
         Player* gPlayer;
+        bool left = true;
 
         bool checkPos(int playX, int playY, int enemX, int enemY);
         bool checkWall(int x, int y);
 		//	just wondering if we want to put some kind of custom acceleration on enemies?
 		//	this is just a note for the future since the online pitt library won't let me open the book I found
 		//	but maybe we'll eventually have a setting for the ai's current state (searching, pathing, running away, etc)
-		
+		int xArrPosL(int pos);
+        int xArrPosR(int pos);
+        int yArrPos(int pos);
+        int** tile_map;
     public:
         // Enemy(Sprite sprite, Sprite turret, int x, int y); //constructor, initialize the x, y, and sprite
         Enemy(int x, int y, Player* player); //constructor, initialize the x, y, and sprite
@@ -48,6 +52,7 @@ class Enemy : public OBJECT {
         int getY();
         void updatePos();
 
+        void setTileMap(int** tileMap);
         ~Enemy();
 };
 #endif

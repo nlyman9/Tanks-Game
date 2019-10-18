@@ -24,9 +24,11 @@ void Enemy::draw(SDL_Renderer *gRenderer, double update_lag) {
   // int y_pos = getY() + y_velocity * update_lag;
 
   // Render enemy
-  SDL_Rect src = {0, 0, 48, 48};
-  SDL_Rect dst = {x_enemy_pos, y_enemy_pos, 39, 48};
-  SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), &src, &dst, 0, NULL, SDL_FLIP_NONE);
+  // SDL_Rect src = {0, 0, 48, 48};
+  // SDL_Rect dst = {x_enemy_pos, y_enemy_pos, 39, 48};
+  // SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), &src, &dst, 0, NULL, SDL_FLIP_NONE);
+  SDL_Rect pos = {x_enemy_pos, y_enemy_pos, BOX_WIDTH, BOX_HEIGHT};
+  SDL_RenderCopy(gRenderer, getSprite()->getTexture(), NULL, &pos);
 }
 
 /**
@@ -93,17 +95,17 @@ bool Enemy::checkPos(int playX, int playY, int enemX, int enemY) {
 
 bool Enemy::checkWall(int x, int y) {
   //left wall
-	if (x <= 20)
+	if (x <= TILE_SIZE + BORDER_GAP)
 	{
 		return true;
 	}
 	//right wall
-	else if (x >= SCREEN_WIDTH - 2 * BOX_WIDTH)
+	else if (x >= SCREEN_WIDTH - BORDER_GAP * BOX_WIDTH)
 	{
 		return true;
 	}
 	//top wall
-	else if (y <= 20)
+	else if (y <= TILE_SIZE)
 	{
 		return true;
 	}
@@ -136,94 +138,98 @@ void Enemy::updatePos() {
   bool nearWall;
   nearWall = checkWall(x_enemy_pos, y_enemy_pos);
 
-  if (!retreat)
-  {
+  int startingPosition =  SCREEN_WIDTH - BOX_WIDTH/2 - 75;
 
-    //go to center
-
-    if (x_enemy_pos <= SCREEN_WIDTH / 2)
-    {
+  if(left) {
+    if(tile_map[xArrPosL(x_enemy_pos)][yArrPos(y_enemy_pos)] == 2) {
+      x_enemy_pos -= MAX_VELOCITY;
+    } else {
+      y_enemy_pos -= MAX_VELOCITY;
+    }
+  } else {
+    if(tile_map[xArrPosR(x_enemy_pos)][yArrPos(y_enemy_pos)] == 2) {
       x_enemy_pos += MAX_VELOCITY;
-    }
-    else
-    {
-      x_enemy_pos += -MAX_VELOCITY;
-    }
-    if (y_enemy_pos <= SCREEN_HEIGHT / 2)
-    {
-      y_enemy_pos += MAX_VELOCITY;
-    }
-    else
-    {
-      y_enemy_pos += -MAX_VELOCITY;
+    } else {
+      y_enemy_pos -= MAX_VELOCITY;
     }
   }
-  else
-  {
 
-    //run away but not near wall
-    if (!nearWall)
-    {
-      if (x_pos >= x_enemy_pos)
-      {
-        x_enemy_pos += -MAX_VELOCITY;
+  if(x_enemy_pos <= TILE_SIZE + BORDER_GAP) {
+    left = false;
+  }
+  if(x_enemy_pos >= startingPosition) {
+    left = true;
+  }
+
+  SDL_Rect* box = get_box(); // required to update box    //Enemy box is within 8 pixels of an obstacle
+  for(auto obstacle : obstacles) {
+    if(check_collision(&obstacle)) {
+      if (left) {
+        //x_enemy_pos += MAX_VELOCITY;
+        y_enemy_pos += 3;
       }
-      else
-      {
-        x_enemy_pos += MAX_VELOCITY;
-      }
-      if (y_pos >= y_enemy_pos)
-      {
-        y_enemy_pos += -MAX_VELOCITY;
-      }
-      else
-      {
-        y_enemy_pos += MAX_VELOCITY;
+      //correct by going up a pixel
+      else {
+        //x_enemy_pos += -MAX_VELOCITY;
+        y_enemy_pos += 3;
       }
     }
-    else
-    {
-      //run away and on wall
+	}
 
-      if (x_enemy_pos == 20 || x_enemy_pos == SCREEN_WIDTH - 2 * BOX_WIDTH)
-      {
-        if (y_pos >= y_enemy_pos)
-        {
-          y_enemy_pos += -MAX_VELOCITY;
-        }
-        else
-        {
-          y_enemy_pos += MAX_VELOCITY;
-        }
-      }
-      if (y_enemy_pos == 20 || y_enemy_pos == SCREEN_HEIGHT - 2 * BOX_HEIGHT)
-      {
+  if(x_enemy_pos > SCREEN_WIDTH - 2*BOX_WIDTH) {
+    x_enemy_pos = SCREEN_WIDTH - 2*BOX_WIDTH;
+  }
+  if(x_enemy_pos < TILE_SIZE){
+    x_enemy_pos = TILE_SIZE;
+  }
+  if(y_enemy_pos < TILE_SIZE){
+    y_enemy_pos = TILE_SIZE;
+  }
+  if(y_enemy_pos > SCREEN_HEIGHT - 2*BOX_HEIGHT) {
+    y_enemy_pos = SCREEN_HEIGHT - 2*BOX_HEIGHT;
+  }
+}
 
-        if (x_pos >= x_enemy_pos)
-        {
-          x_enemy_pos += -MAX_VELOCITY;
-        }
-        else
-        {
-          x_enemy_pos += MAX_VELOCITY;
-        }
-      }
-    }
-  }
-  if (x_enemy_pos > SCREEN_WIDTH - 2 * BOX_WIDTH)
-  {
-    x_enemy_pos = SCREEN_WIDTH - 2 * BOX_WIDTH;
-  }
-  if (x_enemy_pos < 20)
-  {
-    x_enemy_pos = 20;
-  }
-  if (y_enemy_pos < 20)
-  {
-    y_enemy_pos = 20;
-  }
-  if (y_enemy_pos > SCREEN_HEIGHT - 2 * BOX_HEIGHT)
-  {
-    y_enemy_pos = SCREEN_HEIGHT - 2 * BOX_HEIGHT;
-  }
+
+int Enemy::xArrPosR(int pos) {
+	int lowBound = TILE_SIZE+25;
+	int upBound = TILE_SIZE*2+25;
+	for(int i = 0; i < 24; i++){
+		if(pos <= upBound && pos >= lowBound){
+			return i;
+		}
+		lowBound += TILE_SIZE;
+		upBound += TILE_SIZE;
+	}
+	return 23;
+}
+
+int Enemy::yArrPos(int pos) {
+	int lowBound = TILE_SIZE-30;
+	int upBound = TILE_SIZE*2-30;
+	for(int i = 0; i < 12; i++){
+		if(pos <= upBound && pos >= lowBound){
+			return i - 1;
+		}
+		lowBound += TILE_SIZE;
+		upBound += TILE_SIZE;
+	}
+	return 11;
+}
+
+int Enemy::xArrPosL(int pos) {
+	int lowBound = TILE_SIZE-20;
+	int upBound = TILE_SIZE*2-20;
+	for(int i = 0; i < 24; i++){
+		if(pos <= upBound && pos >= lowBound){
+			return i;
+		}
+		lowBound += TILE_SIZE;
+		upBound += TILE_SIZE;
+	}
+	return 23;
+}
+
+void Enemy::setTileMap(int** tileMap) {
+	tile_map = tileMap;
 }

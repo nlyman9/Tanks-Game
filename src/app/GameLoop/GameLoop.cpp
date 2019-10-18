@@ -16,9 +16,7 @@ GameLoop::~GameLoop() {}
  */
 bool GameLoop::init() {
 	player = new Player(75, 50);
-	// enemies.push_back(new Enemy(SCREEN_WIDTH / 2 - BOX_WIDTH / 2, SCREEN_HEIGHT / 2 - BOX_HEIGHT / 2, player));
-	// enemies.push_back(new Enemy(SCREEN_WIDTH - BOX_WIDTH / 2, SCREEN_HEIGHT / 2 - BOX_HEIGHT / 2, player));
-	// enemies.push_back(new Enemy(SCREEN_WIDTH / 2 - BOX_WIDTH / 2, SCREEN_HEIGHT - BOX_HEIGHT / 2, player));
+	enemies.push_back(new Enemy( SCREEN_WIDTH - BOX_WIDTH/2 - 75, SCREEN_HEIGHT - BOX_HEIGHT/2 - 60, player));
 	render = new Render(player, enemies);
 	render->init();
 
@@ -29,9 +27,9 @@ bool GameLoop::init() {
 	enemy_tank->init();
 
 	player->setSprite(player_tank);
-	// for (auto enemy : enemies) {
-	// 	enemy->setSprite(enemy_tank);
-	// }
+	for (auto enemy : enemies) {
+		enemy->setSprite(enemy_tank);
+	}
 
 	isGameOn = true;
 
@@ -90,9 +88,10 @@ bool GameLoop::init() {
 	}
 
 	player->setObstacleLocations(&tileArray);
-	// for (auto enemy : enemies) {
-	// 	enemy->setObstacleLocations(&tileArray);
-	// }
+	for (auto enemy : enemies) {
+		enemy->setObstacleLocations(&tileArray);
+		enemy->setTileMap(tile_map);
+	}
 
 	// Initialized successfully
 	return true;
