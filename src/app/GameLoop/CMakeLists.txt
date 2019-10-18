@@ -12,6 +12,7 @@ target_link_libraries(GameLoop
   Constants
   Enemy
   Sprite
+  MapGenerator
 )
 
 target_include_directories(GameLoop

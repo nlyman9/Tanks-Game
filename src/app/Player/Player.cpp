@@ -40,18 +40,19 @@ Player::~Player() {}
  * 
  * @param update_lag - the value to extrapolate by
  */
-void Player::draw(SDL_Renderer *gRenderer, double update_lag, SDL_Rect* obstacles) {
+void Player::draw(SDL_Renderer *gRenderer, double update_lag, std::vector<SDL_Rect> obstacles) {
     // Extrapolate the x and y positions 
     // "Solves" stuck in the middle rendering.
     int x_pos = getX() + x_vel * update_lag;
     int y_pos = getY() + y_vel * update_lag;
-
-    for(int i = 0; i < 312; i++){
-        SDL_Rect* cur_out = &obstacles[i];
-        get_box(); // required to update box
-        if(check_collision(cur_out)){
+   
+    SDL_Rect* box = get_box(); // required to update box
+    for(auto obstacle : obstacles) {
+        if(check_collision(&obstacle)){
             x_pos -= x_vel * update_lag;
             y_pos -= y_vel * update_lag;
+            std::cout << box->x << " " << box->y << " " <<  box->h << " " << box->w << "\n" << std::endl;
+            std::cout << obstacle.x << " " << obstacle.y << " " << obstacle.h << " " << obstacle.w << std::endl;
         }
     }
 
@@ -60,9 +61,8 @@ void Player::draw(SDL_Renderer *gRenderer, double update_lag, SDL_Rect* obstacle
 	// SDL_Rect fillRect = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
 	// SDL_RenderFillRect(gRenderer, &fillRect);
 
-    SDL_Rect src = {0, 0, 48, 48};
-    SDL_Rect dst = {x_pos, y_pos, 39, 48};
-    SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), &src, &dst, 0, NULL, SDL_FLIP_NONE);
+    SDL_Rect pos = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
+    SDL_RenderCopy(gRenderer, getSprite()->getTexture(), NULL, &pos);
 }
 
 /**
@@ -79,7 +79,7 @@ void Player::update() {
     {
         setX(SCREEN_WIDTH - BOX_WIDTH);
     }
-    if (getX()  < 0)
+    if (getX() < 0)
     {
         setX(0);
     }

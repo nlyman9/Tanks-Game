@@ -33,17 +33,17 @@ bool OBJECT::check_collision(OBJECT *B)
     b = B->get_box();
 
     // Check vertical overlap
-    if (a->y + a->h <= b->y - 2)
+    if (a->y + a->h <= b->y)
         return false;
 
-    if (a->y >= b->y + b->h + 2)
+    if (a->y >= b->y + b->h)
         return false;
 
     // Check horizontal overlap
-    if (a->x >= b->x + b->w + 2)
+    if (a->x >= b->x + b->w)
         return false;
 
-    if (a->x + a->w <= b->x - 2)
+    if (a->x + a->w <= b->x)
         return false;
 
     // Must overlap in both
@@ -56,17 +56,17 @@ bool OBJECT::check_collision(SDL_Rect *B)
     SDL_Rect *b = B;
 
     // Check vertical overlap
-    if (a->y + a->h <= b->y - 2)
+    if (a->y + a->h <= b->y)
         return false;
 
-    if (a->y >= b->y + b->h + 2)
+    if (a->y >= b->y + b->h)
         return false;
 
     // Check horizontal overlap
-    if (a->x >= b->x + b->w + 2)
+    if (a->x >= b->x + b->w)
         return false;
 
-    if (a->x + a->w <= b->x - 2)
+    if (a->x + a->w <= b->x)
         return false;
 
     // Must overlap in both

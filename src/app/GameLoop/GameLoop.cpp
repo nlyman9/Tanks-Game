@@ -28,7 +28,6 @@ bool GameLoop::init() {
 	Sprite *enemy_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
 	enemy_tank->init();
 
-	std::cout << "sprite init" << std::endl;
 	player->setSprite(player_tank);
 	// for (auto enemy : enemies) {
 	// 	enemy->setSprite(enemy_tank);

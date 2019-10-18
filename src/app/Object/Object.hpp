@@ -19,6 +19,7 @@ using UNDEFINED = bool;
 #ifndef OBJECT_HPP
 #define OBJECT_HPP
 #include <iostream>
+#include <vector>
 #include <SDL2/SDL.h>
 #include "Sprite.hpp"
 #include "Constants.hpp"
@@ -61,7 +62,7 @@ public:
          *  Helps solve the "stuck in the middle" problem of rendering a frame 
          *  in-between two updates.
          */
-    virtual void draw(SDL_Renderer *gRenderer, double update_lag, SDL_Rect* obstacless) = 0;
+    virtual void draw(SDL_Renderer *gRenderer, double update_lag, std::vector<SDL_Rect> obstacles) = 0;
 
     // virtual struct pos* getPos() = 0;
 

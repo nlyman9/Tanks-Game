@@ -5,14 +5,6 @@
 #include <time.h>
 
 #include "Render.hpp"
-#include "MapGenerator.hpp"
-
-SDL_Texture* gTileSheet;
-SDL_Rect gTileRects[3];
-std::vector<SDL_Texture*> gTex;
-SDL_Rect cur_out;
-SDL_Texture* loadImage(std::string fname);
-int** tile_map;
 
 Render::~Render() {
   close();
@@ -48,8 +40,8 @@ bool Render::init()
 
 	// Set renderer draw/clear color
 	SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
-
-	gTileSheet = loadImage("src/res/images/tiles.png");
+	ImageLoader imgLoad;
+	gTileSheet = imgLoad.loadImage("src/res/images/tiles.png", gRenderer);
 	for (int i = 0; i < 3; i++) {
 			gTileRects[i].x = i * TILE_SIZE;
 			gTileRects[i].y = 0;
@@ -98,38 +90,17 @@ bool Render::init()
 			break;
 	}
 
-	
-	tileArray = new SDL_Rect[312];
 	int count = 0;
 	for (int x = BORDER_GAP + TILE_SIZE, i = 0; x < SCREEN_WIDTH - BORDER_GAP - TILE_SIZE; x+=TILE_SIZE, i++) {
 		for (int y = TILE_SIZE, j = 0; y < SCREEN_HEIGHT - TILE_SIZE; y+=TILE_SIZE, j++) {
 			SDL_Rect cur_out = { x, y, TILE_SIZE, TILE_SIZE};
 			if(tile_map[i][j] == 2){
-				tileArray[count++] = cur_out;
+				tileArray.push_back(cur_out);
 			}
 		}
 	}
 
 	return true;
-}
-
-SDL_Texture* Render::loadImage(std::string fname) {
-	SDL_Texture* newText = nullptr;
-
-	SDL_Surface* startSurf = IMG_Load(fname.c_str());
-	if (startSurf == nullptr) {
-			std::cout << "Unable to load image " << fname << "! SDL Error: " << SDL_GetError() << std::endl;
-			return nullptr;
-	}
-
-	newText = SDL_CreateTextureFromSurface(gRenderer, startSurf);
-	if (newText == nullptr) {
-			std::cout << "Unable to create texture from " << fname << "! SDL Error: " << SDL_GetError() << std::endl;
-	}
-
-	SDL_FreeSurface(startSurf);
-
-	return newText;
 }
 
 void Render::close() {

@@ -17,6 +17,7 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 
+#include "ImageLoader.hpp"
 
 class Sprite {
     private:
@@ -29,17 +30,6 @@ class Sprite {
         Sprite(){};
         Sprite(SDL_Renderer *gRenderer, std::string fname);
         void init();
-
-        /**
-         * @brief load image of sprite
-         * 
-         * @param fname - file to load sprite from
-         * 
-         * @return true  - image load success 
-         * @return false - image load fail 
-         */
-        bool loadImage();
-
 
         /**
          * @brief return sprite texture
