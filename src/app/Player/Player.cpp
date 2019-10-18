@@ -74,14 +74,14 @@ void Player::update() {
         overlap = check_collision(&obstacle);
         if(overlap != nullptr) {
             std::cout << overlap->h << " " << overlap->w << " " << theta << std::endl;
-            if(abs(theta) > 0 && abs(theta) < 180) {
+            if(theta > 0 && theta < 180) {
                 setY(getY() - overlap->h - 1);
-            } else if(abs(theta) > 180 && abs(theta) < 0) {
+            } else if(theta > 180 && theta < 0) {
                 setY(getY() + overlap->h + 1);
             }
-            if(abs(theta) > 90 && abs(theta) < 270) {
+            if(theta > 90 && theta < 270) {
                 setX(getX() - overlap->w - 1);
-            } else if(abs(theta) > 270 && abs(theta) < 90) {
+            } else if(theta > 270 && theta < 90) {
                 setX(getX() + overlap->w + 1);
             }
         }
@@ -172,6 +172,9 @@ void Player::getEvent(SDL_Event e) {
         theta += PHI;
     }
 
+    if(theta < 0) {
+        theta = 360 + theta;
+    }
     theta %= 360;
 
 	if (delta_velocity == 0) {
