@@ -7,6 +7,7 @@
 #include "Player.hpp"
 #include "Render.hpp"
 #include "Enemy.hpp"
+#include "MapGenerator.hpp"
 
 class GameLoop {
   public:
@@ -35,5 +36,9 @@ class GameLoop {
 
     // Current time step of the gameloop
     std::chrono::system_clock::time_point current_time;
+
+    // Map Building Variables
+    std::vector<SDL_Rect> tileArray;
+    int** tile_map;
 };
 #endif

@@ -35,7 +35,7 @@ class Enemy : public OBJECT {
         Enemy(int x, int y, Player* player); //constructor, initialize the x, y, and sprite
 
 		//Object methods
-        void draw(SDL_Renderer *gRenderer, double update_lag, std::vector<SDL_Rect> obstacles) override;
+        void draw(SDL_Renderer *gRenderer, double update_lag) override;
         void update() override;
         bool move(int x, int y) override;	//	move x offset from current x and y offset from current y
         bool place(int x, int y) override;	//	place/teleport to an x and y

@@ -35,6 +35,65 @@ bool GameLoop::init() {
 
 	isGameOn = true;
 
+	// Fill 2D tile array of tiles with all 0s
+	// int** array = 0;
+	tile_map = new int*[24];
+
+	for(int j = 0; j < 24; j++)
+	{
+		tile_map[j] = new int[13];
+		for(int h = 0; h < 13; h++)
+		{
+			tile_map[j][h] = 0;
+		}
+	}
+
+
+	//small randomly generated thing
+	MapGenerator* mapGen = new MapGenerator();
+
+	// Select map generation technique
+	enum map_types { destructible, holes, line, maze, mirror };
+	srand(time(NULL));
+
+	// switch(rand() % 4)
+	switch(line)
+	{
+		case destructible:
+			tile_map[4][4] = 2;
+			break;
+		case holes:
+			tile_map[1][1] = 2;
+			break;
+		case line:
+			tile_map = mapGen->generateLineMap();
+			break;
+		case maze:
+			tile_map[6][10] = 2;
+			break;
+		case mirror:
+			tile_map = mapGen->generateMirrorMap();
+			tile_map[14][10] = 2;
+			break;
+	}
+
+	render->setTileMap(tile_map);
+
+	int count = 0;
+	for (int x = BORDER_GAP + TILE_SIZE, i = 0; x < SCREEN_WIDTH - BORDER_GAP - TILE_SIZE; x+=TILE_SIZE, i++) {
+		for (int y = TILE_SIZE, j = 0; y < SCREEN_HEIGHT - TILE_SIZE; y+=TILE_SIZE, j++) {
+			SDL_Rect cur_out = { x, y, TILE_SIZE, TILE_SIZE};
+			if(tile_map[i][j] == 2){
+				tileArray.push_back(cur_out);
+			}
+		}
+	}
+
+	player->setObstacleLocations(&tileArray);
+	// for (auto enemy : enemies) {
+	// 	enemy->setObstacleLocations(&tileArray);
+	// }
+
 	// Initialized successfully
 	return true;
 }

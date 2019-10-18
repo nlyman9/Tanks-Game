@@ -22,17 +22,19 @@ class Render {
         void close();
 
         SDL_Renderer* getRenderer();
+
+        void setTileMap(int** tileMap);
     private:
 
         std::vector<SDL_Texture*> gTex;
         SDL_Window* gWindow;
         SDL_Renderer* gRenderer;
 
+        Player* gPlayer;
+
         SDL_Texture* gTileSheet;
         SDL_Rect gTileRects[3];
-        Player* gPlayer;
-        int** tile_map;
 
-        std::vector<SDL_Rect> tileArray;
+        int** tile_map;
 };
 #endif

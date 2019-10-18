@@ -40,21 +40,11 @@ Player::~Player() {}
  * 
  * @param update_lag - the value to extrapolate by
  */
-void Player::draw(SDL_Renderer *gRenderer, double update_lag, std::vector<SDL_Rect> obstacles) {
+void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
     // Extrapolate the x and y positions 
     // "Solves" stuck in the middle rendering.
     int x_pos = getX() + x_vel * update_lag;
     int y_pos = getY() + y_vel * update_lag;
-   
-    SDL_Rect* box = get_box(); // required to update box
-    for(auto obstacle : obstacles) {
-        if(check_collision(&obstacle)){
-            x_pos -= x_vel * update_lag;
-            y_pos -= y_vel * update_lag;
-            std::cout << box->x << " " << box->y << " " <<  box->h << " " << box->w << "\n" << std::endl;
-            std::cout << obstacle.x << " " << obstacle.y << " " << obstacle.h << " " << obstacle.w << std::endl;
-        }
-    }
 
     // Render to screen (gRenderer)
     // SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
@@ -72,24 +62,33 @@ void Player::draw(SDL_Renderer *gRenderer, double update_lag, std::vector<SDL_Re
  */
 void Player::update() {
     // Move player
+
     setPos(getX() + x_vel, getY() + y_vel);
 
+    SDL_Rect* box = get_box(); // required to update box
+    for(auto obstacle : obstacles) {
+        if(check_collision(&obstacle)){
+            setX(getX() - x_vel);
+            setY(getY() - y_vel);
+        }
+    }
+
     // Check he isn't moving outside of the map
-    if (getX() > SCREEN_WIDTH - BOX_WIDTH)
+    if (getX() > SCREEN_WIDTH - TILE_SIZE)
     {
-        setX(SCREEN_WIDTH - BOX_WIDTH);
+        setX(SCREEN_WIDTH - TILE_SIZE);
     }
-    if (getX() < 0)
+    if (getX() < TILE_SIZE)
     {
-        setX(0);
+        setX(TILE_SIZE);
     }
-    if (getY() < 0)
+    if (getY() < TILE_SIZE)
     {
-        setY(0);
+        setY(TILE_SIZE);
     }
-    if (getY()  > SCREEN_HEIGHT - BOX_HEIGHT)
+    if (getY() > SCREEN_HEIGHT - TILE_SIZE)
     {
-        setY(SCREEN_HEIGHT - BOX_HEIGHT);
+        setY(SCREEN_HEIGHT - TILE_SIZE);
     }
 }
 

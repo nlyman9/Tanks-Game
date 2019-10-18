@@ -32,6 +32,7 @@ private:
     int y;
     SDL_Rect box;
 
+
 public:
     OBJECT() {};
     bool check_collision(OBJECT *B);
@@ -45,7 +46,10 @@ public:
     void setY(int y);
     int getX();
     int getY();
+
+    void setObstacleLocations(std::vector<SDL_Rect>* obstaclesLocs);
     
+    std::vector<SDL_Rect> obstacles;
     Sprite* getSprite();
     /**
          * @brief Updates the object at a fixed timestep;
@@ -62,7 +66,7 @@ public:
          *  Helps solve the "stuck in the middle" problem of rendering a frame 
          *  in-between two updates.
          */
-    virtual void draw(SDL_Renderer *gRenderer, double update_lag, std::vector<SDL_Rect> obstacles) = 0;
+    virtual void draw(SDL_Renderer *gRenderer, double update_lag) = 0;
 
     // virtual struct pos* getPos() = 0;
 

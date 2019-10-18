@@ -135,3 +135,7 @@ int OBJECT::getY()
 OBJECT::~OBJECT(){
     std::cout << "OBJ Deleted";
 }
+
+void OBJECT::setObstacleLocations(std::vector<SDL_Rect>* obstacleLocs) {
+    obstacles = *obstacleLocs;
+}
