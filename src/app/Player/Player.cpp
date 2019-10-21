@@ -143,7 +143,6 @@ bool Player::rotateTurret(float theta) {
     return false;
 }
 
-// TODO - Change to scancodes?
 void Player::getEvent(SDL_Event e) {
 
     delta_velocity = 0;

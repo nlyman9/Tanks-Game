@@ -15,6 +15,15 @@
 #include <vector>
 #include <unistd.h>
 
+#include <SDL2/SDL.h>
+
+SDL_Window* gWindow;
+SDL_Surface* gSurface;
+SDL_Renderer* gRenderer;
+constexpr int SCREEN_HEIGHT = 720;
+constexpr int SCREEN_WIDTH = 1296;
+constexpr int TILE_SIZE = 48;
+
 
 std::vector<int> *unpackMap(std::vector<char> mapPacked, std::vector<int> *map){
     //std::cout << "UNPACKING\n";
@@ -49,7 +58,45 @@ std::vector<int> *unpackMap(std::vector<char> mapPacked, std::vector<int> *map){
 	}
     return map;
 }
+
+bool initSDL() 
+{
+    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+	{
+		std::cout << "SDL could not initialize! SDL_Error: " << SDL_GetError() << std::endl;
+		return false;
+	}
+
+	if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1"))
+	{
+		std::cout << "Warning: Linear texture filtering not enabled!" << std::endl;
+	}
+
+	gWindow = SDL_CreateWindow("Client", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+	if (gWindow == nullptr)
+	{
+		std::cout << "Window could not be created! SDL_Error: " << SDL_GetError() << std::endl;
+		return false;
+	}
+
+	// SEt up rendered with out vsync
+	gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
+	if (gRenderer == nullptr)
+	{
+		std::cout << "Renderer could not be created! SDL_Error: " << SDL_GetError() << std::endl;
+		return false;
+	}
+
+    return true;
+}
+
 int main() {
+
+    if(!initSDL()) {
+        std::cout << "Unsuccessful SDL initalization" << std::endl;
+        exit(1);
+    }
+
     int status;
     struct addrinfo hints;
     struct addrinfo *serverInfo;
@@ -103,7 +150,7 @@ int main() {
 
         // If from server
         if (FD_ISSET(sockfd, &read_fds)) {
-            nbytes = recv(sockfd, buffer, 100, 0);
+            nbytes = recv(sockfd, buffer, 151, 0);
             if (nbytes <= 0) {
                 printf("Closing connection to server.");
                 close(sockfd);
@@ -114,9 +161,40 @@ int main() {
                 std::vector<char> test(buffer, buffer + (sizeof(buffer)/sizeof(buffer[0])));
                 std::vector<int> map;
                 unpackMap(test, &map);
-                for(auto x: map){
-                    std::cout << (int) x << "\n";
+
+                int x = 0;
+                int y = 0;
+                SDL_Rect currentTile;
+                std::cout << (int) map.size() << " " << nbytes << "\n";
+                for(auto tile : map){
+                    // std::cout << (int) tile << "\n";
+                    
+                    // Extract row and column from the 1D vector
+                    if(x == 27) {
+                        y++;
+                        x = 0;
+                    }
+
+                    currentTile = {x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE};
+                    if(tile == 0) {
+                        SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0x00, 0xFF);
+                    }
+                    if(tile == 1) {
+                        SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0xFF, 0x00);
+                    }
+                    if(tile == 2) {
+                        SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0x00, 0x00);
+                    }
+                    if(tile == 3) {
+                        SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0xFF, 0xFF);
+                    }
+                    if(tile == 4) {
+                        SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0x00, 0xFF);
+                    }
+                    SDL_RenderFillRect(gRenderer, &currentTile);
+                    x++;
                 }
+                SDL_RenderPresent(gRenderer);
             }
         } else if (fgets(buffer, 100, stdin) != NULL) { // get input from user
             // Check for user input in the terminal 
