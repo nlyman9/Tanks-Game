@@ -15,46 +15,114 @@
 #include <vector>
 #include <unistd.h>
 
+#include <SDL2/SDL.h>
 
-std::vector<int> *unpackMap(std::vector<char> mapPacked, std::vector<int> *map){
-    //std::cout << "UNPACKING\n";
+SDL_Window* gWindow;
+SDL_Surface* gSurface;
+SDL_Renderer* gRenderer;
+constexpr int SCREEN_HEIGHT = 720;
+constexpr int SCREEN_WIDTH = 1296;
+constexpr int TILE_SIZE = 48;
+bool mapRecieved = false;
+std::vector<int> *unpack(std::vector<char>* packed, std::vector<int> *unPacked, int bits){
 	std::vector<bool> workSet;
-    //first turn the packed map into a bool array
-	for(auto curr : mapPacked){
-		for(int i = 0; i < 8; i++){
+    int i;
+	for(auto curr : *packed){
+		for(i = 0; i < 8; i++){
 			workSet.push_back((curr >> (7 - i)) & 1);
-			//std::cout << (int) ((curr >> (7 - i)) & 1);
 		}
-		//std::cout << '\n';
 	}
+    i = 0;
 	int tmp = 0;
-	int i = 0;
-	//std::cout << "Converting to int array\n";
-    //cycle through the bool array
-    //every 3 bools is one int
 	for(auto curr : workSet){
-		//std::cout << "curr is : " << curr << '\n';
-		tmp = (tmp) | (curr << (2-i));
-		if(i == 2){
-			map->push_back(tmp);
-			//std::cout << tmp << '\n';
-			//for(unsigned int j = 1 << 31; j > 0; j = j/2){
-			//	(tmp & j)? std::cout << 1: std::cout << 0;
-			//}
-			//std::cout << '\n';
+		tmp = (tmp) | (curr << (bits - 1 - i));
+		if(i == (bits - 1)){
+			unPacked->push_back(tmp);
 			tmp = 0;
 			i = -1;
 		}
 		i++;
 	}
-    return map;
+    mapRecieved = true;
+    std::cout << unPacked->size() << std::endl;
+    return unPacked;
 }
+void displayMap(std::vector<int>* map){
+    int i = 0;
+    int x = 0;
+    int y = 0;
+    SDL_Rect currentTile;
+    for(i = 0 ; i < map->size() ; i++, x++){
+        if(x == 27) {
+            y++;
+            x = 0;
+        }
+        currentTile = {x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE};
+        std::cout << map->at(i) << " ";
+        switch(map->at(i))
+        {   
+            case 0: 
+                SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0x00, 0xFF);
+                break;
+            case 1:
+                SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0xFF, 0x00);
+                break;
+            case 2:
+                SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0x00, 0x00);
+                break;
+            default:
+                SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0x00);
+                break;
+        }
+        SDL_RenderFillRect(gRenderer, &currentTile);
+    }
+    std::cout << std::endl;
+    SDL_RenderPresent(gRenderer);
+}
+
+bool initSDL() 
+{
+    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+	{
+		std::cout << "SDL could not initialize! SDL_Error: " << SDL_GetError() << std::endl;
+		return false;
+	}
+
+	if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1"))
+	{
+		std::cout << "Warning: Linear texture filtering not enabled!" << std::endl;
+	}
+
+	gWindow = SDL_CreateWindow("Client", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+	if (gWindow == nullptr)
+	{
+		std::cout << "Window could not be created! SDL_Error: " << SDL_GetError() << std::endl;
+		return false;
+	}
+
+	// SEt up rendered with out vsync
+	gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
+	if (gRenderer == nullptr)
+	{
+		std::cout << "Renderer could not be created! SDL_Error: " << SDL_GetError() << std::endl;
+		return false;
+	}
+
+    return true;
+}
+
 int main() {
+
+    if(!initSDL()) {
+        std::cout << "Unsuccessful SDL initalization" << std::endl;
+        exit(1);
+    }
+
     int status;
     struct addrinfo hints;
     struct addrinfo *serverInfo;
     int sockfd;
-    char buffer[100];
+    char buffer[152];
 
     fd_set master;      // Master of file descriptors
     fd_set read_fds;    // Read fd's returned from select
@@ -91,6 +159,8 @@ int main() {
 
     fdmax = sockfd;
 
+    std::vector<char>* test = new std::vector<char>();
+
     int i, nbytes;
     while(1) {
         read_fds = master;
@@ -103,7 +173,7 @@ int main() {
 
         // If from server
         if (FD_ISSET(sockfd, &read_fds)) {
-            nbytes = recv(sockfd, buffer, 100, 0);
+            nbytes = recv(sockfd, buffer, 152, 0);
             if (nbytes <= 0) {
                 printf("Closing connection to server.");
                 close(sockfd);
@@ -111,11 +181,17 @@ int main() {
             } else {
                 //recieved data
                 //for this test only recieving the map data
-                std::vector<char> test(buffer, buffer + (sizeof(buffer)/sizeof(buffer[0])));
+                //test->insert(test->end(), buffer);
+
+                for(int i = 0; i < 152; i++){
+                    std::cout << buffer[i] << " ";
+                    test->push_back(buffer[i]);
+                }
+                std::cout << test->size() << std::endl;
                 std::vector<int> map;
-                unpackMap(test, &map);
-                for(auto x: map){
-                    std::cout << (int) x << "\n";
+                if(!mapRecieved){
+                    unpack(test, &map, 3);
+                    displayMap(&map);
                 }
             }
         } else if (fgets(buffer, 100, stdin) != NULL) { // get input from user
