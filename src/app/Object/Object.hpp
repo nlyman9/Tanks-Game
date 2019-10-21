@@ -37,6 +37,7 @@ public:
     OBJECT() {};
     SDL_Rect* check_collision(OBJECT *B);
     SDL_Rect* check_collision(SDL_Rect *B);
+    SDL_Rect* check_collision(SDL_Rect* A, SDL_Rect *B);
     SDL_Rect *get_box();
     bool check_bounds();
     void setSprite(Sprite *new_sprite);
