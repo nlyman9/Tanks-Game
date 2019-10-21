@@ -37,7 +37,32 @@ public:
         printf("Closing client connection %d", sockfd);
     }
 };
+std::vector<char>* pack(std::vector<int>* x, std::vector<char>* packed, int bits)
+{   
+    std::vector<bool> workingSet;
+    for (auto curr : *x)
+    {
+        int i;
+        for(i = 0; i < bits; i++){
+            workingSet.push_back((bool) (curr >> (bits - i - 1) & 1));
+        }
+    }
+    int i = 0;
+    char temp = 0;
+    for(auto currInSet : workingSet){
+        temp = temp | ((char) currInSet << (7-i));
+        if(i == 7){
+            packed->push_back(temp);
+            temp = 0;
+            i = -1;
+        }
+        i++;
+    }
+    if(i != 0) 
+        packed->push_back(temp); 
 
+    return packed;
+}
 std::vector<char> *packMap(std::vector<int> map, std::vector<char>* mapPacked)
 {
     /*
@@ -170,7 +195,61 @@ bool initSDL()
 
     return true;
 }
-
+void displayMap(std::vector<int>* map){
+    std::cout << map->size() << std::endl;
+    int i = 0;
+    int x = 0;
+    int y = 0;
+    SDL_Rect currentTile;
+    for(i = 0 ; i < map->size() ; i++, x++){
+        if(x == 27) {
+            y++;
+            x = 0;
+        }
+        currentTile = {x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE};
+        std::cout << map->at(i) << " ";
+        switch(map->at(i))
+        {   
+            case 0: 
+                SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0x00, 0xFF);
+                break;
+            case 1:
+                SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0xFF, 0x00);
+                break;
+            case 2:
+                SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0x00, 0x00);
+                break;
+            default:
+                SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0x00);
+                break;
+        }
+        SDL_RenderFillRect(gRenderer, &currentTile);
+    }
+    std::cout  << std::endl;
+    SDL_RenderPresent(gRenderer);
+}
+std::vector<int> *unpack(std::vector<char>* packed, std::vector<int> *unPacked, int bits){
+	std::vector<bool> workSet;
+    int i;
+	for(auto curr : *packed){
+		for(i = 0; i < 8; i++){
+			workSet.push_back((curr >> (7 - i)) & 1);
+		}
+	}
+    i = 0;
+	int tmp = 0;
+	for(auto curr : workSet){
+		tmp = (tmp) | (curr << (bits - 1 - i));
+		if(i == (bits - 1)){
+			unPacked->push_back(tmp);
+			tmp = 0;
+			i = -1;
+		}
+		i++;
+	}
+    std::cout << unPacked->size() << std::endl;
+    return unPacked;
+}
 int main()
 {
     if(!initSDL()) {
@@ -184,12 +263,14 @@ int main()
     for(int i = 0; i < 405; i++) {
         test->push_back(i % 3);
     }
-
-    packMap(*test, &test2);
+    std::vector<int>* test3 = new std::vector<int>();
+    pack(test, &test2, 2); //pack map into 3 bits
+    unpack(&test2, test3, 2);
+    displayMap(test3);
     // std::cout << "Binary Representation of map : \n";
-	for(auto curr : test2){
-		std::cout << (int)(curr >> 7 & 1) << (int)(curr >> 6 & 1) << (int)(curr >> 5 & 1) << (int)(curr >> 4 & 1) << (int)(curr >> 3 & 1) << (int)(curr >> 2 & 1) << (int)(curr >> 1 & 1) << (int)(curr & 1) << '\n';
-	}
+	//for(auto curr : test2){
+	//	std::cout << (int)(curr >> 7 & 1) << (int)(curr >> 6 & 1) << (int)(curr >> 5 & 1) << (int)(curr >> 4 & 1) << (int)(curr >> 3 & 1) << (int)(curr >> 2 & 1) << (int)(curr >> 1 & 1) << (int)(curr & 1) << '\n';
+	//}
     //test 2 is our packed map
     delete test; //delete the map from memory
     std::cout << (int) test2.size() << "\n";
@@ -206,7 +287,7 @@ int main()
     int fdmax;       // maximym file descriptor number
 
     char remoteIP[INET_ADDRSTRLEN];
-    char buf[100];
+    char buf[105];
 
     FD_ZERO(&master);
     FD_ZERO(&read_fds);
