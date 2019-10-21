@@ -66,27 +66,23 @@ void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
 void Player::update() {
     // Move player
 
-    setPos(getX() + x_vel, getY() + y_vel);
-
+    //setPos(getX() + x_vel, getY() + y_vel);
+    Player* temp = new Player(getX() + x_vel, getY() + y_vel);
     SDL_Rect* overlap;
-    SDL_Rect* box = get_box(); // required to update box
-    for(auto obstacle : obstacles) {
-        overlap = check_collision(&obstacle);
+    get_box(); // required to update box
+    bool isCol = false;
+    for(auto obstacle : obstacles) {  
+        overlap = check_collision(temp->get_box(), &obstacle);
         if(overlap != nullptr) {
-            std::cout << overlap->h << " " << overlap->w << " " << theta << std::endl;
-            if(theta > 0 && theta < 180) {
-                setY(getY() - overlap->h - 1);
-            } else if(theta > 180 && theta < 0) {
-                setY(getY() + overlap->h + 1);
-            }
-            if(theta > 90 && theta < 270) {
-                setX(getX() - overlap->w - 1);
-            } else if(theta > 270 && theta < 90) {
-                setX(getX() + overlap->w + 1);
-            }
+            std::cout << theta << " " << std::endl;
+            isCol = true;
+            break;
         }
     }
-
+    if(!isCol){
+        setPos(getX() + x_vel, getY() + y_vel);
+    }
+    delete temp;
     // Check he isn't moving outside of the map
     if (getX() > SCREEN_WIDTH - TILE_SIZE)
     {
@@ -158,15 +154,19 @@ void Player::getEvent(SDL_Event e) {
     if (keystate[SDL_SCANCODE_W]) {
         delta_velocity += 1;
         x_deltav += delta_velocity * cos((theta * M_PI) / 180);
+        if(theta == 90 || theta == 270)
+            x_deltav = 0;
         y_deltav += delta_velocity * sin((theta * M_PI) / 180);
+        if(theta == 0 || theta == 180)
+            y_deltav = 0;
     }
     if (keystate[SDL_SCANCODE_A]) {
         theta -= PHI;
     }
     if (keystate[SDL_SCANCODE_S]) {
         delta_velocity -= 1;
-        x_deltav += delta_velocity * cos((-theta * M_PI) / 180);
-        y_deltav += delta_velocity * sin((-theta * M_PI) / 180);
+        x_deltav += delta_velocity * cos((theta * M_PI) / 180);
+        y_deltav += delta_velocity * sin((theta * M_PI) / 180);
     }
     if (keystate[SDL_SCANCODE_D]) {
         theta += PHI;
@@ -185,7 +185,7 @@ void Player::getEvent(SDL_Event e) {
             delta_velocity = 1;
     }
 
-    if (x_deltav == 0) {
+    if (x_deltav == 0 || theta == 90 || theta == 270) {
         // No user-supplied "push", return to rest
         if (x_vel > 0)
             x_deltav = -1;
@@ -193,7 +193,7 @@ void Player::getEvent(SDL_Event e) {
             x_deltav = 1;
     }
 
-    if (y_deltav == 0) {
+    if (y_deltav == 0 || theta == 0 || theta == 180) {
         // No user-supplied "push", return to rest
         if (y_vel > 0)
             y_deltav = -1;

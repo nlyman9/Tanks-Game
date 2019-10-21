@@ -34,6 +34,14 @@ SDL_Rect* OBJECT::check_collision(OBJECT *B)
     }
     return nullptr;
 }
+SDL_Rect* OBJECT::check_collision(SDL_Rect* A, SDL_Rect *B)
+{
+    SDL_Rect* overlap = new SDL_Rect;
+    if(SDL_IntersectRect(A, B, overlap)) {
+        return overlap;
+    }
+    return nullptr;
+}
 
 SDL_Rect* OBJECT::check_collision(SDL_Rect *B)
 {
@@ -104,7 +112,7 @@ int OBJECT::getY()
     return y;
 }
 OBJECT::~OBJECT(){
-    std::cout << "OBJ Deleted";
+    //std::cout << "OBJ Deleted";
 }
 
 void OBJECT::setObstacleLocations(std::vector<SDL_Rect>* obstacleLocs) {
