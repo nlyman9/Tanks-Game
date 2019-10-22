@@ -16,7 +16,8 @@ constexpr int BOX_WIDTH = 20;
 constexpr int BOX_HEIGHT = 20;
 constexpr int BULLET_WIDTH = 4;
 constexpr int BULLET_HEIGHT = 6;
-constexpr int MAX_VELOCITY = 1;
+constexpr int MAX_VELOCITY = 2;
+constexpr int BULLET_VELOCITY = 2;
 
 // Function declarations
 bool init();
@@ -38,6 +39,7 @@ SDL_Rect gTileRects[3];
 bool dir = true;
 bool left = true;
 bool bullet_fire[3] = {false, false, false};
+bool enemy_bullet_fire = false;
 int** tile_map;
 std::vector<SDL_Texture*> gTex;
 SDL_Rect cur_out;
@@ -105,7 +107,7 @@ bool init() {
 	srand(time(NULL));
 
 	// switch(rand() % 4)
-	switch(line)
+  /*switch(line)
 	{
 		case destructible:
 			tile_map[4][4] = 2;
@@ -124,9 +126,7 @@ bool init() {
 			tile_map[14][10] = 2;
 			break;
 	}
-
-
-
+*/
 	return true;
 }
 
@@ -246,7 +246,7 @@ bool checkDistFrom(int playX, int playY, int enemX, int enemY) {
 
  	double distanceAway =  (pow(stepOne, .5));
 
-	if(distanceAway < 200.0) {
+	if(distanceAway < 100.0) {
 		return true;
 	}
 	return false;
@@ -353,6 +353,15 @@ int yArrPos(int pos){
 
 }
 
+bool shouldShoot(int x_player, int x_enemy, int y_player, int y_enemy){
+	int cannon = x_enemy - BOX_WIDTH/2;
+	int x_player_rightEdge = x_player + BOX_WIDTH;
+	if(cannon <= x_player_rightEdge && cannon >= x_player && y_player < y_enemy){
+		return true;
+	}
+	return false;
+}
+
 int main() {
 	if (!init()) {
 		std::cout <<  "Failed to initialize!" << std::endl;
@@ -370,8 +379,11 @@ int main() {
 		gTileRects[i].w = TILE_SIZE;
 		gTileRects[i].h = TILE_SIZE;
 	}
-
 	tileArray = new SDL_Rect[312];
+	SDL_Rect outRect = {0,0,0,0};
+	for(int i = 0; i < 312; i++){
+		tileArray[i] = outRect;
+	}
 	int count = 0;
 	for (int x = BORDER_GAP + TILE_SIZE, i = 0; x < SCREEN_WIDTH - BORDER_GAP - TILE_SIZE; x+=TILE_SIZE, i++) {
 		for (int y = TILE_SIZE, j = 0; y < SCREEN_HEIGHT - TILE_SIZE; y+=TILE_SIZE, j++) {
@@ -394,13 +406,13 @@ int main() {
 	int y_pos = 60;
 
 	//Enemy box start position
-	int x_enemy_pos = SCREEN_WIDTH - BOX_WIDTH/2 - 75;
-	int y_enemy_pos = SCREEN_HEIGHT - BOX_HEIGHT/2 - 60;
-	int enemy_start_x = x_enemy_pos;
+	int x_enemy_pos = SCREEN_WIDTH/2;
+	int y_enemy_pos = SCREEN_HEIGHT/2;
+	//int enemy_start_x = x_enemy_pos;
 	//int enemy_start_y = y_enemy_pos;
 	//Initialize enemy box
 	SDL_Rect enemy_box = {x_enemy_pos, y_enemy_pos, BOX_WIDTH, BOX_HEIGHT};
-
+	SDL_Rect player_box = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
 	// Current velocity of the box
 	// Start off at reset
 	int x_vel = 0;
@@ -408,8 +420,9 @@ int main() {
 
 	int x_bullet_pos[3];
 	int y_bullet_pos[3];
-	//int x_bullet_vel = 0;
-	//int y_bullet_vel = 0;
+
+	int x_enemy_bullet_pos;
+	int y_enemy_bullet_pos;
 
 	while(gameon) {
 		while(SDL_PollEvent(&e)) {
@@ -464,13 +477,37 @@ int main() {
 			}
 		}
 
+		if(shouldShoot(x_pos, x_enemy_pos, y_pos, y_enemy_pos) && !enemy_bullet_fire){
+			printf("enemy fired\n");
+			enemy_bullet_fire = true;
+			x_enemy_bullet_pos = x_enemy_pos + BOX_WIDTH/2;
+			y_enemy_bullet_pos = y_enemy_pos;
+		}
+
+		if(enemy_bullet_fire){
+			y_enemy_bullet_pos -= BULLET_VELOCITY;
+		}
+
+		if(enemy_bullet_fire){
+			SDL_Rect bullet_collide = {x_enemy_bullet_pos, y_enemy_bullet_pos, BULLET_WIDTH, BULLET_HEIGHT};
+			for(int j = 0; j < 312; j++){
+				cur_out = tileArray[j];
+				if(player_vicinity(&bullet_collide, &cur_out)){
+					enemy_bullet_fire = false;
+				}
+			}
+			if(y_enemy_bullet_pos == TILE_SIZE){
+				enemy_bullet_fire = false;
+			}
+		}
+
 		for(int i = 0; i < 3; i++){
 			if(bullet_fire[i]){
-				if(y_bullet_pos[i] == TILE_SIZE){
+				if(y_bullet_pos[i] <= TILE_SIZE){
 						bullet_fire[i] = false;
 				}
 				else{
-					y_bullet_pos[i] -= MAX_VELOCITY;
+					y_bullet_pos[i] -= BULLET_VELOCITY;
 				}
 			}
 		}
@@ -497,6 +534,15 @@ int main() {
 			}
 		}
 
+
+		if(enemy_bullet_fire){
+			SDL_Rect enemy_bullet_collide = {x_enemy_bullet_pos, y_enemy_bullet_pos, BULLET_WIDTH, BULLET_HEIGHT};
+			if(player_vicinity(&enemy_bullet_collide, &player_box)){
+				printf("ENEMY WINS\n");
+				enemy_bullet_fire = false;
+			}
+		}
+
 		// Move box
 		if(x_vel > MAX_VELOCITY) {
 			x_vel = MAX_VELOCITY;
@@ -513,10 +559,10 @@ int main() {
 		x_pos += x_vel;
 		y_pos += y_vel;
 
-		SDL_Rect player_collide = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
+		player_box = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
 		for(int i = 0; i < 312; i++){
 			cur_out = tileArray[i];
-			if(player_vicinity(&player_collide, &cur_out)){
+			if(player_vicinity(&player_box, &cur_out)){
 				x_pos -= x_vel;
 				y_pos -= y_vel;
 			}
@@ -537,15 +583,26 @@ int main() {
 		}
 
 		//Checking if enemy should move away
-		//bool retreat;
-		//retreat = checkDistFrom(x_pos, y_pos, x_enemy_pos, y_enemy_pos);
+		bool retreat;
+		for(int i = 0; i < 3; i++) {
+		  retreat = checkDistFrom(x_bullet_pos[i], y_bullet_pos[i], x_enemy_pos, y_enemy_pos);
 
+			if(retreat && y_enemy_pos <= y_bullet_pos[i]){
+					if(x_bullet_pos[i] < x_enemy_pos){
+						x_enemy_pos += MAX_VELOCITY;
+					}
+					else{
+						x_enemy_pos -= MAX_VELOCITY;
+					}
+
+			}
+		}
 
 		bool nearWall;
 		nearWall = checkWall(x_enemy_pos, y_enemy_pos);
 
 		//Make enemy avoid player when player gets too close and return to center otherwise
-		/*-----------------------------------------------------------------------------------
+		/*\\-----------------------------------------------------------------------------------
 		if(!retreat) {
 
 			//go to center
@@ -641,7 +698,7 @@ int main() {
 			}
 		}
 */
-		if(left) {
+		/*if(left) {
 			if(tile_map[xArrPosL(x_enemy_pos)][yArrPos(y_enemy_pos)] == 2){
 				x_enemy_pos -= MAX_VELOCITY;
 			}
@@ -665,7 +722,7 @@ int main() {
 		if(x_enemy_pos == enemy_start_x){
 			left = true;
 		}
-
+*/
 		enemy_box = {x_enemy_pos, y_enemy_pos, BOX_WIDTH, BOX_HEIGHT};
 		//Enemy box is within 8 pixels of an obstacle
 		for(int i = 0; i < 312; i++){
@@ -690,11 +747,11 @@ int main() {
 			dir = true;
 */
 		//Ensure enemy doesn't go offscreen
-		if(x_enemy_pos > SCREEN_WIDTH - 2*BOX_WIDTH) {
-			x_enemy_pos = SCREEN_WIDTH - 2*BOX_WIDTH;
+		if(x_enemy_pos > SCREEN_WIDTH - TILE_SIZE - 2*BOX_WIDTH) {
+			x_enemy_pos = SCREEN_WIDTH - TILE_SIZE - 2*BOX_WIDTH;
 		}
-		if(x_enemy_pos < TILE_SIZE){
-			x_enemy_pos = TILE_SIZE;
+		if(x_enemy_pos < TILE_SIZE + BOX_WIDTH){
+			x_enemy_pos = TILE_SIZE + BOX_WIDTH;
 		}
 		if(y_enemy_pos < TILE_SIZE){
 			y_enemy_pos = TILE_SIZE;
@@ -767,6 +824,12 @@ int main() {
 				SDL_Rect bullet = {x_bullet_pos[i], y_bullet_pos[i], BULLET_WIDTH, BULLET_HEIGHT};
 				SDL_RenderFillRect(gRenderer, &bullet);
 			}
+		}
+
+		if(enemy_bullet_fire){
+			SDL_SetRenderDrawColor(gRenderer, 0xff, 0x00, 0x00, 0xff);
+			SDL_Rect enemy_bullet = {x_enemy_bullet_pos, y_enemy_bullet_pos, BULLET_WIDTH, BULLET_HEIGHT};
+			SDL_RenderFillRect(gRenderer, &enemy_bullet);
 		}
 		SDL_RenderPresent(gRenderer);
 	} //end of game loop
