@@ -21,35 +21,35 @@ class Enemy : public OBJECT {
         /* data */
         // Sprite sprite;
         // Sprite turret;
-        int x_enemy_pos, y_enemy_pos;
+        float x_enemy_pos, y_enemy_pos;
         Player* gPlayer;
         bool left = true;
 
-        bool checkPos(int playX, int playY, int enemX, int enemY);
-        bool checkWall(int x, int y);
+        bool checkPos(float playX, float playY, float enemX, float enemY);
+        bool checkWall(float x, float y);
 		//	just wondering if we want to put some kind of custom acceleration on enemies?
 		//	this is just a note for the future since the online pitt library won't let me open the book I found
 		//	but maybe we'll eventually have a setting for the ai's current state (searching, pathing, running away, etc)
-		int xArrPosL(int pos);
-        int xArrPosR(int pos);
-        int yArrPos(int pos);
+		int xArrPosL(float pos);
+        int xArrPosR(float pos);
+        int yArrPos(float pos);
         int** tile_map;
     public:
         // Enemy(Sprite sprite, Sprite turret, int x, int y); //constructor, initialize the x, y, and sprite
-        Enemy(int x, int y, Player* player); //constructor, initialize the x, y, and sprite
+        Enemy(float x, float y, Player* player); //constructor, initialize the x, y, and sprite
 
 		//Object methods
         void draw(SDL_Renderer *gRenderer, double update_lag) override;
         void update() override;
-        bool move(int x, int y) override;	//	move x offset from current x and y offset from current y
-        bool place(int x, int y) override;	//	place/teleport to an x and y
+        bool move(float x, float y) override;	//	move x offset from current x and y offset from current y
+        bool place(float x, float y) override;	//	place/teleport to an x and y
         
         bool fire();	//	return true if the enemy fired successfully
         bool rotateEnemy(float theta);	//	rotate the object
         bool rotateTurret(float theta);	//	rotate the turret
         
-        int getX();
-        int getY();
+        float getX();
+        float getY();
         void updatePos();
 
         void setTileMap(int** tileMap);
