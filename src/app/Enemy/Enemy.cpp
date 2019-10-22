@@ -3,7 +3,7 @@
 
 // Enemy::Enemy(Sprite sprite, Sprite turret, int x, int y) : sprite{sprite}, turret{turret}, x_enemy_pos{x}, y_enemy_pos{y} {}
 
-Enemy::Enemy(int x, int y, Player* player) :  x_enemy_pos{x}, y_enemy_pos{y}, gPlayer{player} {}
+Enemy::Enemy(float x, float y, Player* player) :  x_enemy_pos{x}, y_enemy_pos{y}, gPlayer{player} {}
 
 Enemy::~Enemy() {}
 
@@ -27,11 +27,11 @@ void Enemy::draw(SDL_Renderer *gRenderer, double update_lag) {
   // SDL_Rect src = {0, 0, 48, 48};
   // SDL_Rect dst = {x_enemy_pos, y_enemy_pos, 39, 48};
   // SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), &src, &dst, 0, NULL, SDL_FLIP_NONE);
-  SDL_Rect pos = {x_enemy_pos, y_enemy_pos, BOX_WIDTH, BOX_HEIGHT};
+  SDL_Rect pos = {x_enemy_pos, y_enemy_pos, TANK_WIDTH, TANK_HEIGHT};
   SDL_RenderCopy(gRenderer, getSprite()->getTexture(), NULL, &pos);
 }
 
-/**
+/**  
  * @brief update the Enemy object
  *  Overrides base class OBJECT
  * 
@@ -50,7 +50,7 @@ void Enemy::update() {
  * @return true  - moved Enemy succesfully 
  * @return false - failed to move Enemy 
  */
-bool Enemy::move(int x, int y) {
+bool Enemy::move(float x, float y) {
     return false;
 }
 
@@ -63,7 +63,7 @@ bool Enemy::move(int x, int y) {
  * @return true  - placed Enemy succesfully 
  * @return false - failed to place Enemy 
  */
-bool Enemy::place(int x, int y) {
+bool Enemy::place(float x, float y) {
     return false;
 }
 
@@ -81,7 +81,7 @@ bool Enemy::rotateTurret(float theta) {
     return false;
 }
 
-bool Enemy::checkPos(int playX, int playY, int enemX, int enemY) {
+bool Enemy::checkPos(float playX, float playY, float enemX, float enemY) {
   double stepOne = (double)(pow((playX - enemX), 2) + pow((playY - enemY), 2));
 
 	double distanceAway = (pow(stepOne, .5));
@@ -93,14 +93,14 @@ bool Enemy::checkPos(int playX, int playY, int enemX, int enemY) {
 	return false;
 }
 
-bool Enemy::checkWall(int x, int y) {
+bool Enemy::checkWall(float x, float y) {
   //left wall
 	if (x <= TILE_SIZE + BORDER_GAP)
 	{
 		return true;
 	}
 	//right wall
-	else if (x >= SCREEN_WIDTH - BORDER_GAP * BOX_WIDTH)
+	else if (x >= SCREEN_WIDTH - BORDER_GAP * TANK_WIDTH)
 	{
 		return true;
 	}
@@ -110,7 +110,7 @@ bool Enemy::checkWall(int x, int y) {
 		return true;
 	}
 	//bottom wall
-	else if (y >= SCREEN_HEIGHT - 2 * BOX_HEIGHT)
+	else if (y >= SCREEN_HEIGHT - 2 * TANK_HEIGHT)
 	{
 		return true;
 	}
@@ -120,25 +120,25 @@ bool Enemy::checkWall(int x, int y) {
 	}
 }
 
-int Enemy::getX(){
+float Enemy::getX(){
   return x_enemy_pos;
 }
 
-int Enemy::getY(){
+float Enemy::getY(){
   return y_enemy_pos;
 }
 
 void Enemy::updatePos() {
 
-  int x_pos = gPlayer->getX();
-  int y_pos = gPlayer->getY();
+  float x_pos = gPlayer->getX();
+  float y_pos = gPlayer->getY();
   bool retreat;
   retreat = checkPos(x_pos, y_pos, x_enemy_pos, y_enemy_pos);
 
   bool nearWall;
   nearWall = checkWall(x_enemy_pos, y_enemy_pos);
 
-  int startingPosition =  SCREEN_WIDTH - BOX_WIDTH/2 - 75;
+  int startingPosition =  SCREEN_WIDTH - TANK_WIDTH/2 - 75;
 
   if(left) {
     if(tile_map[xArrPosL(x_enemy_pos)][yArrPos(y_enemy_pos)] == 2) {
@@ -176,8 +176,8 @@ void Enemy::updatePos() {
     }
 	}
 
-  if(x_enemy_pos > SCREEN_WIDTH - 2*BOX_WIDTH) {
-    x_enemy_pos = SCREEN_WIDTH - 2*BOX_WIDTH;
+  if(x_enemy_pos > SCREEN_WIDTH - 2*TANK_WIDTH) {
+    x_enemy_pos = SCREEN_WIDTH - 2*TANK_WIDTH;
   }
   if(x_enemy_pos < TILE_SIZE){
     x_enemy_pos = TILE_SIZE;
@@ -185,13 +185,13 @@ void Enemy::updatePos() {
   if(y_enemy_pos < TILE_SIZE){
     y_enemy_pos = TILE_SIZE;
   }
-  if(y_enemy_pos > SCREEN_HEIGHT - 2*BOX_HEIGHT) {
-    y_enemy_pos = SCREEN_HEIGHT - 2*BOX_HEIGHT;
+  if(y_enemy_pos > SCREEN_HEIGHT - 2*TANK_HEIGHT) {
+    y_enemy_pos = SCREEN_HEIGHT - 2*TANK_HEIGHT;
   }
 }
 
 
-int Enemy::xArrPosR(int pos) {
+int Enemy::xArrPosR(float pos) {
 	int lowBound = TILE_SIZE+25;
 	int upBound = TILE_SIZE*2+25;
 	for(int i = 0; i < 24; i++){
@@ -204,7 +204,7 @@ int Enemy::xArrPosR(int pos) {
 	return 23;
 }
 
-int Enemy::yArrPos(int pos) {
+int Enemy::yArrPos(float pos) {
 	int lowBound = TILE_SIZE-30;
 	int upBound = TILE_SIZE*2-30;
 	for(int i = 0; i < 12; i++){
@@ -217,7 +217,7 @@ int Enemy::yArrPos(int pos) {
 	return 11;
 }
 
-int Enemy::xArrPosL(int pos) {
+int Enemy::xArrPosL(float pos) {
 	int lowBound = TILE_SIZE-20;
 	int upBound = TILE_SIZE*2-20;
 	for(int i = 0; i < 24; i++){

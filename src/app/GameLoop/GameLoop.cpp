@@ -6,6 +6,22 @@
 
 GameLoop::~GameLoop() {}
 
+bool GameLoop::networkInit(Args *options) {
+	// Create host process
+		// Wait for connections
+
+	// Create client process
+		// Wait for map
+
+		// Download map
+
+		// Unpack map 
+
+	// Init 
+
+	return true;
+}
+
 /**
  * @brief Initialize properties for Gameloop
  * 		Initializes player and enemies
@@ -16,7 +32,7 @@ GameLoop::~GameLoop() {}
  */
 bool GameLoop::init() {
 	player = new Player(75, 50);
-	enemies.push_back(new Enemy( SCREEN_WIDTH - BOX_WIDTH/2 - 75, SCREEN_HEIGHT - BOX_HEIGHT/2 - 60, player));
+	enemies.push_back(new Enemy( SCREEN_WIDTH - TANK_WIDTH/2 - 75, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, player));
 	render = new Render(player, enemies);
 	render->init();
 
@@ -121,11 +137,9 @@ int GameLoop::run()
 			{
 				isGameOn = false;
 			}
-			else 
-			{
-				player->getEvent(e);
-			}
 		}
+		
+		player->getEvent(elapsed_time);
 		
 		// 2. Update
 		// Update if time since last update is >= MS_PER_UPDATE

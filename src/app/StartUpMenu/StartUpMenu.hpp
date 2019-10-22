@@ -6,9 +6,9 @@
 
 class StartUpMenu {
   public:
-    void launch();
+    void launch(Args *options);
   private:
-    int drawMenu();
+    int drawMenu(Args *options);
 };
 
 #endif

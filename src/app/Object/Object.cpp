@@ -17,60 +17,44 @@
 //using UNDEFINED = bool;
 //using Sprite = UNDEFINED;
 
+#include <math.h>
+
 #include "Object.hpp"
 #include "Constants.hpp"
 
 SDL_Rect* OBJECT::get_box()
 {
-    box = {getX(), getY(), BOX_HEIGHT, BOX_WIDTH};
+    box = {nearbyint(getX()), nearbyint(getY()), TANK_WIDTH, TANK_HEIGHT};
     return &box;
 }
 
-bool OBJECT::check_collision(OBJECT *B)
+
+// TODO make a custom collision detection that detects a box based off of 4 points. 
+SDL_Rect* OBJECT::check_collision(OBJECT *B)
 {
-    SDL_Rect *a = &box;
-    SDL_Rect *b;
-    b = B->get_box();
-
-    // Check vertical overlap
-    if (a->y + a->h <= b->y)
-        return false;
-
-    if (a->y >= b->y + b->h)
-        return false;
-
-    // Check horizontal overlap
-    if (a->x >= b->x + b->w)
-        return false;
-
-    if (a->x + a->w <= b->x)
-        return false;
-
-    // Must overlap in both
-    return true;
+    SDL_Rect* overlap = new SDL_Rect;
+    if(SDL_IntersectRect(&box, B->get_box(), overlap)) {
+        return overlap;
+    }
+    return nullptr;
 }
 
-bool OBJECT::check_collision(SDL_Rect *B)
+SDL_Rect* OBJECT::check_collision(SDL_Rect* A, SDL_Rect *B)
 {
-    SDL_Rect *a = &box;
-    SDL_Rect *b = B;
+    SDL_Rect* overlap = new SDL_Rect;
+    if(SDL_IntersectRect(A, B, overlap)) {
+        return overlap;
+    }
+    return nullptr;
+}
 
-    // Check vertical overlap
-    if (a->y + a->h <= b->y)
-        return false;
-
-    if (a->y >= b->y + b->h)
-        return false;
-
-    // Check horizontal overlap
-    if (a->x >= b->x + b->w)
-        return false;
-
-    if (a->x + a->w <= b->x)
-        return false;
-
-    // Must overlap in both
-    return true;
+SDL_Rect* OBJECT::check_collision(SDL_Rect *B)
+{
+    SDL_Rect* overlap = new SDL_Rect;
+    if(SDL_IntersectRect(&box, B, overlap)) {
+        return overlap;
+    }
+    return nullptr;
 }
 
 bool OBJECT::check_bounds()
@@ -82,7 +66,7 @@ bool OBJECT::check_bounds()
         return true;
     }
     //right wall
-    else if (x >= SCREEN_WIDTH - 2 * BOX_WIDTH)
+    else if (x >= SCREEN_WIDTH - 2 * TANK_WIDTH)
     {
         return true;
     }
@@ -92,7 +76,7 @@ bool OBJECT::check_bounds()
         return true;
     }
     //bottom wall
-    else if (y >= SCREEN_HEIGHT - 2 * BOX_HEIGHT)
+    else if (y >= SCREEN_HEIGHT - 2 * TANK_HEIGHT)
     {
         return true;
     }
@@ -111,29 +95,29 @@ void OBJECT::setSprite(Sprite *new_sprite)
     sprite = *new_sprite;
 }
 
-void OBJECT::setPos(int newx, int newy)
+void OBJECT::setPos(float newx, float newy)
 {
     x = newx;
     y = newy;
 }
-void OBJECT::setX(int newx)
+void OBJECT::setX(float newx)
 {
     x = newx;
 }
-void OBJECT::setY(int newy)
+void OBJECT::setY(float newy)
 {
     y = newy;
 }
-int OBJECT::getX()
+float OBJECT::getX()
 {
     return x;
 }
-int OBJECT::getY()
+float OBJECT::getY()
 {
     return y;
 }
 OBJECT::~OBJECT(){
-    std::cout << "OBJ Deleted";
+    //std::cout << "OBJ Deleted";
 }
 
 void OBJECT::setObstacleLocations(std::vector<SDL_Rect>* obstacleLocs) {
