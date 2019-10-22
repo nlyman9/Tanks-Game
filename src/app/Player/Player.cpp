@@ -54,9 +54,12 @@ void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
 
     // SDL_Rect pos = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
     // SDL_RenderCopy(gRenderer, getSprite()->getTexture(), NULL, &pos);
-    SDL_Rect src = {0, 0, 20, 20};
+	
+	// Danny: to get the tank to render correctly, I replaced %src with NULL.
+    // SDL_Rect src = {0, 0, 20, 20};
+	
     SDL_Rect* dst = get_box();
-    SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), &src, dst, theta, NULL, SDL_FLIP_NONE);
+    SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), NULL, dst, theta, NULL, SDL_FLIP_NONE);
 }
 
 /**
