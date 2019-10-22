@@ -6,6 +6,22 @@
 
 GameLoop::~GameLoop() {}
 
+bool GameLoop::networkInit(Args *options) {
+	// Create host process
+		// Wait for connections
+
+	// Create client process
+		// Wait for map
+
+		// Download map
+
+		// Unpack map 
+
+	// Init 
+
+	return true;
+}
+
 /**
  * @brief Initialize properties for Gameloop
  * 		Initializes player and enemies
