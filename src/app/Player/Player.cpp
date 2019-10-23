@@ -91,21 +91,21 @@ void Player::update() {
     }
 
     // Check he isn't moving outside of the map
-    if (getX() + TANK_WIDTH > SCREEN_WIDTH - TILE_SIZE)
+    if (getX() + TANK_WIDTH > SCREEN_WIDTH - TILE_SIZE - 16)	// Right border
     {
-        setX(SCREEN_WIDTH - TILE_SIZE);
+        setX(SCREEN_WIDTH - TILE_SIZE - TANK_WIDTH - 16);
     }
-    if (getX() < TILE_SIZE)
+    if (getX() < TILE_SIZE + 16)	// left border
     {
-        setX(TILE_SIZE);
+        setX(TILE_SIZE + 16);
     }
-    if (getY() < TILE_SIZE)
+    if (getY() < TILE_SIZE)	// Top border
     {
         setY(TILE_SIZE);
     }
-    if (getY() + TANK_HEIGHT > SCREEN_HEIGHT - TILE_SIZE)
+    if (getY() + TANK_HEIGHT > SCREEN_HEIGHT - TILE_SIZE)	// bottom border
     {
-        setY(SCREEN_HEIGHT - TILE_SIZE);
+        setY(SCREEN_HEIGHT - TILE_SIZE - TANK_HEIGHT);
     }
 }
 
