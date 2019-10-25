@@ -30,7 +30,7 @@ bool Render::init()
 		return false;
 	}
 
-	// SEt up rendered with out vsync
+	// Set up rendered with out vsync
 	gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
 	if (gRenderer == nullptr)
 	{
@@ -60,6 +60,75 @@ void Render::close() {
 
 	// Quit SDL subsystems
 	SDL_Quit();
+}
+
+bool Render::drawMenu() {
+ 	button_t start_button;
+	start_button.r = 255;
+	start_button.g = 255;
+	start_button.b = 255;
+	start_button.a = 255;
+	start_button.draw_rect =  {128, 128, 128, 128};
+	start_button.pressed = false;
+
+	enum {
+		STATE_IN_MENU,
+		STATE_IN_GAME
+	};
+	int state = 0;
+
+	bool quit = false;
+  	while(!quit) {
+		SDL_Event e;
+
+		while(SDL_PollEvent(&e)) {
+			if(e.type == SDL_QUIT || (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_CLOSE)) {
+				quit = true;
+			}
+
+			button_process_event(&start_button, &e);
+		}
+
+		SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 255);
+		SDL_RenderClear(gRenderer);
+
+		if(state == STATE_IN_MENU) {
+			if(button(&start_button)) {
+				state = STATE_IN_GAME; 
+			} else if(state == STATE_IN_GAME) {
+				return true;
+				std::cout << "Start game" << std::endl;
+			}
+		}
+		SDL_RenderPresent(gRenderer);
+	}
+	return false;
+}
+
+bool Render::button(button_t *btn) {
+    // draw button
+    SDL_SetRenderDrawColor(gRenderer, btn->r, btn->g, btn->b, btn->a);
+    SDL_RenderFillRect(gRenderer, &btn->draw_rect);
+
+    // if button press detected - reset it so it wouldn't trigger twice
+    if(btn->pressed) {
+        btn->pressed = false;
+        return true;
+    }
+    return false;
+}
+
+void Render::button_process_event(button_t *btn, const SDL_Event *e) {
+    // react on mouse click within button rectangle by setting 'pressed'
+    if(e->type == SDL_MOUSEBUTTONDOWN) {
+        if(e->button.button == SDL_BUTTON_LEFT &&
+                e->button.x >= btn->draw_rect.x &&
+                e->button.x <= (btn->draw_rect.x + btn->draw_rect.w) &&
+                e->button.y >= btn->draw_rect.y &&
+                e->button.y <= (btn->draw_rect.y + btn->draw_rect.h)) {
+            btn->pressed = true;
+        }
+    }
 }
 
 void Render::setTileMap(int** tileMap) {
@@ -131,4 +200,12 @@ int Render::draw(double update_lag) {
 
 SDL_Renderer* Render::getRenderer() {
 	return gRenderer;
+}
+
+void Render::setPlayer(Player* player) {
+	gPlayer = player;
+}
+
+void Render::setEnemies(std::vector<Enemy *> enemies) {
+	gEnemies = enemies;
 }

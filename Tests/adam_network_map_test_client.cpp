@@ -26,10 +26,11 @@ constexpr int TILE_SIZE = 48;
 bool mapRecieved = false;
 std::vector<int> *unpack(std::vector<char>* packed, std::vector<int> *unPacked, int bits){
 	std::vector<bool> workSet;
-    int i;
-	for(auto curr : *packed){
-		for(i = 0; i < 8; i++){
-			workSet.push_back((curr >> (7 - i)) & 1);
+    //first turn the packed map into a bool array
+	for(auto curr : mapPacked){
+		for(int i = 0; i < 8; i++){
+			workSet.push_back((bool)((curr >> (7 - i)) & 1));
+			//std::cout << (int) ((curr >> (7 - i)) & 1);
 		}
 	}
     i = 0;
@@ -171,7 +172,7 @@ int main() {
 
         // If from server
         if (FD_ISSET(sockfd, &read_fds)) {
-            nbytes = recv(sockfd, buffer, 151, 0);
+            nbytes = recv(sockfd, buffer, 500, 0);
             if (nbytes <= 0) {
                 printf("Closing connection to server.");
                 close(sockfd);
@@ -182,10 +183,42 @@ int main() {
                 std::vector<char> test(buffer, buffer + (sizeof(buffer)/sizeof(buffer[0])));
                 std::cout << test.size() << std::endl;
                 std::vector<int> map;
-                if(!mapRecieved){
-                    unpack(&test, &map, 2);
-                    displayMap(&map);
+                unpackMap(test, &map);
+
+                int x = 0;
+                int y = 0;
+                SDL_Rect currentTile;
+                std::cout << (int) map.size() << " " << nbytes << "\n";
+                for(auto tile : map){
+                    std::cout << (int) tile << " ";
+                    
+                    // Extract row and column from the 1D vector
+                    if(x == 27) {
+                        y++;
+                        x = 0;
+                    }
+
+                    currentTile = {x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE};
+                    if(tile == 0) {
+                        SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0x00, 0xFF);
+                    }
+                    if(tile == 1) {
+                        SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0xFF, 0x00);
+                    }
+                    if(tile == 2) {
+                        SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0x00, 0x00);
+                    }
+                    if(tile == 3) {
+                        SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0xFF, 0xFF);
+                    }
+                    if(tile == 4) {
+                        SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0x00, 0xFF);
+                    }
+                    SDL_RenderFillRect(gRenderer, &currentTile);
+                    x++;
                 }
+                SDL_RenderPresent(gRenderer);
+                std::cout << " \n";
             }
         } else if (fgets(buffer, 100, stdin) != NULL) { // get input from user
             // Check for user input in the terminal 

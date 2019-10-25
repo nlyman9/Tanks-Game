@@ -9,6 +9,7 @@ class StartUpMenu {
     void launch(Args *options);
   private:
     int drawMenu(Args *options);
+    Render* renderer;
 };
 
 #endif

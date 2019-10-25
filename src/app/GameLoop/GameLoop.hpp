@@ -22,7 +22,7 @@ class GameLoop {
     GameLoop() {};
     ~GameLoop();
     bool networkInit(Args *options);
-    bool init();
+    bool init(Render* renderer);
     int run();
 
   private:

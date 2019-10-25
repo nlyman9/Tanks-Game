@@ -3,6 +3,8 @@
 
 void StartUpMenu::launch(Args *options) 
 {
+  renderer = new Render();
+  renderer->init();
   drawMenu(options);
 }
 
@@ -12,7 +14,8 @@ int StartUpMenu::drawMenu(Args *options)
   if (options->isOnline) {
     gLoop.networkInit(options);
   }
-
-  gLoop.init();
-  gLoop.run();
+  if(renderer->drawMenu()) {
+    gLoop.init(renderer);
+    gLoop.run();
+  }
 }
