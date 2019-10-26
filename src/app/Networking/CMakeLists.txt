@@ -2,10 +2,9 @@ add_library(Networking
   STATIC
   Network.hpp
   Network.cpp
-  Server.cpp
   Client.cpp
+  Client.hpp
 )
-
 target_include_directories(Networking
   PUBLIC
   .

@@ -46,6 +46,8 @@
         "chrono": "cpp",
         "complex": "cpp",
         "ctime": "cpp",
-        "ratio": "cpp"
+        "ratio": "cpp",
+        "codecvt": "cpp",
+        "filesystem": "cpp"
     }
 }

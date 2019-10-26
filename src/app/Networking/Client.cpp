@@ -4,134 +4,55 @@
     test to create a map on a server then pack it and send it over as bit data
     and unpack render on client
 */
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <stdlib.h>
-#include <netdb.h>
-#include <cstring>
-#include <iostream>
-#include <vector>
-#include <unistd.h>
-
+#include "Client.hpp"
+#include <SDL2/SDL_thread.h>
 #include <SDL2/SDL.h>
-
-SDL_Window* gWindow;
-SDL_Surface* gSurface;
-SDL_Renderer* gRenderer;
-constexpr int SCREEN_HEIGHT = 720;
-constexpr int SCREEN_WIDTH = 1296;
-constexpr int TILE_SIZE = 48;
 bool mapRecieved = false;
-std::vector<int> *unpack(std::vector<char>* packed, std::vector<int> *unPacked, int bits){
-	std::vector<bool> workSet;
-    int i;
-	for(auto curr : *packed){
-		for(i = 0; i < 8; i++){
-			workSet.push_back((curr >> (7 - i)) & 1);
-		}
-	}
-    i = 0;
-	int tmp = 0;
-	for(auto curr : workSet){
-		tmp = (tmp) | (curr << (bits - 1 - i));
-		if(i == (bits - 1)){
-			unPacked->push_back(tmp);
-			tmp = 0;
-			i = -1;
-		}
-		i++;
-	}
-    mapRecieved = true;
-    std::cout << unPacked->size() << std::endl;
-    return unPacked;
-}
-void displayMap(std::vector<int>* map){
-    int i = 0;
-    int x = 0;
-    int y = 0;
-    SDL_Rect currentTile;
-    for(i = 0 ; i < map->size() ; i++, x++){
-        if(x == 27) {
-            y++;
-            x = 0;
+int receiveThread( void* data){
+    char* rcBuffer = (char*) data; 
+    data = static_cast<char*>(data) + 1;
+    Client* crClient = (Client*) data;
+    std::cout << "Client info: " << std::endl;
+    std::cout << crClient->status << std::endl;
+    std::cout << "Receive thread created!" << std::endl;
+    while(crClient->gameOn) {
+        std::cout << "looping in thread" << std::endl;
+        sleep(1);
+        /*crClient->read_fds = crClient->master;
+        // Check for any response from serrver
+        std::cout << "select" << std::endl;
+        if (select(crClient->fdmax+1, &crClient->read_fds, NULL, NULL, NULL) == -1) {
+            perror("select");
+            exit(4);
         }
-        currentTile = {x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE};
-        std::cout << map->at(i) << " ";
-        switch(map->at(i))
-        {   
-            case 0: 
-                SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0x00, 0xFF);
-                break;
-            case 1:
-                SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0xFF, 0x00);
-                break;
-            case 2:
-                SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0x00, 0x00);
-                break;
-            default:
-                SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0x00);
-                break;
-        }
-        SDL_RenderFillRect(gRenderer, &currentTile);
+        // If from server
+        std::cout << "FD IS SET" << std::endl;
+        if (FD_ISSET(crClient->sockfd, &crClient->read_fds)) {
+            crClient->nbytes = recv(crClient->sockfd, rcBuffer, 151, 0);
+            std::cout << "nbytes" << std::endl;
+            if (crClient->nbytes <= 0) {
+                std::cout << "Connection closing" << std::endl;
+                close(crClient->sockfd);
+                exit(10);
+            } else {
+                //recieved data
+                std::cout << "receiving" << std::endl;
+                std::vector<char> test(rcBuffer, rcBuffer + (sizeof(rcBuffer)/sizeof(rcBuffer[0])));
+                std::cout << test.size() << std::endl;
+                std::vector<int> map;
+               // if(!mapRecieved){
+                //    crClient->network->unpack(&test, &map, 2);
+                //}
+            }
+        }*/
     }
-    std::cout << std::endl;
-    SDL_RenderPresent(gRenderer);
 }
-
-bool initSDL() 
-{
-    if (SDL_Init(SDL_INIT_VIDEO) < 0)
-	{
-		std::cout << "SDL could not initialize! SDL_Error: " << SDL_GetError() << std::endl;
-		return false;
-	}
-
-	if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1"))
-	{
-		std::cout << "Warning: Linear texture filtering not enabled!" << std::endl;
-	}
-
-	gWindow = SDL_CreateWindow("Client", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-	if (gWindow == nullptr)
-	{
-		std::cout << "Window could not be created! SDL_Error: " << SDL_GetError() << std::endl;
-		return false;
-	}
-
-	// SEt up rendered with out vsync
-	gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
-	if (gRenderer == nullptr)
-	{
-		std::cout << "Renderer could not be created! SDL_Error: " << SDL_GetError() << std::endl;
-		return false;
-	}
-
-    return true;
-}
-
-int main() {
-
-    if(!initSDL()) {
-        std::cout << "Unsuccessful SDL initalization" << std::endl;
-        exit(1);
-    }
-
-    int status;
-    struct addrinfo hints;
-    struct addrinfo *serverInfo;
-    int sockfd;
-    char buffer[105];
-
-    fd_set master;      // Master of file descriptors
-    fd_set read_fds;    // Read fd's returned from select
-    int fdmax;          // maximym file descriptor number
-
+bool Client::init() {
+    std::cout << "initting client" << std::endl;
     // Innitialize sets to zero
     FD_ZERO(&master);
     FD_ZERO(&read_fds);
-
+    network = new Network();
     memset(&hints, 0, sizeof(hints));
 
     hints.ai_family = AF_INET;          // IPv4
@@ -146,11 +67,13 @@ int main() {
     // Create a socket based on server info 
     sockfd = socket(serverInfo->ai_family, serverInfo->ai_socktype, serverInfo->ai_protocol);
 
-    // Connec to server
-    if (connect(sockfd, serverInfo->ai_addr, serverInfo->ai_addrlen) < 0) {
-        perror("failed to connect");
-        exit(1);
+    // Connect to server
+    std::cout << "connecting" << std::endl;
+    while (connect(sockfd, serverInfo->ai_addr, serverInfo->ai_addrlen) < 0) {
+        //perror("failed to connect");
+
     }
+    std::cout << "connected" << std::endl;
 
     // Add server fd to master
     FD_SET(sockfd, &master);
@@ -158,41 +81,24 @@ int main() {
     FD_SET(STDIN_FILENO, &master);
 
     fdmax = sockfd;
-
-    int i, nbytes;
-    while(1) {
-        read_fds = master;
-
-        // Check for any response from serrver
-        if (select(fdmax+1, &read_fds, NULL, NULL, NULL) == -1) {
-            perror("select");
-            exit(4);
-        }
-
-        // If from server
-        if (FD_ISSET(sockfd, &read_fds)) {
-            nbytes = recv(sockfd, buffer, 151, 0);
-            if (nbytes <= 0) {
-                printf("Closing connection to server.");
-                close(sockfd);
-                exit(10);
-            } else {
-                //recieved data
-                //for this test only recieving the map data
-                std::vector<char> test(buffer, buffer + (sizeof(buffer)/sizeof(buffer[0])));
-                std::cout << test.size() << std::endl;
-                std::vector<int> map;
-                if(!mapRecieved){
-                    unpack(&test, &map, 2);
-                    displayMap(&map);
-                }
-            }
-        } else if (fgets(buffer, 100, stdin) != NULL) { // get input from user
-            // Check for user input in the terminal 
-            //printf("%s", buffer);
-            //send data
-            send(sockfd, buffer, 100, 0);
-        }
-
-    }
+    //initialize all buffers
+    //receive buffer
+    rcBuffer = (char*) calloc(152, sizeof(char)); 
+    //to send buffer
+    tsBuffer = (char*) calloc(152, sizeof(char)); 
+    //buffer to fill in
+    fBuffer = new std::vector<char>();
+    void* pointers = malloc(sizeof(void)*2);
+    pointers = (void*) rcBuffer;
+    pointers = static_cast<char*>(pointers) + 1;
+    pointers = (void*) this;
+    pointers = static_cast<char*>(pointers) - 1;
+    gameOn = true;
+    rcThread = SDL_CreateThread(receiveThread, "myThread", (void*) pointers);
+    //SDL_Thread* sThread =  SDL_CreateThread(sendThread, (void*) this);
+    return true;
 }
+Client Client::initClient(Client c){
+    
+}
+

@@ -5,36 +5,42 @@
 #include "Sprite.hpp"
 #include <stdio.h>
 #include <unistd.h>
-#include<iostream>
+#include <iostream>
+#include <SDL2/SDL_thread.h>
 
 GameLoop::~GameLoop() {}
 
 bool GameLoop::networkInit(Args *options) {
-	if(fork() == 0){
-		//child process
-		//checking working dir for testing
-		//char buff[FILENAME_MAX];
- 	 	//getcwd( buff, FILENAME_MAX );
-  		//std::string current_working_dir(buff);
-  		//std::cout << current_working_dir << std::endl;
-		char *args[]={NULL}; 
-		execvp("build/bin/server", args);
-		//this line should not run!
-		std::cout << "execvp failed" << std::endl;
-	}
 	// Create host process
-		// Wait for connections
-
+	std::cout << options->isHost << std::endl;
+	if(options->isHost){
+		if(fork() == 0){
+			//child process
+			//checking working dir for testing
+			//char buff[FILENAME_MAX];
+			//getcwd( buff, FILENAME_MAX );
+			//std::string current_working_dir(buff);
+			//std::cout << current_working_dir << std::endl;
+			char *args[]={NULL}; 
+			execvp("build/bin/server", args);
+			//this line should not run!
+			std::cout << "execvp failed" << std::endl;
+		}
+		else{
+		}
+	}
 	// Create client process
-		// Wait for map
-
-		// Download map
-
-		// Unpack map 
-
+	Client* client = new Client();
 	// Init 
-
+	client->init();
+	//run the game loop
+	networkRun(client);
 	return true;
+}
+int GameLoop::networkRun(Client* client){
+	while(client->gameOn){
+
+	}
 }
 
 /**
@@ -105,7 +111,15 @@ bool GameLoop::init() {
 			tile_map[14][10] = 2;
 			break;
 	}
-
+		std::cout<< "Client map array" << std::endl;
+		for(int j = 0; j < 24; j++)
+		{
+			for(int h = 0; h < 13; h++)
+			{
+				std::cout<< tile_map[j][h];
+			}
+			std::cout<< std::endl;
+		}
 	render->setTileMap(tile_map);
 
 	int count = 0;

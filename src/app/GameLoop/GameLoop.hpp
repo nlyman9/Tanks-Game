@@ -8,6 +8,7 @@
 #include "Render.hpp"
 #include "Enemy.hpp"
 #include "MapGenerator.hpp"
+#include "Client.hpp"
 
 class Args {
 	public:
@@ -24,6 +25,7 @@ class GameLoop {
     bool networkInit(Args *options);
     bool init();
     int run();
+    int networkRun(Client* client);
 
   private:
     // Render class to render the game
