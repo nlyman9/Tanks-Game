@@ -9,10 +9,19 @@
 #include "Enemy.hpp"
 #include "MapGenerator.hpp"
 
+class Args {
+	public:
+		bool isOnline;
+		bool isHost;
+		std::string ip;
+		int port;
+};
+
 class GameLoop {
   public:
     GameLoop() {};
     ~GameLoop();
+    bool networkInit(Args *options);
     bool init();
     int run();
 

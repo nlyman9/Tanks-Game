@@ -13,6 +13,7 @@ target_link_libraries(GameLoop
   Enemy
   Sprite
   MapGenerator
+  Networking
 )
 
 target_include_directories(GameLoop
