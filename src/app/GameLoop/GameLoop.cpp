@@ -7,21 +7,20 @@
 #include <unistd.h>
 #include<iostream>
 
-std::string GetCurrentWorkingDir( void ) {
-  char buff[FILENAME_MAX];
-  getcwd( buff, FILENAME_MAX );
-  std::string current_working_dir(buff);
-  return current_working_dir;
-}
-
 GameLoop::~GameLoop() {}
 
 bool GameLoop::networkInit(Args *options) {
 	if(fork() == 0){
 		//child process
+		//checking working dir for testing
+		//char buff[FILENAME_MAX];
+ 	 	//getcwd( buff, FILENAME_MAX );
+  		//std::string current_working_dir(buff);
+  		//std::cout << current_working_dir << std::endl;
 		char *args[]={NULL}; 
 		execvp("build/bin/server", args);
-		std::cout << "execvp failed????" << std::endl;
+		//this line should not run!
+		std::cout << "execvp failed" << std::endl;
 	}
 	// Create host process
 		// Wait for connections
