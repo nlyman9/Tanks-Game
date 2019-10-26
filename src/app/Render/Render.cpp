@@ -30,7 +30,9 @@ bool Render::init()
 		return false;
 	}
 
-	// SEt up rendered with out vsync
+	gScreenSurface = SDL_GetWindowSurface( gWindow );
+
+	// Set up rendered with out vsync
 	gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
 	if (gRenderer == nullptr)
 	{
@@ -60,6 +62,59 @@ void Render::close() {
 
 	// Quit SDL subsystems
 	SDL_Quit();
+}
+
+int Render::drawMenu() {
+
+	ImageLoader imgLoad;
+	SDL_Texture* menuSinglePlayer = imgLoad.loadImage("src/res/images/menu_single_player.png", gRenderer);
+	SDL_Texture* menuMultiPlayer = imgLoad.loadImage("src/res/images/menu_multi_player.png", gRenderer);
+	SDL_Texture* menuCredits = imgLoad.loadImage("src/res/images/menu_credits.png", gRenderer);
+
+	bool quit = false;
+	int menuOption = MENU_SINGLE;
+  	while(!quit) {
+		SDL_Event e;
+
+		while(SDL_PollEvent(&e)) {
+			if(e.type == SDL_QUIT || (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_CLOSE)) {
+				quit = true;
+			} else if(e.type == SDL_KEYDOWN) {
+				switch(e.key.keysym.sym) {
+					case SDLK_s:
+						menuOption++;
+						break;
+					case SDLK_w:
+						menuOption--;
+						break;
+					case SDLK_RETURN:
+						return menuOption;
+						break;
+				} 
+			}
+		}
+
+		if(menuOption == -1) {
+			menuOption = MENU_CREDITS;
+		}
+
+		if(menuOption == 3) {
+			menuOption = MENU_SINGLE;
+		}
+
+		SDL_Rect fullscreen = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+		if(menuOption == MENU_SINGLE) {
+			SDL_RenderCopy(gRenderer, menuSinglePlayer, NULL, &fullscreen); 
+		} else if(menuOption == MENU_MULTI) {
+			SDL_RenderCopy(gRenderer, menuMultiPlayer, NULL, &fullscreen); 
+		} else {
+			SDL_RenderCopy(gRenderer, menuCredits, NULL, &fullscreen); 
+		}
+
+		SDL_RenderPresent(gRenderer);
+	}
+
+	return menuOption;
 }
 
 void Render::setTileMap(int** tileMap) {
@@ -131,4 +186,12 @@ int Render::draw(double update_lag) {
 
 SDL_Renderer* Render::getRenderer() {
 	return gRenderer;
+}
+
+void Render::setPlayer(Player* player) {
+	gPlayer = player;
+}
+
+void Render::setEnemies(std::vector<Enemy *> enemies) {
+	gEnemies = enemies;
 }

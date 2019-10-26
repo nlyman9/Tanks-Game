@@ -272,6 +272,7 @@ int main()
 	//	std::cout << (int)(curr >> 7 & 1) << (int)(curr >> 6 & 1) << (int)(curr >> 5 & 1) << (int)(curr >> 4 & 1) << (int)(curr >> 3 & 1) << (int)(curr >> 2 & 1) << (int)(curr >> 1 & 1) << (int)(curr & 1) << '\n';
 	//}
     //test 2 is our packed map
+    std::cout << (int) (*test).size() << " ";
     delete test; //delete the map from memory
     std::cout << (int) test2.size() << "\n";
     // Set structs and variables for the internet

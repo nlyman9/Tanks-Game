@@ -3,16 +3,19 @@
 
 void StartUpMenu::launch(Args *options) 
 {
-  drawMenu(options);
-}
+  renderer = new Render();
+  renderer->init();
 
-int StartUpMenu::drawMenu(Args *options) 
-{    
   GameLoop gLoop;
-  if (options->isOnline) {
-    gLoop.networkInit(options);
-  }
+  gLoop.init(renderer);
 
-  gLoop.init();
-  gLoop.run();
+  int gameMode = renderer->drawMenu();
+  if(gameMode == MENU_SINGLE) {
+    gLoop.runSinglePlayer();
+  } else if(gameMode == MENU_MULTI) {
+    gLoop.networkInit(options);
+    gLoop.runMultiPlayer();
+  } else {
+    std::cout << "ROLL CREDITS" << std::endl;
+  }
 }
