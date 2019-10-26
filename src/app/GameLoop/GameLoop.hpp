@@ -23,7 +23,8 @@ class GameLoop {
     ~GameLoop();
     bool networkInit(Args *options);
     bool init(Render* renderer);
-    int run();
+    int runSinglePlayer();
+    int runMultiPlayer();
 
   private:
     // Render class to render the game

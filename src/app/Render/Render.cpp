@@ -30,6 +30,8 @@ bool Render::init()
 		return false;
 	}
 
+	gScreenSurface = SDL_GetWindowSurface( gWindow );
+
 	// Set up rendered with out vsync
 	gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
 	if (gRenderer == nullptr)
@@ -62,73 +64,57 @@ void Render::close() {
 	SDL_Quit();
 }
 
-bool Render::drawMenu() {
- 	button_t start_button;
-	start_button.r = 255;
-	start_button.g = 255;
-	start_button.b = 255;
-	start_button.a = 255;
-	start_button.draw_rect =  {128, 128, 128, 128};
-	start_button.pressed = false;
+int Render::drawMenu() {
 
-	enum {
-		STATE_IN_MENU,
-		STATE_IN_GAME
-	};
-	int state = 0;
+	ImageLoader imgLoad;
+	SDL_Texture* menuSinglePlayer = imgLoad.loadImage("src/res/images/menu_single_player.png", gRenderer);
+	SDL_Texture* menuMultiPlayer = imgLoad.loadImage("src/res/images/menu_multi_player.png", gRenderer);
+	SDL_Texture* menuCredits = imgLoad.loadImage("src/res/images/menu_credits.png", gRenderer);
 
 	bool quit = false;
+	int menuOption = MENU_SINGLE;
   	while(!quit) {
 		SDL_Event e;
 
 		while(SDL_PollEvent(&e)) {
 			if(e.type == SDL_QUIT || (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_CLOSE)) {
 				quit = true;
-			}
-
-			button_process_event(&start_button, &e);
-		}
-
-		SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 255);
-		SDL_RenderClear(gRenderer);
-
-		if(state == STATE_IN_MENU) {
-			if(button(&start_button)) {
-				state = STATE_IN_GAME; 
-			} else if(state == STATE_IN_GAME) {
-				return true;
-				std::cout << "Start game" << std::endl;
+			} else if(e.type == SDL_KEYDOWN) {
+				switch(e.key.keysym.sym) {
+					case SDLK_s:
+						menuOption++;
+						break;
+					case SDLK_w:
+						menuOption--;
+						break;
+					case SDLK_RETURN:
+						return menuOption;
+						break;
+				} 
 			}
 		}
+
+		if(menuOption == -1) {
+			menuOption = MENU_CREDITS;
+		}
+
+		if(menuOption == 3) {
+			menuOption = MENU_SINGLE;
+		}
+
+		SDL_Rect fullscreen = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+		if(menuOption == MENU_SINGLE) {
+			SDL_RenderCopy(gRenderer, menuSinglePlayer, NULL, &fullscreen); 
+		} else if(menuOption == MENU_MULTI) {
+			SDL_RenderCopy(gRenderer, menuMultiPlayer, NULL, &fullscreen); 
+		} else {
+			SDL_RenderCopy(gRenderer, menuCredits, NULL, &fullscreen); 
+		}
+
 		SDL_RenderPresent(gRenderer);
 	}
-	return false;
-}
 
-bool Render::button(button_t *btn) {
-    // draw button
-    SDL_SetRenderDrawColor(gRenderer, btn->r, btn->g, btn->b, btn->a);
-    SDL_RenderFillRect(gRenderer, &btn->draw_rect);
-
-    // if button press detected - reset it so it wouldn't trigger twice
-    if(btn->pressed) {
-        btn->pressed = false;
-        return true;
-    }
-    return false;
-}
-
-void Render::button_process_event(button_t *btn, const SDL_Event *e) {
-    // react on mouse click within button rectangle by setting 'pressed'
-    if(e->type == SDL_MOUSEBUTTONDOWN) {
-        if(e->button.button == SDL_BUTTON_LEFT &&
-                e->button.x >= btn->draw_rect.x &&
-                e->button.x <= (btn->draw_rect.x + btn->draw_rect.w) &&
-                e->button.y >= btn->draw_rect.y &&
-                e->button.y <= (btn->draw_rect.y + btn->draw_rect.h)) {
-            btn->pressed = true;
-        }
-    }
+	return menuOption;
 }
 
 void Render::setTileMap(int** tileMap) {

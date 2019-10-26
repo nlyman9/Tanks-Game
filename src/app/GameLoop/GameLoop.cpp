@@ -118,7 +118,7 @@ bool GameLoop::init(Render* renderer) {
  * @brief The actual GameLoop
  * 
  */
-int GameLoop::run()
+int GameLoop::runSinglePlayer()
 {
 	SDL_Event e;
 	previous_time = std::chrono::system_clock::now(); // get current time of system
@@ -160,5 +160,11 @@ int GameLoop::run()
 	}
 
 	// Exit normally
+	return 0;
+}
+
+int GameLoop::runMultiPlayer()
+{
+	std::cout << "MULTIPLAYER MADNESS" << std::endl;
 	return 0;
 }

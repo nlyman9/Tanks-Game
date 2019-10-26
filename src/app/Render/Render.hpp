@@ -10,15 +10,11 @@
 #include "MapGenerator.hpp"
 #include "ImageLoader.hpp"
 
-typedef struct {
-    SDL_Rect draw_rect;
-    int r;
-    int g;
-    int b;
-    int a;
-    bool pressed;
-} button_t;
-
+enum {
+    MENU_SINGLE,
+    MENU_MULTI,
+    MENU_CREDITS
+};
 
 class Render {
     public:
@@ -29,7 +25,7 @@ class Render {
         ~Render();
 
         int draw(double update_lag);
-        bool drawMenu();
+        int drawMenu();
         bool init();
         void close();
 
@@ -44,6 +40,7 @@ class Render {
         std::vector<SDL_Texture*> gTex;
         SDL_Window* gWindow;
         SDL_Renderer* gRenderer;
+        SDL_Surface* gScreenSurface;
 
         Player* gPlayer;
 
@@ -51,8 +48,5 @@ class Render {
         SDL_Rect gTileRects[3];
 
         int** tile_map;
-
-        bool button(button_t *btn);
-        void button_process_event(button_t *btn, const SDL_Event *e);
 };
 #endif
