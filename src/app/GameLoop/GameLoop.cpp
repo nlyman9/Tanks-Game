@@ -3,10 +3,26 @@
 #include "GameLoop.hpp"
 #include "Constants.hpp"
 #include "Sprite.hpp"
+#include <stdio.h>
+#include <unistd.h>
+#include<iostream>
+
+std::string GetCurrentWorkingDir( void ) {
+  char buff[FILENAME_MAX];
+  getcwd( buff, FILENAME_MAX );
+  std::string current_working_dir(buff);
+  return current_working_dir;
+}
 
 GameLoop::~GameLoop() {}
 
 bool GameLoop::networkInit(Args *options) {
+	if(fork() == 0){
+		//child process
+		char *args[]={NULL}; 
+		execvp("build/bin/server", args);
+		std::cout << "execvp failed????" << std::endl;
+	}
 	// Create host process
 		// Wait for connections
 

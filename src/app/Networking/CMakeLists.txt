@@ -2,7 +2,6 @@ add_library(Networking
   STATIC
   Network.hpp
   Network.cpp
-
   Server.cpp
   Client.cpp
 )

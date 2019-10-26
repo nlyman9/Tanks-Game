@@ -14,12 +14,13 @@
 #include <iostream>
 #include <vector>
 #include <unistd.h>
-
+#include <SDL2/SDL_image.h>
 #include <SDL2/SDL.h>
 
 SDL_Window* gWindow;
 SDL_Surface* gSurface;
 SDL_Renderer* gRenderer;
+
 constexpr int SCREEN_HEIGHT = 720;
 constexpr int SCREEN_WIDTH = 1296;
 constexpr int TILE_SIZE = 48;
@@ -62,97 +63,6 @@ std::vector<char>* pack(std::vector<int>* x, std::vector<char>* packed, int bits
         packed->push_back(temp); 
 
     return packed;
-}
-std::vector<char> *packMap(std::vector<int> map, std::vector<char>* mapPacked)
-{
-    /*
-        bring in an array of int representing the map
-        the map is 15 tiles downward and 27 tiles across
-        each tile can be represented by 3 bits
-        that ends up with 405 possible tiles and 1215 bits
-        which is 151.875 -> 152 chars
-        Rules for each tile
-        bit     descr     integer rep
-        000 - Passable      -  0
-        001 - hole          -  1
-        010 - wall/obstacle -  2
-        011 - bomb tile     -  3
-        100 - destroyed ob  -  4
-        101 - UNUSED        -  5
-        110 - UNUSED        -  6
-        111 - UNUSED        -  7
-    */
-    /*
-        since c++ is not bit addressable, I need to create a bool vector
-        for each int in the map array
-        I need to isolate the bits and push them in to the workingSet bool array
-    */
-    int x = 0;
-    int y = 0;
-    SDL_Rect currentTile;
-    std::vector<bool> workingSet;
-    for (auto curr : map)
-    {
-        bool bit2 = (bool)(curr >> 2 & 1);
-        bool bit1 = (bool)((curr >> 1) & 1);
-        bool bit0 = (bool)((curr) & 1);
-
-        workingSet.push_back(bit2);
-        //std::cout << (curr >> 2 & 1);
-        workingSet.push_back(bit1);
-        //std::cout << (curr >> 1 & 1);
-        workingSet.push_back(bit0);
-        //std::cout << (curr & 1);
-
-        // Extract row and column from the 1D vector
-        if(x == 27) {
-            y++;
-            x = 0;
-        }
-        currentTile = {x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE};
-        if(!bit2 && !bit1 && !bit0) {
-            SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0x00, 0xFF);
-        }
-        if(!bit2 && !bit1 && bit0) {
-            SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0xFF, 0x00);
-        }
-        if(!bit2 && bit1 && !bit0) {
-            SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0x00, 0x00);
-        }
-        if(!bit2 && bit1 && bit0) {
-            SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0xFF, 0xFF);
-        }
-        if(bit2 && !bit1 && !bit0) {
-            SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0x00, 0xFF);
-        }
-        SDL_RenderFillRect(gRenderer, &currentTile);
-        x++;
-	}
-    SDL_RenderPresent(gRenderer);
-
-    /*
-        working set is a bool vector, but I need to return a char array
-        so I need to take every 8 bools and pack them into a char
-    */
-   	int i = 0;
-	char temp = 0;
-	for(auto currInSet : workingSet){
-		//std::cout << currInSet;
-		temp = temp | ((char) currInSet << (7-i));
-		if((i == 7) && i != 0){
-			mapPacked->push_back(temp);
-			temp = 0;
-			i = -1;
-		}
-		i++;
-	}
-	if(i+1 < 8 && i != 0) 
-        mapPacked->push_back(temp); //push back the last temp if the above array did not align
-	//std::cout << "Binary Representation of map : \n";
-	//for(auto curr : *mapPacked){
-	//	std::cout << (int)(curr >> 7 & 1) << (int)(curr >> 6 & 1) << (int)(curr >> 5 & 1) << (int)(curr >> 4 & 1) << (int)(curr >> 3 & 1) << (int)(curr >> 2 & 1) << (int)(curr >> 1 & 1) << (int)(curr & 1) << '\n';
-	//}
-    return mapPacked;
 }
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
@@ -256,7 +166,7 @@ int main()
         std::cout << "Unsuccessful SDL initalization" << std::endl;
         exit(1);
     }
-
+    std::cout << "running server." << std::endl;
     std::vector<int>* test = new std::vector<int>();
     std::vector<char> test2;
     //create a map that just cycles through the tiles
