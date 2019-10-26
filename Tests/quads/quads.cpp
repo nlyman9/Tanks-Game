@@ -55,7 +55,16 @@ int main() {
     int num, num_lines, num_quads, quad_type = 0;
 
     std::vector<std::vector<std::vector<int>>> quads;
+
+    std::vector<std::vector<std::vector<int>>> quadrant_1;
+    std::vector<std::vector<std::vector<int>>> quadrant_2;
+    std::vector<std::vector<std::vector<int>>> quadrant_3;
+    std::vector<std::vector<std::vector<int>>> quadrant_4;
+    std::vector<std::vector<std::vector<int>>> quadrant_5;
+    std::vector<std::vector<std::vector<int>>> quadrant_6;
     
+    std::vector<std::vector<std::vector<int>>> quadrant_all;
+
     if (infile.is_open()) {
 
         while (std::getline(infile, line))  // calculate the number of lines in the file
@@ -89,31 +98,68 @@ int main() {
                 switch (quad_type) {
 
                     case 4: {   // corner quads 
-                        quads.push_back(quad);
+                        quadrant_1.push_back(quad);
                         auto corners = corner(quad);
-                        for (auto& c : corners)
-                            quads.push_back(c);
+                        quadrant_4.push_back(corners.at(0));
+                        quadrant_6.push_back(corners.at(1));
+                        quadrant_3.push_back(corners.at(2));
                         break;
                     }   
                     case 5: {   // middle quads
-                        quads.push_back(quad);
-                        quads.push_back(flip(quad));
+                        quadrant_2.push_back(quad);
+                        quadrant_5.push_back(flip(quad));
+                        quadrant_all.push_back(quad);
+                        quadrant_all.push_back(flip(quad));
                         break;
                     }
                     case 6: {   // any quad
-                        quads.push_back(quad);
+                        quadrant_all.push_back(quad);
                         break;
                     }
                     case 7: {   // mirror
-                        quads.push_back(quad);
-                        quads.push_back(mirror(quad));
+                        quadrant_1.push_back(quad);
+                        quadrant_4.push_back(quad);
+                        quadrant_3.push_back(mirror(quad));
+                        quadrant_6.push_back(mirror(quad));
                         break;
                     }
                     default: {  // 6 - any quads
                         // quads.push_back(quad);
+                        std::cout << "Reached default case" << std::endl;
                         break;
                     }
                 }
+
+                quad_type = 0;
+
+                // switch (quad_type) {
+
+                //     case 4: {   // corner quads 
+                //         quads.push_back(quad); // push into 1
+                //         auto corners = corner(quad);
+                //         for (auto& c : corners)
+                //             quads.push_back(c); // push into 4, 6, 3
+                //         break;
+                //     }   
+                //     case 5: {   // middle quads
+                //         quads.push_back(quad);
+                //         quads.push_back(flip(quad));
+                //         break;
+                //     }
+                //     case 6: {   // any quad
+                //         quads.push_back(quad);
+                //         break;
+                //     }
+                //     case 7: {   // mirror
+                //         quads.push_back(quad);
+                //         quads.push_back(mirror(quad));
+                //         break;
+                //     }
+                //     default: {  // 6 - any quads
+                //         // quads.push_back(quad);
+                //         break;
+                //     }
+                // }
             }
                 
         }
@@ -123,7 +169,28 @@ int main() {
         std::cout << "unable to open file";
     }
     
-    print_quads(quads);
+    // print_quads(quads);
+
+    std::cout << "Quadrant 1:" << std::endl;
+    print_quads(quadrant_1);
+
+    std::cout << "Quadrant 2:" << std::endl;
+    print_quads(quadrant_2);
+
+    std::cout << "Quadrant 3:" << std::endl;
+    print_quads(quadrant_3);
+
+    std::cout << "Quadrant 4:" << std::endl;
+    print_quads(quadrant_4);
+
+    std::cout << "Quadrant 5:" << std::endl;
+    print_quads(quadrant_5);
+
+    std::cout << "Quadrant 6:" << std::endl;
+    print_quads(quadrant_6);
+
+    std::cout << "Quadrant All" << std::endl;
+    print_quads(quadrant_all);
 
     return 0;
 }
