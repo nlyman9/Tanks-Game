@@ -11,9 +11,11 @@ void StartUpMenu::launch(Args *options)
 
   int gameMode = renderer->drawMenu();
   if(gameMode == MENU_SINGLE) {
+    gLoop.initMapSinglePlayer();
     gLoop.runSinglePlayer();
   } else if(gameMode == MENU_MULTI) {
     gLoop.networkInit(options);
+    gLoop.initMapMultiPlayer();
     //run the game loop
 	  gLoop.networkRun();
   } else {

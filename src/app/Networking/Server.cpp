@@ -16,13 +16,11 @@
 #include <unistd.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL.h>
-#include "GameLoop.hpp"
 #include "Server.hpp"
+#include "MapGenerator.hpp"
 
-SDL_Window* gWindow;
-SDL_Surface* gSurface;
-SDL_Renderer* gRenderer;
 bool readyToSend = false;
+
 std::vector<char>* pack(std::vector<int>* x, std::vector<char>* packed, int bits)
 {   
     std::vector<bool> workingSet;
@@ -49,6 +47,7 @@ std::vector<char>* pack(std::vector<int>* x, std::vector<char>* packed, int bits
 
     return packed;
 }
+
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
 {
@@ -59,6 +58,7 @@ void *get_in_addr(struct sockaddr *sa)
 
     return &(((struct sockaddr_in6 *)sa)->sin6_addr);
 }
+
 std::vector<int> *unpack(std::vector<char>* packed, std::vector<int> *unPacked, int bits){
 	std::vector<bool> workSet;
     int i;
@@ -81,63 +81,17 @@ std::vector<int> *unpack(std::vector<char>* packed, std::vector<int> *unPacked, 
     std::cout << unPacked->size() << std::endl;
     return unPacked;
 }
+
 std::vector<int>* serverMapGen(){
     std::vector<int>* retval = new std::vector<int>();
     //create a map that just cycles through the tiles
-    	// Fill 2D tile array of tiles with all 0s
-	// int** array = 0;
-	int** tile_map = new int*[24];
+    MapGenerator* mapGen = new MapGenerator();    
+	int** tile_map = mapGen->generateMap();
 
-	for(int j = 0; j < 24; j++)
-	{
-		tile_map[j] = new int[13];
-		for(int h = 0; h < 13; h++)
-		{
-			tile_map[j][h] = 0;
-		}
-	}
-
-	//small randomly generated thing
-	MapGenerator* mapGen = new MapGenerator();
-
-	// Select map generation technique
-	enum map_types { destructible, holes, line, maze, mirror };
-	srand(time(NULL));
-
-	// switch(rand() % 4)
-	switch(line)
-	{
-		case destructible:
-			tile_map[4][4] = 2;
-			break;
-		case holes:
-			tile_map[1][1] = 2;
-			break;
-		case line:
-			tile_map = mapGen->generateLineMap();
-			break;
-		case maze:
-			tile_map[6][10] = 2;
-			break;
-		case mirror:
-			tile_map = mapGen->generateMirrorMap();
-			tile_map[14][10] = 2;
-			break;
-	}
-        std::cout<< "Server map array" << std::endl;
-    	for(int j = 0; j < 24; j++)
-	    {
-            for(int h = 0; h < 13; h++)
-            {
-                retval->push_back(tile_map[j][h]);
-                std::cout << tile_map[j][h];
-            }
-            std::cout<< std::endl;
-	    }
-
-        return retval;
+    return retval;
 
 }
+
 int sendThread( void* data){
 
     int newfd;
@@ -239,6 +193,7 @@ int sendThread( void* data){
         }*/
     }
 }
+
 int main()
 {
 

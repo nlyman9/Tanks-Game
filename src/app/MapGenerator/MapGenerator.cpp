@@ -72,3 +72,44 @@ int** MapGenerator::generateLineMap() {
 	}
 	return room;
 }
+
+int** MapGenerator::generateMap() {
+	// Fill 2D tile array of tiles with all 0s
+	tile_map = new int*[24];
+
+	for(int j = 0; j < 24; j++)
+	{
+		tile_map[j] = new int[13];
+		for(int h = 0; h < 13; h++)
+		{
+			tile_map[j][h] = 0;
+		}
+	}
+
+	// Select map generation technique
+	enum map_types { destructible, holes, line, maze, mirror };
+	srand(time(NULL));
+
+	// switch(rand() % 4)
+	switch(line)
+	{
+		case destructible:
+			tile_map[4][4] = 2;
+			break;
+		case holes:
+			tile_map[1][1] = 2;
+			break;
+		case line:
+			tile_map = generateLineMap();
+			break;
+		case maze:
+			tile_map[6][10] = 2;
+			break;
+		case mirror:
+			tile_map = generateMirrorMap();
+			tile_map[14][10] = 2;
+			break;
+	}
+
+	return tile_map;
+}

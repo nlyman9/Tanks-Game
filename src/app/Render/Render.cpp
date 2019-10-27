@@ -40,7 +40,7 @@ bool Render::init()
 		return false;
 	}
 
-		// Set renderer draw/clear color
+	// Set renderer draw/clear color
 	SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
 	ImageLoader imgLoad;
 	gTileSheet = imgLoad.loadImage("src/res/images/tiles.png", gRenderer);

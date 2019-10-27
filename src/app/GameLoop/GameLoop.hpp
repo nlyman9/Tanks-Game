@@ -26,6 +26,8 @@ class GameLoop {
     bool init(Render* renderer);
     int runSinglePlayer();
     int networkRun();
+    void initMapSinglePlayer();
+    void initMapMultiPlayer();
 
   private:
     // Render class to render the game
@@ -50,6 +52,6 @@ class GameLoop {
 
     // Map Building Variables
     std::vector<SDL_Rect> tileArray;
-    int** tile_map;
+
 };
 #endif

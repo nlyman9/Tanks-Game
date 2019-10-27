@@ -6,9 +6,11 @@ constexpr int Y_HIGH = 13;
 
 class MapGenerator{
   public:
-    int** generateLineMap();
-    int** generateMirrorMap();
+    int** generateMap();
   private:
+    int** tile_map;
+    int** generateMirrorMap();
+    int** generateLineMap();
     int room[X_WIDE][Y_HIGH];
 };
 
