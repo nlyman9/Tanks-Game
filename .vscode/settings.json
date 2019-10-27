@@ -1,3 +1,57 @@
+<<<<<<< HEAD
+{
+    "files.associations": {
+        "vector": "cpp",
+        "array": "cpp",
+        "deque": "cpp",
+        "string_view": "cpp",
+        "__split_buffer": "cpp",
+        "queue": "cpp",
+        "string": "cpp",
+        "atomic": "cpp",
+        "*.tcc": "cpp",
+        "cctype": "cpp",
+        "clocale": "cpp",
+        "cmath": "cpp",
+        "cstdarg": "cpp",
+        "cstddef": "cpp",
+        "cstdint": "cpp",
+        "cstdio": "cpp",
+        "cstdlib": "cpp",
+        "cstring": "cpp",
+        "cwchar": "cpp",
+        "cwctype": "cpp",
+        "unordered_map": "cpp",
+        "exception": "cpp",
+        "algorithm": "cpp",
+        "memory": "cpp",
+        "memory_resource": "cpp",
+        "optional": "cpp",
+        "system_error": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp",
+        "fstream": "cpp",
+        "initializer_list": "cpp",
+        "iosfwd": "cpp",
+        "iostream": "cpp",
+        "istream": "cpp",
+        "limits": "cpp",
+        "new": "cpp",
+        "ostream": "cpp",
+        "sstream": "cpp",
+        "stdexcept": "cpp",
+        "streambuf": "cpp",
+        "cinttypes": "cpp",
+        "typeinfo": "cpp",
+        "chrono": "cpp",
+        "complex": "cpp",
+        "ctime": "cpp",
+        "ratio": "cpp",
+        "codecvt": "cpp",
+        "filesystem": "cpp"
+    }
+=======
 {
     "files.associations": {
         "vector": "cpp",
@@ -48,4 +102,5 @@
         "ctime": "cpp",
         "ratio": "cpp"
     }
+>>>>>>> 38d397e3885ae5bd61407c0fc9289f31c34455e6
 }

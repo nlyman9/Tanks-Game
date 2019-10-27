@@ -10,16 +10,16 @@
 #include <iostream>
 #include <vector>
 #include <unistd.h>
-constexpr int headersize = 20; //dont know what to put this as yet
+//constexpr int headersize = 20;
 class Network{
     public:
         void sender(int fd, std::vector<int>* buffer, size_t t, int flags, int csFlag);
         void sender(int fd, std::vector<char>* buffer, size_t t, int flags, int csFlag);
-    private:
         std::vector<char>* pack(std::vector<int>* x, std::vector<char>* packed, int bits);
         std::vector<int> *unpack(std::vector<char>* packed, std::vector<int> *unPacked, int bits);
         std::vector<int> *unpack(std::vector<char>* packed, std::vector<int> *unPacked, int bits, int numbers);
         std::vector<char>* packMap(std::vector<int>* map, std::vector<char>* mapPacked);
+    private:
         void sendMap(int fd, std::vector<int>* map, size_t t, int flags, int csFlag);
 };
 #endif

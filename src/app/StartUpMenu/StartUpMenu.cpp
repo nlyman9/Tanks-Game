@@ -14,7 +14,8 @@ void StartUpMenu::launch(Args *options)
     gLoop.runSinglePlayer();
   } else if(gameMode == MENU_MULTI) {
     gLoop.networkInit(options);
-    gLoop.runMultiPlayer();
+    //run the game loop
+	  gLoop.networkRun();
   } else {
     std::cout << "ROLL CREDITS" << std::endl;
   }

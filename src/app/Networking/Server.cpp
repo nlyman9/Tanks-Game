@@ -14,29 +14,15 @@
 #include <iostream>
 #include <vector>
 #include <unistd.h>
-
+#include <SDL2/SDL_image.h>
 #include <SDL2/SDL.h>
+#include "GameLoop.hpp"
+#include "Server.hpp"
 
 SDL_Window* gWindow;
 SDL_Surface* gSurface;
 SDL_Renderer* gRenderer;
-constexpr int SCREEN_HEIGHT = 720;
-constexpr int SCREEN_WIDTH = 1296;
-constexpr int TILE_SIZE = 48;
-
-class Client
-{
-public:
-    int sockfd;
-    struct sockaddr *clientAddr;
-    Client(int fd, sockaddr *addr) : sockfd{fd}, clientAddr{addr} {}
-    ~Client()
-    {
-        delete &sockfd;
-        delete clientAddr;
-        printf("Closing client connection %d", sockfd);
-    }
-};
+bool readyToSend = false;
 std::vector<char>* pack(std::vector<int>* x, std::vector<char>* packed, int bits)
 {   
     std::vector<bool> workingSet;
@@ -63,97 +49,6 @@ std::vector<char>* pack(std::vector<int>* x, std::vector<char>* packed, int bits
 
     return packed;
 }
-std::vector<char> *packMap(std::vector<int> map, std::vector<char>* mapPacked)
-{
-    /*
-        bring in an array of int representing the map
-        the map is 15 tiles downward and 27 tiles across
-        each tile can be represented by 3 bits
-        that ends up with 405 possible tiles and 1215 bits
-        which is 151.875 -> 152 chars
-        Rules for each tile
-        bit     descr     integer rep
-        000 - Passable      -  0
-        001 - hole          -  1
-        010 - wall/obstacle -  2
-        011 - bomb tile     -  3
-        100 - destroyed ob  -  4
-        101 - UNUSED        -  5
-        110 - UNUSED        -  6
-        111 - UNUSED        -  7
-    */
-    /*
-        since c++ is not bit addressable, I need to create a bool vector
-        for each int in the map array
-        I need to isolate the bits and push them in to the workingSet bool array
-    */
-    int x = 0;
-    int y = 0;
-    SDL_Rect currentTile;
-    std::vector<bool> workingSet;
-    for (auto curr : map)
-    {
-        bool bit2 = (bool)(curr >> 2 & 1);
-        bool bit1 = (bool)((curr >> 1) & 1);
-        bool bit0 = (bool)((curr) & 1);
-
-        workingSet.push_back(bit2);
-        //std::cout << (curr >> 2 & 1);
-        workingSet.push_back(bit1);
-        //std::cout << (curr >> 1 & 1);
-        workingSet.push_back(bit0);
-        //std::cout << (curr & 1);
-
-        // Extract row and column from the 1D vector
-        if(x == 27) {
-            y++;
-            x = 0;
-        }
-        currentTile = {x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE};
-        if(!bit2 && !bit1 && !bit0) {
-            SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0x00, 0xFF);
-        }
-        if(!bit2 && !bit1 && bit0) {
-            SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0xFF, 0x00);
-        }
-        if(!bit2 && bit1 && !bit0) {
-            SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0x00, 0x00);
-        }
-        if(!bit2 && bit1 && bit0) {
-            SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0xFF, 0xFF);
-        }
-        if(bit2 && !bit1 && !bit0) {
-            SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0x00, 0xFF);
-        }
-        SDL_RenderFillRect(gRenderer, &currentTile);
-        x++;
-	}
-    SDL_RenderPresent(gRenderer);
-
-    /*
-        working set is a bool vector, but I need to return a char array
-        so I need to take every 8 bools and pack them into a char
-    */
-   	int i = 0;
-	char temp = 0;
-	for(auto currInSet : workingSet){
-		//std::cout << currInSet;
-		temp = temp | ((char) currInSet << (7-i));
-		if((i == 7) && i != 0){
-			mapPacked->push_back(temp);
-			temp = 0;
-			i = -1;
-		}
-		i++;
-	}
-	if(i+1 < 8 && i != 0) 
-        mapPacked->push_back(temp); //push back the last temp if the above array did not align
-	//std::cout << "Binary Representation of map : \n";
-	//for(auto curr : *mapPacked){
-	//	std::cout << (int)(curr >> 7 & 1) << (int)(curr >> 6 & 1) << (int)(curr >> 5 & 1) << (int)(curr >> 4 & 1) << (int)(curr >> 3 & 1) << (int)(curr >> 2 & 1) << (int)(curr >> 1 & 1) << (int)(curr & 1) << '\n';
-	//}
-    return mapPacked;
-}
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
 {
@@ -163,70 +58,6 @@ void *get_in_addr(struct sockaddr *sa)
     }
 
     return &(((struct sockaddr_in6 *)sa)->sin6_addr);
-}
-
-bool initSDL() 
-{
-    if (SDL_Init(SDL_INIT_VIDEO) < 0)
-	{
-		std::cout << "SDL could not initialize! SDL_Error: " << SDL_GetError() << std::endl;
-		return false;
-	}
-
-	if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1"))
-	{
-		std::cout << "Warning: Linear texture filtering not enabled!" << std::endl;
-	}
-
-	gWindow = SDL_CreateWindow("Server", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-	if (gWindow == nullptr)
-	{
-		std::cout << "Window could not be created! SDL_Error: " << SDL_GetError() << std::endl;
-		return false;
-	}
-
-	// SEt up rendered with out vsync
-	gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
-	if (gRenderer == nullptr)
-	{
-		std::cout << "Renderer could not be created! SDL_Error: " << SDL_GetError() << std::endl;
-		return false;
-	}
-
-    return true;
-}
-void displayMap(std::vector<int>* map){
-    std::cout << map->size() << std::endl;
-    int i = 0;
-    int x = 0;
-    int y = 0;
-    SDL_Rect currentTile;
-    for(i = 0 ; i < map->size() ; i++, x++){
-        if(x == 27) {
-            y++;
-            x = 0;
-        }
-        currentTile = {x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE};
-        std::cout << map->at(i) << " ";
-        switch(map->at(i))
-        {   
-            case 0: 
-                SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0x00, 0xFF);
-                break;
-            case 1:
-                SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0xFF, 0x00);
-                break;
-            case 2:
-                SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0x00, 0x00);
-                break;
-            default:
-                SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0x00);
-                break;
-        }
-        SDL_RenderFillRect(gRenderer, &currentTile);
-    }
-    std::cout  << std::endl;
-    SDL_RenderPresent(gRenderer);
 }
 std::vector<int> *unpack(std::vector<char>* packed, std::vector<int> *unPacked, int bits){
 	std::vector<bool> workSet;
@@ -250,23 +81,175 @@ std::vector<int> *unpack(std::vector<char>* packed, std::vector<int> *unPacked, 
     std::cout << unPacked->size() << std::endl;
     return unPacked;
 }
+std::vector<int>* serverMapGen(){
+    std::vector<int>* retval = new std::vector<int>();
+    //create a map that just cycles through the tiles
+    	// Fill 2D tile array of tiles with all 0s
+	// int** array = 0;
+	int** tile_map = new int*[24];
+
+	for(int j = 0; j < 24; j++)
+	{
+		tile_map[j] = new int[13];
+		for(int h = 0; h < 13; h++)
+		{
+			tile_map[j][h] = 0;
+		}
+	}
+
+	//small randomly generated thing
+	MapGenerator* mapGen = new MapGenerator();
+
+	// Select map generation technique
+	enum map_types { destructible, holes, line, maze, mirror };
+	srand(time(NULL));
+
+	// switch(rand() % 4)
+	switch(line)
+	{
+		case destructible:
+			tile_map[4][4] = 2;
+			break;
+		case holes:
+			tile_map[1][1] = 2;
+			break;
+		case line:
+			tile_map = mapGen->generateLineMap();
+			break;
+		case maze:
+			tile_map[6][10] = 2;
+			break;
+		case mirror:
+			tile_map = mapGen->generateMirrorMap();
+			tile_map[14][10] = 2;
+			break;
+	}
+        std::cout<< "Server map array" << std::endl;
+    	for(int j = 0; j < 24; j++)
+	    {
+            for(int h = 0; h < 13; h++)
+            {
+                retval->push_back(tile_map[j][h]);
+                std::cout << tile_map[j][h];
+            }
+            std::cout<< std::endl;
+	    }
+
+        return retval;
+
+}
+int sendThread( void* data){
+
+    int newfd;
+    int nbytes;
+    int i, j;
+    // Loop of server
+    while (gameOn)
+    {
+        std::cout << "server looping" << std::endl;
+        sleep(1);
+        /*read_fds = master;
+        if (select(fdmax + 1, &read_fds, NULL, NULL, NULL) == -1)
+        {
+            perror("select");
+            exit(4);
+        }
+        // Loop through our connections
+        for (i = 0; i <= fdmax; i++)
+        {
+            // Check if one of the connections is in the set read_fds
+            if (FD_ISSET(i, &read_fds))
+            {
+                // Check if it is a new connection
+                if (i == listenerfd)
+                { // if listenerfd is in set, we have a new connection
+                    addr_len = sizeof(remoteaddr);
+                    newfd = accept(listenerfd, (struct sockaddr *)&remoteaddr, &addr_len);      
+                    if (newfd == -1)
+                    {
+                        // Failed to accept
+                        perror("accept");
+                    }
+                    else
+                    {
+                        // Successfully accepted connection
+                        FD_SET(newfd, &master); // Add new connection to master list
+                        if (newfd > fdmax)
+                        {
+                            fdmax = newfd; // Keep track of max
+                        }
+                        printf("New connection from %s on socket %d.\n",
+                               inet_ntop(remoteaddr.ss_family, &remoteaddr, remoteIP, INET_ADDRSTRLEN),
+                               newfd);
+                        //new connection so need to send map data here accepted so send data
+                        //send(newfd, test2.data(), test2.size(), 0);
+                    }
+                }
+                else
+                {
+                    sendBuffer[0] = 'x';
+                    if (FD_ISSET(i, &master)){
+                        send(i, sendBuffer, 8, 0);
+                    }
+                    // Handle data from clients
+                    if ((nbytes = (recv(i, recvBuffer, 100, 0))) <= 0)
+                    {
+                        // Either error or closed connection
+                        if (nbytes == 0)
+                        { // Connection closed
+                            printf("Socket %d disconnected.", i);
+                        }
+                        else
+                        {
+                            perror("recv");
+                        }
+                        // remember to close the fd
+                        close(i);
+                        FD_CLR(i, &master); // Remove from master set
+                    }
+                    else
+                    {
+                        // We have real data from client
+                        for (j = 0; j <= fdmax; j++)
+                        {
+
+                            // relay message to connections
+                            if (FD_ISSET(j, &master))
+                            {
+                                // except the listener and ourselves
+                                if (j != listenerfd && j != i)
+                                {
+
+                                    //sprintf(buffer, "User %d: %.90s", i, buf);
+
+                                    //if (send(j, buffer, nbytes, 0) == -1)
+                                    //{
+                                    //    perror("send");
+                                    //}
+                                }
+                                else if (j == listenerfd)
+                                {
+                                    fflush(stdout);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }*/
+    }
+}
 int main()
 {
-    if(!initSDL()) {
-        std::cout << "Unsuccessful SDL initalization" << std::endl;
-        exit(1);
-    }
 
-    std::vector<int>* test = new std::vector<int>();
+    std::cout << "running server." << std::endl;
+    std::vector<int>* test = serverMapGen();
     std::vector<char> test2;
-    //create a map that just cycles through the tiles
-    for(int i = 0; i < 405; i++) {
-        test->push_back(i % 3);
-    }
+    
     std::vector<int>* test3 = new std::vector<int>();
     pack(test, &test2, 2); //pack map into 3 bits
     unpack(&test2, test3, 2);
-    displayMap(test3);
+    //displayMap(test3);
     // std::cout << "Binary Representation of map : \n";
 	//for(auto curr : test2){
 	//	std::cout << (int)(curr >> 7 & 1) << (int)(curr >> 6 & 1) << (int)(curr >> 5 & 1) << (int)(curr >> 4 & 1) << (int)(curr >> 3 & 1) << (int)(curr >> 2 & 1) << (int)(curr >> 1 & 1) << (int)(curr & 1) << '\n';
@@ -275,19 +258,10 @@ int main()
     delete test; //delete the map from memory
     std::cout << (int) test2.size() << "\n";
     // Set structs and variables for the internet
-    int status;
-    struct addrinfo hints;
-    struct addrinfo *serverInfo, *p;
-    struct sockaddr_storage remoteaddr; // client address; for setting new connections
-    int listenerfd;
-
-    socklen_t addr_len = sizeof(struct sockaddr_storage);
-    fd_set master;   // Master of file descriptors
-    fd_set read_fds; // Read fd's returned from select
-    int fdmax;       // maximym file descriptor number
+    addr_len = sizeof(struct sockaddr_storage);
 
     char remoteIP[INET_ADDRSTRLEN];
-    char buf[105];
+    char buf[152];
 
     FD_ZERO(&master);
     FD_ZERO(&read_fds);
@@ -344,99 +318,14 @@ int main()
     int newfd;
     int nbytes;
     int i, j;
-    char buffer[100];
-    // Loop of server
-    while (1)
-    {
-        read_fds = master;
-        if (select(fdmax + 1, &read_fds, NULL, NULL, NULL) == -1)
-        {
-            perror("select");
-            exit(4);
-        }
+    char* tsBuffer = (char*) calloc(152, sizeof(char)); 
+    std::vector<char>* workingBuffer;
+    std::cout << "Creating send thread" << std::endl;
+    gameOn = true;
+    SDL_CreateThread(sendThread, "send thread", (void*) tsBuffer);
 
-        // Loop through our connections
-        for (i = 0; i <= fdmax; i++)
-        {
-            // Check if one of the connections is in the set read_fds
-            if (FD_ISSET(i, &read_fds))
-            {
-
-                // Check if it is a new connection
-                if (i == listenerfd)
-                { // if listenerfd is in set, we have a new connection
-                    addr_len = sizeof(remoteaddr);
-                    newfd = accept(listenerfd, (struct sockaddr *)&remoteaddr, &addr_len);
-                    
-                    
-                    if (newfd == -1)
-                    {
-                        // Failed to accept
-                        perror("accept");
-                    }
-                    else
-                    {
-                        // Successfully accepted connection
-                        FD_SET(newfd, &master); // Add new connection to master list
-                        if (newfd > fdmax)
-                        {
-                            fdmax = newfd; // Keep track of max
-                        }
-                        printf("New connection from %s on socket %d.\n",
-                               inet_ntop(remoteaddr.ss_family, &remoteaddr, remoteIP, INET_ADDRSTRLEN),
-                               newfd);
-                        //new connection so need to send map data here accepted so send data
-                        send(newfd, test2.data(), test2.size(), 0);
-                    }
-                }
-                else
-                {
-                    // Handle data from clients
-                    if ((nbytes = (recv(i, buf, 100, 0))) <= 0)
-                    {
-                        // Either error or closed connection
-                        if (nbytes == 0)
-                        { // Connection closed
-                            printf("Socket %d disconnected.", i);
-                        }
-                        else
-                        {
-                            perror("recv");
-                        }
-                        // remember to close the fd
-                        close(i);
-                        FD_CLR(i, &master); // Remove from master set
-                    }
-                    else
-                    {
-                        // We have real data from client
-                        for (j = 0; j <= fdmax; j++)
-                        {
-
-                            // relay message to connections
-                            if (FD_ISSET(j, &master))
-                            {
-                                // except the listener and ourselves
-                                if (j != listenerfd && j != i)
-                                {
-
-                                    sprintf(buffer, "User %d: %.90s", i, buf);
-
-                                    if (send(j, buffer, nbytes, 0) == -1)
-                                    {
-                                        perror("send");
-                                    }
-                                }
-                                else if (j == listenerfd)
-                                {
-                                    printf("Client %d: %s\n", i, buf);
-                                    fflush(stdout);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+    //Game stuff here
+    while(gameOn){
+        
     }
 }

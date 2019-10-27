@@ -3,23 +3,42 @@
 #include "GameLoop.hpp"
 #include "Constants.hpp"
 #include "Sprite.hpp"
+#include <stdio.h>
+#include <unistd.h>
+#include <iostream>
+#include <SDL2/SDL_thread.h>
 
 GameLoop::~GameLoop() {}
 
 bool GameLoop::networkInit(Args *options) {
 	// Create host process
-		// Wait for connections
-
+	std::cout << options->isHost << std::endl;
+	if(options->isHost){
+		if(fork() == 0){
+			//child process
+			//checking working dir for testing
+			//char buff[FILENAME_MAX];
+			//getcwd( buff, FILENAME_MAX );
+			//std::string current_working_dir(buff);
+			//std::cout << current_working_dir << std::endl;
+			char *args[]={NULL}; 
+			execvp("build/bin/server", args);
+			//this line should not run!
+			std::cout << "execvp failed" << std::endl;
+		}
+		else{
+		}
+	}
 	// Create client process
-		// Wait for map
-
-		// Download map
-
-		// Unpack map 
-
+	client = new Client();
 	// Init 
-
+	client->init();
 	return true;
+}
+int GameLoop::networkRun(){
+	while(client->gameOn){
+
+	}
 }
 
 /**
@@ -91,7 +110,15 @@ bool GameLoop::init(Render* renderer) {
 			tile_map[14][10] = 2;
 			break;
 	}
-
+		std::cout<< "Client map array" << std::endl;
+		for(int j = 0; j < 24; j++)
+		{
+			for(int h = 0; h < 13; h++)
+			{
+				std::cout<< tile_map[j][h];
+			}
+			std::cout<< std::endl;
+		}
 	render->setTileMap(tile_map);
 
 	int count = 0;
@@ -160,11 +187,5 @@ int GameLoop::runSinglePlayer()
 	}
 
 	// Exit normally
-	return 0;
-}
-
-int GameLoop::runMultiPlayer()
-{
-	std::cout << "MULTIPLAYER MADNESS" << std::endl;
 	return 0;
 }

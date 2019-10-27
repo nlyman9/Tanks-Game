@@ -8,6 +8,7 @@
 #include "Render.hpp"
 #include "Enemy.hpp"
 #include "MapGenerator.hpp"
+#include "Client.hpp"
 
 class Args {
 	public:
@@ -24,7 +25,7 @@ class GameLoop {
     bool networkInit(Args *options);
     bool init(Render* renderer);
     int runSinglePlayer();
-    int runMultiPlayer();
+    int networkRun();
 
   private:
     // Render class to render the game
@@ -32,7 +33,7 @@ class GameLoop {
     Player *player;
     std::vector<Enemy *> enemies;
     bool isGameOn;
-
+    Client* client;
     // Time delta of (current_time) - (previous_time)
     // The ratio sets the duration to calculate in Miliseconds
     std::chrono::duration<double, std::ratio<1, 1000>> elapsed_time;
