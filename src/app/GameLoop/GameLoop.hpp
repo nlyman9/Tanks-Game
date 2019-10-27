@@ -23,9 +23,9 @@ class GameLoop {
     GameLoop() {};
     ~GameLoop();
     bool networkInit(Args *options);
-    bool init();
-    int run();
-    int networkRun(Client* client);
+    bool init(Render* renderer);
+    int runSinglePlayer();
+    int networkRun();
 
   private:
     // Render class to render the game
@@ -33,7 +33,7 @@ class GameLoop {
     Player *player;
     std::vector<Enemy *> enemies;
     bool isGameOn;
-
+    Client* client;
     // Time delta of (current_time) - (previous_time)
     // The ratio sets the duration to calculate in Miliseconds
     std::chrono::duration<double, std::ratio<1, 1000>> elapsed_time;

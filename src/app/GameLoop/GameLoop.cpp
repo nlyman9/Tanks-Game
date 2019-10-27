@@ -30,14 +30,12 @@ bool GameLoop::networkInit(Args *options) {
 		}
 	}
 	// Create client process
-	Client* client = new Client();
+	client = new Client();
 	// Init 
 	client->init();
-	//run the game loop
-	networkRun(client);
 	return true;
 }
-int GameLoop::networkRun(Client* client){
+int GameLoop::networkRun(){
 	while(client->gameOn){
 
 	}
@@ -51,11 +49,12 @@ int GameLoop::networkRun(Client* client){
  * @return true - Initialized successfully
  * @return false - Failed to initialize
  */
-bool GameLoop::init() {
+bool GameLoop::init(Render* renderer) {
 	player = new Player(75, 50);
 	enemies.push_back(new Enemy( SCREEN_WIDTH - TANK_WIDTH/2 - 75, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, player));
-	render = new Render(player, enemies);
-	render->init();
+	render = renderer;
+	render->setPlayer(player);
+	render->setEnemies(enemies);
 
 	Sprite *player_tank = new Sprite(render->getRenderer(), "src/res/images/red_tank.png");
 	player_tank->init();
@@ -146,7 +145,7 @@ bool GameLoop::init() {
  * @brief The actual GameLoop
  * 
  */
-int GameLoop::run()
+int GameLoop::runSinglePlayer()
 {
 	SDL_Event e;
 	previous_time = std::chrono::system_clock::now(); // get current time of system
