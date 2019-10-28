@@ -16,7 +16,8 @@ bool GameLoop::networkInit(Args *options) {
 	if(options->isHost){
 		if(fork() == 0){
 			//child process
-			execvp("build/bin/ServerProcess", nullptr);
+			char* args[] = {NULL};
+			execvp("build/bin/ServerProcess", args);
 			//this line should not run!
 			std::cout << "execvp failed" << std::endl;
 			exit(-1);
@@ -36,14 +37,14 @@ void GameLoop::initMapMultiPlayer() {
 	std::vector<int> tile_map = client->gameMap;
 	std::vector<std::vector<int>> map2D;
 	// init the first row
-	map2D.push_back(std::vector<int>((SCREEN_WIDTH - BORDER_GAP - TILE_SIZE) / TILE_SIZE));
+	map2D.push_back(std::vector<int>((SCREEN_WIDTH - BORDER_GAP - TILE_SIZE) / TILE_SIZE - 1));
 	int row = 0;
 	int col = 0;
 	for (auto tile : tile_map) {
-		if(col == ( SCREEN_WIDTH - BORDER_GAP - TILE_SIZE) / TILE_SIZE) {
+		if(col == (SCREEN_HEIGHT - TILE_SIZE) / TILE_SIZE - 1) {
 			row++;
 			col = 0;
-			map2D.push_back(std::vector<int>((SCREEN_WIDTH - BORDER_GAP - TILE_SIZE) / TILE_SIZE));
+			map2D.push_back(std::vector<int>((SCREEN_WIDTH - BORDER_GAP - TILE_SIZE) / TILE_SIZE - 1));
 		}
 		map2D[row][col] = tile;
 		col++;
@@ -94,17 +95,11 @@ int GameLoop::networkRun() {
 		// Update if time since last update is >= MS_PER_UPDATE
 		while(lag_time >= MS_PER_UPDATE) {
 			player->update();
-			
-			for (auto enemy: enemies) {
-				enemy->update();
-			}
-
 			lag_time -= MS_PER_UPDATE;
 		}
 
 		// 3. Render
 		// Render everything 
-		std::cout << "render" << std::endl;
 		render->draw(lag_time / MS_PER_UPDATE);
 	}
 
@@ -122,18 +117,19 @@ int GameLoop::networkRun() {
  */
 bool GameLoop::init(Render* renderer) {
 	player = new Player(75, 50);
-	enemies.push_back(new Enemy( SCREEN_WIDTH - TANK_WIDTH/2 - 75, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, player));
 	render = renderer;
 	render->setPlayer(player);
-	render->setEnemies(enemies);
-
+	
+	// Init the player
 	Sprite *player_tank = new Sprite(render->getRenderer(), "src/res/images/red_tank.png");
-	player_tank->init();
+	player_tank->init();	
+	player->setSprite(player_tank);
 
+	// Init the enemy
+	enemies.push_back(new Enemy( SCREEN_WIDTH - TANK_WIDTH/2 - 75, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, player));
+	render->setEnemies(enemies);
 	Sprite *enemy_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
 	enemy_tank->init();
-
-	player->setSprite(player_tank);
 	for (auto enemy : enemies) {
 		enemy->setSprite(enemy_tank);
 	}
@@ -145,7 +141,7 @@ bool GameLoop::init(Render* renderer) {
 }
 
 void GameLoop::initMapSinglePlayer() {
-	//small randomly generated thing
+	// Generate map
 	MapGenerator* mapGen = new MapGenerator();
 	std::vector<std::vector<int>>* map = mapGen->generateMap();
 	render->setTileMap(map);

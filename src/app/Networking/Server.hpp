@@ -17,8 +17,7 @@
 #include <SDL2/SDL_thread.h>
 
 char* tsBuffer;
-//buffer to fill in
-std::vector<char>* fBuffer;
+
 //receive buffer
 char* sendBuffer;
 char* recvBuffer;
@@ -34,7 +33,7 @@ fd_set read_fds;    // Read fd's returned from select
 int fdmax;          // maximym file descriptor number
 int nbytes;
 socklen_t addr_len;
-std::vector<char> test2;
+std::vector<char> packedMap;
 
 bool gameOn;
  

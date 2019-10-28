@@ -10,37 +10,35 @@
 
 bool mapReceived = false;
 
-int receiveThread( void* data) {
+int receiveThread(void* data) {
+
+    // Unpack data in the recvBuffer and Client object
     char* recvBuffer = (char*) data; 
     data = static_cast<char*>(data) + 1;
     Client* crClient = (Client*) data;
     std::cout << "Client info: " << std::endl;
     std::cout << crClient->status << std::endl;
     std::cout << "Receive thread created!" << std::endl;
+
+    // Game loop
     while(crClient->gameOn) {
-        std::cout << "looping in thread" << std::endl;
-        sleep(1);
         crClient->read_fds = crClient->master;
         // Check for any response from serrver
-        std::cout << "select" << std::endl;
         if (select(crClient->fdmax+1, &crClient->read_fds, NULL, NULL, NULL) == -1) {
-            perror("select");
+            std::cout << "Select error" << std::endl;
             exit(4);
         }
         // If from server
-        std::cout << "FD IS SET" << std::endl;
         if (FD_ISSET(crClient->sockfd, &crClient->read_fds)) {
             crClient->nbytes = recv(crClient->sockfd, recvBuffer, 152, 0);
-            std::cout << "nbytes: " << crClient->nbytes << std::endl;
             if (crClient->nbytes <= 0) {
                 std::cout << "Connection closing" << std::endl;
                 close(crClient->sockfd);
                 exit(10);
             } else {
                 //recieved data
-                std::cout << "receiving" << std::endl;
+                std::cout << "receiving map data..." << std::endl;
                 std::vector<char> test(recvBuffer, recvBuffer + crClient->nbytes);
-                std::cout << "Received test.size()" << test.size() << std::endl;
                 std::vector<int> map;
                 if(!mapReceived){
                    crClient->network->unpack(&test, &map, 3);
@@ -57,7 +55,6 @@ bool Client::pollMap() {
 }
 
 bool Client::init() {
-    std::cout << "initting client" << std::endl;
     // Innitialize sets to zero
     FD_ZERO(&master);
     FD_ZERO(&read_fds);
@@ -69,7 +66,7 @@ bool Client::init() {
 
     // Get address info of server
     if ((status = getaddrinfo("127.0.0.1", "8123", &hints, &serverInfo)) != 0) {
-        perror("failed to get address info");
+        std::cout << "Failed to get address info" << std::endl;
         exit(4);
     }
 
@@ -77,12 +74,11 @@ bool Client::init() {
     sockfd = socket(serverInfo->ai_family, serverInfo->ai_socktype, serverInfo->ai_protocol);
 
     // Connect to server
-    std::cout << "connecting" << std::endl;
     while (connect(sockfd, serverInfo->ai_addr, serverInfo->ai_addrlen) < 0) {
-        //perror("failed to connect");
-
+        std::cout << "Waiting for connection..." << std::endl;
+        sleep(1);
     }
-    std::cout << "connected" << std::endl;
+    std::cout << "Connected" << std::endl;
 
     // Add server fd to master
     FD_SET(sockfd, &master);
@@ -90,6 +86,7 @@ bool Client::init() {
     FD_SET(STDIN_FILENO, &master);
 
     fdmax = sockfd;
+
     //initialize all buffers
     //receive buffer
     rcBuffer = (char*) calloc(152, sizeof(char)); 
@@ -97,18 +94,16 @@ bool Client::init() {
     tsBuffer = (char*) calloc(152, sizeof(char)); 
     //buffer to fill in
     fBuffer = new std::vector<char>();
-    void* pointers = malloc(sizeof(void)*2);
-    pointers = (void*) rcBuffer;
-    pointers = static_cast<char*>(pointers) + 1;
-    pointers = (void*) this;
-    pointers = static_cast<char*>(pointers) - 1;
+
+    // Pack recvBuffer and Client into void pointer for thread
+    void* clientInfo = malloc(sizeof(void)*2);
+    clientInfo = (void*) rcBuffer;
+    clientInfo = static_cast<char*>(clientInfo) + 1;
+    clientInfo = (void*) this;
+    clientInfo = static_cast<char*>(clientInfo) - 1;
     gameOn = true;
-    rcThread = SDL_CreateThread(receiveThread, "myThread", (void*) pointers);
-    //SDL_Thread* sThread =  SDL_CreateThread(sendThread, (void*) this);
+    rcThread = SDL_CreateThread(receiveThread, "myThread", (void*) clientInfo);
     return true;
 }
 
-Client Client::initClient(Client c){
-    
-}
-
+Client Client::initClient(Client c) {}

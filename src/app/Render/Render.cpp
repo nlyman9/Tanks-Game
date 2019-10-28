@@ -124,7 +124,6 @@ int Render::drawMenu() {
 }
 
 void Render::setTileMap(std::vector<std::vector<int>>* tileMap) {
-	std::cout << "set map" << std::endl;
 	tile_map = *tileMap;
 }
 
