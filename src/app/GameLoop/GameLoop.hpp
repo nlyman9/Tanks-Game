@@ -8,13 +8,26 @@
 #include "Render.hpp"
 #include "Enemy.hpp"
 #include "MapGenerator.hpp"
+#include "Client.hpp"
+
+class Args {
+	public:
+		bool isOnline;
+		bool isHost;
+		std::string ip;
+		int port;
+};
 
 class GameLoop {
   public:
     GameLoop() {};
     ~GameLoop();
-    bool init();
-    int run();
+    bool networkInit(Args *options);
+    bool init(Render* renderer);
+    int runSinglePlayer();
+    int networkRun();
+    void initMapSinglePlayer();
+    void initMapMultiPlayer();
 
   private:
     // Render class to render the game
@@ -22,7 +35,7 @@ class GameLoop {
     Player *player;
     std::vector<Enemy *> enemies;
     bool isGameOn;
-
+    Client* client;
     // Time delta of (current_time) - (previous_time)
     // The ratio sets the duration to calculate in Miliseconds
     std::chrono::duration<double, std::ratio<1, 1000>> elapsed_time;
@@ -39,6 +52,6 @@ class GameLoop {
 
     // Map Building Variables
     std::vector<SDL_Rect> tileArray;
-    int** tile_map;
+
 };
 #endif

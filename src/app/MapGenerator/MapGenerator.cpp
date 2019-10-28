@@ -1,16 +1,15 @@
 #include "MapGenerator.hpp"
 #include <time.h>
 #include <math.h>
+#include <iostream>
 
-int** MapGenerator::generateMirrorMap() //tile_map is 24x13
+std::vector<std::vector<int>> MapGenerator::generateMirrorMap() //tile_map is 24x13
 {
-    int** array = 0;
-    array = new int*[24];
-
-    for(int i = 0; i < 24; i++)
+    std::vector<std::vector<int>> array;
+    for(int i = 0; i < X_WIDE; i++)
     {
-        array[i] = new int[13];
-        for(int j = 0; j < 13; j++)
+        array.push_back(std::vector<int>(Y_HIGH));
+        for(int j = 0; j < Y_HIGH; j++)
         {
             array[i][j] = 0;
         }
@@ -18,36 +17,34 @@ int** MapGenerator::generateMirrorMap() //tile_map is 24x13
 
     srand(time(NULL));
 
-    array[13][10] = 2;
+    array[Y_HIGH][10] = 2;
 
     return array;
 }
 
-int** MapGenerator::generateLineMap() {
-	// make empty room array
-	int** array = 0;
-    array = new int*[24];
+std::vector<std::vector<int>> MapGenerator::generateLineMap() {
 
-    for(int i = 0; i < 24; i++)
+	std::vector<std::vector<int>> array;
+    for(int i = 0; i < X_WIDE; i++)
     {
-        array[i] = new int[13];
-        for(int j = 0; j < 13; j++)
+		array.push_back(std::vector<int>(Y_HIGH));
+        for(int j = 0; j < Y_HIGH; j++)
         {
             array[i][j] = 0;
         }
     }
 
-	int** room = array;
+	std::vector<std::vector<int>> room = array;
 
 	//initialize random seed
 	srand(time(NULL));
 	int random_index;
 	int random_index_bonus;
-	for(int i = 0; i < 13; i++) {
-		random_index = rand() % 24;
+	for(int i = 0; i < Y_HIGH; i++) {
+		random_index = rand() % X_WIDE;
 		if(rand() % 3 == 0)
 		{
-			random_index_bonus = rand() % 24;
+			random_index_bonus = rand() % X_WIDE;
 			if(abs(random_index_bonus - random_index) == 1)
 			{
 				random_index_bonus = -1;
@@ -59,7 +56,7 @@ int** MapGenerator::generateLineMap() {
 		}
 		
 
-		for(int j = 0; j < 24; j++) {
+		for(int j = 0; j < X_WIDE; j++) {
 			if(i % 2 != 0) {
 				if(j == random_index || j == random_index_bonus)
 					room[j][i] = 0;
@@ -71,4 +68,41 @@ int** MapGenerator::generateLineMap() {
 		}
 	}
 	return room;
+}
+
+std::vector<std::vector<int>>* MapGenerator::generateMap() {
+	for(int j = 0; j < X_WIDE; j++)
+	{
+		tile_map.push_back(std::vector<int>(Y_HIGH)); 
+		for(int h = 0; h < Y_HIGH; h++)
+		{	
+			tile_map[j][h] = 0;
+		}
+	}
+	// Select map generation technique
+	enum map_types { destructible, holes, line, maze, mirror };
+	srand(time(NULL));
+
+	// switch(rand() % 4)
+	switch(line)
+	{
+		case destructible:
+			tile_map[4][4] = 2;
+			break;
+		case holes:
+			tile_map[1][1] = 2;
+			break;
+		case line:
+			tile_map = generateLineMap();
+			break;
+		case maze:
+			tile_map[6][10] = 2;
+			break;
+		case mirror:
+			tile_map = generateMirrorMap();
+			tile_map[14][10] = 2;
+			break;
+	}
+
+	return &tile_map;
 }

@@ -1,15 +1,20 @@
 #ifndef MAPGENERATOR_HPP
 #define MAPGENERATOR_HPP
 
+#include <vector>
+
 constexpr int X_WIDE = 24;
 constexpr int Y_HIGH = 13;
 
 class MapGenerator{
   public:
-    int** generateLineMap();
-    int** generateMirrorMap();
+    std::vector<std::vector<int>>* generateMap();
   private:
+    std::vector<std::vector<int>> tile_map;
+    std::vector<std::vector<int>> generateMirrorMap();
+    std::vector<std::vector<int>> generateLineMap();
     int room[X_WIDE][Y_HIGH];
+
 };
 
 

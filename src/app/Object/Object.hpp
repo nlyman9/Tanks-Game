@@ -28,24 +28,25 @@ class OBJECT
 {
 private:
     Sprite sprite;
-    int x;
-    int y;
+    float x;
+    float y;
     SDL_Rect box;
 
 
 public:
     OBJECT() {};
-    bool check_collision(OBJECT *B);
-    bool check_collision(SDL_Rect *B);
+    SDL_Rect* check_collision(OBJECT *B);
+    SDL_Rect* check_collision(SDL_Rect *B);
+    SDL_Rect* check_collision(SDL_Rect* A, SDL_Rect *B);
     SDL_Rect *get_box();
     bool check_bounds();
     void setSprite(Sprite *new_sprite);
 
-    void setPos(int x, int y);
-    void setX(int x);
-    void setY(int y);
-    int getX();
-    int getY();
+    void setPos(float x, float y);
+    void setX(float x);
+    void setY(float y);
+    float getX();
+    float getY();
 
     void setObstacleLocations(std::vector<SDL_Rect>* obstaclesLocs);
     
@@ -79,7 +80,7 @@ public:
          * @return true  - moved object succesfully 
          * @return false - failed to move object 
          */
-    virtual bool move(int x, int y) = 0;
+    virtual bool move(float x, float y) = 0;
 
     /**
          * @brief place/teleport an object to a 2D location
@@ -90,7 +91,7 @@ public:
          * @return true  - placed player succesfully 
          * @return false - failed to place player 
          */
-    virtual bool place(int x, int y) = 0;
+    virtual bool place(float x, float y) = 0;
     ~OBJECT(); //destructor
 };
 
