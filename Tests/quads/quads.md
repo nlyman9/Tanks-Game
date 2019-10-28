@@ -8,3 +8,4 @@
 - 6 any quad
 - 7 mirror quad
 - 8 cross quad
+- 9 top bottom quad
