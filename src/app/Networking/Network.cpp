@@ -144,6 +144,40 @@ std::vector<int> *Network::unpack(std::vector<char>* packed, std::vector<int> *u
 	}
     return unPacked;
 }
+
+std::vector<int>* Network::unpackMap(std::vector<char> mapPacked, std::vector<int> *map){
+    //std::cout << "UNPACKING\n";
+	std::vector<bool> workSet;
+    //first turn the packed map into a bool array
+	for(auto curr : mapPacked){
+		for(int i = 0; i < 8; i++){
+			workSet.push_back((curr >> (7 - i)) & 1);
+			//std::cout << (int) ((curr >> (7 - i)) & 1);
+		}
+		//std::cout << '\n';
+	}
+	int tmp = 0;
+	int i = 0;
+	//std::cout << "Converting to int array\n";
+    //cycle through the bool array
+    //every 3 bools is one int
+	for(auto curr : workSet){
+		//std::cout << "curr is : " << curr << '\n';
+		tmp = (tmp) | (curr << (2-i));
+		if(i == 2){
+			map->push_back(tmp);
+			//std::cout << tmp << '\n';
+			//for(unsigned int j = 1 << 31; j > 0; j = j/2){
+			//	(tmp & j)? std::cout << 1: std::cout << 0;
+			//}
+			//std::cout << '\n';
+			tmp = 0;
+			i = -1;
+		}
+		i++;
+	}
+    return map;
+}
 void Network::sendMap(int fd, std::vector<int>* map, size_t t, int flags, int csFlag){
     //create a char array to send it in
     std::vector<char>* mapPacked = new std::vector<char>();   

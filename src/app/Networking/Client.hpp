@@ -41,6 +41,8 @@ class Client {
     int nbytes;
     bool gameOn;
     SDL_Thread* rcThread;
+    std::vector<int> gameMap;
+    bool pollMap();
   private:
 
 };

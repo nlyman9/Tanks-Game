@@ -18,6 +18,7 @@
 #include <SDL2/SDL.h>
 #include "Server.hpp"
 #include "MapGenerator.hpp"
+#include "Network.hpp"
 
 bool readyToSend = false;
 
@@ -83,13 +84,20 @@ std::vector<int> *unpack(std::vector<char>* packed, std::vector<int> *unPacked, 
 }
 
 std::vector<int>* serverMapGen(){
-    std::vector<int>* retval = new std::vector<int>();
+    std::vector<int>* map1D = new std::vector<int>();
     //create a map that just cycles through the tiles
     MapGenerator* mapGen = new MapGenerator();    
-	int** tile_map = mapGen->generateMap();
+	std::vector<std::vector<int>>* tile_map = mapGen->generateMap();
+    std::vector<std::vector<int>>& map = *tile_map;
 
-    return retval;
+    // Convert the 2D map into a 1D vector for the map packer
+    for(auto row : map) {
+        for(auto val : row) {
+            map1D->push_back(val);
+        }
+    }
 
+    return map1D;
 }
 
 int sendThread( void* data){
@@ -102,7 +110,7 @@ int sendThread( void* data){
     {
         std::cout << "server looping" << std::endl;
         sleep(1);
-        /*read_fds = master;
+        read_fds = master;
         if (select(fdmax + 1, &read_fds, NULL, NULL, NULL) == -1)
         {
             perror("select");
@@ -136,7 +144,8 @@ int sendThread( void* data){
                                inet_ntop(remoteaddr.ss_family, &remoteaddr, remoteIP, INET_ADDRSTRLEN),
                                newfd);
                         //new connection so need to send map data here accepted so send data
-                        //send(newfd, test2.data(), test2.size(), 0);
+                        std::cout << "Sending map to client: " << test2.data() << " size: " << test2.size() << std::endl;
+                        std::cout << send(newfd, test2.data(), test2.size(), 0) << std::endl;
                     }
                 }
                 else
@@ -174,12 +183,10 @@ int sendThread( void* data){
                                 if (j != listenerfd && j != i)
                                 {
 
-                                    //sprintf(buffer, "User %d: %.90s", i, buf);
-
-                                    //if (send(j, buffer, nbytes, 0) == -1)
-                                    //{
-                                    //    perror("send");
-                                    //}
+                                    if (send(j, tsBuffer, nbytes, 0) == -1)
+                                    {
+                                       perror("send");
+                                    }
                                 }
                                 else if (j == listenerfd)
                                 {
@@ -190,7 +197,7 @@ int sendThread( void* data){
                     }
                 }
             }
-        }*/
+        }
     }
 }
 
@@ -199,11 +206,11 @@ int main()
 
     std::cout << "running server." << std::endl;
     std::vector<int>* test = serverMapGen();
-    std::vector<char> test2;
+
+    Network* net = new Network();
     
     std::vector<int>* test3 = new std::vector<int>();
-    pack(test, &test2, 2); //pack map into 3 bits
-    unpack(&test2, test3, 2);
+    net->pack(test, &test2, 3); //pack map into 3 bits
     //displayMap(test3);
     // std::cout << "Binary Representation of map : \n";
 	//for(auto curr : test2){
@@ -211,7 +218,7 @@ int main()
 	//}
     //test 2 is our packed map
     delete test; //delete the map from memory
-    std::cout << (int) test2.size() << "\n";
+    std::cout << "Map size: " << (int) test2.size() << "\n";
     // Set structs and variables for the internet
     addr_len = sizeof(struct sockaddr_storage);
 

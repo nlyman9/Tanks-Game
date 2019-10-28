@@ -18,6 +18,7 @@ class Network{
         std::vector<char>* pack(std::vector<int>* x, std::vector<char>* packed, int bits);
         std::vector<int> *unpack(std::vector<char>* packed, std::vector<int> *unPacked, int bits);
         std::vector<int> *unpack(std::vector<char>* packed, std::vector<int> *unPacked, int bits, int numbers);
+        std::vector<int> *unpackMap(std::vector<char> mapPacked, std::vector<int> *map);
         std::vector<char>* packMap(std::vector<int>* map, std::vector<char>* mapPacked);
     private:
         void sendMap(int fd, std::vector<int>* map, size_t t, int flags, int csFlag);

@@ -230,6 +230,6 @@ int Enemy::xArrPosL(float pos) {
 	return 23;
 }
 
-void Enemy::setTileMap(int** tileMap) {
-	tile_map = tileMap;
+void Enemy::setTileMap(std::vector<std::vector<int>>* tileMap) {
+	tile_map = *tileMap;
 }

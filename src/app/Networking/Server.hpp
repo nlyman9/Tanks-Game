@@ -14,7 +14,6 @@
 #include <iostream>
 #include <vector>
 #include <unistd.h>
-#include "Network.hpp"
 #include <SDL2/SDL_thread.h>
 
 char* tsBuffer;
@@ -35,6 +34,7 @@ fd_set read_fds;    // Read fd's returned from select
 int fdmax;          // maximym file descriptor number
 int nbytes;
 socklen_t addr_len;
+std::vector<char> test2;
 
 bool gameOn;
  

@@ -7,9 +7,11 @@
 #include "Client.hpp"
 #include <SDL2/SDL_thread.h>
 #include <SDL2/SDL.h>
-bool mapRecieved = false;
-int receiveThread( void* data){
-    char* rcBuffer = (char*) data; 
+
+bool mapReceived = false;
+
+int receiveThread( void* data) {
+    char* recvBuffer = (char*) data; 
     data = static_cast<char*>(data) + 1;
     Client* crClient = (Client*) data;
     std::cout << "Client info: " << std::endl;
@@ -18,7 +20,7 @@ int receiveThread( void* data){
     while(crClient->gameOn) {
         std::cout << "looping in thread" << std::endl;
         sleep(1);
-        /*crClient->read_fds = crClient->master;
+        crClient->read_fds = crClient->master;
         // Check for any response from serrver
         std::cout << "select" << std::endl;
         if (select(crClient->fdmax+1, &crClient->read_fds, NULL, NULL, NULL) == -1) {
@@ -28,8 +30,8 @@ int receiveThread( void* data){
         // If from server
         std::cout << "FD IS SET" << std::endl;
         if (FD_ISSET(crClient->sockfd, &crClient->read_fds)) {
-            crClient->nbytes = recv(crClient->sockfd, rcBuffer, 151, 0);
-            std::cout << "nbytes" << std::endl;
+            crClient->nbytes = recv(crClient->sockfd, recvBuffer, 152, 0);
+            std::cout << "nbytes: " << crClient->nbytes << std::endl;
             if (crClient->nbytes <= 0) {
                 std::cout << "Connection closing" << std::endl;
                 close(crClient->sockfd);
@@ -37,16 +39,23 @@ int receiveThread( void* data){
             } else {
                 //recieved data
                 std::cout << "receiving" << std::endl;
-                std::vector<char> test(rcBuffer, rcBuffer + (sizeof(rcBuffer)/sizeof(rcBuffer[0])));
-                std::cout << test.size() << std::endl;
+                std::vector<char> test(recvBuffer, recvBuffer + crClient->nbytes);
+                std::cout << "Received test.size()" << test.size() << std::endl;
                 std::vector<int> map;
-               // if(!mapRecieved){
-                //    crClient->network->unpack(&test, &map, 2);
-                //}
+                if(!mapReceived){
+                   crClient->network->unpack(test, &map, 3);
+                   crClient->gameMap = map;
+                   mapReceived = true;
+                }
             }
-        }*/
+        }
     }
 }
+
+bool Client::pollMap() {
+    return mapReceived;
+}
+
 bool Client::init() {
     std::cout << "initting client" << std::endl;
     // Innitialize sets to zero
@@ -98,6 +107,7 @@ bool Client::init() {
     //SDL_Thread* sThread =  SDL_CreateThread(sendThread, (void*) this);
     return true;
 }
+
 Client Client::initClient(Client c){
     
 }

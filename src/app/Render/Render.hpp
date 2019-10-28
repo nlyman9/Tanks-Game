@@ -31,7 +31,7 @@ class Render {
 
         SDL_Renderer* getRenderer();
 
-        void setTileMap(int** tileMap);
+        void setTileMap(std::vector<std::vector<int>>* tileMap);
 
         void setPlayer(Player* player);
         void setEnemies(std::vector<Enemy *> enemies);
@@ -47,6 +47,6 @@ class Render {
         SDL_Texture* gTileSheet;
         SDL_Rect gTileRects[3];
 
-        int** tile_map;
+       std::vector<std::vector<int>> tile_map;
 };
 #endif

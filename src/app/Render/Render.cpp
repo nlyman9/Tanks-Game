@@ -117,12 +117,13 @@ int Render::drawMenu() {
 	return menuOption;
 }
 
-void Render::setTileMap(int** tileMap) {
-	tile_map = tileMap;
+void Render::setTileMap(std::vector<std::vector<int>>* tileMap) {
+	std::cout << "set map" << std::endl;
+	tile_map = *tileMap;
 }
 
 int Render::draw(double update_lag) {
-		
+	std::cout << "draw" << std::endl;
 	int c;
 	SDL_Rect cur_out;
 
@@ -133,10 +134,12 @@ int Render::draw(double update_lag) {
 	for (int x = BORDER_GAP + TILE_SIZE, i = 0; x < SCREEN_WIDTH - BORDER_GAP - TILE_SIZE; x+=TILE_SIZE, i++) {
 		for (int y = TILE_SIZE, j = 0; y < SCREEN_HEIGHT - TILE_SIZE; y+=TILE_SIZE, j++) {
 			cur_out = { x, y, TILE_SIZE, TILE_SIZE};
+			std::cout << i << " " << j << " " << tile_map[i][j] << std::endl;
 			SDL_RenderCopy(gRenderer, gTileSheet, &gTileRects[tile_map[i][j]], &cur_out);
 		}
 	}
-	
+
+	std::cout << "start border" << std::endl;
 	//GENERATES TOP BORDER
 	c = BORDER_GAP;
 	while (c < SCREEN_WIDTH - BORDER_GAP) {

@@ -33,7 +33,7 @@ class Enemy : public OBJECT {
 		int xArrPosL(float pos);
         int xArrPosR(float pos);
         int yArrPos(float pos);
-        int** tile_map;
+        std::vector<std::vector<int>> tile_map;
     public:
         // Enemy(Sprite sprite, Sprite turret, int x, int y); //constructor, initialize the x, y, and sprite
         Enemy(float x, float y, Player* player); //constructor, initialize the x, y, and sprite
@@ -52,7 +52,7 @@ class Enemy : public OBJECT {
         float getY();
         void updatePos();
 
-        void setTileMap(int** tileMap);
+        void setTileMap(std::vector<std::vector<int>>* tileMap);
         ~Enemy();
 };
 #endif
