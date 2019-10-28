@@ -17,7 +17,7 @@ add_executable(Game
   game.cpp
 )
 add_executable(ServerProcess
-  Networking/server.cpp
+  Networking/Server.cpp
 )
 target_link_libraries(Game
   PRIVATE
