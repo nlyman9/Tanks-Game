@@ -43,7 +43,7 @@ int receiveThread( void* data) {
                 std::cout << "Received test.size()" << test.size() << std::endl;
                 std::vector<int> map;
                 if(!mapReceived){
-                   crClient->network->unpack(test, &map, 3);
+                   crClient->network->unpack(&test, &map, 3);
                    crClient->gameMap = map;
                    mapReceived = true;
                 }
