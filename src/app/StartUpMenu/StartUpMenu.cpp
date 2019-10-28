@@ -9,8 +9,7 @@ void StartUpMenu::launch(Args *options)
   GameLoop gLoop;
   gLoop.init(renderer);
 
-  // int gameMode = renderer->drawMenu();
-  int gameMode = MENU_MULTI;
+  int gameMode = renderer->drawMenu();
   if(gameMode == MENU_SINGLE) {
     gLoop.initMapSinglePlayer();
     gLoop.runSinglePlayer();
