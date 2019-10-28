@@ -81,8 +81,14 @@ int Render::drawMenu() {
 				quit = true;
 			} else if(e.type == SDL_KEYDOWN) {
 				switch(e.key.keysym.sym) {
+					case SDLK_DOWN:
+						menuOption++;
+						break;
 					case SDLK_s:
 						menuOption++;
+						break;
+					case SDLK_UP:
+						menuOption--;
 						break;
 					case SDLK_w:
 						menuOption--;
