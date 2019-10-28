@@ -43,9 +43,14 @@
         "streambuf": "cpp",
         "cinttypes": "cpp",
         "typeinfo": "cpp",
+        "iomanip": "cpp",
         "chrono": "cpp",
         "complex": "cpp",
         "ctime": "cpp",
+        "functional": "cpp",
+        "iterator": "cpp",
+        "numeric": "cpp",
+        "random": "cpp",
         "ratio": "cpp"
     }
 }
