@@ -123,6 +123,7 @@ int GameLoop::networkRun() {
 bool GameLoop::init(Render* renderer) {
 	player = new Player(75, 50);
 	enemies.clear();
+	tileArray.clear();
 	enemies.push_back(new Enemy( SCREEN_WIDTH - TANK_WIDTH/2 - 75, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, player));
 	render = renderer;
 	render->setPlayer(player);
@@ -227,9 +228,7 @@ void GameLoop::checkEscape()
 	if (keystate[SDL_SCANCODE_ESCAPE]) {
 		this->init(render);
 		int gameMode = render->drawMenu();
-		printf("gm: %d\n", gameMode);
 		if(gameMode == MENU_SINGLE) {
-			printf("afojiwe\n");
 			this->initMapSinglePlayer();
 			this->runSinglePlayer();
 		} else if(gameMode == MENU_MULTI) {

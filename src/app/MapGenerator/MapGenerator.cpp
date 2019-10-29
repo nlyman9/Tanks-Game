@@ -211,8 +211,8 @@ std::vector<std::vector<int>> MapGenerator::generateOpenLineMap()
 				room[pre_array[i]][j] = 0;
 				room[pre_array[i] + 1][j] = 0;
 			} else {
-				room[pre_array[i]][j] = 1;
-				room[pre_array[i] + 1][j] = 1;
+				room[pre_array[i]][j] = 2;
+				room[pre_array[i] + 1][j] = 2;
 			}
 
 		}
