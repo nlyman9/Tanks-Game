@@ -173,7 +173,7 @@ std::vector<std::vector<int>>* MapGenerator::generateMap()
 	enum map_types { destructible, holes, line, maze, mirror, hmaze };
 	srand(time(NULL));
 
-	switch(rand() % 4)
+	switch(rand() % 3) // update this line when adding more generated maps
 	{
 		case 1:
 			tile_map = generateLineMap();
@@ -181,11 +181,16 @@ std::vector<std::vector<int>>* MapGenerator::generateMap()
 		case 2:
 			tile_map = generateHMazeMap();
 			break;
-		case 3:
-	        tile_map = presetCenterCubes();
-			break;
 		default:
-			tile_map = generateEmptyMap();
+			switch(rand() % 2) // update this line when adding new preset maps
+			{
+				case 0:
+					tile_map = generateEmptyMap();
+					break;
+				case 1:
+					tile_map = presetCenterCubes();
+					break;
+			}
 	}
 
 	return &tile_map;
