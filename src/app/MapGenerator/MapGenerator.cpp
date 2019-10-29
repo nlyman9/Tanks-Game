@@ -200,10 +200,11 @@ std::vector<std::vector<int>> MapGenerator::generateOpenLineMap()
 			if(random_index == j || random_index == j + 1) {
 				room[pre_array[i]][j] = 0;
 				room[pre_array[i] + 1][j] = 0;
-			}
-			else
+			} else {
 				room[pre_array[i]][j] = 1;
 				room[pre_array[i] + 1][j] = 1;
+			}
+
 		}
 	}
 	return room;
