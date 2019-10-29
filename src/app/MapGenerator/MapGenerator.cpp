@@ -69,8 +69,9 @@ std::vector<std::vector<int>> MapGenerator::generateLineMap()
 				else
 					room[j][i] = 2;
 			}
-			else
+			else {
 				room[j][i] = 0;
+			}
 		}
 	}
 	return room;
@@ -164,6 +165,50 @@ std::vector<std::vector<int>> MapGenerator::presetCenterCubes()
 	return array;
 }
 
+/*std::vector<std::vector<int>> MapGenerator::generateCheckerMap()
+{
+    std::vector<std::vector<int>> room = generateEmptyMap();
+	int random_index;
+	int random_index_bonus;
+
+    for(int i = 2; i < Y_HIGH; i++) {
+		for(int j = 0; j < X_WIDE; j++) {
+			if(i % 2 != 0) {
+				if(j == random_index || j == random_index_bonus)
+					room[j][i] = 0;
+				else
+					room[j][i] = 2;
+			}
+			else
+				room[j][i] = 0;
+		}
+	}
+	return room;
+}*/
+
+std::vector<std::vector<int>> MapGenerator::generateOpenLineMap()
+{
+	std::vector<std::vector<int>> room = generateEmptyMap();
+	int random_index;
+	int pre_array[5] = {2, 6, 11, 16, 20};
+	srand(time(NULL));
+
+	for(int i = 0; i < (sizeof(pre_array)/sizeof(pre_array[0])); i++) {
+		random_index = rand() % (Y_HIGH - 2);
+
+		for(int j = 0; j < Y_HIGH; j++) {
+			if(random_index == j || random_index == j + 1) {
+				room[pre_array[i]][j] = 0;
+				room[pre_array[i] + 1][j] = 0;
+			}
+			else
+				room[pre_array[i]][j] = 1;
+				room[pre_array[i] + 1][j] = 1;
+		}
+	}
+	return room;
+}
+
 std::vector<std::vector<int>>* MapGenerator::generateMap()
 {
 	// init tile map
@@ -173,7 +218,9 @@ std::vector<std::vector<int>>* MapGenerator::generateMap()
 	enum map_types { destructible, holes, line, maze, mirror, hmaze };
 	srand(time(NULL));
 
-	switch(rand() % 3) // update this line when adding more generated maps
+	tile_map = generateOpenLineMap();
+
+	/*switch(rand() % 3) // update this line when adding more generated maps
 	{
 		case 1:
 			tile_map = generateLineMap();
@@ -191,7 +238,7 @@ std::vector<std::vector<int>>* MapGenerator::generateMap()
 					tile_map = presetCenterCubes();
 					break;
 			}
-	}
+	}*/
 
 	return &tile_map;
 }

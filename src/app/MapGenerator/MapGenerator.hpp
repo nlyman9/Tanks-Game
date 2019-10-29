@@ -16,6 +16,7 @@ class MapGenerator{
     std::vector<std::vector<int>> generateLineMap();
     std::vector<std::vector<int>> generateHMazeMap();
     std::vector<std::vector<int>> presetCenterCubes();
+    std::vector<std::vector<int>> generateOpenLineMap();
     int room[X_WIDE][Y_HIGH];
 };
 
