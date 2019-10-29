@@ -11,6 +11,7 @@
 #include <chrono>
 #include "Player.hpp"
 #include "Constants.hpp"
+#include <math.h>
 
 /**
  * @brief Construct a new Player:: Player object
@@ -90,22 +91,42 @@ void Player::update() {
             break;
         }
 
-        BoundingBox *box = getBoundingBox();
+        // BoundingBox *box = getBoundingBox();
             
         // // Collides with top of box
         // if (box->frontRight.x > obstacle.x && box->frontRight.x < obstacle.x + obstacle.w &&
+        //     box->frontRight.y > obstacle.y && box->frontRight.y < obstacle.y + obstacle.h ||
+        //     box->frontLeft.x > obstacle.x && box->frontLeft.x < obstacle.x + obstacle.w &&
+        //     box->frontLeft.y > obstacle.y && box->frontLeft.y < obstacle.y + obstacle.h) {
+
+        //     if (y_vel > 0) {
+        //         float y_overlap = std::max((box->frontRight.y - (obstacle.y)), (box->frontLeft.y - (obstacle.y)));
+        //         std::cout << box->frontRight.y << " -- " << obstacle.y << " -> " << y_overlap << std::endl;
+        //         setX(getX());
+        //         setY(getY() - y_overlap);
+        //         break;
+        //     } else if (y_vel < 0) {
+        //         float y_overlap = std::max(((obstacle.y + obstacle.h) - box->frontRight.y), ((obstacle.y + obstacle.h) - box->frontLeft.y));
+        //         std::cout << box->frontRight.y << " -- " << obstacle.y << " -> " << y_overlap << std::endl;
+        //         setX(getX());
+        //         setY(getY() + y_overlap);
+        //         break;
+        //     }
+        // }
+        // // Collides with left side of box
+        // if (box->frontRight.x > obstacle.x && box->frontRight.x < obstacle.x + obstacle.w/4 &&
         //     box->frontRight.y > obstacle.y && box->frontRight.y < obstacle.y + obstacle.h) {
         //     int norm_vel = abs(y_vel)/y_vel;
         //     if (isnan(norm_vel)) 
         //         norm_vel = 1;
 
-        //     float y_overlap = box->frontRight.y - (obstacle.y * norm_vel);
-        //     std::cout << box->frontRight.y << " -- " << obstacle.y << " -> " << y_overlap << std::endl;
-        //     setX(getX());
-        //     setY(getY() - y_overlap);
+        //     float x_overlap = box->frontRight.x - (obstacle.x * norm_vel);
+        //     std::cout << box->frontRight.x << " -- " << obstacle.x << " -> " << x_overlap << std::endl;
+        //     setX(getX() - x_overlap);
+        //     setY(getY());
+        //     break;
 
         // }
-
     }
 
     // Check he isn't moving outside of the map
