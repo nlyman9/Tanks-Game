@@ -14,6 +14,7 @@ target_link_libraries(GameLoop
   Sprite
   MapGenerator
   Networking
+  StartUpMenu
 )
 
 target_include_directories(GameLoop

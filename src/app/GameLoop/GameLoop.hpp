@@ -28,6 +28,7 @@ class GameLoop {
     int networkRun();
     void initMapSinglePlayer();
     void initMapMultiPlayer();
+    void checkEscape();
 
   private:
     // Render class to render the game

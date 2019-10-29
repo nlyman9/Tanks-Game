@@ -89,7 +89,7 @@ int GameLoop::networkRun() {
 		}
 		
 		player->getEvent(elapsed_time);
-		
+
 		// 2. Update
 		// Update if time since last update is >= MS_PER_UPDATE
 		while(lag_time >= MS_PER_UPDATE) {
@@ -122,6 +122,7 @@ int GameLoop::networkRun() {
  */
 bool GameLoop::init(Render* renderer) {
 	player = new Player(75, 50);
+	enemies.clear();
 	enemies.push_back(new Enemy( SCREEN_WIDTH - TANK_WIDTH/2 - 75, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, player));
 	render = renderer;
 	render->setPlayer(player);
@@ -193,6 +194,8 @@ int GameLoop::runSinglePlayer()
 				isGameOn = false;
 			}
 		}
+
+		checkEscape();
 		
 		player->getEvent(elapsed_time);
 		
@@ -215,4 +218,29 @@ int GameLoop::runSinglePlayer()
 
 	// Exit normally
 	return 0;
+}
+// press escape to return to main menu
+void GameLoop::checkEscape()
+{
+	const Uint8* keystate = SDL_GetKeyboardState(nullptr);
+
+	if (keystate[SDL_SCANCODE_ESCAPE]) {
+		this->init(render);
+		int gameMode = render->drawMenu();
+		printf("gm: %d\n", gameMode);
+		if(gameMode == MENU_SINGLE) {
+			printf("afojiwe\n");
+			this->initMapSinglePlayer();
+			this->runSinglePlayer();
+		} else if(gameMode == MENU_MULTI) {
+			this->networkInit(new Args());
+			this->initMapMultiPlayer();
+			//run the game loop
+			this->networkRun();
+		} else if(gameMode == MENU_CREDITS) {
+			std::cout << "ROLL CREDITS" << std::endl;
+		} else {
+			render->close();
+		}
+	}
 }

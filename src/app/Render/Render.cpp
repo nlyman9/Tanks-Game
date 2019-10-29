@@ -79,6 +79,7 @@ int Render::drawMenu() {
 		while(SDL_PollEvent(&e)) {
 			if(e.type == SDL_QUIT || (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_CLOSE)) {
 				quit = true;
+				return -1;
 			} else if(e.type == SDL_KEYDOWN) {
 				switch(e.key.keysym.sym) {
 					case SDLK_DOWN:
