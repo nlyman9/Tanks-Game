@@ -19,6 +19,7 @@
 #include "Server.hpp"
 #include "MapGenerator.hpp"
 #include "Network.hpp"
+#include "GameLoop.hpp"
 
 bool readyToSend = false;
 
@@ -106,7 +107,7 @@ int sendThread(void* data){
                         // Either error or closed connection
                         if (nbytes == 0)
                         { // Connection closed
-W                            std::cout << "Socket " << i <<" disconnected." << std::endl;
+                            std::cout << "Socket " << i <<" disconnected." << std::endl;
                         }
                         else
                         {
@@ -147,11 +148,27 @@ W                            std::cout << "Socket " << i <<" disconnected." << s
     }
 }
 
-int main()
+/**
+ * @brief Main for Server process
+ * 
+ * @param argc - Number of arguments passed
+ * @param argv - Argument values
+ *     - Only one value should be passed. The option's arguments.
+ * @return int 
+ */
+int main(int argc, char* argv[])
 {
+    // Get the server option's
+    
+
+    std::cout << "IP " << argv[1] << std::endl;
+    std::cout << "PORT " << argv[2] << std::endl;
 
     std::vector<int>* map = serverMapGen();
 
+    char *server_ip = argv[1];
+    char *server_port = argv[2];
+    
     Network* net = new Network();
     
     net->pack(map, &packedMap, 3); //pack map into 3 bits
@@ -174,7 +191,7 @@ int main()
     hints.ai_socktype = SOCK_STREAM; // Use TCP because it does work for me
 
     // Set address info for listening address '0.0.0.0'
-    if ((status = getaddrinfo("0.0.0.0", "8123", &hints, &serverInfo)) != 0)
+    if ((status = getaddrinfo(server_ip, server_port, &hints, &serverInfo)) != 0)
     {
         std::cout << "Failed to get address info." << std::endl;
         exit(3);

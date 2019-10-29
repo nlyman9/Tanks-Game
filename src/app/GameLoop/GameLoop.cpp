@@ -1,30 +1,50 @@
 #include <iostream>
 #include <chrono>
-#include "GameLoop.hpp"
-#include "Constants.hpp"
-#include "Sprite.hpp"
+#include <vector>
 #include <stdio.h>
 #include <unistd.h>
 #include <iostream>
 #include <SDL2/SDL_thread.h>
+#include <signal.h>
+
+#include "GameLoop.hpp"
+#include "Constants.hpp"
+#include "Sprite.hpp"
+
 
 GameLoop::~GameLoop() {}
 
 bool GameLoop::networkInit(Args *options) {
 	// Create host process
 	std::cout << options->isHost << std::endl;
-	if(options->isHost){
-		if(fork() == 0){
+	if(options->isHost == true){
+		int pid = fork();
+		if(pid == 0) {
 			//child process
-			char* args[] = {NULL};
-			execvp("build/bin/ServerProcess", args);
-			//this line should not run!
-			std::cout << "execvp failed" << std::endl;
-			exit(-1);
+			std::vector<char *> args;
+
+			args.push_back("build/bin/ServerProcess");
+			args.push_back((char *)options->ip.c_str());
+			args.push_back((char *)std::to_string(options->port).c_str());
+			args.push_back(NULL);
+
+			std::cout << args[0] << " | " << args[1] << " | " << args[2] << std::endl;
+
+			if (execvp(args[0], args.data()) == -1) {
+				//this line should not run!
+				std::cout << "execvp failed: " << strerror(errno) << std::endl;
+				exit(-1);
+			} else {
+				// exit normally
+				exit(0);
+			} 
+		} else { // Parent
+			server_pid = pid;
+			std::cout << "Created server process " << server_pid << std::endl;
 		}
 	}
 	// Create client process
-	client = new Client();
+	client = new Client(options->ip, options->port);
 	// Init 
 	client->init();
 	return true;
@@ -86,6 +106,10 @@ int GameLoop::networkRun() {
 			if (e.type == SDL_QUIT)
 			{
 				client->gameOn = false;
+				// Kill server/client thread
+
+				std::cout << "Killing server process " << server_pid << std::endl;
+				kill(server_pid, SIGTERM);
 			}
 		}
 		

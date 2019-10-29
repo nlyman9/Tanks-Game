@@ -65,7 +65,8 @@ bool Client::init() {
     hints.ai_socktype = SOCK_STREAM;    // TCP
 
     // Get address info of server
-    if ((status = getaddrinfo("127.0.0.1", "8123", &hints, &serverInfo)) != 0) {
+    std::cout << "Connecting to " << server_ip << " on port " << server_port << std::endl;
+    if ((status = getaddrinfo(server_ip.c_str(), server_port.c_str(), &hints, &serverInfo)) != 0) {
         std::cout << "Failed to get address info" << std::endl;
         exit(4);
     }

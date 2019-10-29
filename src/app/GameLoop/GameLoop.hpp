@@ -53,5 +53,8 @@ class GameLoop {
     // Map Building Variables
     std::vector<SDL_Rect> tileArray;
 
+    // Server pid
+    int server_pid;
+
 };
 #endif

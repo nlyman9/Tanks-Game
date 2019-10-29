@@ -12,12 +12,14 @@ int main(int argc, char* argv[]) {
 		if (type.compare("host") == 0) {
 			options->isOnline = true;
 			options->isHost = true;
+			// Set host's ip to 0.0.0.0 by default 
 			options->ip = "0.0.0.0";
 
 			if (argc >= 3) {
 				options->port = atoi(argv[2]);
 			} else {
-				std::cerr << "host Please provide port number." << std::endl;
+				std::cerr << "Host: Please provide port number." << std::endl;
+				exit(1);
 			}
 		} else {
 			options->isOnline = true;
@@ -27,13 +29,15 @@ int main(int argc, char* argv[]) {
 				ip = argv[2];
 				options->ip = ip;
 			} else {
-				std::cerr << "Please provide IP address." << std::endl;
+				std::cerr << "Client: Please provide IP address." << std::endl;
+				exit(2);
 			}
 
 			if (argc >= 4) {
 				options->port = atoi(argv[3]);
 			} else {
-				std::cerr << "Please provide port number." << std::endl;
+				std::cerr << "Client: Please provide port number." << std::endl;
+				exit(3);
 			}
 		}
 	} else {

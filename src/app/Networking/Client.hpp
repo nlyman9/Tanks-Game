@@ -11,15 +11,18 @@
 #include <stdlib.h>
 #include <netdb.h>
 #include <cstring>
-#include <iostream>
-#include <vector>
+#include <string>
+
 #include <unistd.h>
 #include "Network.hpp"
 #include <SDL2/SDL_thread.h>
 
 class Client {
   public:
-    Client() {};
+    Client(std::string ip, int port) {
+      server_ip = ip;
+      server_port = std::to_string(port);
+    };
     ~Client();
     bool init();
     Client initClient(Client c);
@@ -43,6 +46,9 @@ class Client {
     SDL_Thread* rcThread;
     std::vector<int> gameMap;
     bool pollMap();
+
+    std::string server_ip;
+    std::string server_port;
   private:
 
 };
