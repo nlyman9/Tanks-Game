@@ -634,9 +634,9 @@ int main() {
 	SDL_Rect enemy_box = {x_enemy_pos, y_enemy_pos, BOX_WIDTH, BOX_HEIGHT};
 	SDL_Rect player_box = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
 
-	move_map = generateMoveMap(tile_map, player_box, enemy_box);
+	//move_map = generateMoveMap(tile_map, player_box, enemy_box);
 
-	std::vector<coordinate> enemyPath = generatePath(move_map, player_box, enemy_box);
+	std::vector<coordinate> enemyPath = generatePath(tile_map, player_box, enemy_box);
 
 	// Current velocity of the box
 	// Start off at reset
