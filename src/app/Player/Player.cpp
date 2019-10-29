@@ -11,6 +11,7 @@
 #include <chrono>
 #include "Player.hpp"
 #include "Constants.hpp"
+#include "StartUpMenu.hpp"
 
 /**
  * @brief Construct a new Player:: Player object
@@ -175,6 +176,13 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time) {
     }
     if (keystate[SDL_SCANCODE_D]) {
         theta_v += PHI;
+    }
+    // press escape to return to main menu
+    if (keystate[SDL_SCANCODE_ESCAPE]) {
+        Args *options = new Args();
+
+        StartUpMenu startUpMenu;
+        startUpMenu.launch(options);
     }
 
     if(theta < 0) {
