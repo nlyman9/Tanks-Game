@@ -165,26 +165,36 @@ std::vector<std::vector<int>> MapGenerator::presetCenterCubes()
 	return array;
 }
 
-/*std::vector<std::vector<int>> MapGenerator::generateCheckerMap()
+std::vector<std::vector<int>> MapGenerator::presetCheckerMap()
 {
     std::vector<std::vector<int>> room = generateEmptyMap();
-	int random_index;
-	int random_index_bonus;
+    int pre_array[5] = {2, 6, 11, 16, 20};
 
-    for(int i = 2; i < Y_HIGH; i++) {
-		for(int j = 0; j < X_WIDE; j++) {
-			if(i % 2 != 0) {
-				if(j == random_index || j == random_index_bonus)
-					room[j][i] = 0;
-				else
-					room[j][i] = 2;
+	for(int j = 2; j < Y_HIGH; j+=4) {
+		if(j == 2 || j == 10) {
+			for(int i = 1; i < X_WIDE; i+=4) {
+				room[i][j] = 2;
 			}
-			else
-				room[j][i] = 0;
+			for(int i = 2; i < X_WIDE; i+=4) {
+				room[i][j] = 2;
+			}
+		}
+		else if(j == 6) {
+			for(int i = 3; i < X_WIDE; i+=4) {
+				if(i == 23) {
+
+				}
+				else {
+					room[i][j] = 2;
+				}	
+			}
+			for(int i = 4; i < X_WIDE; i+=4) {
+				room[i][j] = 2;
+			}
 		}
 	}
 	return room;
-}*/
+}
 
 std::vector<std::vector<int>> MapGenerator::generateOpenLineMap()
 {
@@ -219,7 +229,7 @@ std::vector<std::vector<int>>* MapGenerator::generateMap()
 	enum map_types { destructible, holes, line, maze, mirror, hmaze };
 	srand(time(NULL));
 
-	switch(rand() % 3) // update this line when adding more generated maps
+	switch(rand() % 4) // update this line when adding more generated maps
 	{
 		case 1:
 			tile_map = generateLineMap();
@@ -227,14 +237,20 @@ std::vector<std::vector<int>>* MapGenerator::generateMap()
 		case 2:
 			tile_map = generateHMazeMap();
 			break;
+		case 3:
+			tile_map = generateOpenLineMap();
+			break;
 		default:
-			switch(rand() % 2) // update this line when adding new preset maps
+			switch(rand() % 3) // update this line when adding new preset maps
 			{
 				case 0:
 					tile_map = generateEmptyMap();
 					break;
 				case 1:
 					tile_map = presetCenterCubes();
+					break;
+				case 2:
+					tile_map = presetCheckerMap();
 					break;
 			}
 	}
