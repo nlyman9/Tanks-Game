@@ -24,6 +24,37 @@ using UNDEFINED = bool;
 #include "Sprite.hpp"
 #include "Constants.hpp"
 
+
+class Point {
+     public:
+          float x;
+          float y;
+
+          friend std::ostream& operator<<(std::ostream& out, const Point &p);
+};
+
+inline std::ostream& operator<<(std::ostream& out, const Point &p) {
+     out << "[x: " << p.x << " | y: " << p.y << "]";
+     return out;
+}
+
+class BoundingBox {
+     public:
+          Point backLeft;
+          Point backRight;
+          Point frontLeft;
+          Point frontRight;
+
+          friend std::ostream& operator<<(std::ostream& out, const BoundingBox &box);
+};
+
+inline std::ostream& operator<<(std::ostream& out, const BoundingBox &box) {
+     out << "Back Left: " << box.backLeft << "  Front Left : " << box.frontLeft << std::endl;
+     out << "Back Right: " << box.backRight << "  Front Right : " << box.frontRight;
+     return out;
+}
+
+
 class OBJECT
 {
 private:
@@ -47,6 +78,8 @@ public:
     void setY(float y);
     float getX();
     float getY();
+    
+    virtual BoundingBox* getBoundingBox() = 0;
 
     void setObstacleLocations(std::vector<SDL_Rect>* obstaclesLocs);
     

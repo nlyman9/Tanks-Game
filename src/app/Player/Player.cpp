@@ -78,16 +78,34 @@ void Player::update() {
     setPos(getX() + (x_vel * updateStep), getY() + (y_vel * updateStep));
 
     SDL_Rect* overlap;
-    SDL_Rect currentPos = {getX(), getY(), TANK_WIDTH + 1.41 * cos((theta * M_PI_4)/180), TANK_HEIGHT + 1.41 * cos((theta * M_PI_4)/180)};
+    SDL_Rect currentPos = {getX(), getY(), TANK_WIDTH + 1.41 * sin((theta * M_PI_4)/180), TANK_HEIGHT + 1.41 * sin((theta * M_PI_4)/180)};
 
     for(auto obstacle : obstacles) {  
         overlap = check_collision(&currentPos, &obstacle);
         if(overlap != nullptr) {
-            std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
-
-            setPos(getX() - (x_vel * updateStep), getY() - (y_vel * updateStep));
+            //std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
+            //std::cout << *getBoundingBox() << std::endl << "THETA " << theta << std::endl << std::endl;
+            
+            setPos(getX() - (x_vel * updateStep) / 2, getY() - (y_vel * updateStep) /2);
             break;
         }
+
+        BoundingBox *box = getBoundingBox();
+            
+        // // Collides with top of box
+        // if (box->frontRight.x > obstacle.x && box->frontRight.x < obstacle.x + obstacle.w &&
+        //     box->frontRight.y > obstacle.y && box->frontRight.y < obstacle.y + obstacle.h) {
+        //     int norm_vel = abs(y_vel)/y_vel;
+        //     if (isnan(norm_vel)) 
+        //         norm_vel = 1;
+
+        //     float y_overlap = box->frontRight.y - (obstacle.y * norm_vel);
+        //     std::cout << box->frontRight.y << " -- " << obstacle.y << " -> " << y_overlap << std::endl;
+        //     setX(getX());
+        //     setY(getY() - y_overlap);
+
+        // }
+
     }
 
     // Check he isn't moving outside of the map
@@ -142,8 +160,13 @@ bool Player::fire() {
     return false;
 }
 
-bool Player::rotatePlayer(float theta) {
-    this->theta += theta;
+bool Player::rotatePlayer(float t) {
+    theta += t;
+
+    if(theta < 0) {
+        theta = 360 + theta;
+    }
+    theta %= 360;
     return true;
 }
 
@@ -176,11 +199,6 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time) {
     if (keystate[SDL_SCANCODE_D]) {
         theta_v += PHI;
     }
-
-    if(theta < 0) {
-        theta = 360 + theta;
-    }
-    theta %= 360;
 
     // Set Player's X velocity
     if (x_deltav == 0) {
@@ -245,4 +263,35 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time) {
     {
         y_vel = -MAX_PLAYER_VELOCITY;
     }
+}
+
+/**
+ * @brief Get the bounding box of the player's tank
+ * 
+ * The bounding box is based off 4 points: backLeft, backRight, frontLeft, frontRight;
+ *  - The front of the tank is the direction the tank is pointing. The back is the opposit.
+ *  - The left side is the lefthand side of the direction the the tank is facing. The right is the right hand side.
+ * 
+ * @return BoundingBox* 
+ */
+BoundingBox* Player::getBoundingBox() {
+    BoundingBox *box = new BoundingBox();
+    float sqrt_2 = 1.414213;
+    float radius = (TANK_WIDTH * sqrt_2)/2;
+
+    // The player's theta increases clockwise instead of how trig functions naturally increases counter-clockwise
+    // So, the the trig functions for backLeft use theta+225 instead of theta+135
+    box->backLeft.x = (getX() + (TANK_WIDTH/2)) + radius * cos((theta+225) * M_PI / 180);
+    box->backLeft.y = (getY() + (TANK_HEIGHT/2)) + radius * sin((theta+225) * M_PI / 180);
+
+    box->backRight.x = (getX() + (TANK_WIDTH/2)) + radius * cos((theta+135) * M_PI / 180);
+    box->backRight.y = (getY() + (TANK_HEIGHT/2)) + radius * sin((theta+135) * M_PI / 180);
+
+    box->frontLeft.x = (getX() + (TANK_WIDTH/2)) + radius * cos((theta+315) * M_PI / 180);
+    box->frontLeft.y = (getY() + (TANK_HEIGHT/2)) + radius * sin((theta+315) * M_PI / 180);
+
+    box->frontRight.x = (getX() + (TANK_WIDTH/2)) + radius * cos((theta+45) * M_PI / 180);
+    box->frontRight.y = (getY() + (TANK_HEIGHT/2)) + radius * sin((theta+45) * M_PI / 180);
+
+    return box;
 }

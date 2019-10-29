@@ -233,3 +233,34 @@ int Enemy::xArrPosL(float pos) {
 void Enemy::setTileMap(std::vector<std::vector<int>>* tileMap) {
 	tile_map = *tileMap;
 }
+
+/** TODO Finish implementation once theta is added to enemy.
+ * @brief Get the bounding box of the player's tank
+ * 
+ * The bounding box is based off 4 points: backLeft, backRight, frontLeft, frontRight;
+ *  - The front of the tank is the direction the tank is pointing. The back is the opposit.
+ *  - The left side is the lefthand side of the direction the the tank is facing. The right is the right hand side.
+ * 
+ * @return BoundingBox* 
+ */
+BoundingBox* Enemy::getBoundingBox() {
+    BoundingBox *box = new BoundingBox();
+    float sqrt_2 = 1.414213;
+    float radius = (TANK_WIDTH * sqrt_2)/2;
+
+    // The player's theta increases clockwise instead of how trig functions naturally increases counter-clockwise
+    // So, the the trig functions for backLeft use theta+225 instead of theta+135
+    box->backLeft.x = (getX() + (TANK_WIDTH/2));// + radius * cos((theta+225) * M_PI / 180);
+    box->backLeft.y = (getY() + (TANK_HEIGHT/2));// + radius * sin((theta+225) * M_PI / 180);
+
+    box->backRight.x = (getX() + (TANK_WIDTH/2));// + radius * cos((theta+135) * M_PI / 180);
+    box->backRight.y = (getY() + (TANK_HEIGHT/2));// + radius * sin((theta+135) * M_PI / 180);
+
+    box->frontLeft.x = (getX() + (TANK_WIDTH/2));// + radius * cos((theta+315) * M_PI / 180);
+    box->frontLeft.y = (getY() + (TANK_HEIGHT/2));// + radius * sin((theta+315) * M_PI / 180);
+
+    box->frontRight.x = (getX() + (TANK_WIDTH/2));// + radius * cos((theta+45) * M_PI / 180);
+    box->frontRight.y = (getY() + (TANK_HEIGHT/2));//+ radius * sin((theta+45) * M_PI / 180);
+
+    return box;
+}

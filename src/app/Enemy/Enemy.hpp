@@ -52,6 +52,8 @@ class Enemy : public OBJECT {
         float getY();
         void updatePos();
 
+        BoundingBox* getBoundingBox() override;
+
         void setTileMap(std::vector<std::vector<int>>* tileMap);
         ~Enemy();
 };

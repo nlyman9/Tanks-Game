@@ -44,6 +44,8 @@ class Player : public OBJECT {
 
         void getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time);
 
+        BoundingBox* getBoundingBox() override;
+
         ~Player();
 };
 #endif
