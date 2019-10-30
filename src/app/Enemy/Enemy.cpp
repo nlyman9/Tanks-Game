@@ -640,17 +640,3 @@ std::vector<coordinate> Enemy::generatePath(std::vector<std::vector<int>> move_m
 
 	return finalPath;
 }
-
-int Enemy::findXBlock(float pos) {
-  int center = pos + TANK_WIDTH/2;
-	int trueX = center - TILE_SIZE - BORDER_GAP;
-	int block = trueX / TILE_SIZE;
-	return block;
-}
-
-int Enemy::findYBlock(float pos) {
-  int center = pos + TANK_HEIGHT/2;
-	int trueY = center - TILE_SIZE;
-	int block = trueY / TILE_SIZE;
-	return block;
-}
