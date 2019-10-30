@@ -173,7 +173,7 @@ void Enemy::updatePos() {
       //check collision with player
       if (overlap != nullptr) {
         x_enemy_pos += MAX_VELOCITY;
-        std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
+        //std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
       }
     }
     //move right
@@ -187,7 +187,7 @@ void Enemy::updatePos() {
       //check collision
       if (overlap != nullptr) {
         x_enemy_pos -= MAX_VELOCITY;
-        std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
+        //std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
       }
     }
     //move up
@@ -200,7 +200,7 @@ void Enemy::updatePos() {
       //check collision
       if (overlap != nullptr) {
         y_enemy_pos += MAX_VELOCITY;
-        std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
+        //std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
       }
     }
     //move DOWN
@@ -213,7 +213,7 @@ void Enemy::updatePos() {
       //check collision
       if (overlap != nullptr) {
         y_enemy_pos -= MAX_VELOCITY;
-        std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
+        //std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
       }
     }
   }

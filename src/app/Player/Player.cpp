@@ -59,7 +59,11 @@ void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
     // SDL_Rect src = {0, 0, 20, 20};
 
     SDL_Rect* dst = get_box();
-    SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), NULL, dst, theta, NULL, SDL_FLIP_NONE);
+
+    float temp_theta = 0;
+    temp_theta = theta;
+    SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), NULL, dst, temp_theta, NULL, SDL_FLIP_NONE);
+
 }
 
 /**
@@ -73,47 +77,56 @@ void Player::update() {
     // Rotate player
     rotatePlayer(theta_v);
 
-    //setPos(getX() + x_vel, getY() + y_vel);
+
     float updateStep = MS_PER_UPDATE/1000;
-    setPos(getX() + (x_vel * updateStep), getY() + (y_vel * updateStep));
+    //NEW implementation
+
 
     SDL_Rect* overlap;
-    SDL_Rect currentPos = {getX(), getY(), TANK_WIDTH + 1.41 * cos((theta * M_PI_4)/180), TANK_HEIGHT + 1.41 * cos((theta * M_PI_4)/180)};
+    SDL_Rect currentPos;
 
+    //first add X velocity
+    setX(getX() + (x_vel * updateStep));
+
+    currentPos = {getX(), getY(), TANK_WIDTH, TANK_HEIGHT};
+    //correct for collisions
     for(auto obstacle : obstacles) {
         overlap = check_collision(&currentPos, &obstacle);
         if(overlap != nullptr) {
-            std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
-
-            setPos(getX() - (x_vel * updateStep), getY() - (y_vel * updateStep));
+            //std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
+            if(x_vel < 0) {
+               setX(floor(getX() + overlap->w));
+             } else {
+               setX(floor(getX() - overlap->w));
+             }
             break;
         }
     }
-    /*
-    if (check_collision(&gEnemy)) {
-      setPos(getX() - (x_vel * updateStep), getY() - (y_vel * updateStep));
-    }
-    */
-    //check player collision with enemy
-    /*
-    float enemy_x_pos = gEnemy->getX();
-    float enemy_y_pos = gEnemy->getY();
+    // next add Y velocity
+    setY(getY() + (y_vel * updateStep));
 
-    SDL_Rect enemy_rect = {enemy_x_pos, enemy_y_pos, TANK_WIDTH, TANK_HEIGHT};
-    overlap = check_collision(&currentPos, &enemy_rect);
-    if (overlap != nullptr) {
-      setPos(getX() - (x_vel * updateStep), getY() - (y_vel * updateStep));
+    currentPos = {getX(), getY(), TANK_WIDTH, TANK_HEIGHT};
+    //correct for collisions
+    for(auto obstacle : obstacles) {
+        overlap = check_collision(&currentPos, &obstacle);
+        if(overlap != nullptr) {
+            if(y_vel < 0) {
+                setY(floor(getY() + overlap->h));
+            } else {
+                setY(floor(getY() - overlap->h));
+            }
+            break;
+        }
     }
-    */
 
     // Check he isn't moving outside of the map
-    if (getX() + TANK_WIDTH > SCREEN_WIDTH - TILE_SIZE)
+    if (getX() + TANK_WIDTH > SCREEN_WIDTH - TILE_SIZE - 16)
     {
-        setX(SCREEN_WIDTH - TILE_SIZE);
+        setX(SCREEN_WIDTH - TILE_SIZE - 16 - TANK_WIDTH);
     }
     if (getX() < TILE_SIZE)
     {
-        setX(TILE_SIZE);
+        setX(TILE_SIZE + 16);
     }
     if (getY() < TILE_SIZE)
     {
@@ -121,7 +134,7 @@ void Player::update() {
     }
     if (getY() + TANK_HEIGHT > SCREEN_HEIGHT - TILE_SIZE)
     {
-        setY(SCREEN_HEIGHT - TILE_SIZE);
+        setY(SCREEN_HEIGHT - TILE_SIZE - TANK_HEIGHT);
     }
 }
 
