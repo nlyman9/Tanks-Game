@@ -10,11 +10,18 @@
 #include <map>
 #include <iterator>
 
+typedef std::vector<int>       vector_1d;
+typedef std::vector<vector_1d> vector_2d;
+typedef std::vector<vector_2d> vector_3d;
+typedef std::vector<vector_3d> vector_4d;
+
 constexpr int MAX_ROW = 6;
 constexpr int MAX_COL = 8;
-std::vector<std::vector<std::vector<std::vector<int>>>> quads;
+// std::vector<std::vector<std::vector<std::vector<int>>>> quads;
 
-void print_quads(const std::vector<std::vector<std::vector<int>>> q) {
+vector_4d quads;
+
+void print_quads(const vector_3d q) {
     for(auto& quad : q) {
         for (auto& v : quad) {
             for (auto& num: v) {
@@ -26,17 +33,17 @@ void print_quads(const std::vector<std::vector<std::vector<int>>> q) {
     }
 }
 
-std::vector<std::vector<std::vector<std::vector<int>>>> get_quads() {
+vector_4d get_quads() {
     return quads;
 }
 
-std::vector<std::vector<int>> flip(std::vector<std::vector<int>> q) {
-    std::vector<std::vector<int>> q_flip(q.rbegin(), q.rend()); // convert from q2 to q5
+vector_2d flip(vector_2d q) {
+    vector_2d q_flip(q.rbegin(), q.rend()); // convert from q2 to q5
     return q_flip;
 }
 
-std::vector<std::vector<int>> mirror(std::vector<std::vector<int>> q) {
-    std::vector<std::vector<int>> q_mirror; // convert from q1 to q3
+vector_2d mirror(vector_2d q) {
+    vector_2d q_mirror; // convert from q1 to q3
     for (auto& v : q) {
         std::vector<int> vec(v.rbegin(), v.rend());
         q_mirror.push_back(vec);
@@ -44,9 +51,9 @@ std::vector<std::vector<int>> mirror(std::vector<std::vector<int>> q) {
     return q_mirror;
 }
 
-std::vector<std::vector<std::vector<int>>> corner(std::vector<std::vector<int>> q1) {
+vector_3d corner(vector_2d q1) {
     
-    std::vector<std::vector<std::vector<int>>> reversed;
+    vector_3d reversed;
 
     reversed.push_back(flip(q1)); // convert to q4
     reversed.push_back(mirror(flip(q1))); // convert to q6
@@ -55,29 +62,16 @@ std::vector<std::vector<std::vector<int>>> corner(std::vector<std::vector<int>> 
     return reversed;
 }
 
-void write_to(std::vector<std::vector<std::vector<int>>> quadrant) {
-    // std::ofstream out("quads_out.bin", std::ios::out | std::ios::binary);
-    std::ofstream out("quads_out.txt");
-    std::ostream_iterator<int> out_iter(out, " ");
-    for (auto& quad : quadrant) { // get the 2d vector
-        for (int i = 0; i < MAX_ROW; i++) { // get the vector at [i]
-            int* q = quad[i].data();
-            out << &q;
-        }
-    }
-    out.close();
-}
-
-int main() {
+void make_quads() {
 
     std::ifstream infile ("quadrants.txt");
     std::string line;
     int num, num_lines, num_quads, quad_type = 0;
 
-    std::vector<std::vector<std::vector<int>>> quads;
+    // std::vector<std::vector<std::vector<int>>> quads;
 
-    std::vector<std::vector<std::vector<int>>> quadrant_1, quadrant_2, quadrant_3, 
-                                            quadrant_4, quadrant_5, quadrant_6, quadrant_all;
+    vector_3d quadrant_1, quadrant_2, quadrant_3, 
+                quadrant_4, quadrant_5, quadrant_6, quadrant_all;
 
     if (infile.is_open()) {
 
@@ -94,7 +88,7 @@ int main() {
             for (int i = 0; i < num_quads; i++) {
                 
                 infile >> quad_type;                    
-                std::vector<std::vector<int>> quad;
+                vector_2d quad;
 
                 for (int j = 0; j < MAX_ROW; j++) {     // read the quad into a 2d vector
                     std::vector<int> v;
@@ -143,7 +137,7 @@ int main() {
                     }
                     default: {  // 6 - any quads
                         // quads.push_back(quad);
-                        std::cout << "Reached default case" << std::endl;
+                        // std::cout << "Reached default case" << std::endl;
                         break;
                     }
                 }
@@ -157,29 +151,6 @@ int main() {
     } else {
         std::cout << "unable to open file";
     }
-    
-    // print_quads(quads);
-
-    std::cout << "Quadrant 1:" << std::endl;
-    print_quads(quadrant_1);
-
-    std::cout << "Quadrant 2:" << std::endl;
-    print_quads(quadrant_2);
-
-    std::cout << "Quadrant 3:" << std::endl;
-    print_quads(quadrant_3);
-
-    std::cout << "Quadrant 4:" << std::endl;
-    print_quads(quadrant_4);
-
-    std::cout << "Quadrant 5:" << std::endl;
-    print_quads(quadrant_5);
-
-    std::cout << "Quadrant 6:" << std::endl;
-    print_quads(quadrant_6);
-
-    std::cout << "Quadrant All" << std::endl;
-    print_quads(quadrant_all);
 
     quads.push_back(quadrant_1);
     quads.push_back(quadrant_2);
@@ -189,5 +160,5 @@ int main() {
     quads.push_back(quadrant_6);
     quads.push_back(quadrant_all);
     
-    return 0;
+    // return quads;
 }

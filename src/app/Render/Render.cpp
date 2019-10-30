@@ -79,7 +79,7 @@ int Render::drawMenu() {
 		while(SDL_PollEvent(&e)) {
 			if(e.type == SDL_QUIT || (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_CLOSE)) {
 				quit = true;
-				exit(0);
+				return -1;
 			} else if(e.type == SDL_KEYDOWN) {
 				switch(e.key.keysym.sym) {
 					case SDLK_DOWN:
@@ -178,6 +178,14 @@ int Render::draw(double update_lag) {
 	// Render all the enemies
 	for (auto enemy: gEnemies) {
 		enemy->draw(gRenderer, update_lag);
+	}
+
+  int cnt = 1;
+	// Render all projectiles
+	for (auto projectile: gProjectiles) {
+		//std::cout << cnt << " = " << projectile->getX() << ", " << projectile->getY() << "; " << projectile->getTheta() << std::endl;
+		cnt++;
+		projectile->draw(gRenderer, update_lag);
 	}
 
 	// SDL_SetRenderDrawColor(gRenderer, 0xff, 0x00, 0xff, 0xff);

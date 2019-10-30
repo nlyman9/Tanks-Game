@@ -10,6 +10,10 @@
 #include "GameLoop.hpp"
 #include "Constants.hpp"
 #include "Sprite.hpp"
+#include <stdio.h>
+#include <unistd.h>
+#include <iostream>
+#include <SDL2/SDL_thread.h>
 
 
 GameLoop::~GameLoop() {}
@@ -93,6 +97,14 @@ int GameLoop::networkRun() {
 	SDL_Event e;
 	previous_time = std::chrono::system_clock::now(); // get current time of system
 	lag_time = 0.0;	// Set duration of time to 0
+
+	//Create bullet sprite
+	Sprite *bullet = new Sprite(render->getRenderer(), "src/res/images/bullet.png");
+		bullet->init();
+	//Create shell sprite
+	Sprite *shell = new Sprite(render->getRenderer(), "src/res/images/shell.png");
+		shell->init();
+
 	while (client->gameOn)
 	{
 		current_time = std::chrono::system_clock::now();
@@ -114,11 +126,35 @@ int GameLoop::networkRun() {
 		}
 		
 		player->getEvent(elapsed_time);
-		
+
+		//network version of player firing bullet
+		if (player->getFire() == true) {
+
+			//std::cout << "pew\n";
+
+			//Projectile *newlyFired = new Projectile(player->getX(), player->getY());
+			//projectiles.push_back(newlyFired);
+			projectiles.push_back(new Projectile(player->getX(), player->getY(), player->getTheta()));
+
+			std::cout << projectiles.back()->getX() << ", " << projectiles.back()->getY() << "; " << projectiles.back()->getTheta() << std::endl;
+
+			render->gProjectiles.push_back(projectiles.back());
+			projectiles.back()->setSprite(shell);
+			//newlyFired->setSprite(bullet);
+			projectiles.back()->setObstacleLocations(&tileArray);
+			player->setFire(false);
+		}
 		// 2. Update
 		// Update if time since last update is >= MS_PER_UPDATE
 		while(lag_time >= MS_PER_UPDATE) {
 			player->update();
+
+			for (auto enemy: enemies) {
+				enemy->update();
+			}
+			for (auto projectile: projectiles) {
+				projectile->update();
+			}
 			lag_time -= MS_PER_UPDATE;
 		}
 
@@ -135,16 +171,19 @@ int GameLoop::networkRun() {
  * @brief Initialize properties for Gameloop
  * 		Initializes player and enemies
  * 		Initializes the Renderer to render the game screen (Wrapper for SDL_Render)
- * 
+ *
  * @return true - Initialized successfully
  * @return false - Failed to initialize
  */
 bool GameLoop::init(Render* renderer) {
-	player = new Player(75, 50);
+	player = new Player(SCREEN_WIDTH/2 + 100, 50);
+	enemies.clear();
+	tileArray.clear();
+	enemies.push_back(new Enemy( SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, player));
 	render = renderer;
 	render->setPlayer(player);
-	
-	// Init the player
+	render->setEnemies(enemies);
+
 	Sprite *player_tank = new Sprite(render->getRenderer(), "src/res/images/red_tank.png");
 	player_tank->init();	
 	player->setSprite(player_tank);
@@ -185,25 +224,33 @@ void GameLoop::initMapSinglePlayer() {
 	for (auto enemy : enemies) {
 		enemy->setObstacleLocations(&tileArray);
 		enemy->setTileMap(map);
+		enemy->setPathway(*map, *player, *enemy);
 	}
 }
 
 /**
  * @brief The actual GameLoop
- * 
+ *
  */
 int GameLoop::runSinglePlayer()
 {
 	SDL_Event e;
 	previous_time = std::chrono::system_clock::now(); // get current time of system
 	lag_time = 0.0;	// Set duration of time to 0
+	//Create bullet sprite
+	Sprite *bullet = new Sprite(render->getRenderer(), "src/res/images/bullet.png");
+		bullet->init();
+	//Create shell sprite
+	Sprite *shell = new Sprite(render->getRenderer(), "src/res/images/shell.png");
+		shell->init();
+
 	while (isGameOn)
 	{
 		current_time = std::chrono::system_clock::now();
 		elapsed_time = current_time - previous_time;
 		previous_time = current_time;
 		lag_time += elapsed_time.count();
-		
+
 
 		// 1. Process input
 		while (SDL_PollEvent(&e))
@@ -213,26 +260,67 @@ int GameLoop::runSinglePlayer()
 				isGameOn = false;
 			}
 		}
-		
+
+		checkEscape();
+
 		player->getEvent(elapsed_time);
-		
+
+		//The player fired a bullet
+		if (player->getFire() == true) {
+
+			projectiles.push_back(new Projectile(player->getX(), player->getY(), player->getTheta()));
+
+			std::cout << projectiles.back()->getX() << ", " << projectiles.back()->getY() << "; " << projectiles.back()->getTheta() << std::endl;
+
+			render->gProjectiles.push_back(projectiles.back());
+			projectiles.back()->setSprite(shell);
+			//newlyFired->setSprite(bullet);
+			projectiles.back()->setObstacleLocations(&tileArray);
+			player->setFire(false);
+		}
 		// 2. Update
 		// Update if time since last update is >= MS_PER_UPDATE
 		while(lag_time >= MS_PER_UPDATE) {
 			player->update();
-			
+
 			for (auto enemy: enemies) {
 				enemy->update();
 			}
 
+			for (auto projectile: projectiles) {
+				projectile->update();
+			}
 			lag_time -= MS_PER_UPDATE;
 		}
 
 		// 3. Render
-		// Render everything 
+		// Render everything
 		render->draw(lag_time / MS_PER_UPDATE);
 	}
 
 	// Exit normally
 	return 0;
+}
+// press escape to return to main menu
+void GameLoop::checkEscape()
+{
+	const Uint8* keystate = SDL_GetKeyboardState(nullptr);
+
+	if (keystate[SDL_SCANCODE_ESCAPE]) {
+		this->init(render);
+		int gameMode = render->drawMenu();
+		if(gameMode == MENU_SINGLE) {
+			this->initMapSinglePlayer();
+			this->runSinglePlayer();
+		} else if(gameMode == MENU_MULTI) {
+			this->networkInit(new Args());
+			this->initMapMultiPlayer();
+			//run the game loop
+			this->networkRun();
+		} else if(gameMode == MENU_CREDITS) {
+			std::cout << "ROLL CREDITS" << std::endl;
+		} else {
+			render->close();
+		}
+	}
 }

@@ -87,7 +87,6 @@ bool Client::init() {
     FD_SET(STDIN_FILENO, &master);
 
     fdmax = sockfd;
-
     //initialize all buffers
     //receive buffer
     rcBuffer = (char*) calloc(152, sizeof(char)); 

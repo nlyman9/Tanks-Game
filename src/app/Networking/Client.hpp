@@ -12,7 +12,8 @@
 #include <netdb.h>
 #include <cstring>
 #include <string>
-
+#include <iostream>
+#include <vector>
 #include <unistd.h>
 #include "Network.hpp"
 #include <SDL2/SDL_thread.h>

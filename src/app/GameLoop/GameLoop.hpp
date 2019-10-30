@@ -8,6 +8,7 @@
 #include "Render.hpp"
 #include "Enemy.hpp"
 #include "MapGenerator.hpp"
+#include "Projectile.hpp"
 #include "Client.hpp"
 
 class Args {
@@ -28,12 +29,14 @@ class GameLoop {
     int networkRun();
     void initMapSinglePlayer();
     void initMapMultiPlayer();
+    void checkEscape();
 
   private:
     // Render class to render the game
     Render *render;
     Player *player;
     std::vector<Enemy *> enemies;
+		std::vector<Projectile *> projectiles;
     bool isGameOn;
     Client* client;
     // Time delta of (current_time) - (previous_time)
@@ -43,7 +46,7 @@ class GameLoop {
     // Time since last update
     // May be a sumation of elapsed times on fast computers.
     double lag_time;
-    
+
     // Previous time step of the gameloop
     std::chrono::system_clock::time_point previous_time;
 

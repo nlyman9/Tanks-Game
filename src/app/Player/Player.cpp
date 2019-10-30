@@ -4,9 +4,9 @@
  * @brief Player class implementation
  * @version 0.1
  * @date 2019-09-29
- * 
+ *
  * @copyright Copyright (c) 2019
- * 
+ *
  */
 #include <chrono>
 #include "Player.hpp"
@@ -15,11 +15,11 @@
 
 /**
  * @brief Construct a new Player:: Player object
- * 
- * @param sprite 
- * @param turret 
- * @param x 
- * @param y 
+ *
+ * @param sprite
+ * @param turret
+ * @param x
+ * @param y
  */
 Player::Player(Sprite *sprite, Sprite *turret, float x, float y) {
     setSprite(sprite);
@@ -32,18 +32,18 @@ Player::Player(float x, float y) {
 
 /**
  * @brief Destroy the Player:: Player object
- * 
+ *
  */
 Player::~Player() {}
 
 /**
- * @brief draws the player object 
+ * @brief draws the player object
  *  Overrides base class OBJECT
- * 
+ *
  * @param update_lag - the value to extrapolate by
  */
 void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
-    // Extrapolate the x and y positions 
+    // Extrapolate the x and y positions
     // "Solves" stuck in the middle rendering.
     int x_pos = getX() + x_vel * update_lag;
     int y_pos = getY() + y_vel * update_lag;
@@ -55,39 +55,67 @@ void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
 
     // SDL_Rect pos = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
     // SDL_RenderCopy(gRenderer, getSprite()->getTexture(), NULL, &pos);
-	
+
 	// Danny: to get the tank to render correctly, I replaced %src with NULL.
     // SDL_Rect src = {0, 0, 20, 20};
-	
+
     SDL_Rect* dst = get_box();
-    SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), NULL, dst, theta, NULL, SDL_FLIP_NONE);
+
+    float temp_theta = 0;
+    temp_theta = theta;
+    SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), NULL, dst, temp_theta, NULL, SDL_FLIP_NONE);
+
 }
 
 /**
  * @brief update the player object
  *  Overrides base class OBJECT
- * 
+ *
  */
 void Player::update() {
     // Move player
 
-    // Rotate player 
+    // Rotate player
     rotatePlayer(theta_v);
 
-    //setPos(getX() + x_vel, getY() + y_vel);
+
     float updateStep = MS_PER_UPDATE/1000;
-    setPos(getX() + (x_vel * updateStep), getY() + (y_vel * updateStep));
+    //NEW implementation
+
 
     SDL_Rect* overlap;
-    SDL_Rect currentPos = {getX(), getY(), TANK_WIDTH + 1.41 * sin((theta * M_PI_4)/180), TANK_HEIGHT + 1.41 * sin((theta * M_PI_4)/180)};
+    SDL_Rect currentPos;
 
-    for(auto obstacle : obstacles) {  
+    //first add X velocity
+    setX(getX() + (x_vel * updateStep));
+
+    currentPos = {getX(), getY(), TANK_WIDTH, TANK_HEIGHT};
+    //correct for collisions
+    for(auto obstacle : obstacles) {
         overlap = check_collision(&currentPos, &obstacle);
         if(overlap != nullptr) {
             //std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
-            //std::cout << *getBoundingBox() << std::endl << "THETA " << theta << std::endl << std::endl;
-            
-            setPos(getX() - (x_vel * updateStep) / 2, getY() - (y_vel * updateStep) /2);
+            if(x_vel < 0) {
+               setX(floor(getX() + overlap->w));
+             } else {
+               setX(floor(getX() - overlap->w));
+             }
+            break;
+        }
+    }
+    // next add Y velocity
+    setY(getY() + (y_vel * updateStep));
+
+    currentPos = {getX(), getY(), TANK_WIDTH, TANK_HEIGHT};
+    //correct for collisions
+    for(auto obstacle : obstacles) {
+        overlap = check_collision(&currentPos, &obstacle);
+        if(overlap != nullptr) {
+            if(y_vel < 0) {
+                setY(floor(getY() + overlap->h));
+            } else {
+                setY(floor(getY() - overlap->h));
+            }
             break;
         }
 
@@ -130,19 +158,19 @@ void Player::update() {
     }
 
     // Check he isn't moving outside of the map
-    if (getX() + TANK_WIDTH > SCREEN_WIDTH - TILE_SIZE - BORDER_GAP)	// Right border
+    if (getX() + TANK_WIDTH > SCREEN_WIDTH - TILE_SIZE - 16)
     {
-        setX(SCREEN_WIDTH - TILE_SIZE - TANK_WIDTH - BORDER_GAP);
+        setX(SCREEN_WIDTH - TILE_SIZE - 16 - TANK_WIDTH);
     }
-    if (getX() < TILE_SIZE + BORDER_GAP)	// left border
+    if (getX() < TILE_SIZE)
     {
-        setX(TILE_SIZE + BORDER_GAP);
+        setX(TILE_SIZE + 16);
     }
-    if (getY() < TILE_SIZE)	// Top border
+    if (getY() < TILE_SIZE)
     {
         setY(TILE_SIZE);
     }
-    if (getY() + TANK_HEIGHT > SCREEN_HEIGHT - TILE_SIZE)	// bottom border
+    if (getY() + TANK_HEIGHT > SCREEN_HEIGHT - TILE_SIZE)
     {
         setY(SCREEN_HEIGHT - TILE_SIZE - TANK_HEIGHT);
     }
@@ -151,12 +179,12 @@ void Player::update() {
 /**
  * @brief move the player an offset from its current x-y position
  *  Overrides base class OBJECT
- * 
+ *
  * @param x - how much to move player's current x position by
  * @param y - how much to move player's current y position by
- * 
- * @return true  - moved player succesfully 
- * @return false - failed to move player 
+ *
+ * @return true  - moved player succesfully
+ * @return false - failed to move player
  */
 bool Player::move(float x, float y) {
     return false;
@@ -164,12 +192,12 @@ bool Player::move(float x, float y) {
 
 /**
  * @brief place/teleport player to a specified x-y location
- * 
+ *
  * @param x - set x position
  * @param y - set y position
- * 
- * @return true  - placed player succesfully 
- * @return false - failed to place player 
+ *
+ * @return true  - placed player succesfully
+ * @return false - failed to place player
  */
 bool Player::place(float x, float y) {
     return false;
@@ -177,8 +205,13 @@ bool Player::place(float x, float y) {
 
 /* Player Specific Functions */
 
-bool Player::fire() {
-    return false;
+bool Player::getFire() {
+    return fire;
+}
+
+bool Player::setFire(bool fire) {
+    this->fire = fire;
+    return true;
 }
 
 bool Player::rotatePlayer(float t) {
@@ -195,12 +228,17 @@ bool Player::rotateTurret(float theta) {
     return false;
 }
 
+int Player::getTheta() {
+    return theta;
+}
+
 void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time) {
 
     delta_velocity = 0;
     x_deltav = 0;
     y_deltav = 0;
     theta_v = 0;
+    fire = false;
 
     const Uint8* keystate = SDL_GetKeyboardState(nullptr);
     if (keystate[SDL_SCANCODE_W]) {
@@ -221,6 +259,20 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time) {
         theta_v += PHI;
     }
 
+    if (keystate[SDL_SCANCODE_SPACE]) {
+  		Uint32 current_time = SDL_GetTicks();
+
+  		if (current_time > fire_last_time + 3000) {
+  			fire = true;
+  			fire_last_time = current_time;
+  		}
+  	}
+
+    if(theta < 0) {
+        theta = 360 + theta;
+    }
+    theta %= 360;
+
     // Set Player's X velocity
     if (x_deltav == 0) {
         // No user-supplied "push", return to rest
@@ -233,14 +285,14 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time) {
         else if (x_vel < 0) {
             if (-x_vel < (1 * time.count()))
                 x_vel = 0;
-            else 
+            else
                 x_vel += (1 * time.count());
         }
     } else {
         x_vel = x_deltav; //* time.count();
         //x_vel *= cos((theta * M_PI) / 180);
     }
-    
+
     // Set Player's Y velocity
     if (y_deltav == 0) {
         // No user-supplied "push", return to rest
@@ -253,7 +305,7 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time) {
         else if (y_vel < 0) {
             if (-y_vel < (1 * time.count()))
                 y_vel = 0;
-            else 
+            else
                 y_vel += (1 * time.count());
         }
 
@@ -267,20 +319,20 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time) {
     //std::cout << theta << ":" << x_deltav << ":" << y_deltav << "|" << x_vel << ":" << y_vel << std::endl;
 
     // Clamp velocities within bounds of -+ MAX_PLAYER_VELOCITY
-    if(x_vel > MAX_PLAYER_VELOCITY) 
+    if(x_vel > MAX_PLAYER_VELOCITY)
     {
         x_vel = MAX_PLAYER_VELOCITY;
     }
-    if(x_vel < -MAX_PLAYER_VELOCITY) 
+    if(x_vel < -MAX_PLAYER_VELOCITY)
     {
         x_vel = -MAX_PLAYER_VELOCITY;
     }
 
-    if(y_vel > MAX_PLAYER_VELOCITY) 
+    if(y_vel > MAX_PLAYER_VELOCITY)
     {
         y_vel = MAX_PLAYER_VELOCITY;
     }
-    if(y_vel < -MAX_PLAYER_VELOCITY) 
+    if(y_vel < -MAX_PLAYER_VELOCITY)
     {
         y_vel = -MAX_PLAYER_VELOCITY;
     }

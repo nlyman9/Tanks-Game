@@ -7,6 +7,7 @@
 #include "Constants.hpp"
 #include "Player.hpp"
 #include "Enemy.hpp"
+#include "Projectile.hpp"
 #include "MapGenerator.hpp"
 #include "ImageLoader.hpp"
 
@@ -19,6 +20,7 @@ enum {
 class Render {
     public:
         std::vector<Enemy *> gEnemies;
+        std::vector<Projectile *> gProjectiles;
 
         Render() {}
         Render(Player* player, std::vector<Enemy*> enemies): gPlayer{player}, gEnemies{enemies} {}
@@ -32,6 +34,7 @@ class Render {
         SDL_Renderer* getRenderer();
 
         void setTileMap(std::vector<std::vector<int>>* tileMap);
+        void addProjectile(Projectile* newProjectile);
 
         void setPlayer(Player* player);
         void setEnemies(std::vector<Enemy *> enemies);
