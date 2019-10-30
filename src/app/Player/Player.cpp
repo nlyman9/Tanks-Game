@@ -62,9 +62,6 @@ void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
     float temp_theta = 0;
     temp_theta = theta;
     SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), NULL, dst, temp_theta, NULL, SDL_FLIP_NONE);
-
-    SDL_SetRenderDrawColor(gRenderer, 255, 0, 0, 0);
-    SDL_RenderDrawRect(gRenderer, &ovlp);
 }
 
 /**
