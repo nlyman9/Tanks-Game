@@ -31,9 +31,9 @@ For now, you have to command line arguments when running the game and then selec
 
 ## Host
 
-* `./build/bin/Game host <port>
+* `./build/bin/Game host <port>`
 
 ## Client 
 
-* `./build/bin/Game client <ip> <port>
+* `./build/bin/Game client <ip> <port>`
 For local connections, use ip `127.0.0.1`.
