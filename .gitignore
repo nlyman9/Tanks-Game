@@ -5,3 +5,4 @@ build/
 Game
 Tests/client
 Tests/server
+src/cmake/*

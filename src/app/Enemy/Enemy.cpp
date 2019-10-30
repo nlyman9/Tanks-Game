@@ -27,7 +27,7 @@ void Enemy::draw(SDL_Renderer *gRenderer, double update_lag) {
   // SDL_Rect src = {0, 0, 48, 48};
   // SDL_Rect dst = {x_enemy_pos, y_enemy_pos, 39, 48};
   // SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), &src, &dst, 0, NULL, SDL_FLIP_NONE);
-  SDL_Rect pos = {x_enemy_pos, y_enemy_pos, TANK_WIDTH, TANK_HEIGHT};
+  SDL_Rect pos = {(int)x_enemy_pos, (int)y_enemy_pos, TANK_WIDTH, TANK_HEIGHT};
   SDL_RenderCopy(gRenderer, getSprite()->getTexture(), NULL, &pos);
 }
 
@@ -137,8 +137,8 @@ void Enemy::updatePos() {
   //See if player and enemy are intersecting
   SDL_Rect enemy_rect;
   SDL_Rect player_rect;
-  enemy_rect = {x_enemy_pos, y_enemy_pos, TANK_WIDTH, TANK_HEIGHT};
-  player_rect = {x_pos, y_pos, TANK_WIDTH, TANK_HEIGHT};
+  enemy_rect = {(int)x_enemy_pos, (int)y_enemy_pos, TANK_WIDTH, TANK_HEIGHT};
+  player_rect = {(int)x_pos, (int)y_pos, TANK_WIDTH, TANK_HEIGHT};
   //std::cout << enemy_rect.w << ":" << enemy_rect.h << ":" << enemy_rect.x << ":" << enemy_rect.y << std::endl;
 
   SDL_Rect* overlap;
