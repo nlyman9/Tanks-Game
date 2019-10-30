@@ -30,7 +30,9 @@ bool Render::init()
 		return false;
 	}
 
-	// SEt up rendered with out vsync
+	gScreenSurface = SDL_GetWindowSurface( gWindow );
+
+	// Set up rendered with out vsync
 	gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
 	if (gRenderer == nullptr)
 	{
@@ -38,7 +40,7 @@ bool Render::init()
 		return false;
 	}
 
-		// Set renderer draw/clear color
+	// Set renderer draw/clear color
 	SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
 	ImageLoader imgLoad;
 	gTileSheet = imgLoad.loadImage("src/res/images/tiles.png", gRenderer);
@@ -62,12 +64,72 @@ void Render::close() {
 	SDL_Quit();
 }
 
-void Render::setTileMap(int** tileMap) {
-	tile_map = tileMap;
+int Render::drawMenu() {
+
+	ImageLoader imgLoad;
+	SDL_Texture* menuSinglePlayer = imgLoad.loadImage("src/res/images/menu_single_player.png", gRenderer);
+	SDL_Texture* menuMultiPlayer = imgLoad.loadImage("src/res/images/menu_multi_player.png", gRenderer);
+	SDL_Texture* menuCredits = imgLoad.loadImage("src/res/images/menu_credits.png", gRenderer);
+
+	bool quit = false;
+	int menuOption = MENU_SINGLE;
+  	while(!quit) {
+		SDL_Event e;
+
+		while(SDL_PollEvent(&e)) {
+			if(e.type == SDL_QUIT || (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_CLOSE)) {
+				quit = true;
+				return -1;
+			} else if(e.type == SDL_KEYDOWN) {
+				switch(e.key.keysym.sym) {
+					case SDLK_DOWN:
+						menuOption++;
+						break;
+					case SDLK_s:
+						menuOption++;
+						break;
+					case SDLK_UP:
+						menuOption--;
+						break;
+					case SDLK_w:
+						menuOption--;
+						break;
+					case SDLK_RETURN:
+						return menuOption;
+						break;
+				}
+			}
+		}
+
+		if(menuOption == -1) {
+			menuOption = MENU_CREDITS;
+		}
+
+		if(menuOption == 3) {
+			menuOption = MENU_SINGLE;
+		}
+
+		SDL_Rect fullscreen = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+		if(menuOption == MENU_SINGLE) {
+			SDL_RenderCopy(gRenderer, menuSinglePlayer, NULL, &fullscreen);
+		} else if(menuOption == MENU_MULTI) {
+			SDL_RenderCopy(gRenderer, menuMultiPlayer, NULL, &fullscreen);
+		} else {
+			SDL_RenderCopy(gRenderer, menuCredits, NULL, &fullscreen);
+		}
+
+		SDL_RenderPresent(gRenderer);
+	}
+
+	return menuOption;
+}
+
+void Render::setTileMap(std::vector<std::vector<int>>* tileMap) {
+	std::cout << "set map" << std::endl;
+	tile_map = *tileMap;
 }
 
 int Render::draw(double update_lag) {
-		
 	int c;
 	SDL_Rect cur_out;
 
@@ -81,7 +143,7 @@ int Render::draw(double update_lag) {
 			SDL_RenderCopy(gRenderer, gTileSheet, &gTileRects[tile_map[i][j]], &cur_out);
 		}
 	}
-	
+
 	//GENERATES TOP BORDER
 	c = BORDER_GAP;
 	while (c < SCREEN_WIDTH - BORDER_GAP) {
@@ -119,6 +181,14 @@ int Render::draw(double update_lag) {
 		enemy->draw(gRenderer, update_lag);
 	}
 
+  int cnt = 1;
+	// Render all projectiles
+	for (auto projectile: gProjectiles) {
+		//std::cout << cnt << " = " << projectile->getX() << ", " << projectile->getY() << "; " << projectile->getTheta() << std::endl;
+		cnt++;
+		projectile->draw(gRenderer, update_lag);
+	}
+
 	// SDL_SetRenderDrawColor(gRenderer, 0xff, 0x00, 0xff, 0xff);
 	// SDL_Rect fillRect_obst = {gloop->x_obst_pos, gloop->y_obst_pos, OBST_WIDTH, OBST_HEIGHT};
 	// SDL_RenderFillRect(gloop->gRenderer, &fillRect_obst);
@@ -131,4 +201,12 @@ int Render::draw(double update_lag) {
 
 SDL_Renderer* Render::getRenderer() {
 	return gRenderer;
+}
+
+void Render::setPlayer(Player* player) {
+	gPlayer = player;
+}
+
+void Render::setEnemies(std::vector<Enemy *> enemies) {
+	gEnemies = enemies;
 }

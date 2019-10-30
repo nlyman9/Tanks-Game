@@ -13,6 +13,9 @@ target_link_libraries(GameLoop
   Enemy
   Sprite
   MapGenerator
+  Projectile
+  Networking
+  StartUpMenu
 )
 
 target_include_directories(GameLoop

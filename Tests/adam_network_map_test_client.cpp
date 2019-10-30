@@ -26,10 +26,11 @@ constexpr int TILE_SIZE = 48;
 bool mapRecieved = false;
 std::vector<int> *unpack(std::vector<char>* packed, std::vector<int> *unPacked, int bits){
 	std::vector<bool> workSet;
-    int i;
-	for(auto curr : *packed){
-		for(i = 0; i < 8; i++){
-			workSet.push_back((curr >> (7 - i)) & 1);
+    //first turn the packed map into a bool array
+	for(auto curr : mapPacked){
+		for(int i = 0; i < 8; i++){
+			workSet.push_back((bool)((curr >> (7 - i)) & 1));
+			//std::cout << (int) ((curr >> (7 - i)) & 1);
 		}
 	}
     i = 0;
@@ -122,7 +123,7 @@ int main() {
     struct addrinfo hints;
     struct addrinfo *serverInfo;
     int sockfd;
-    char buffer[152];
+    char buffer[105];
 
     fd_set master;      // Master of file descriptors
     fd_set read_fds;    // Read fd's returned from select
@@ -159,8 +160,6 @@ int main() {
 
     fdmax = sockfd;
 
-    std::vector<char>* test = new std::vector<char>();
-
     int i, nbytes;
     while(1) {
         read_fds = master;
@@ -173,7 +172,7 @@ int main() {
 
         // If from server
         if (FD_ISSET(sockfd, &read_fds)) {
-            nbytes = recv(sockfd, buffer, 152, 0);
+            nbytes = recv(sockfd, buffer, 500, 0);
             if (nbytes <= 0) {
                 printf("Closing connection to server.");
                 close(sockfd);
@@ -181,18 +180,45 @@ int main() {
             } else {
                 //recieved data
                 //for this test only recieving the map data
-                //test->insert(test->end(), buffer);
-
-                for(int i = 0; i < 152; i++){
-                    std::cout << buffer[i] << " ";
-                    test->push_back(buffer[i]);
-                }
-                std::cout << test->size() << std::endl;
+                std::vector<char> test(buffer, buffer + (sizeof(buffer)/sizeof(buffer[0])));
+                std::cout << test.size() << std::endl;
                 std::vector<int> map;
-                if(!mapRecieved){
-                    unpack(test, &map, 3);
-                    displayMap(&map);
+                unpackMap(test, &map);
+
+                int x = 0;
+                int y = 0;
+                SDL_Rect currentTile;
+                std::cout << (int) map.size() << " " << nbytes << "\n";
+                for(auto tile : map){
+                    std::cout << (int) tile << " ";
+                    
+                    // Extract row and column from the 1D vector
+                    if(x == 27) {
+                        y++;
+                        x = 0;
+                    }
+
+                    currentTile = {x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE};
+                    if(tile == 0) {
+                        SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0x00, 0xFF);
+                    }
+                    if(tile == 1) {
+                        SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0xFF, 0x00);
+                    }
+                    if(tile == 2) {
+                        SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0x00, 0x00);
+                    }
+                    if(tile == 3) {
+                        SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0xFF, 0xFF);
+                    }
+                    if(tile == 4) {
+                        SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0x00, 0xFF);
+                    }
+                    SDL_RenderFillRect(gRenderer, &currentTile);
+                    x++;
                 }
+                SDL_RenderPresent(gRenderer);
+                std::cout << " \n";
             }
         } else if (fgets(buffer, 100, stdin) != NULL) { // get input from user
             // Check for user input in the terminal 

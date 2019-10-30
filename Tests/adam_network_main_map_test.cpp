@@ -264,14 +264,15 @@ int main()
         test->push_back(i % 3);
     }
     std::vector<int>* test3 = new std::vector<int>();
-    pack(test, &test2, 3); //pack map into 3 bits
-    unpack(&test2, test3, 3);
+    pack(test, &test2, 2); //pack map into 3 bits
+    unpack(&test2, test3, 2);
     displayMap(test3);
     // std::cout << "Binary Representation of map : \n";
 	//for(auto curr : test2){
 	//	std::cout << (int)(curr >> 7 & 1) << (int)(curr >> 6 & 1) << (int)(curr >> 5 & 1) << (int)(curr >> 4 & 1) << (int)(curr >> 3 & 1) << (int)(curr >> 2 & 1) << (int)(curr >> 1 & 1) << (int)(curr & 1) << '\n';
 	//}
     //test 2 is our packed map
+    std::cout << (int) (*test).size() << " ";
     delete test; //delete the map from memory
     std::cout << (int) test2.size() << "\n";
     // Set structs and variables for the internet
@@ -287,7 +288,7 @@ int main()
     int fdmax;       // maximym file descriptor number
 
     char remoteIP[INET_ADDRSTRLEN];
-    char buf[100];
+    char buf[105];
 
     FD_ZERO(&master);
     FD_ZERO(&read_fds);
@@ -344,7 +345,7 @@ int main()
     int newfd;
     int nbytes;
     int i, j;
-    char buffer[305];
+    char buffer[100];
     // Loop of server
     while (1)
     {
@@ -386,7 +387,6 @@ int main()
                                inet_ntop(remoteaddr.ss_family, &remoteaddr, remoteIP, INET_ADDRSTRLEN),
                                newfd);
                         //new connection so need to send map data here accepted so send data
-                        std::cout << "test2 size : " << test2.size() << std::endl;
                         send(newfd, test2.data(), test2.size(), 0);
                     }
                 }

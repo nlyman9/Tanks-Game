@@ -9,15 +9,15 @@ int main(int argc, char* argv[]) {
 
 	if (argc >= 2) {
 		type = argv[1];
-		if (type.compare("host")) {
+		if (type.compare("host") == 0) {
 			options->isOnline = true;
 			options->isHost = true;
 			options->ip = "0.0.0.0";
 
 			if (argc >= 3) {
-				options->ip = atoi(argv[2]);
+				options->port = atoi(argv[2]);
 			} else {
-				std::cerr << "Please provide port number." << std::endl;
+				std::cerr << "host Please provide port number." << std::endl;
 			}
 		} else {
 			options->isOnline = true;
@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
 			}
 
 			if (argc >= 4) {
-				options->ip = atoi(argv[3]);
+				options->port = atoi(argv[3]);
 			} else {
 				std::cerr << "Please provide port number." << std::endl;
 			}

@@ -10,6 +10,7 @@ target_link_libraries(Player
   Constants
   Sprite
   SDL2
+  Enemy
 )
 
 target_include_directories(Player

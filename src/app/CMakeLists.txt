@@ -16,8 +16,14 @@ add_subdirectory(ImageLoader)
 add_executable(Game
   game.cpp
 )
-
+add_executable(ServerProcess
+  Networking/Server.cpp
+)
 target_link_libraries(Game
+  PRIVATE
+  StartUpMenu
+)
+target_link_libraries(ServerProcess
   PRIVATE
   StartUpMenu
 )

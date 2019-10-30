@@ -13,6 +13,7 @@ target_link_libraries(Render
   Object
   Sprite
   Enemy
+  Projectile
   MapGenerator
   ImageLoader
 )
