@@ -62,6 +62,8 @@ void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
     float temp_theta = 0;
     temp_theta = theta;
 
+
+    // Center the delta x and y by the center of the tank
     float delta_x = mouseX - (getX() + TANK_WIDTH / 2);
     float delta_y = mouseY - (getY() + TANK_HEIGHT / 2);
     float theta_radians = atan2(delta_y, delta_x);
