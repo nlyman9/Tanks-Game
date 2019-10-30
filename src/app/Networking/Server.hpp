@@ -14,7 +14,8 @@
 #include <iostream>
 #include <vector>
 #include <unistd.h>
-#include <SDL2/SDL_thread.h>
+
+// #include <SDL2/SDL_thread.h>
 
 char* tsBuffer;
 //buffer to fill in

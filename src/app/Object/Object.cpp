@@ -24,7 +24,7 @@
 
 SDL_Rect* OBJECT::get_box()
 {
-    box = {nearbyint(getX()), nearbyint(getY()), TANK_WIDTH, TANK_HEIGHT};
+    box = {(int)nearbyint(getX()), (int)nearbyint(getY()), TANK_WIDTH, TANK_HEIGHT};
     return &box;
 }
 
