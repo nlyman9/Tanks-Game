@@ -73,6 +73,10 @@ int Render::drawMenu() {
 
 	bool quit = false;
 	int menuOption = MENU_SINGLE;
+
+	SDL_Rect singlePlayerBox = {452, 144, 377, 111};
+	SDL_Rect multiPlayerBox = {452, 288, 377, 111};
+	SDL_Rect creditsBox = {452, 435, 377, 111};
   	while(!quit) {
 		SDL_Event e;
 
@@ -98,6 +102,22 @@ int Render::drawMenu() {
 						return menuOption;
 						break;
 				} 
+			} else if(e.type == SDL_MOUSEBUTTONDOWN) {
+				int x, y;
+				SDL_GetMouseState(&x, &y);
+				SDL_Rect clickBox = {x, y, 1, 1};
+				SDL_Rect intersection;
+
+				// Check for box clicks
+				if(SDL_IntersectRect(&clickBox, &singlePlayerBox, &intersection)) {
+					return MENU_SINGLE;
+				}
+				if(SDL_IntersectRect(&clickBox, &multiPlayerBox, &intersection)) {
+					return MENU_MULTI;
+				}
+				if(SDL_IntersectRect(&clickBox, &creditsBox, &intersection)) {
+					return MENU_CREDITS;
+				}
 			}
 		}
 
