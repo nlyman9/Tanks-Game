@@ -29,21 +29,29 @@ add_executable(Game
 add_executable(ServerProcess
   Networking/Server.cpp
 )
+if(${APPLE})
 target_link_libraries(Game
   PRIVATE
   StartUpMenu
-  if(${APPLE})
   ${SDL2_LIBRARY}
   ${SDL2_IMAGE_LIBRARIES}
   ${SDL2_TTF_LIBRARIES}
-  endif()
+)
+
+target_link_libraries(ServerProcess
+  PRIVATE
+  StartUpMenu
+  ${SDL2_LIBRARY}
+  ${SDL2_IMAGE_LIBRARIES}
+  ${SDL2_TTF_LIBRARIES}
+)
+else()
+target_link_libraries(Game
+  PRIVATE
+  StartUpMenu
 )
 target_link_libraries(ServerProcess
   PRIVATE
   StartUpMenu
-  if(${APPLE})
-  ${SDL2_LIBRARY}
-  ${SDL2_IMAGE_LIBRARIES}
-  ${SDL2_TTF_LIBRARIES}
-  endif()
 )
+endif()

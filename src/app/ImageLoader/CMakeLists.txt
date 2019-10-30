@@ -8,12 +8,17 @@ target_include_directories(ImageLoader
   PUBLIC
   .
 )
-
+if(${APPLE})
 target_link_libraries(ImageLoader
   PRIVATE
   ${SDL2_LIBRARY}
   ${SDL2_IMAGE_LIBRARIES}
   ${SDL2_TTF_LIBRARIES}
+)
+else()
+target_link_libraries(ImageLoader
+  PRIVATE
   SDL2
   SDL2_image
 )
+endif()
