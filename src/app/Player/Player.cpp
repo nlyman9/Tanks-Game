@@ -62,20 +62,19 @@ void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
     float temp_theta = 0;
     temp_theta = theta;
 
-    float delta_x = getX() - mouseX;
-    float delta_y = getY() - mouseY;
+    float delta_x = mouseX - (getX() + TANK_WIDTH / 2);
+    float delta_y = mouseY - (getY() + TANK_HEIGHT / 2);
     float theta_radians = atan2(delta_y, delta_x);
-    mouseTheta = (int)(theta_radians * 180 / M_PI) + 180; // Invert so the turret faces the mouse
+    mouseTheta = (int)(theta_radians * 180 / M_PI); // Invert so the turret faces the mouse
 
-    if(mouseTheta > turretTheta + THETA_WINDOW) {
-        turretTheta += TURRET_PHI;
-    } else if (mouseTheta < turretTheta - THETA_WINDOW) {
-        turretTheta -= TURRET_PHI;
-    } else {
-        turretTheta = mouseTheta;
-    }
-
-    turretTheta %= 360;
+    // if(mouseTheta > turretTheta + THETA_WINDOW) {
+    //     turretTheta += TURRET_PHI;
+    // } else if (mouseTheta < turretTheta - THETA_WINDOW) {
+    //     turretTheta -= TURRET_PHI;
+    // } else {
+    //     turretTheta = mouseTheta;
+    // }
+    turretTheta = mouseTheta;
 
     SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), NULL, dst, temp_theta, NULL, SDL_FLIP_NONE);
     SDL_RenderCopyEx(gRenderer, getTurretSprite()->getTexture(), NULL, turret_dst, turretTheta, NULL, SDL_FLIP_NONE);

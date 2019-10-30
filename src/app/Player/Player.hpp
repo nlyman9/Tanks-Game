@@ -30,7 +30,7 @@ class Player : public Object {
         int mouseTheta = 0;
         int mouseX = 0;
         int mouseY = 0;
-        int turretTheta = 0;
+        float turretTheta = 0;
         int turretTheta_v = 0;
         float x_deltav = 0;
         float y_deltav = 0;
