@@ -14,7 +14,9 @@
 enum {
     MENU_SINGLE,
     MENU_MULTI,
-    MENU_CREDITS
+    MENU_CREDITS,
+    DEFAULT,
+    MENU_NONE
 };
 
 class Render {

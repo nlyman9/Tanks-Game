@@ -67,12 +67,13 @@ void Render::close() {
 int Render::drawMenu() {
 
 	ImageLoader imgLoad;
+	SDL_Texture* menuNone = imgLoad.loadImage("src/res/images/menu_none.png", gRenderer);
 	SDL_Texture* menuSinglePlayer = imgLoad.loadImage("src/res/images/menu_single_player.png", gRenderer);
 	SDL_Texture* menuMultiPlayer = imgLoad.loadImage("src/res/images/menu_multi_player.png", gRenderer);
 	SDL_Texture* menuCredits = imgLoad.loadImage("src/res/images/menu_credits.png", gRenderer);
 
 	bool quit = false;
-	int menuOption = MENU_SINGLE;
+	int menuOption = MENU_NONE;
 
 	SDL_Rect singlePlayerBox = {452, 144, 377, 111};
 	SDL_Rect multiPlayerBox = {452, 288, 377, 111};
@@ -85,6 +86,9 @@ int Render::drawMenu() {
 				quit = true;
 				return -1;
 			} else if(e.type == SDL_KEYDOWN) {
+				if(menuOption == MENU_NONE) {
+					menuOption = MENU_SINGLE;
+				}
 				switch(e.key.keysym.sym) {
 					case SDLK_DOWN:
 						menuOption++;
@@ -134,8 +138,10 @@ int Render::drawMenu() {
 			SDL_RenderCopy(gRenderer, menuSinglePlayer, NULL, &fullscreen); 
 		} else if(menuOption == MENU_MULTI) {
 			SDL_RenderCopy(gRenderer, menuMultiPlayer, NULL, &fullscreen); 
-		} else {
+		} else if(menuOption == MENU_CREDITS) {
 			SDL_RenderCopy(gRenderer, menuCredits, NULL, &fullscreen); 
+		} else {
+			SDL_RenderCopy(gRenderer, menuNone, NULL, &fullscreen); 
 		}
 
 		SDL_RenderPresent(gRenderer);
