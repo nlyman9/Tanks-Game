@@ -167,6 +167,7 @@ void GameLoop::initMapSinglePlayer() {
 	for (auto enemy : enemies) {
 		enemy->setObstacleLocations(&tileArray);
 		enemy->setTileMap(map);
+		enemy->setPathway(*map, *player, *enemy);
 	}
 }
 
