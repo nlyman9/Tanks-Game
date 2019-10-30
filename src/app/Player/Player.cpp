@@ -67,7 +67,7 @@ void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
     float delta_x = mouseX - (getX() + TANK_WIDTH / 2);
     float delta_y = mouseY - (getY() + TANK_HEIGHT / 2);
     float theta_radians = atan2(delta_y, delta_x);
-    mouseTheta = (int)(theta_radians * 180 / M_PI); // Invert so the turret faces the mouse
+    mouseTheta = (int)(theta_radians * 180 / M_PI); 
 
     // if(mouseTheta > turretTheta + THETA_WINDOW) {
     //     turretTheta += TURRET_PHI;
