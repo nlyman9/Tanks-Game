@@ -19,7 +19,6 @@ class MapGenerator{
     std::vector<std::vector<int>> generateOpenLineMap();
     std::vector<std::vector<int>> presetCheckerMap();
     int room[X_WIDE][Y_HIGH];
-
 };
 
 
