@@ -27,7 +27,7 @@ Run `sh setup.sh` to install the following libraries
 
 # Running Multiplayer 
 
-For now, you have to command line arguments when running the game and then select "Multiplayer" in the menu.
+For now, you have to use command line arguments when executing the game and then select "Multiplayer" in the menu.
 
 ## Host
 
@@ -35,5 +35,5 @@ For now, you have to command line arguments when running the game and then selec
 
 ## Client 
 
-* `./build/bin/Game client <ip> <port>`
+* `./build/bin/Game client <ip> <port>`  
 For local connections, use ip `127.0.0.1`.
