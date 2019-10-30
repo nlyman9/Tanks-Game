@@ -59,7 +59,12 @@ void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
     // SDL_Rect src = {0, 0, 20, 20};
 	
     SDL_Rect* dst = get_box();
-    SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), NULL, dst, theta, NULL, SDL_FLIP_NONE);
+    float temp_theta = 0;
+    temp_theta = theta;
+    SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), NULL, dst, temp_theta, NULL, SDL_FLIP_NONE);
+
+    SDL_SetRenderDrawColor(gRenderer, 255, 0, 0, 0);
+    SDL_RenderDrawRect(gRenderer, &ovlp);
 }
 
 /**
@@ -73,31 +78,56 @@ void Player::update() {
     // Rotate player 
     rotatePlayer(theta_v);
 
-    //setPos(getX() + x_vel, getY() + y_vel);
-    float updateStep = MS_PER_UPDATE/1000;
-    setPos(getX() + (x_vel * updateStep), getY() + (y_vel * updateStep));
+    float updateStep = MS_PER_UPDATE / 1000;
 
+    // NEW IMPLEMENTATION
     SDL_Rect* overlap;
-    SDL_Rect currentPos = {getX(), getY(), TANK_WIDTH + 1.41 * cos((theta * M_PI_4)/180), TANK_HEIGHT + 1.41 * cos((theta * M_PI_4)/180)};
+    SDL_Rect currentPos;
 
-    for(auto obstacle : obstacles) {  
+    // first add X velocity
+    setX(getX() + (x_vel * updateStep));
+
+    currentPos = {getX(), getY(), TANK_WIDTH, TANK_HEIGHT};
+
+    // correct for collisions
+    for(auto obstacle : obstacles) {
         overlap = check_collision(&currentPos, &obstacle);
         if(overlap != nullptr) {
-            std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
+            if(x_vel < 0) {
+                setX(floor(getX() + overlap->w));
+            } else {
+                setX(floor(getX() - overlap->w));
+            }
+            break;
+        }
+    }
 
-            setPos(getX() - (x_vel * updateStep), getY() - (y_vel * updateStep));
+    // next add Y velocity
+    setY(getY() + (y_vel * updateStep));
+
+    currentPos = {getX(), getY(), TANK_WIDTH, TANK_HEIGHT};
+
+    // correct for collisions
+    for(auto obstacle : obstacles) {
+        overlap = check_collision(&currentPos, &obstacle);
+        if(overlap != nullptr) {
+            if(y_vel < 0) {
+                setY(floor(getY() + overlap->h));
+            } else {
+                setY(floor(getY() - overlap->h));
+            }
             break;
         }
     }
 
     // Check he isn't moving outside of the map
-    if (getX() + TANK_WIDTH > SCREEN_WIDTH - TILE_SIZE)
+    if (getX() + TANK_WIDTH > SCREEN_WIDTH - TILE_SIZE - 16)
     {
-        setX(SCREEN_WIDTH - TILE_SIZE);
+        setX(SCREEN_WIDTH - TILE_SIZE - 16 - TANK_WIDTH);
     }
-    if (getX() < TILE_SIZE)
+    if (getX() < TILE_SIZE + 16)
     {
-        setX(TILE_SIZE);
+        setX(TILE_SIZE + 16);
     }
     if (getY() < TILE_SIZE)
     {
@@ -105,7 +135,7 @@ void Player::update() {
     }
     if (getY() + TANK_HEIGHT > SCREEN_HEIGHT - TILE_SIZE)
     {
-        setY(SCREEN_HEIGHT - TILE_SIZE);
+        setY(SCREEN_HEIGHT - TILE_SIZE - TANK_HEIGHT);
     }
 }
 
