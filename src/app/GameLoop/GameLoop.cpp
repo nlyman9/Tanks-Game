@@ -125,7 +125,7 @@ int GameLoop::networkRun() {
 			}
 		}
 		
-		player->getEvent(elapsed_time);
+		player->getEvent(elapsed_time, &e);
 
 		//network version of player firing bullet
 		if (player->getFire() == true) {
@@ -134,7 +134,7 @@ int GameLoop::networkRun() {
 
 			//Projectile *newlyFired = new Projectile(player->getX(), player->getY());
 			//projectiles.push_back(newlyFired);
-			projectiles.push_back(new Projectile(player->getX(), player->getY(), player->getTheta()));
+			projectiles.push_back(new Projectile(player->getX(), player->getY(), player->getTurretTheta()));
 
 			std::cout << projectiles.back()->getX() << ", " << projectiles.back()->getY() << "; " << projectiles.back()->getTheta() << std::endl;
 
@@ -185,8 +185,11 @@ bool GameLoop::init(Render* renderer) {
 	render->setEnemies(enemies);
 
 	Sprite *player_tank = new Sprite(render->getRenderer(), "src/res/images/red_tank.png");
-	player_tank->init();	
+	Sprite *player_turrent = new Sprite(render->getRenderer(), "src/res/images/red_turret.png");
+	player_tank->init();
+	player_turrent->init();	
 	player->setSprite(player_tank);
+	player->setTurretSprite(player_turrent);
 
 	// Init the enemy
 	enemies.push_back(new Enemy( SCREEN_WIDTH - TANK_WIDTH/2 - 75, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, player));
@@ -262,12 +265,12 @@ int GameLoop::runSinglePlayer()
 		}
 
 		checkEscape();
-		player->getEvent(elapsed_time);
+		player->getEvent(elapsed_time, &e);
 
 		//The player fired a bullet
 		if (player->getFire() == true) {
 
-			projectiles.push_back(new Projectile(player->getX(), player->getY(), player->getTheta()));
+			projectiles.push_back(new Projectile(player->getX(), player->getY(), player->getTurretTheta()));
 
 			std::cout << projectiles.back()->getX() << ", " << projectiles.back()->getY() << "; " << projectiles.back()->getTheta() << std::endl;
 

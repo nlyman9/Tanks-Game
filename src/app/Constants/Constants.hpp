@@ -18,5 +18,6 @@ const int FPS = 60;
 const double MS_PER_UPDATE = 1000/(double)FPS;  // 1000 MS divided by FPS
 const int NUM_OBSTACLES = 312;
 const float PHI = 3;
+const int TURRET_PHI = 6;
 
 #endif

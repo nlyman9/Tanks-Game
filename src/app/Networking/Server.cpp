@@ -47,7 +47,7 @@ std::vector<int>* serverMapGen(){
             map1D->push_back(val);
         }
     }
-
+    
     return map1D;
 }
 
@@ -159,8 +159,6 @@ int sendThread(void* data){
 int main(int argc, char* argv[])
 {
     // Get the server option's
-    
-
     std::cout << "IP " << argv[1] << std::endl;
     std::cout << "PORT " << argv[2] << std::endl;
 

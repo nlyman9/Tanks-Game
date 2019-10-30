@@ -22,7 +22,7 @@ struct coordinate {
 	int weight;
 };
 
-class Enemy : public OBJECT {
+class Enemy : public Object {
     private:
         /* data */
         // Sprite sprite;

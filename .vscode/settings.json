@@ -51,6 +51,8 @@
         "iterator": "cpp",
         "numeric": "cpp",
         "random": "cpp",
-        "ratio": "cpp"
+        "ratio": "cpp",
+        "xlocale": "cpp",
+        "xstring": "cpp"
     }
 }

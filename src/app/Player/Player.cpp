@@ -23,6 +23,7 @@
  */
 Player::Player(Sprite *sprite, Sprite *turret, float x, float y) {
     setSprite(sprite);
+    setTurretSprite(turret);
     setPos(x, y);
 }
 
@@ -38,7 +39,7 @@ Player::~Player() {}
 
 /**
  * @brief draws the player object
- *  Overrides base class OBJECT
+ *  Overrides base class Object
  *
  * @param update_lag - the value to extrapolate by
  */
@@ -60,14 +61,26 @@ void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
     // SDL_Rect src = {0, 0, 20, 20};
 
     SDL_Rect* dst = get_box();
+    SDL_Rect* turret_dst = get_box();
     float temp_theta = 0;
     temp_theta = theta;
+
+    turretTheta %= 360;
+    if(mouseTheta > turretTheta + 5) {
+        turretTheta += TURRET_PHI;
+    } else if (mouseTheta < turretTheta - 5) {
+        turretTheta -= TURRET_PHI;
+    } else {
+        turretTheta = mouseTheta;
+    }
+
     SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), NULL, dst, temp_theta, NULL, SDL_FLIP_NONE);
+    SDL_RenderCopyEx(gRenderer, getTurretSprite()->getTexture(), NULL, turret_dst, turretTheta, NULL, SDL_FLIP_NONE);
 }
 
 /**
  * @brief update the player object
- *  Overrides base class OBJECT
+ *  Overrides base class Object
  *
  */
 void Player::update() {
@@ -176,7 +189,7 @@ void Player::update() {
 
 /**
  * @brief move the player an offset from its current x-y position
- *  Overrides base class OBJECT
+ *  Overrides base class Object
  *
  * @param x - how much to move player's current x position by
  * @param y - how much to move player's current y position by
@@ -230,7 +243,11 @@ int Player::getTheta() {
     return theta;
 }
 
-void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time) {
+int Player::getTurretTheta() {
+    return turretTheta;
+}
+
+void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, SDL_Event* e) {
 
     delta_velocity = 0;
     x_deltav = 0;
@@ -333,6 +350,17 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time) {
     if(y_vel < -MAX_PLAYER_VELOCITY)
     {
         y_vel = -MAX_PLAYER_VELOCITY;
+    }
+
+    // Mouse Motion Handling
+    if(e->type == SDL_MOUSEMOTION) {
+        int mouseX, mouseY;
+        SDL_GetMouseState(&mouseX, &mouseY);
+        float delta_x = getX() - mouseX;
+        float delta_y = getY() - mouseY;
+        float theta_radians = atan2(delta_y, delta_x);
+        mouseTheta = (int)(theta_radians * 180 / M_PI) + 180; // Invert so the turret faces the mouse
+        mouseTheta %= 360;
     }
 }
 

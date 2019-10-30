@@ -1,7 +1,7 @@
 /**
- * @file object.hpp
+ * @file Object.hpp
  * @author Networking Team (Adam Alec Jakob)
- * @brief Header for abstract object class for general entities in the game
+ * @brief Header for abstract Object class for general entities in the game
  * @version 0.1
  * @date 2019-09-29
  * 
@@ -10,7 +10,7 @@
  */
 
 /**
- * @brief UNDEFINED means the object/type has not been defined/implemented yet
+ * @brief UNDEFINED means the Object/type has not been defined/implemented yet
  * 
  * UNDEFINED = bool -> Essentially should be void but it doesn't work.
  */
@@ -22,7 +22,7 @@
 #include "Object.hpp"
 #include "Constants.hpp"
 
-SDL_Rect* OBJECT::get_box()
+SDL_Rect* Object::get_box()
 {
     box = {nearbyint(getX()), nearbyint(getY()), TANK_WIDTH, TANK_HEIGHT};
     return &box;
@@ -30,7 +30,7 @@ SDL_Rect* OBJECT::get_box()
 
 
 // TODO make a custom collision detection that detects a box based off of 4 points. 
-SDL_Rect* OBJECT::check_collision(OBJECT *B)
+SDL_Rect* Object::check_collision(Object *B)
 {
     SDL_Rect* overlap = new SDL_Rect;
     if(SDL_IntersectRect(&box, B->get_box(), overlap)) {
@@ -39,7 +39,7 @@ SDL_Rect* OBJECT::check_collision(OBJECT *B)
     return nullptr;
 }
 
-SDL_Rect* OBJECT::check_collision(SDL_Rect* A, SDL_Rect *B)
+SDL_Rect* Object::check_collision(SDL_Rect* A, SDL_Rect *B)
 {
     SDL_Rect* overlap = new SDL_Rect;
     if(SDL_IntersectRect(A, B, overlap)) {
@@ -48,7 +48,7 @@ SDL_Rect* OBJECT::check_collision(SDL_Rect* A, SDL_Rect *B)
     return nullptr;
 }
 
-SDL_Rect* OBJECT::check_collision(SDL_Rect *B)
+SDL_Rect* Object::check_collision(SDL_Rect *B)
 {
     SDL_Rect* overlap = new SDL_Rect;
     if(SDL_IntersectRect(&box, B, overlap)) {
@@ -57,7 +57,7 @@ SDL_Rect* OBJECT::check_collision(SDL_Rect *B)
     return nullptr;
 }
 
-bool OBJECT::check_bounds()
+bool Object::check_bounds()
 {
     //left wall
 
@@ -86,40 +86,49 @@ bool OBJECT::check_bounds()
     }
 }
 
-Sprite* OBJECT::getSprite(){
+Sprite* Object::getSprite(){
     return &sprite;
 }
 
-void OBJECT::setSprite(Sprite *new_sprite)
+Sprite* Object::getTurretSprite(){
+    return &turretSprite;
+}
+
+void Object::setSprite(Sprite *new_sprite)
 {
     sprite = *new_sprite;
 }
 
-void OBJECT::setPos(float newx, float newy)
+void Object::setTurretSprite(Sprite *new_sprite) 
+{
+    turretSprite = *new_sprite;
+}
+
+void Object::setPos(float newx, float newy)
 {
     x = newx;
     y = newy;
 }
-void OBJECT::setX(float newx)
+void Object::setX(float newx)
 {
     x = newx;
 }
-void OBJECT::setY(float newy)
+void Object::setY(float newy)
 {
     y = newy;
 }
-float OBJECT::getX()
+float Object::getX()
 {
     return x;
 }
-float OBJECT::getY()
+float Object::getY()
 {
     return y;
 }
-OBJECT::~OBJECT(){
+Object::~Object(){
     //std::cout << "OBJ Deleted";
 }
 
-void OBJECT::setObstacleLocations(std::vector<SDL_Rect>* obstacleLocs) {
+void Object::setObstacleLocations(std::vector<SDL_Rect>* obstacleLocs) {
     obstacles = *obstacleLocs;
 }

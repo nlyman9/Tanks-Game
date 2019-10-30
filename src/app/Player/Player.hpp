@@ -17,7 +17,7 @@
 #include <SDL2/SDL.h>
 #include "Object.hpp"
 
-class Player : public OBJECT {
+class Player : public Object {
     private:
         /* data */
         Sprite *turret;
@@ -25,6 +25,8 @@ class Player : public OBJECT {
         int lives; //health points left
         int theta = 0;
         int theta_v = 0;
+        int mouseTheta = 0;
+        int turretTheta = 0;
         float x_deltav = 0;
         float y_deltav = 0;
         float velocity = 0;
@@ -46,7 +48,8 @@ class Player : public OBJECT {
         bool rotateTurret(float theta); //rotate the turret
 
         int getTheta();
-        void getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time);
+        int getTurretTheta();
+        void getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, SDL_Event* e);
 
         BoundingBox* getBoundingBox() override;
 

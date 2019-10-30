@@ -7,7 +7,7 @@
 #include <SDL2/SDL.h>
 #include "Object.hpp"
 
-class Projectile : public OBJECT {
+class Projectile : public Object {
     private:
         /* data */
         Sprite missile;
