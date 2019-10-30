@@ -203,11 +203,11 @@ std::vector<std::vector<int>> MapGenerator::generateOpenLineMap()
 {
 	std::vector<std::vector<int>> room = generateEmptyMap();
 	int random_index;
-	int pre_array[5] = {2, 6, 11, 16, 20};
+	std::vector<int> pre_array{2, 6, 11, 16, 20};
 	srand(time(NULL));
 
-	for(int i = 0; i < (sizeof(pre_array)/sizeof(pre_array[0])); i++) {
-		random_index = rand() % (Y_HIGH - 2);
+	for(int i = 0; i < pre_array.size(); i++) {
+		random_index = rand() % (Y_HIGH - 2) + 1;
 
 		for(int j = 0; j < Y_HIGH; j++) {
 			if(random_index == j || random_index == j + 1) {
