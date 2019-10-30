@@ -11,10 +11,6 @@ target_include_directories(Networking
   .
 )
 
-target_link_libraries(Networking
-  GameLoop
-)
-
 add_library(Server
   STATIC
   Server.cpp
@@ -29,5 +25,4 @@ target_include_directories(Server
 target_link_libraries(Server
   PRIVATE
   MapGenerator
-  GameLoop
 )

@@ -13,5 +13,4 @@ target_link_libraries(ImageLoader
   PRIVATE
   SDL2
   SDL2_image
-
 )

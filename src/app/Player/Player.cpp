@@ -278,7 +278,7 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, S
         theta_v += PHI;
     }
 
-    if (keystate[SDL_SCANCODE_SPACE]) {
+    if(e->type == SDL_MOUSEBUTTONDOWN) {
   		Uint32 current_time = SDL_GetTicks();
 
   		if (current_time > fire_last_time + 3000) {

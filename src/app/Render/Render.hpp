@@ -8,7 +8,6 @@
 #include "Player.hpp"
 #include "Enemy.hpp"
 #include "Projectile.hpp"
-#include "MapGenerator.hpp"
 #include "ImageLoader.hpp"
 
 enum {
