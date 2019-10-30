@@ -60,11 +60,9 @@ void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
     // SDL_Rect src = {0, 0, 20, 20};
 
     SDL_Rect* dst = get_box();
-
     float temp_theta = 0;
     temp_theta = theta;
     SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), NULL, dst, temp_theta, NULL, SDL_FLIP_NONE);
-
 }
 
 /**
@@ -78,36 +76,36 @@ void Player::update() {
     // Rotate player
     rotatePlayer(theta_v);
 
+    float updateStep = MS_PER_UPDATE / 1000;
 
-    float updateStep = MS_PER_UPDATE/1000;
-    //NEW implementation
-
-
+    // NEW IMPLEMENTATION
     SDL_Rect* overlap;
     SDL_Rect currentPos;
 
-    //first add X velocity
+    // first add X velocity
     setX(getX() + (x_vel * updateStep));
 
     currentPos = {getX(), getY(), TANK_WIDTH, TANK_HEIGHT};
-    //correct for collisions
+
+    // correct for collisions
     for(auto obstacle : obstacles) {
         overlap = check_collision(&currentPos, &obstacle);
         if(overlap != nullptr) {
-            //std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
             if(x_vel < 0) {
-               setX(floor(getX() + overlap->w));
-             } else {
-               setX(floor(getX() - overlap->w));
-             }
+                setX(floor(getX() + overlap->w));
+            } else {
+                setX(floor(getX() - overlap->w));
+            }
             break;
         }
     }
+
     // next add Y velocity
     setY(getY() + (y_vel * updateStep));
 
     currentPos = {getX(), getY(), TANK_WIDTH, TANK_HEIGHT};
-    //correct for collisions
+
+    // correct for collisions
     for(auto obstacle : obstacles) {
         overlap = check_collision(&currentPos, &obstacle);
         if(overlap != nullptr) {
@@ -162,7 +160,7 @@ void Player::update() {
     {
         setX(SCREEN_WIDTH - TILE_SIZE - 16 - TANK_WIDTH);
     }
-    if (getX() < TILE_SIZE)
+    if (getX() < TILE_SIZE + 16)
     {
         setX(TILE_SIZE + 16);
     }
