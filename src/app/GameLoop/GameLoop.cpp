@@ -121,10 +121,10 @@ int GameLoop::networkRun() {
  * @return false - Failed to initialize
  */
 bool GameLoop::init(Render* renderer) {
-	player = new Player(75, 50);
+	player = new Player(SCREEN_WIDTH/2 + 100, 50);
 	enemies.clear();
 	tileArray.clear();
-	enemies.push_back(new Enemy( SCREEN_WIDTH - TANK_WIDTH/2 - 75, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, player));
+	enemies.push_back(new Enemy( SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, player));
 	render = renderer;
 	render->setPlayer(player);
 	render->setEnemies(enemies);
