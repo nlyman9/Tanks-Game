@@ -262,7 +262,6 @@ int GameLoop::runSinglePlayer()
 		}
 
 		checkEscape();
-
 		player->getEvent(elapsed_time);
 
 		//The player fired a bullet

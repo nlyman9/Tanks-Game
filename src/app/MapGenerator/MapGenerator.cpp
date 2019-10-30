@@ -189,7 +189,7 @@ std::vector<std::vector<int>> MapGenerator::presetCheckerMap()
 				}
 				else {
 					room[i][j] = 2;
-				}
+				}	
 			}
 			for(int i = 4; i < X_WIDE; i+=4) {
 				room[i][j] = 2;
