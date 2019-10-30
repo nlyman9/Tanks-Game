@@ -17,6 +17,8 @@
 #include <SDL2/SDL.h>
 #include "Object.hpp"
 
+const int THETA_WINDOW = 5;
+
 class Player : public Object {
     private:
         /* data */
@@ -26,7 +28,10 @@ class Player : public Object {
         int theta = 0;
         int theta_v = 0;
         int mouseTheta = 0;
+        int mouseX = 0;
+        int mouseY = 0;
         int turretTheta = 0;
+        int turretTheta_v = 0;
         float x_deltav = 0;
         float y_deltav = 0;
         float velocity = 0;
