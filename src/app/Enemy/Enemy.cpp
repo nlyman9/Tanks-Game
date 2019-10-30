@@ -455,14 +455,6 @@ int Enemy::findXBlock(float pos) {
 	return block;
 }
 
-int Enemy::findYBlock(float pos) {
-  int center = pos + TANK_HEIGHT/2;
-	int trueY = center - TILE_SIZE;
-	int block = trueY / TILE_SIZE;
-	return block;
-}
-
-
 void Enemy::setTileMap(std::vector<std::vector<int>>* tileMap) {
 	tile_map = *tileMap;
 }
