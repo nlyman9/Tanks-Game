@@ -19,7 +19,6 @@
 #include "Server.hpp"
 #include "MapGenerator.hpp"
 #include "Network.hpp"
-#include "GameLoop.hpp"
 
 bool readyToSend = false;
 

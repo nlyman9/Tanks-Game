@@ -12,6 +12,7 @@ add_subdirectory(Constants)
 add_subdirectory(StartUpMenu)
 add_subdirectory(MapGenerator)
 add_subdirectory(ImageLoader)
+add_subdirectory(Controllers)
 
 add_executable(Game
   game.cpp

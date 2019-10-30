@@ -7,14 +7,12 @@ add_library(Render
 target_link_libraries(Render
   PRIVATE
   SDL2
-  SDL2_image
   Constants
   Player
   Object
   Sprite
   Enemy
   Projectile
-  MapGenerator
   ImageLoader
 )
 
