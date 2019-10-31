@@ -13,10 +13,10 @@ Tileset::Tileset() {
     Tileset(v, 0);
 }
 
-Tileset::~Tileset() {
-    assert(!tiles.empty());
-    delete &tiles;
-}
+// Tileset::~Tileset() {
+//     assert(!tiles.empty());
+//     delete &tiles;
+// }
 
 vector_2d Tileset::get_tiles() {
     return tiles;
@@ -27,10 +27,13 @@ int Tileset::get_id() {
 }
 
 void Tileset::print_tiles() {
-    for (auto& t : tiles)
+    std::cout << "Tileset " << id << std::endl;
+    for (auto& t : tiles) {
         for (auto& num : t)
             std::cout << num << " ";
         std::cout << std::endl;
+    }
+    std::cout << std::endl;
 }
 
 // int main() {

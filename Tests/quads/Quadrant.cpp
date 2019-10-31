@@ -5,10 +5,10 @@ Quadrant::Quadrant(int n) {
     id = n;
 }
 
-Quadrant::~Quadrant() {
-    assert(!quadrant.empty());
-    delete &quadrant;
-}
+// Quadrant::~Quadrant() {
+//     assert(!quadrant.empty());
+//     delete &quadrant;
+// }
 
 std::vector<Tileset> Quadrant::get_quadrant() {
     return quadrant;
@@ -31,6 +31,6 @@ void Quadrant::print_quadrant() {
         tileset.print_tiles();
 }
 
-int main() {
-    return 0;
-}
+// int main() {
+//     return 0;
+// }

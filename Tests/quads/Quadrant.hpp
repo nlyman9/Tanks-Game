@@ -11,7 +11,7 @@ class Quadrant {
     int id;
   public:
     Quadrant(int);
-    ~Quadrant();
+    // ~Quadrant();
     std::vector<Tileset> get_quadrant();
     int size();
     int get_id();

@@ -12,7 +12,7 @@ class Tileset {
   public:
     Tileset(vector_2d, int);
     Tileset();
-    ~Tileset();
+    // ~Tileset();
     vector_2d get_tiles();
     int get_id();
     void print_tiles();

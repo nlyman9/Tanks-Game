@@ -2,20 +2,22 @@
 #define QUADS_HPP
 
 #include <vector>
+#include "Tileset.hpp"
+#include "Edge.hpp"
+#include "Quadrant.hpp"
 #include "QuadConstants.hpp"
 
 class Quads
 {
   private:
-    vector_4d quads;
+    std::vector<Quadrant> quads;
     vector_2d flip(vector_2d);
     vector_2d mirror(vector_2d);
     vector_3d corner(vector_2d);
-    void make_quads();
-
   public:
     Quads();
-    vector_4d get_quads();
+    void make_quads();
+    std::vector<Quadrant> get_quads();
     void print_quads();
 };
 

@@ -9,28 +9,11 @@
 #include <istream>
 #include <map>
 #include <iterator>
-#include "Quad.hpp"
+// #include "Tileset.hpp"
+// #include "Edge.hpp"
+// #include "Quadrant.hpp"
 #include "Quads.hpp"
 #include "QuadConstants.hpp"
-
-
-void Quads::print_quads() {
-    for (auto& q : this->quads) {
-        for(auto& quad : q) {
-            for (auto& v : quad) {
-                for (auto& num: v) {
-                    std::cout << num << " ";
-                }
-                std::cout << std::endl;
-            }
-            std::cout << std::endl;
-        }
-    }   
-}
-
-vector_4d Quads::get_quads() {
-    return quads;
-}
 
 vector_2d Quads::flip(vector_2d q) {
     vector_2d q_flip(q.rbegin(), q.rend()); // convert from q2 to q5
@@ -61,10 +44,7 @@ void Quads::make_quads() {
 
     std::ifstream infile ("quadrants.txt");
     std::string line;
-    int num, num_lines, num_quads, quad_type = 0, quad_id = 0;
-
-    vector_3d quadrant_1, quadrant_2, quadrant_3, 
-                quadrant_4, quadrant_5, quadrant_6, quadrant_all;
+    int num, num_lines = 0, num_quads = 0, quad_type = 0, tileset_id = 0;
 
     if (infile.is_open()) {
 
@@ -81,7 +61,7 @@ void Quads::make_quads() {
             for (int i = 0; i < num_quads; i++) {
                 
                 infile >> quad_type;                    
-                vector_2d quad;
+                vector_2d q;
 
                 for (int j = 0; j < MAX_ROW; j++) {     // read the quad into a 2d vector
                     std::vector<int> v;
@@ -89,54 +69,64 @@ void Quads::make_quads() {
                         infile >> num;
                         v.push_back(num);
                     }
-                    quad.push_back(v);
+                    q.push_back(v);
                 }
 
-                switch (quad_type) {
+                Tileset t(q, tileset_id++);
 
-                    case 4: {   // corner quads 
-                        quadrant_1.push_back(quad);
-                        auto corners = corner(quad);
-                        quadrant_4.push_back(corners.at(0));
-                        quadrant_6.push_back(corners.at(1));
-                        quadrant_3.push_back(corners.at(2));
-                        // Perhaps create the edges at this stage
-                        break;
-                    }   
-                    case 5: {   // middle quads
-                        quadrant_2.push_back(quad);
-                        quadrant_5.push_back(flip(quad));
-                        quadrant_all.push_back(quad);
-                        quadrant_all.push_back(flip(quad));
+                switch (quad_type) {
+                    case 4: {
+                        quads[0].add(t);
+                        auto corners = corner(q);
+                        Tileset t3(corners.at(2), tileset_id++);
+                        Tileset t4(corners.at(0), tileset_id++);
+                        Tileset t6(corners.at(1), tileset_id++);
+                        quads[2].add(t3);
+                        quads[3].add(t4);
+                        quads[5].add(t6);
                         break;
                     }
-                    case 6: {   // any quad
-                        quadrant_all.push_back(quad);
+                    case 5: {
+                        quads[1].add(t);
+                        Tileset t5(flip(t.get_tiles()), tileset_id++);
+                        quads[4].add(t5);
                         break;
                     }
-                    case 7: {   // mirror
-                        quadrant_1.push_back(quad);
-                        quadrant_4.push_back(quad);
-                        quadrant_3.push_back(mirror(quad));
-                        quadrant_6.push_back(mirror(quad));
+                    case 6: {
+                        for (int i = 0; i < 6; i++) {
+                            Tileset tAll(t.get_tiles(), tileset_id++);
+                            quads[i].add(tAll);
+                        }  
                         break;
                     }
-                    case 9: {   // top bottom
-                        quadrant_1.push_back(quad);
-                        quadrant_2.push_back(quad);
-                        quadrant_3.push_back(quad);
-                        quadrant_4.push_back(flip(quad));
-                        quadrant_5.push_back(flip(quad));
-                        quadrant_6.push_back(flip(quad));
+                    case 7: {
+                        quads[0].add(t);
+                        Tileset t3(mirror(t.get_tiles()), tileset_id++);
+                        Tileset t4(t.get_tiles(), tileset_id++);
+                        Tileset t6(mirror(t.get_tiles()), tileset_id++);
+                        quads[2].add(t3);
+                        quads[3].add(t4);
+                        quads[5].add(t6);
+                        break;
                     }
-                    default: {  // 6 - any quads
-                        // quads.push_back(quad);
-                        // std::cout << "Reached default case" << std::endl;
+                    case 9: {
+                        for (int i = 0; i < 3; i++) {
+                            Tileset tTop(t.get_tiles(), tileset_id++);
+                            quads[i].add(tTop);
+                        }
+                        for (int j = 3; j < 6; j++) {
+                            Tileset tBottom(flip(t.get_tiles()), tileset_id++);
+                            quads[j].add(tBottom);
+                        }
+                        break;
+                    }
+                    default: {
                         break;
                     }
                 }
 
                 quad_type = 0;
+
             }
                 
         }
@@ -145,22 +135,29 @@ void Quads::make_quads() {
     } else {
         std::cout << "unable to open file";
     }
-
-    quads.push_back(quadrant_1);
-    quads.push_back(quadrant_2);
-    quads.push_back(quadrant_3);
-    quads.push_back(quadrant_4);
-    quads.push_back(quadrant_5);
-    quads.push_back(quadrant_6);
-    quads.push_back(quadrant_all);
 }
 
 Quads::Quads() {
-    make_quads();
+    for (int i = 1; i < 7; i++) {
+        Quadrant q(i);
+        quads.push_back(q);
+    }
 }
 
-// int main() {
-//     Quads q = Quads();
-//     q.print_quads();
-//     return 0;
-// }
+std::vector<Quadrant> Quads::get_quads() {
+    return quads;
+}
+
+void Quads::print_quads() {
+    for (int i = 0; i < 6; i++) {
+        std::cout << "Quadrant " << i+1 << std::endl;
+        quads[i].print_quadrant();
+    }
+}
+
+int main() {
+    Quads q;
+    q.make_quads();
+    q.print_quads();
+    return 0;
+}

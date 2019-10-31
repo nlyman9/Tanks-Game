@@ -22,5 +22,5 @@ void Graph::print_graph() {
 }
 
 int main() {
-
+    return 0;
 }
