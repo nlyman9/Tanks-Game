@@ -9,40 +9,35 @@
 #include <istream>
 #include <map>
 #include <iterator>
+#include "Quad.hpp"
+#include "Quads.hpp"
+#include "QuadConstants.hpp"
 
-typedef std::vector<int>       vector_1d;
-typedef std::vector<vector_1d> vector_2d;
-typedef std::vector<vector_2d> vector_3d;
-typedef std::vector<vector_3d> vector_4d;
 
-constexpr int MAX_ROW = 6;
-constexpr int MAX_COL = 8;
-// std::vector<std::vector<std::vector<std::vector<int>>>> quads;
-
-vector_4d quads;
-
-void print_quads(const vector_3d q) {
-    for(auto& quad : q) {
-        for (auto& v : quad) {
-            for (auto& num: v) {
-                std::cout << num << " ";
+void Quads::print_quads() {
+    for (auto& q : this->quads) {
+        for(auto& quad : q) {
+            for (auto& v : quad) {
+                for (auto& num: v) {
+                    std::cout << num << " ";
+                }
+                std::cout << std::endl;
             }
             std::cout << std::endl;
         }
-        std::cout << std::endl;
-    }
+    }   
 }
 
-vector_4d get_quads() {
+vector_4d Quads::get_quads() {
     return quads;
 }
 
-vector_2d flip(vector_2d q) {
+vector_2d Quads::flip(vector_2d q) {
     vector_2d q_flip(q.rbegin(), q.rend()); // convert from q2 to q5
     return q_flip;
 }
 
-vector_2d mirror(vector_2d q) {
+vector_2d Quads::mirror(vector_2d q) {
     vector_2d q_mirror; // convert from q1 to q3
     for (auto& v : q) {
         std::vector<int> vec(v.rbegin(), v.rend());
@@ -51,7 +46,7 @@ vector_2d mirror(vector_2d q) {
     return q_mirror;
 }
 
-vector_3d corner(vector_2d q1) {
+vector_3d Quads::corner(vector_2d q1) {
     
     vector_3d reversed;
 
@@ -62,13 +57,11 @@ vector_3d corner(vector_2d q1) {
     return reversed;
 }
 
-void make_quads() {
+void Quads::make_quads() {
 
     std::ifstream infile ("quadrants.txt");
     std::string line;
-    int num, num_lines, num_quads, quad_type = 0;
-
-    // std::vector<std::vector<std::vector<int>>> quads;
+    int num, num_lines, num_quads, quad_type = 0, quad_id = 0;
 
     vector_3d quadrant_1, quadrant_2, quadrant_3, 
                 quadrant_4, quadrant_5, quadrant_6, quadrant_all;
@@ -107,6 +100,7 @@ void make_quads() {
                         quadrant_4.push_back(corners.at(0));
                         quadrant_6.push_back(corners.at(1));
                         quadrant_3.push_back(corners.at(2));
+                        // Perhaps create the edges at this stage
                         break;
                     }   
                     case 5: {   // middle quads
@@ -159,6 +153,14 @@ void make_quads() {
     quads.push_back(quadrant_5);
     quads.push_back(quadrant_6);
     quads.push_back(quadrant_all);
-    
-    // return quads;
 }
+
+Quads::Quads() {
+    make_quads();
+}
+
+// int main() {
+//     Quads q = Quads();
+//     q.print_quads();
+//     return 0;
+// }
