@@ -35,11 +35,19 @@ Tileset Edge::get_dest() {
     return dest;
 }
 
+int Edge::get_src_id() {
+    return src.get_id();
+}
+
+int Edge::get_dest_id() {
+    return dest.get_id();
+}
+
 void Edge::print_edge() {
     std::cout << src.get_id() << " -> " << dest.get_id() 
         << " weight: " << weight << std::endl;
 }
 
-int main() {
-    return 0;
-}
+// int main() {
+//     return 0;
+// }

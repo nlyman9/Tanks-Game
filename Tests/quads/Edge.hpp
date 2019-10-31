@@ -17,6 +17,8 @@ class Edge {
     void set_weight(int);
     Tileset get_src();
     Tileset get_dest();
+    int get_src_id();
+    int get_dest_id();
     void print_edge();
 };
 
