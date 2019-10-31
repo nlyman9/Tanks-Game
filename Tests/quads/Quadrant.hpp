@@ -13,6 +13,7 @@ class Quadrant {
     Quadrant(int);
     ~Quadrant();
     std::vector<Tileset> get_quadrant();
+    int size();
     int get_id();
     void add(Tileset);
     void print_quadrant();

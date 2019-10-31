@@ -5,13 +5,17 @@ Quadrant::Quadrant(int n) {
     id = n;
 }
 
+Quadrant::~Quadrant() {
+    assert(!quadrant.empty());
+    delete &quadrant;
+}
+
 std::vector<Tileset> Quadrant::get_quadrant() {
     return quadrant;
 }
 
-Quadrant::~Quadrant() {
-    assert(!quadrant.empty());
-    delete &quadrant;
+int Quadrant::size() {
+    return quadrant.size();
 }
 
 int Quadrant::get_id() {

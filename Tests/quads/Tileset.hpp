@@ -11,6 +11,7 @@ class Tileset {
     int id;
   public:
     Tileset(vector_2d, int);
+    Tileset();
     ~Tileset();
     vector_2d get_tiles();
     int get_id();

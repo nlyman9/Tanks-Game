@@ -8,6 +8,11 @@ Tileset::Tileset(vector_2d t, int n) {
     id = n;
 }
 
+Tileset::Tileset() {
+    vector_2d v(0, vector_1d(0,0));
+    Tileset(v, 0);
+}
+
 Tileset::~Tileset() {
     assert(!tiles.empty());
     delete &tiles;
