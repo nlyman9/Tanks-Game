@@ -13,7 +13,7 @@ class Graph {
     Graph(std::vector<Edge>, int);
     Graph(int);
     Graph();
-    ~Graph();
+    // ~Graph();
     void print_graph();
 };
 

@@ -11,6 +11,7 @@ class Quads
 {
   private:
     std::vector<Quadrant> quads;
+    std::vector<Edge> edges;
     vector_2d flip(vector_2d);
     vector_2d mirror(vector_2d);
     vector_3d corner(vector_2d);
@@ -18,6 +19,7 @@ class Quads
     Quads();
     void make_quads();
     std::vector<Quadrant> get_quads();
+    std::vector<Edge> get_edges();
     void print_quads();
 };
 

@@ -81,6 +81,12 @@ void Quads::make_quads() {
                         Tileset t3(corners.at(2), tileset_id++);
                         Tileset t4(corners.at(0), tileset_id++);
                         Tileset t6(corners.at(1), tileset_id++);
+                        Edge t_t3(t, t3, 2);
+                        Edge t3_t4(t3, t4, 2);
+                        Edge t4_t6(t4, t6, 2);
+                        edges.push_back(t_t3);
+                        edges.push_back(t3_t4);
+                        edges.push_back(t4_t6);
                         quads[2].add(t3);
                         quads[3].add(t4);
                         quads[5].add(t6);
@@ -89,12 +95,17 @@ void Quads::make_quads() {
                     case 5: {
                         quads[1].add(t);
                         Tileset t5(flip(t.get_tiles()), tileset_id++);
+                        Edge t_t5(t, t5, 2);
+                        edges.push_back(t_t5);
                         quads[4].add(t5);
                         break;
                     }
                     case 6: {
-                        for (int i = 0; i < 6; i++) {
+                        quads[0].add(t);
+                        for (int i = 1; i < 6; i++) {
                             Tileset tAll(t.get_tiles(), tileset_id++);
+                            Edge t_tAll(t, tAll, 2);
+                            edges.push_back(t_tAll);
                             quads[i].add(tAll);
                         }  
                         break;
@@ -104,18 +115,29 @@ void Quads::make_quads() {
                         Tileset t3(mirror(t.get_tiles()), tileset_id++);
                         Tileset t4(t.get_tiles(), tileset_id++);
                         Tileset t6(mirror(t.get_tiles()), tileset_id++);
+                        Edge t_t3(t, t3, 2);
+                        Edge t3_t4(t3, t4, 2);
+                        Edge t4_t6(t4, t6, 2);
+                        edges.push_back(t_t3);
+                        edges.push_back(t3_t4);
+                        edges.push_back(t4_t6);
                         quads[2].add(t3);
                         quads[3].add(t4);
                         quads[5].add(t6);
                         break;
                     }
                     case 9: {
-                        for (int i = 0; i < 3; i++) {
+                        quads[0].add(t);
+                        for (int i = 1; i < 3; i++) {
                             Tileset tTop(t.get_tiles(), tileset_id++);
+                            Edge t_tTop(t, tTop, 2);
+                            edges.push_back(t_tTop);
                             quads[i].add(tTop);
                         }
                         for (int j = 3; j < 6; j++) {
                             Tileset tBottom(flip(t.get_tiles()), tileset_id++);
+                            Edge t_tBottom(t, tBottom, 2);
+                            edges.push_back(t_tBottom);
                             quads[j].add(tBottom);
                         }
                         break;
@@ -146,6 +168,10 @@ Quads::Quads() {
 
 std::vector<Quadrant> Quads::get_quads() {
     return quads;
+}
+
+std::vector<Edge> Quads::get_edges() {
+    return edges;
 }
 
 void Quads::print_quads() {

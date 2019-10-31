@@ -19,10 +19,10 @@ Edge::Edge(Tileset s, Tileset d) {
     Edge(s, d, 1);
 }
 
-Edge::~Edge() {
-    delete &src;
-    delete &dest;
-}
+// Edge::~Edge() {
+//     delete &src;
+//     delete &dest;
+// }
 
 Tileset Edge::get_src() {
     return src;

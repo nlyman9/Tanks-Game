@@ -14,7 +14,7 @@ class Edge {
     Edge(Tileset, Tileset, int, int);
     Edge(Tileset, Tileset, int);
     Edge(Tileset, Tileset);
-    ~Edge();
+    // ~Edge();
     Tileset get_src();
     Tileset get_dest();
     int get_src_id();

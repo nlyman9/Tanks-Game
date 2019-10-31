@@ -11,9 +11,9 @@ Graph::Graph(int n) {
     adj.resize(n);
 }
 
-Graph::~Graph() {
-    delete[] &adj;
-}
+// Graph::~Graph() {
+//     delete[] &adj;
+// }
 
 void Graph::print_graph() {
     for (auto& edges : adj)
