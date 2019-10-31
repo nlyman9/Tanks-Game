@@ -9,6 +9,7 @@ target_link_libraries(StartUpMenu
   GameLoop
   SDL2
   Render
+  Projectile
 )
 
 target_include_directories(StartUpMenu

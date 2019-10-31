@@ -9,8 +9,8 @@ target_link_libraries(Player
   Object
   Constants
   Sprite
-  StartUpMenu
   SDL2
+  Enemy
 )
 
 target_include_directories(Player

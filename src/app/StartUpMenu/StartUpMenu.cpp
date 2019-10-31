@@ -18,7 +18,9 @@ void StartUpMenu::launch(Args *options)
     gLoop.initMapMultiPlayer();
     //run the game loop
 	  gLoop.networkRun();
-  } else {
+  } else if(gameMode == MENU_CREDITS) {
     std::cout << "ROLL CREDITS" << std::endl;
+  } else {
+    renderer->close();
   }
 }

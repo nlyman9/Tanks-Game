@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <netdb.h>
 #include <cstring>
+#include <string>
 #include <iostream>
 #include <vector>
 #include <unistd.h>
@@ -19,7 +20,10 @@
 
 class Client {
   public:
-    Client() {};
+    Client(std::string ip, int port) {
+      server_ip = ip;
+      server_port = std::to_string(port);
+    };
     ~Client();
     bool init();
     Client initClient(Client c);
@@ -43,6 +47,9 @@ class Client {
     SDL_Thread* rcThread;
     std::vector<int> gameMap;
     bool pollMap();
+
+    std::string server_ip;
+    std::string server_port;
   private:
 
 };

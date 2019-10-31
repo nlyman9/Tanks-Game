@@ -60,7 +60,7 @@ std::vector<std::vector<int>> MapGenerator::generateLineMap()
 		{
 			random_index_bonus = -1;
 		}
-		
+
 
 		for(int j = 0; j < X_WIDE; j++) {
 			if(i % 2 != 0) {
@@ -119,31 +119,34 @@ std::vector<std::vector<int>> MapGenerator::generateHMazeMap()
 					}
 
 					if(!can_go_north) { // add another cell to ensure passage north
-						set.push_back(j+1);
-						north_set.push_back(j+1);
-						set_size++;
-						j++;
+						if(j+1 > 23) {
+							array[j][i] = 0;
+							array[j-1][i] = 0;
+							continue;
+						} else {
+							set.push_back(j+1);
+							north_set.push_back(j+1);
+							set_size = set.size();
+							j++;
+						}
 					}
 
 					int path_north = rand() % north_set.size();
 
-					// printf("set:");
 					for(int k = 0; k < set_size; k++) { // cave cells from set
 						int col = set.at(k);
 						array[col][i] = 0;
-						// printf("%d:", col);
 						if(col == north_set.at(path_north)) { // carve north from set
 							array[col][i-1] = 0;
 						}
 					}
-					// printf("north:%d\n", north_set.at(path_north));
 
 					set.clear();
 					set.push_back(j+2);
 					j++;
 				}
 			}
-		} 
+		}
     }
 
     return array;
@@ -200,19 +203,19 @@ std::vector<std::vector<int>> MapGenerator::generateOpenLineMap()
 {
 	std::vector<std::vector<int>> room = generateEmptyMap();
 	int random_index;
-	int pre_array[5] = {2, 6, 11, 16, 20};
+	std::vector<int> pre_array{2, 6, 11, 16, 20};
 	srand(time(NULL));
 
-	for(int i = 0; i < (sizeof(pre_array)/sizeof(pre_array[0])); i++) {
-		random_index = rand() % (Y_HIGH - 2);
+	for(int i = 0; i < pre_array.size(); i++) {
+		random_index = rand() % (Y_HIGH - 2) + 1;
 
 		for(int j = 0; j < Y_HIGH; j++) {
 			if(random_index == j || random_index == j + 1) {
 				room[pre_array[i]][j] = 0;
 				room[pre_array[i] + 1][j] = 0;
 			} else {
-				room[pre_array[i]][j] = 1;
-				room[pre_array[i] + 1][j] = 1;
+				room[pre_array[i]][j] = 2;
+				room[pre_array[i] + 1][j] = 2;
 			}
 
 		}
@@ -222,16 +225,16 @@ std::vector<std::vector<int>> MapGenerator::generateOpenLineMap()
 
 std::vector<std::vector<int>>* MapGenerator::generateMap()
 {
+	// UPDATE THESE WHEN ADDING NEW MAP TYPES
+	int NUM_GEN = 3;
+	int NUM_PRE = 3;
+	
 	// init tile map
 	tile_map = generateEmptyMap();
 
-	// Select map generation technique
-	enum map_types { destructible, holes, line, maze, mirror, hmaze };
 	srand(time(NULL));
 
-	tile_map = presetCheckerMap();
-
-	switch(rand() % 4) // update this line when adding more generated maps
+	switch(rand() % (int) ceil(NUM_GEN * 1.2))
 	{
 		case 1:
 			tile_map = generateLineMap();
@@ -243,7 +246,7 @@ std::vector<std::vector<int>>* MapGenerator::generateMap()
 			tile_map = generateOpenLineMap();
 			break;
 		default:
-			switch(rand() % 3) // update this line when adding new preset maps
+			switch(rand() % NUM_PRE)
 			{
 				case 0:
 					tile_map = generateEmptyMap();
