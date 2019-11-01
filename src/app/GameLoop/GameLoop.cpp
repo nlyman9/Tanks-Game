@@ -13,7 +13,6 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <iostream>
-#include <SDL2/SDL_thread.h>
 
 
 GameLoop::~GameLoop() {}
@@ -58,7 +57,7 @@ void GameLoop::initMapMultiPlayer() {
 	while(!client->pollMap()) {
 	}
 
-	std::vector<int> tile_map = client->gameMap;
+	std::vector<int> tile_map = *client->gameMap;
 	std::vector<std::vector<int>> map2D;
 	// init the first row
 	map2D.push_back(std::vector<int>((SCREEN_WIDTH - BORDER_GAP - TILE_SIZE) / TILE_SIZE - 1));
