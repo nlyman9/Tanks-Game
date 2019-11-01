@@ -21,6 +21,8 @@ class Quads
     std::vector<Quadrant> get_quads();
     std::vector<Edge> get_edges();
     void print_quads();
+    void print_edges();
+    int get_num_tilesets();
 };
 
 #endif

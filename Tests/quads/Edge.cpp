@@ -12,17 +12,18 @@ Edge::Edge(Tileset s, Tileset d, int m, int w) {
 }
 
 Edge::Edge(Tileset s, Tileset d, int m) {
-    Edge(s, d, m, 0);
+    src = s;
+    dest = d;
+    multiplier = m;
+    weight = 0;
 }
 
 Edge::Edge(Tileset s, Tileset d) {
-    Edge(s, d, 1);
+    src = s;
+    dest = d;
+    multiplier = 1;
+    weight = 0;
 }
-
-// Edge::~Edge() {
-//     delete &src;
-//     delete &dest;
-// }
 
 Tileset Edge::get_src() {
     return src;
@@ -57,8 +58,8 @@ void Edge::set_weight(int w) {
 }
 
 void Edge::print_edge() {
-    std::cout << src.get_id() << " -> " << dest.get_id() 
-        << " weight: " << weight << std::endl;
+    std::cout << get_src_id() << " -> " << get_dest_id() << std::endl;
+        // << " weight: " << weight << std::endl;
 }
 
 // int main() {

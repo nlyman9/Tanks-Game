@@ -5,6 +5,8 @@
 #include "Tileset.hpp"
 #include "Edge.hpp"
 #include "Quadrant.hpp"
+#include "Quads.hpp"
+#include "QuadConstants.hpp"
 
 class Graph {
   private:
