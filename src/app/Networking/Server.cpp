@@ -190,10 +190,6 @@ int main(int argc, char* argv[])
     sfBuffer = new std::vector<char>(152);
 
     // Get the server option's
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
     std::cout << "IP " << argv[1] << std::endl;
     std::cout << "PORT " << argv[2] << std::endl;
 

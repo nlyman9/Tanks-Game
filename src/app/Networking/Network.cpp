@@ -187,6 +187,14 @@ void sendMap(int fd, std::vector<int>* map, size_t t, int flags, int csFlag){
     //send(fd, some packet, t, 0)
     send(fd, mapPacked, t, flags);
 }
+int stripHeader(std::vector<char>* packet){
+    int toRet = (int) packet->at(0);
+    packet->erase(packet->begin());
+    return toRet;
+}
+void appendHeader(std::vector<char>* packet, char toAppend){
+    packet->insert(packet->begin(), toAppend);
+}
 /*
 Function Ideas:
 
