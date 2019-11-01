@@ -6,6 +6,9 @@ add_library(Controllers
 
     KeyboardController.hpp
     KeyboardController.cpp
+
+    NetworkController.hpp
+    NetworkController.cpp
 )
 
 target_include_directories(Controllers

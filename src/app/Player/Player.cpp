@@ -21,13 +21,13 @@
  * @param x
  * @param y
  */
-Player::Player(Sprite *sprite, Sprite *turret, float x, float y) {
+Player::Player(Sprite *sprite, Sprite *turret, float x, float y, Controller* contr) : controller{contr} {
     setSprite(sprite);
     setTurretSprite(turret);
     setPos(x, y);
 }
 
-Player::Player(float x, float y) {
+Player::Player(float x, float y, Controller* contr) : controller{contr} {
     setPos(x, y);
 }
 
@@ -36,6 +36,7 @@ Player::Player(float x, float y) {
  *
  */
 Player::~Player() {}
+
 
 /**
  * @brief draws the player object
@@ -92,7 +93,7 @@ void Player::update() {
     turretTheta = mouseTheta;
 
 
-    std::cout << "TURRET: " << turretTheta << " | " << deltaMouse << std::endl;
+    // std::cout << "TURRET: " << turretTheta << " | " << deltaMouse << std::endl;
 
     // Move player
     // Rotate player
@@ -227,7 +228,8 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, S
     theta_v = 0;
     fire = false;
 
-    const Uint8* keystate = SDL_GetKeyboardState(nullptr);
+    const Uint8* keystate = controller->pollEvent();
+
     if (keystate[SDL_SCANCODE_W]) {
         delta_velocity += MAX_PLAYER_VELOCITY;
         x_deltav += delta_velocity * cos((theta * M_PI) / 180);

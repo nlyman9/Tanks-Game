@@ -175,7 +175,8 @@ int GameLoop::networkRun() {
  * @return false - Failed to initialize
  */
 bool GameLoop::init(Render* renderer) {
-	player = new Player(SCREEN_WIDTH/2 + 100, 50);
+	KeyboardController* keyController = new KeyboardController();
+	player = new Player(SCREEN_WIDTH/2 + 100, 50, keyController);
 	enemies.clear();
 	tileArray.clear();
 	enemies.push_back(new Enemy( SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, player));

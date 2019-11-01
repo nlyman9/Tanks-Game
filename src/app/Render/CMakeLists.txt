@@ -16,6 +16,7 @@ target_link_libraries(Render
   Projectile
   MapGenerator
   ImageLoader
+  Controllers
 )
 else()
 target_link_libraries(Render
@@ -28,6 +29,7 @@ target_link_libraries(Render
   Enemy
   Projectile
   ImageLoader
+  Controllers
 )
 endif()
 
