@@ -113,6 +113,7 @@ int serverThread(void* data){
                         std::cout << std::endl;
                         std::cout << " size of toSend" << sBuffer->size();
                         std::cout << std::endl;
+                        appendHeader(sBuffer, '0');
                         send(newfd, sBuffer->data(), sBuffer->size(), 0);
                     }
                 }

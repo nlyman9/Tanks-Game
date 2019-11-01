@@ -89,7 +89,7 @@ int receiveThread(void* data) {
                 std::cout << "Connection closing" << std::endl;
                 close(sockfd);
                 exit(10);
-            } else if(nbytes >= 0) {
+            } else if(nbytes > 0) {
                 //recieved data
                 std::cout << "receiving map data..." << std::endl;
                 std::cout << std::endl;
@@ -129,6 +129,8 @@ int receiveThread(void* data) {
 
                         break;
                 }
+            }else{
+                std::cout << "NO data received! check if buffer size is set!" << std::endl;
             }
         } else if (tsReady) { 
             send(sockfd, tsBuffer->data(), tsBuffer->size(), 0);
