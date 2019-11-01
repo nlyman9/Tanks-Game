@@ -15,3 +15,11 @@ target_include_directories(Controllers
     PUBLIC
     .
 )
+
+if(${APPLE})
+target_link_libraries(Controllers
+  PUBLIC
+  ${SDL2_LIBRARY}
+)
+else()
+endif()
