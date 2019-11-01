@@ -1,10 +1,11 @@
 #ifndef KEYBOARDCONTROLLER_HPP
 #define KEYBOARDCONTROLLER_HPP
 
+#include "Controller.hpp"
+
 class KeyboardController : public Controller {
     public:
-        int pollEvent() override;
-
+        const Uint8* pollEvent() override;
 };
 
 #endif

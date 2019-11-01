@@ -9,43 +9,131 @@
 #include <SDL2/SDL.h>
 
 bool mapReceived = false;
+bool tsReady = false;
 
 int receiveThread(void* data) {
-
-    // Unpack data in the recvBuffer and Client object
-    char* recvBuffer = (char*) data; 
-    data = static_cast<char*>(data) + 1;
+    // Unpack data in the Client object
     Client* crClient = (Client*) data;
-    std::cout << "Client info: " << std::endl;
-    std::cout << crClient->status << std::endl;
+    std::cout << "Client thread created!" << std::endl;
+
+    int status;
+    struct addrinfo hints;
+    struct addrinfo *serverInfo;
+    int sockfd;
+    fd_set master;      // Master of file descriptors
+    fd_set read_fds;    // Read fd's returned from select
+    int fdmax;          // maximym file descriptor number
+    int nbytes;
+    // Innitialize sets to zero
+    FD_ZERO(&master);
+    FD_ZERO(&read_fds);
+
+    memset(&hints, 0, sizeof(hints));
+
+    struct timeval* timeout = (timeval*) calloc(1, sizeof(struct timeval));
+    timeout->tv_sec = 0;
+    timeout->tv_usec = 0;
+
+    hints.ai_family = AF_INET;          // IPv4
+    hints.ai_socktype = SOCK_STREAM;    // TCP
+    // Get address info of server
+    std::cout << "Connecting to " << crClient->server_ip << " on port " << crClient->server_port << std::endl;
+    if ((status = getaddrinfo(crClient->server_ip.c_str(), crClient->server_port.c_str(), &hints, &serverInfo)) != 0) {
+        std::cout << "Failed to get address info" << std::endl;
+        exit(4);
+    }
+    // Create a socket based on server info 
+    sockfd = socket(serverInfo->ai_family, serverInfo->ai_socktype, serverInfo->ai_protocol);
+    sleep(2);
+    // Connect to server
+    while (connect(sockfd, serverInfo->ai_addr, serverInfo->ai_addrlen) < 0) {
+        std::cout << "Waiting for connection..." << std::endl;
+        sleep(1);
+    }
+    std::cout << "Connected ip:" << crClient->server_ip << " Port: " << crClient->server_port << std::endl;
+    //set the socket to non-blocking
+    fcntl(sockfd, F_SETFL, O_NONBLOCK);
+    // Add server fd to master
+    FD_SET(sockfd, &master);
+    // Add stdin fd to master
+    FD_SET(STDIN_FILENO, &master);
+
+    fdmax = sockfd;
+
     std::cout << "Receive thread created!" << std::endl;
 
     // Game loop
     while(crClient->gameOn) {
-        crClient->read_fds = crClient->master;
+        if(gameBufferReady) {
+            int i = 0;
+            for(auto item : *fBuffer) {
+                tsBuffer->at(i)= item;
+                i++;
+            }
+            gameBufferReady = false;
+            tsReady = true;
+            fBuffer->clear();
+        }
+
+        read_fds = master;
         // Check for any response from serrver
-        if (select(crClient->fdmax+1, &crClient->read_fds, NULL, NULL, NULL) == -1) {
+        if (select(fdmax+1, &read_fds, NULL, NULL, timeout) == -1) {
             std::cout << "Select error" << std::endl;
-            exit(4);
+            continue;
         }
         // If from server
-        if (FD_ISSET(crClient->sockfd, &crClient->read_fds)) {
-            crClient->nbytes = recv(crClient->sockfd, recvBuffer, 152, 0);
-            if (crClient->nbytes <= 0) {
+        if (FD_ISSET(sockfd, &read_fds)) {
+            nbytes = recv(sockfd, rcBuffer->data(), rcBuffer->size(), 0);
+            if (nbytes < 0) {
+                fprintf(stderr, "recv: %s (%d)\n", strerror(errno), errno);
                 std::cout << "Connection closing" << std::endl;
-                close(crClient->sockfd);
+                close(sockfd);
                 exit(10);
-            } else {
+            } else if(nbytes >= 0) {
                 //recieved data
                 std::cout << "receiving map data..." << std::endl;
-                std::vector<char> test(recvBuffer, recvBuffer + crClient->nbytes);
-                std::vector<int> map;
-                if(!mapReceived){
-                   crClient->network->unpack(&test, &map, 3);
-                   crClient->gameMap = map;
-                   mapReceived = true;
+                std::cout << std::endl;
+                for(int i = 0; i < rcBuffer->size(); i++){
+                    std::cout << (int) rcBuffer->at(i);
+                }
+                std::cout << std::endl;
+
+                int header = stripHeader();
+                switch(header)
+                {
+                    // Recieve Map
+                    case 0:
+                        std::vector<int>* map = new std::vector<int>();
+                        if(!mapReceived){
+                        unpack(rcBuffer, map, 3);
+                        for(int i = 0; i < map->size();i++){
+                            crClient->gameMap->push_back(map->at(i));                 
+                            }
+                        mapReceived = true;
+                        }
+                        std::cout << "map data received!" << std::endl;
+                        break;
+                    
+                    // Receive Keystate
+                    case 1:
+
+                        break;
+                    
+                    // Receive Game State
+                    case 2:
+
+                        break;
+                    
+                    // Receive Wall Destroy
+                    case 3:
+
+                        break;
                 }
             }
+        } else if (tsReady) { 
+            send(sockfd, tsBuffer->data(), tsBuffer->size(), 0);
+            tsBuffer->clear();
+            tsReady = false;
         }
     }
 }
@@ -54,53 +142,27 @@ bool Client::pollMap() {
     return mapReceived;
 }
 
+void Client::getGameBufferReady(bool flag) {
+    gameBufferReady = flag;
+}
+
+std::vector<char>* getFillBuffer() {
+    return fBuffer;
+}
+
 bool Client::init() {
-    // Innitialize sets to zero
-    FD_ZERO(&master);
-    FD_ZERO(&read_fds);
-    network = new Network();
-    memset(&hints, 0, sizeof(hints));
-
-    hints.ai_family = AF_INET;          // IPv4
-    hints.ai_socktype = SOCK_STREAM;    // TCP
-
-    // Get address info of server
-    std::cout << "Connecting to " << server_ip << " on port " << server_port << std::endl;
-    if ((status = getaddrinfo(server_ip.c_str(), server_port.c_str(), &hints, &serverInfo)) != 0) {
-        std::cout << "Failed to get address info" << std::endl;
-        exit(4);
-    }
-
-    // Create a socket based on server info 
-    sockfd = socket(serverInfo->ai_family, serverInfo->ai_socktype, serverInfo->ai_protocol);
-
-    // Connect to server
-    while (connect(sockfd, serverInfo->ai_addr, serverInfo->ai_addrlen) < 0) {
-        std::cout << "Waiting for connection..." << std::endl;
-        sleep(1);
-    }
-    std::cout << "Connected" << std::endl;
-
-    // Add server fd to master
-    FD_SET(sockfd, &master);
-    // Add stdin fd to master
-    FD_SET(STDIN_FILENO, &master);
-
-    fdmax = sockfd;
+    gameMap = new std::vector<int>();
     //initialize all buffers
     //receive buffer
-    rcBuffer = (char*) calloc(152, sizeof(char)); 
+    rcBuffer = new std::vector<char>(152);
     //to send buffer
-    tsBuffer = (char*) calloc(152, sizeof(char)); 
     //buffer to fill in
     fBuffer = new std::vector<char>();
-
-    // Pack recvBuffer and Client into void pointer for thread
-    void* clientInfo = malloc(sizeof(long)*2);
-    clientInfo = (void*) rcBuffer;
-    clientInfo = static_cast<char*>(clientInfo) + 1;
+    //to send buffer
+    tsBuffer = new std::vector<char>();;
+    // Pack Client into void pointer for thread
+    void* clientInfo = malloc(sizeof(long));
     clientInfo = (void*) this;
-    clientInfo = static_cast<char*>(clientInfo) - 1;
     gameOn = true;
     rcThread = SDL_CreateThread(receiveThread, "myThread", (void*) clientInfo);
     return true;

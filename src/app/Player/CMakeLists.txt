@@ -11,6 +11,7 @@ target_link_libraries(Player
   Sprite
   ${SDL2_LIBRARY}
   Enemy
+  Controllers
 )
 else()
 target_link_libraries(Player

@@ -10,6 +10,7 @@ target_link_libraries(Enemy
   Player
   Sprite
   Constants
+  Controllers
 )
 
 target_include_directories(Enemy

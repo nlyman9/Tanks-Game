@@ -8,6 +8,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <fcntl.h>
 #include <stdlib.h>
 #include <netdb.h>
 #include <cstring>
@@ -16,7 +17,16 @@
 #include <vector>
 #include <unistd.h>
 #include "Network.hpp"
+#include "NetworkController.hpp"
 #include <SDL2/SDL_thread.h>
+
+static bool gameBufferReady = false; 
+//buffer received
+static std::vector<char>* rcBuffer;
+//to send buffer
+static std::vector<char>* tsBuffer;
+//buffer to fill in
+static std::vector<char>* fBuffer;
 
 class Client {
   public:
@@ -27,30 +37,19 @@ class Client {
     ~Client();
     bool init();
     Client initClient(Client c);
-    //will have to write getters and setters but just testing for now
-    Network* network;
-    //to send buffer
-    char* tsBuffer;
-    //buffer to fill in
-    std::vector<char>* fBuffer;
-    //receive buffer
-    char* rcBuffer;
-    int status;
-    struct addrinfo hints;
-    struct addrinfo *serverInfo;
-    int sockfd;
-    fd_set master;      // Master of file descriptors
-    fd_set read_fds;    // Read fd's returned from select
-    int fdmax;          // maximym file descriptor number
-    int nbytes;
-    bool gameOn;
-    SDL_Thread* rcThread;
-    std::vector<int> gameMap;
-    bool pollMap();
-
     std::string server_ip;
     std::string server_port;
-  private:
+    bool gameOn;
+    SDL_Thread* rcThread;
+    std::vector<int>* gameMap;
+    bool pollMap();
+    void getGameBufferReady(bool flag);
 
+    std::vector<char>* getFillBuffer();
+
+    void setController(NetworkController* controller);
+
+  private:
+    NetworkController* netController;
 };
 #endif
