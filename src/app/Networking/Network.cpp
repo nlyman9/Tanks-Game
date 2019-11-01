@@ -190,6 +190,7 @@ void sendMap(int fd, std::vector<int>* map, size_t t, int flags, int csFlag){
 int stripHeader(std::vector<char>* packet){
     int toRet = (int) packet->at(0);
     packet->erase(packet->begin());
+    std::cout << "packet header: " << toRet << std::endl;
     return toRet;
 }
 void appendHeader(std::vector<char>* packet, char toAppend){

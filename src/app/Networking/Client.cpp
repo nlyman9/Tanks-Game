@@ -65,10 +65,8 @@ int receiveThread(void* data) {
     // Game loop
     while(crClient->gameOn) {
         if(gameBufferReady) {
-            int i = 0;
             for(auto item : *fBuffer) {
-                tsBuffer->at(i)= item;
-                i++;
+                tsBuffer->push_back(item);
             }
             gameBufferReady = false;
             tsReady = true;

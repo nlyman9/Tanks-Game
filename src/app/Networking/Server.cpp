@@ -108,7 +108,7 @@ int serverThread(void* data){
                         //new connection so need to send map data here accepted so send data
                         std::vector<char> toSend;
                         for(int i = 0; i < packedMap.size(); i++){
-                            sBuffer->at(i) = packedMap.at(i);
+                            sBuffer->push_back(packedMap.at(i));
                         }
                         std::cout << std::endl;
                         std::cout << " size of toSend" << sBuffer->size();
@@ -186,7 +186,7 @@ int main(int argc, char* argv[])
     //buffer received
     rBuffer = new std::vector<char>(152);
     //to send buffer
-    sBuffer = new std::vector<char>(152);
+    sBuffer = new std::vector<char>();
     //buffer to fill in
     sfBuffer = new std::vector<char>(152);
 
