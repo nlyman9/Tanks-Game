@@ -59,26 +59,8 @@ void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
     
     SDL_Rect* dst = get_box();
     SDL_Rect* turret_dst = get_box();
-    float temp_theta = 0;
-    temp_theta = theta;
 
-
-    // Center the delta x and y by the center of the tank
-    float delta_x = mouseX - (getX() + TANK_WIDTH / 2);
-    float delta_y = mouseY - (getY() + TANK_HEIGHT / 2);
-    float theta_radians = atan2(delta_y, delta_x);
-    mouseTheta = (int)(theta_radians * 180 / M_PI); 
-
-    // if(mouseTheta > turretTheta + THETA_WINDOW) {
-    //     turretTheta += TURRET_PHI;
-    // } else if (mouseTheta < turretTheta - THETA_WINDOW) {
-    //     turretTheta -= TURRET_PHI;
-    // } else {
-    //     turretTheta = mouseTheta;
-    // }
-    turretTheta = mouseTheta;
-
-    SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), NULL, dst, temp_theta, NULL, SDL_FLIP_NONE);
+    SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), NULL, dst, theta, NULL, SDL_FLIP_NONE);
     SDL_RenderCopyEx(gRenderer, getTurretSprite()->getTexture(), NULL, turret_dst, turretTheta, NULL, SDL_FLIP_NONE);
 }
 
@@ -88,8 +70,31 @@ void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
  *
  */
 void Player::update() {
-    // Move player
+    // Move the turret
+    // Center the delta x and y by the center of the tank
+    float delta_x = mouseX - (getX() + TANK_WIDTH / 2);
+    float delta_y = mouseY - (getY() + TANK_HEIGHT / 2);
+    float theta_radians = atan2(delta_y, delta_x);
+    mouseTheta = (int)(theta_radians * 180 / M_PI); 
 
+    // int deltaMouse = (int)abs((abs(mouseTheta) - abs(turretTheta)));
+    
+    // if (delta_y != 0) { // So turret doesnt start spinning in circles
+    //     if(mouseTheta > turretTheta + THETA_WINDOW) {
+    //         turretTheta += TURRET_PHI;
+    //     } else if (mouseTheta < turretTheta - THETA_WINDOW) {
+    //         turretTheta -= TURRET_PHI;
+    //     } else {
+    //         turretTheta = mouseTheta;
+    //     }
+    // }
+
+    turretTheta = mouseTheta;
+
+
+    std::cout << "TURRET: " << turretTheta << " | " << deltaMouse << std::endl;
+
+    // Move player
     // Rotate player
     rotatePlayer(theta_v);
 
@@ -133,43 +138,6 @@ void Player::update() {
             }
             break;
         }
-
-        // BoundingBox *box = getBoundingBox();
-            
-        // // Collides with top of box
-        // if (box->frontRight.x > obstacle.x && box->frontRight.x < obstacle.x + obstacle.w &&
-        //     box->frontRight.y > obstacle.y && box->frontRight.y < obstacle.y + obstacle.h ||
-        //     box->frontLeft.x > obstacle.x && box->frontLeft.x < obstacle.x + obstacle.w &&
-        //     box->frontLeft.y > obstacle.y && box->frontLeft.y < obstacle.y + obstacle.h) {
-
-        //     if (y_vel > 0) {
-        //         float y_overlap = std::max((box->frontRight.y - (obstacle.y)), (box->frontLeft.y - (obstacle.y)));
-        //         std::cout << box->frontRight.y << " -- " << obstacle.y << " -> " << y_overlap << std::endl;
-        //         setX(getX());
-        //         setY(getY() - y_overlap);
-        //         break;
-        //     } else if (y_vel < 0) {
-        //         float y_overlap = std::max(((obstacle.y + obstacle.h) - box->frontRight.y), ((obstacle.y + obstacle.h) - box->frontLeft.y));
-        //         std::cout << box->frontRight.y << " -- " << obstacle.y << " -> " << y_overlap << std::endl;
-        //         setX(getX());
-        //         setY(getY() + y_overlap);
-        //         break;
-        //     }
-        // }
-        // // Collides with left side of box
-        // if (box->frontRight.x > obstacle.x && box->frontRight.x < obstacle.x + obstacle.w/4 &&
-        //     box->frontRight.y > obstacle.y && box->frontRight.y < obstacle.y + obstacle.h) {
-        //     int norm_vel = abs(y_vel)/y_vel;
-        //     if (isnan(norm_vel)) 
-        //         norm_vel = 1;
-
-        //     float x_overlap = box->frontRight.x - (obstacle.x * norm_vel);
-        //     std::cout << box->frontRight.x << " -- " << obstacle.x << " -> " << x_overlap << std::endl;
-        //     setX(getX() - x_overlap);
-        //     setY(getY());
-        //     break;
-
-        // }
     }
 
     // Check he isn't moving outside of the map
