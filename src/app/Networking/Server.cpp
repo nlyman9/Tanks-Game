@@ -119,6 +119,7 @@ int serverThread(void* data){
                         }
                         std::cout << std::endl;
                         send(newfd, sBuffer->data(), sBuffer->size(), 0);
+                        sBuffer->clear();
                     }
                 }
                 else
@@ -156,10 +157,10 @@ int serverThread(void* data){
                                 if (j != listenerfd && j != i)
                                 {
 
-                                    if (send(j, sBuffer->data(), sBuffer->size(), 0) == -1)
-                                    {
-                                       std::cout << "Send error" << std::endl;
-                                    }
+                                    //if (send(j, sBuffer->data(), sBuffer->size(), 0) == -1)
+                                   // {
+                                   //    std::cout << "Send error" << std::endl;
+                                   // }
                                 }
                                 else if (j == listenerfd)
                                 {
