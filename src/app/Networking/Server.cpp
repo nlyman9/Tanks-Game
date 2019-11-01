@@ -73,8 +73,8 @@ int serverThread(void* data){
     while (gameOn)
     {
         //std::cout << "server looping" << std::endl;
-        read_fds = master;
-        if (select(fdmax + 1, &read_fds, NULL, NULL, timeout) == -1)
+        client_fds = master;
+        if (select(fdmax + 1, &client_fds, NULL, NULL, timeout) == -1)
         {
             std::cout << "Select error" << std::endl;
             exit(4);
@@ -82,8 +82,8 @@ int serverThread(void* data){
         // Loop through our connections
         for (i = 0; i <= fdmax; i++)
         {
-            // Check if one of the connections is in the set read_fds
-            if (FD_ISSET(i, &read_fds))
+            // Check if one of the connections is in the set client_fds
+            if (FD_ISSET(i, &client_fds))
             {
                 // Check if it is a new connection
                 if (i == listenerfd)
@@ -207,7 +207,7 @@ int main(int argc, char* argv[])
     char remoteIP[INET_ADDRSTRLEN];
 
     FD_ZERO(&master);
-    FD_ZERO(&read_fds);
+    FD_ZERO(&client_fds);
 
     int yes = 1;
 
