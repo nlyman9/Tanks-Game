@@ -16,9 +16,6 @@
 #include <unistd.h>
 
 // #include <SDL2/SDL_thread.h>
-//receive buffer
-char* sendBuffer;
-char* recvBuffer;
 int status;
 struct addrinfo hints;
 struct addrinfo *serverInfo, *p;
@@ -34,5 +31,11 @@ socklen_t addr_len;
 std::vector<char> packedMap;
 
 bool gameOn;
- 
+//server buffers
+//buffer received
+static std::vector<char>* rBuffer;
+//to send buffer
+static std::vector<char>* sBuffer;
+//buffer to fill in
+static std::vector<char>* sfBuffer;
 #endif

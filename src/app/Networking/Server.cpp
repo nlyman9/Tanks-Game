@@ -108,22 +108,18 @@ int serverThread(void* data){
                         //new connection so need to send map data here accepted so send data
                         std::vector<char> toSend;
                         for(int i = 0; i < packedMap.size(); i++){
-                            toSend.push_back(packedMap.at(i));
-                        }
-                        std::cout << "map = " << std::endl;
-                        for(int i = 0; i < toSend.size();i++){
-                            std::cout << " " << (int) toSend.at(i);
+                            sBuffer->at(i) = packedMap.at(i);
                         }
                         std::cout << std::endl;
-                        std::cout << " size of toSend" << toSend.size();
+                        std::cout << " size of toSend" << sBuffer->size();
                         std::cout << std::endl;
-                        send(newfd, toSend.data(), toSend.size(), 0);
+                        send(newfd, sBuffer->data(), sBuffer->size(), 0);
                     }
                 }
                 else
                 {
                     // Handle data from clients
-                    if ((nbytes = (recv(i, recvBuffer, 100, 0))) <= 0)
+                    if ((nbytes = (recv(i, rBuffer->data(), rBuffer->size(), 0))) <= 0)
                     {
                         // Either error or closed connection
                         if (nbytes == 0)
@@ -155,7 +151,7 @@ int serverThread(void* data){
                                 if (j != listenerfd && j != i)
                                 {
 
-                                    if (send(j, tsBuffer, nbytes, 0) == -1)
+                                    if (send(j, sBuffer->data(), sBuffer->size(), 0) == -1)
                                     {
                                        std::cout << "Send error" << std::endl;
                                     }
@@ -185,7 +181,19 @@ int serverThread(void* data){
  */
 int main(int argc, char* argv[])
 {
+    //init buffers
+    //buffer received
+    rBuffer = new std::vector<char>(152);
+    //to send buffer
+    sBuffer = new std::vector<char>(152);
+    //buffer to fill in
+    sfBuffer = new std::vector<char>(152);
+
     // Get the server option's
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
     std::cout << "IP " << argv[1] << std::endl;
     std::cout << "PORT " << argv[2] << std::endl;
 
@@ -200,7 +208,6 @@ int main(int argc, char* argv[])
     addr_len = sizeof(struct sockaddr_storage);
 
     char remoteIP[INET_ADDRSTRLEN];
-    char buf[152];
 
     FD_ZERO(&master);
     FD_ZERO(&read_fds);
@@ -251,8 +258,6 @@ int main(int argc, char* argv[])
     FD_SET(listenerfd, &master);
 
     fdmax = listenerfd;
-
-    char* tsBuffer = (char*) calloc(152, sizeof(char)); 
     std::cout << "Creating server thread" << std::endl;
     gameOn = true;
     SDL_CreateThread(serverThread, "server thread", (void*) tsBuffer);
