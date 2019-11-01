@@ -98,7 +98,7 @@ int receiveThread(void* data) {
                 }
                 std::cout << std::endl;
 
-                int header = stripHeader();
+                int header = stripHeader(rcBuffer);
                 switch(header)
                 {
                     // Recieve Map

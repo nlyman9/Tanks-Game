@@ -257,7 +257,7 @@ int main(int argc, char* argv[])
     fdmax = listenerfd;
     std::cout << "Creating server thread" << std::endl;
     gameOn = true;
-    SDL_CreateThread(serverThread, "server thread", (void*) tsBuffer);
+    SDL_CreateThread(serverThread, "server thread", NULL);
 
     //Game stuff here
     while(gameOn){
