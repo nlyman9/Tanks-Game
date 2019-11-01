@@ -76,23 +76,7 @@ void Player::update() {
     float delta_y = mouseY - (getY() + TANK_HEIGHT / 2);
     float theta_radians = atan2(delta_y, delta_x);
     mouseTheta = (int)(theta_radians * 180 / M_PI); 
-
-    // int deltaMouse = (int)abs((abs(mouseTheta) - abs(turretTheta)));
-    
-    // if (delta_y != 0) { // So turret doesnt start spinning in circles
-    //     if(mouseTheta > turretTheta + THETA_WINDOW) {
-    //         turretTheta += TURRET_PHI;
-    //     } else if (mouseTheta < turretTheta - THETA_WINDOW) {
-    //         turretTheta -= TURRET_PHI;
-    //     } else {
-    //         turretTheta = mouseTheta;
-    //     }
-    // }
-
     turretTheta = mouseTheta;
-
-
-    std::cout << "TURRET: " << turretTheta << " | " << deltaMouse << std::endl;
 
     // Move player
     // Rotate player
