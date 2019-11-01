@@ -9,8 +9,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 
-add_subdirectory(app)
-
-if(MAC) 
+if(${APPLE}) 
   message("Include Mac directories")
+  message(${CMAKE_CURRENT_SOURCE_DIR})
+  list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+  set (CMAKE_CXX_STANDARD 17)
 endif()
+
+add_subdirectory(app)

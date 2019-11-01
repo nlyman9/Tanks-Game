@@ -13,7 +13,6 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <iostream>
-#include <SDL2/SDL_thread.h>
 
 
 GameLoop::~GameLoop() {}

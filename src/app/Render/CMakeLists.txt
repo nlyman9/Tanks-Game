@@ -3,7 +3,21 @@ add_library(Render
   Render.hpp
   Render.cpp
 )
-
+if(${APPLE})
+target_link_libraries(Render
+  PRIVATE
+  ${SDL2_LIBRARY}
+  ${SDL2_IMAGE_LIBRARIES}
+  Constants
+  Player
+  Object
+  Sprite
+  Enemy
+  Projectile
+  MapGenerator
+  ImageLoader
+)
+else()
 target_link_libraries(Render
   PRIVATE
   SDL2
@@ -15,6 +29,7 @@ target_link_libraries(Render
   Projectile
   ImageLoader
 )
+endif()
 
 target_include_directories(Render
   PUBLIC

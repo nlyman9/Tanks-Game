@@ -102,7 +102,7 @@ void Player::update() {
     // first add X velocity
     setX(getX() + (x_vel * updateStep));
 
-    currentPos = {getX(), getY(), TANK_WIDTH, TANK_HEIGHT};
+    currentPos = {(int)getX(), (int)getY(), TANK_WIDTH, TANK_HEIGHT};
 
     // correct for collisions
     for(auto obstacle : obstacles) {
@@ -120,7 +120,7 @@ void Player::update() {
     // next add Y velocity
     setY(getY() + (y_vel * updateStep));
 
-    currentPos = {getX(), getY(), TANK_WIDTH, TANK_HEIGHT};
+    currentPos = {(int)getX(), (int)getY(), TANK_WIDTH, TANK_HEIGHT};
 
     // correct for collisions
     for(auto obstacle : obstacles) {

@@ -96,7 +96,7 @@ bool Client::init() {
     fBuffer = new std::vector<char>();
 
     // Pack recvBuffer and Client into void pointer for thread
-    void* clientInfo = malloc(sizeof(void)*2);
+    void* clientInfo = malloc(sizeof(long)*2);
     clientInfo = (void*) rcBuffer;
     clientInfo = static_cast<char*>(clientInfo) + 1;
     clientInfo = (void*) this;

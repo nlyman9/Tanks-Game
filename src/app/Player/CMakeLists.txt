@@ -3,7 +3,16 @@ add_library(Player
   Player.hpp
   Player.cpp
 )
-
+if(${APPLE})
+target_link_libraries(Player
+  PRIVATE
+  Object
+  Constants
+  Sprite
+  ${SDL2_LIBRARY}
+  Enemy
+)
+else()
 target_link_libraries(Player
   PRIVATE
   Object
@@ -11,6 +20,8 @@ target_link_libraries(Player
   Sprite
   Controllers
 )
+endif()
+
 
 target_include_directories(Player
   PUBLIC

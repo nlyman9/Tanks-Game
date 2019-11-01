@@ -3,13 +3,22 @@ add_library(StartUpMenu
   StartUpMenu.cpp
   StartUpMenu.hpp
 )
-
+if(${APPLE})
+target_link_libraries(StartUpMenu
+  PUBLIC
+  GameLoop
+  ${SDL2_LIBRARY}
+  Render
+  Projectile
+)
+else()
 target_link_libraries(StartUpMenu
   PUBLIC
   GameLoop
   SDL2
   Render
 )
+endif()
 
 target_include_directories(StartUpMenu
   PUBLIC

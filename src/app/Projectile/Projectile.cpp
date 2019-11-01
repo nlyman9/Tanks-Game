@@ -59,7 +59,7 @@ void Projectile::update() {
     setPos(getX() + (x_vel * updateStep), getY() + (y_vel * updateStep));
 
     SDL_Rect* overlap;
-    SDL_Rect currentPos = {getX(), getY(), PROJECTILE_WIDTH + 1.41 * cos((theta * M_PI_4)/180), PROJECTILE_HEIGHT + 1.41 * cos((theta * M_PI_4)/180)};
+    SDL_Rect currentPos = {(int)getX(),(int) getY(), PROJECTILE_WIDTH, PROJECTILE_HEIGHT};
 
 
     for(auto obstacle : obstacles) {

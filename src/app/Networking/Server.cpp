@@ -4,6 +4,16 @@
     test to create a map on a server then send it over as bit data
     and render on client
 */
+// #if __APPLE__
+// #include <SDL2/SDL.h>
+// #include <SDL2_image/SDL_image.h>
+// #include <SDL2_ttf/SDL_ttf.h>
+// #else
+// #include <SDL2/SDL.h>
+// #include <SDL2/SDL_image.h>
+// #include <SDL2/SDL_ttf.h>
+//#include <SDL2/SDL_thread.h>
+// #endif
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -14,8 +24,6 @@
 #include <iostream>
 #include <vector>
 #include <unistd.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL.h>
 #include "Server.hpp"
 #include "MapGenerator.hpp"
 #include "Network.hpp"
@@ -145,6 +153,8 @@ int sendThread(void* data){
             }
         }
     }
+
+    return 0;
 }
 
 /**
