@@ -136,7 +136,7 @@ int GameLoop::networkRun() {
 		
 		const Uint8* keystate = player->getEvent(elapsed_time, &e);
 		std::vector<char>* fBuffer = client->getFillBuffer();
-		fBuffer->push_back((char)keystate);
+		fBuffer->push_back((const unsigned char)*keystate);
 
 		//network version of player firing bullet
 		if (player->getFire() == true) {
@@ -193,10 +193,10 @@ bool GameLoop::init(Render* renderer) {
 	player = new Player(SCREEN_WIDTH/2 + 100, 50, keyController, netController);
 	enemies.clear();
 	tileArray.clear();
-	enemies.push_back(new Enemy( SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, player));
+	// enemies.push_back(new Enemy( SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, player));
 	render = renderer;
 	render->setPlayer(player);
-	render->setEnemies(enemies);
+	// render->setEnemies(enemies);
 
 	Sprite *player_tank = new Sprite(render->getRenderer(), "src/res/images/red_tank.png");
 	Sprite *player_turrent = new Sprite(render->getRenderer(), "src/res/images/red_turret.png");
@@ -206,13 +206,13 @@ bool GameLoop::init(Render* renderer) {
 	player->setTurretSprite(player_turrent);
 
 	// Init the enemy
-	enemies.push_back(new Enemy( SCREEN_WIDTH - TANK_WIDTH/2 - 75, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, player));
-	render->setEnemies(enemies);
-	Sprite *enemy_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
-	enemy_tank->init();
-	for (auto enemy : enemies) {
-		enemy->setSprite(enemy_tank);
-	}
+	// enemies.push_back(new Enemy( SCREEN_WIDTH - TANK_WIDTH/2 - 75, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, player));
+	// render->setEnemies(enemies);
+	// Sprite *enemy_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
+	// enemy_tank->init();
+	// for (auto enemy : enemies) {
+	// 	enemy->setSprite(enemy_tank);
+	// }
 
 	isGameOn = true;
 

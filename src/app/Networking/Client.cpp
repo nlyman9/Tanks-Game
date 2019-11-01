@@ -103,31 +103,46 @@ int receiveThread(void* data) {
                 {
                     // Recieve Map
                     case 0:
+                    {
                         std::vector<int>* map = new std::vector<int>();
-                        if(!mapReceived){
-                        unpack(rcBuffer, map, 3);
-                        for(int i = 0; i < map->size();i++){
-                            crClient->gameMap->push_back(map->at(i));                 
+                        if(!mapReceived) {
+                            unpack(rcBuffer, map, 3);
+                            for(int i = 0; i < map->size();i++){
+                                crClient->gameMap->push_back(map->at(i));                 
                             }
-                        mapReceived = true;
+                            mapReceived = true;
                         }
+                        delete map;
                         std::cout << "map data received!" << std::endl;
                         break;
-                    
+                    }
+
                     // Receive Keystate
                     case 1:
-
+                    {
+                        netController->setKeystate((uint8_t*)(rcBuffer->at(0)));
                         break;
+                    }
                     
                     // Receive Game State
                     case 2:
+                    {
 
                         break;
+                    }
                     
                     // Receive Wall Destroy
                     case 3:
+                    {
 
+                       break;
+                    }
+
+                    default:
+                    {
+                        std::cout << "HELP ILLEGAL PACKET RECEIVED" << std::endl;
                         break;
+                    }
                 }
             }else{
                 std::cout << "NO data received! check if buffer size is set!" << std::endl;
@@ -148,8 +163,12 @@ void Client::getGameBufferReady(bool flag) {
     gameBufferReady = flag;
 }
 
-std::vector<char>* getFillBuffer() {
+std::vector<char>* Client::getFillBuffer() {
     return fBuffer;
+}
+
+void Client::setController(NetworkController* controller) {
+    netController = controller;
 }
 
 bool Client::init() {

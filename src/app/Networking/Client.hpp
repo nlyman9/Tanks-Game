@@ -27,6 +27,8 @@ static std::vector<char>* rcBuffer;
 static std::vector<char>* tsBuffer;
 //buffer to fill in
 static std::vector<char>* fBuffer;
+// Network Controller
+static NetworkController* netController;
 
 class Client {
   public:
@@ -50,6 +52,5 @@ class Client {
     void setController(NetworkController* controller);
 
   private:
-    NetworkController* netController;
 };
 #endif
