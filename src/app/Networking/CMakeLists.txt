@@ -14,6 +14,7 @@ if(${APPLE})
 target_link_libraries(Networking
   PRIVATE
   MapGenerator
+  Controllers
   ${SDL2_LIBRARY}
   ${SDL2_IMAGE_LIBRARIES}
 )
@@ -21,6 +22,7 @@ else()
 target_link_libraries(Networking
   PRIVATE
   MapGenerator
+  Controllers
 )
 endif()
 

@@ -17,7 +17,16 @@
 #include <vector>
 #include <unistd.h>
 #include "Network.hpp"
+#include "NetworkController.hpp"
 #include <SDL2/SDL_thread.h>
+
+static bool gameBufferReady = false; 
+//buffer received
+static std::vector<char>* rcBuffer;
+//to send buffer
+static std::vector<char>* tsBuffer;
+//buffer to fill in
+static std::vector<char>* fBuffer;
 
 class Client {
   public:
@@ -34,8 +43,13 @@ class Client {
     SDL_Thread* rcThread;
     std::vector<int>* gameMap;
     bool pollMap();
+    void getGameBufferReady(bool flag);
+
+    std::vector<char>* getFillBuffer();
+
+    void setController(NetworkController* controller);
 
   private:
-
+    NetworkController* netController;
 };
 #endif

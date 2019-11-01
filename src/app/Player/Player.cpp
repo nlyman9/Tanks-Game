@@ -21,13 +21,13 @@
  * @param x
  * @param y
  */
-Player::Player(Sprite *sprite, Sprite *turret, float x, float y, Controller* contr) : controller{contr} {
+Player::Player(Sprite *sprite, Sprite *turret, float x, float y, KeyboardController* keyboardController, NetworkController* networkController) : keyController{keyboardController}, netController{networkController} {
     setSprite(sprite);
     setTurretSprite(turret);
     setPos(x, y);
 }
 
-Player::Player(float x, float y, Controller* contr) : controller{contr} {
+Player::Player(float x, float y, KeyboardController* keyboardController, NetworkController* networkController) : keyController{keyboardController}, netController{networkController} {
     setPos(x, y);
 }
 
@@ -220,7 +220,7 @@ int Player::getTurretTheta() {
     return turretTheta;
 }
 
-void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, SDL_Event* e) {
+const Uint8* Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, SDL_Event* e) {
 
     delta_velocity = 0;
     x_deltav = 0;
@@ -228,7 +228,12 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, S
     theta_v = 0;
     fire = false;
 
-    const Uint8* keystate = controller->pollEvent();
+    const Uint8* keystate; 
+    if(keyController != nullptr) {
+        keystate = keyController->pollEvent();
+    } else {
+        keystate = netController->pollEvent();
+    }
 
     if (keystate[SDL_SCANCODE_W]) {
         delta_velocity += MAX_PLAYER_VELOCITY;
@@ -330,6 +335,8 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, S
     if(e->type == SDL_MOUSEMOTION) {
         SDL_GetMouseState(&mouseX, &mouseY);
     }
+
+    return keystate;
 }
 
 /**

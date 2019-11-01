@@ -9,6 +9,7 @@
 #include <SDL2/SDL.h>
 
 bool mapReceived = false;
+bool tsReady = false;
 
 int receiveThread(void* data) {
     // Unpack data in the Client object
@@ -63,6 +64,17 @@ int receiveThread(void* data) {
 
     // Game loop
     while(crClient->gameOn) {
+        if(gameBufferReady) {
+            int i = 0;
+            for(auto item : *fBuffer) {
+                tsBuffer->at(i)= item;
+                i++;
+            }
+            gameBufferReady = false;
+            tsReady = true;
+            fBuffer->clear();
+        }
+
         read_fds = master;
         // Check for any response from serrver
         if (select(fdmax+1, &read_fds, NULL, NULL, timeout) == -1) {
@@ -77,7 +89,7 @@ int receiveThread(void* data) {
                 std::cout << "Connection closing" << std::endl;
                 close(sockfd);
                 exit(10);
-            } else if(nbytes >= 0){
+            } else if(nbytes >= 0) {
                 //recieved data
                 std::cout << "receiving map data..." << std::endl;
                 std::cout << std::endl;
@@ -85,23 +97,57 @@ int receiveThread(void* data) {
                     std::cout << (int) rcBuffer->at(i);
                 }
                 std::cout << std::endl;
-                std::vector<int>* map = new std::vector<int>();
-                if(!mapReceived){
-                   unpack(rcBuffer, map, 3);
-                   for(int i = 0; i < map->size();i++){
-                       std::cout << "pushing" << std::endl;
-                       crClient->gameMap->push_back(map->at(i));                 
-                    }
-                   mapReceived = true;
+
+                int header = stripHeader();
+                switch(header)
+                {
+                    // Recieve Map
+                    case 0:
+                        std::vector<int>* map = new std::vector<int>();
+                        if(!mapReceived){
+                        unpack(rcBuffer, map, 3);
+                        for(int i = 0; i < map->size();i++){
+                            crClient->gameMap->push_back(map->at(i));                 
+                            }
+                        mapReceived = true;
+                        }
+                        std::cout << "map data received!" << std::endl;
+                        break;
+                    
+                    // Receive Keystate
+                    case 1:
+
+                        break;
+                    
+                    // Receive Game State
+                    case 2:
+
+                        break;
+                    
+                    // Receive Wall Destroy
+                    case 3:
+
+                        break;
                 }
-                std::cout << "map data received!" << std::endl;
             }
+        } else if (tsReady) { 
+            send(sockfd, tsBuffer->data(), tsBuffer->size(), 0);
+            tsBuffer->clear();
+            tsReady = false;
         }
     }
 }
 
 bool Client::pollMap() {
     return mapReceived;
+}
+
+void Client::getGameBufferReady(bool flag) {
+    gameBufferReady = flag;
+}
+
+std::vector<char>* getFillBuffer() {
+    return fBuffer;
 }
 
 bool Client::init() {

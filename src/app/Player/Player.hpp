@@ -26,7 +26,8 @@ class Player : public Object {
     private:
         /* data */
         Sprite *turret;
-        Controller *controller;
+        KeyboardController *keyController;
+        NetworkController *netController;
         float x_vel, y_vel; // x and y velocity
         int lives; //health points left
         int theta = 0;
@@ -43,8 +44,8 @@ class Player : public Object {
         bool fire = false;
         Uint32 fire_last_time = 0;
     public:
-        Player(Sprite *sprite, Sprite *turret, float x, float y, Controller* controller); //constructor, initialize the x, y, and sprite
-        Player(float x, float y, Controller* controller); //constructor, initialize the x, snd y
+        Player(Sprite *sprite, Sprite *turret, float x, float y, KeyboardController* controller, NetworkController* controller); //constructor, initialize the x, y, and sprite
+        Player(float x, float y, KeyboardController* controller, NetworkController* controller); //constructor, initialize the x, snd y
 
         void draw(SDL_Renderer *gRenderer, double update_lag) override;
         void update() override;
@@ -58,7 +59,7 @@ class Player : public Object {
 
         int getTheta();
         int getTurretTheta();
-        void getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, SDL_Event* e);
+        const Uint8* getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, SDL_Event* e);
 
         BoundingBox* getBoundingBox() override;
 

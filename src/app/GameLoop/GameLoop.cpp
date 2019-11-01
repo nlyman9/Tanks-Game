@@ -46,10 +46,20 @@ bool GameLoop::networkInit(Args *options) {
 			std::cout << "Created server process " << server_pid << std::endl;
 		}
 	}
+
+	netController = new NetworkController();
+	Player* player2 = new Player(SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, nullptr, netController);
+	Sprite *player_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
+	Sprite *player_turrent = new Sprite(render->getRenderer(), "src/res/images/red_turret.png");
+	player_tank->init();
+	player_turrent->init();	
+	player2->setSprite(player_tank);
+	player2->setTurretSprite(player_turrent);
 	// Create client process
 	client = new Client(options->ip, options->port);
 	// Init 
 	client->init();
+	client->setController(netController);
 	return true;
 }
 
@@ -124,7 +134,9 @@ int GameLoop::networkRun() {
 			}
 		}
 		
-		player->getEvent(elapsed_time, &e);
+		const Uint8* keystate = player->getEvent(elapsed_time, &e);
+		std::vector<char>* fBuffer = client->getFillBuffer();
+		fBuffer->push_back((char)keystate);
 
 		//network version of player firing bullet
 		if (player->getFire() == true) {
@@ -160,6 +172,7 @@ int GameLoop::networkRun() {
 		// 3. Render
 		// Render everything 
 		render->draw(lag_time / MS_PER_UPDATE);
+		client->getGameBufferReady(true);
 	}
 
 	// Exit normally
@@ -175,8 +188,9 @@ int GameLoop::networkRun() {
  * @return false - Failed to initialize
  */
 bool GameLoop::init(Render* renderer) {
-	KeyboardController* keyController = new KeyboardController();
-	player = new Player(SCREEN_WIDTH/2 + 100, 50, keyController);
+	keyController = new KeyboardController();
+	netController = new NetworkController();
+	player = new Player(SCREEN_WIDTH/2 + 100, 50, keyController, netController);
 	enemies.clear();
 	tileArray.clear();
 	enemies.push_back(new Enemy( SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, player));
