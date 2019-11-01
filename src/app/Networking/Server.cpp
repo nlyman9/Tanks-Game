@@ -16,6 +16,8 @@
 #endif
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <fcntl.h>
+#include <sys/time.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <stdlib.h>
@@ -58,17 +60,21 @@ std::vector<int>* serverMapGen(){
     return map1D;
 }
 
-int sendThread(void* data){
+int serverThread(void* data){
     int newfd;
     int nbytes;
     int i, j;
+    //timeval is passed into select and is used to say when select should timeout
+    //setting all the members to 0 tells select it should not block
+    struct timeval* timeout = (timeval*) calloc(1, sizeof(struct timeval));
+    timeout->tv_sec = 0;
+    timeout->tv_usec = 0;
     // Loop of server
     while (gameOn)
     {
-        std::cout << "server looping" << std::endl;
-        sleep(1);
+        //std::cout << "server looping" << std::endl;
         read_fds = master;
-        if (select(fdmax + 1, &read_fds, NULL, NULL, NULL) == -1)
+        if (select(fdmax + 1, &read_fds, NULL, NULL, timeout) == -1)
         {
             std::cout << "Select error" << std::endl;
             exit(4);
@@ -87,7 +93,8 @@ int sendThread(void* data){
                     if (newfd == -1)
                     {
                         // Failed to accept
-                        std::cout << "Accept error" << std::endl;
+                        perror("accept");
+                        continue;
                     }
                     else
                     {
@@ -99,15 +106,22 @@ int sendThread(void* data){
                         }
                         std::cout << "New connection from" << inet_ntop(remoteaddr.ss_family, &remoteaddr, remoteIP, INET_ADDRSTRLEN) << " on socket " << newfd << std::endl;
                         //new connection so need to send map data here accepted so send data
-                        send(newfd, packedMap.data(), packedMap.size(), 0);
+                        std::vector<char> toSend;
+                        for(int i = 0; i < packedMap.size(); i++){
+                            toSend.push_back(packedMap.at(i));
+                        }
+                        std::cout << "map = " << std::endl;
+                        for(int i = 0; i < toSend.size();i++){
+                            std::cout << " " << (int) toSend.at(i);
+                        }
+                        std::cout << std::endl;
+                        std::cout << " size of toSend" << toSend.size();
+                        std::cout << std::endl;
+                        send(newfd, toSend.data(), toSend.size(), 0);
                     }
                 }
                 else
                 {
-                    sendBuffer[0] = 'x';
-                    if (FD_ISSET(i, &master)){
-                        send(i, sendBuffer, 8, 0);
-                    }
                     // Handle data from clients
                     if ((nbytes = (recv(i, recvBuffer, 100, 0))) <= 0)
                     {
@@ -115,14 +129,18 @@ int sendThread(void* data){
                         if (nbytes == 0)
                         { // Connection closed
                             std::cout << "Socket " << i <<" disconnected." << std::endl;
+                            // remember to close the fd
+                            close(i);
+                            FD_CLR(i, &master); // Remove from master set
                         }
                         else
                         {
-                            std::cout << "Recv error" << std::endl;
+                            //client disconnected... for testing purposes just closing the server
+                            //so we dont have to in task manager
+                            std::cout << "Recv error server server exiting" << std::endl;
+                            exit(0);
                         }
-                        // remember to close the fd
-                        close(i);
-                        FD_CLR(i, &master); // Remove from master set
+                        
                     }
                     else
                     {
@@ -176,9 +194,7 @@ int main(int argc, char* argv[])
     char *server_ip = argv[1];
     char *server_port = argv[2];
     
-    Network* net = new Network();
-    
-    net->pack(map, &packedMap, 3); //pack map into 3 bits
+    pack(map, &packedMap, 3); //pack map into 3 bits
     
     // Set structs and variables for the internet
     addr_len = sizeof(struct sockaddr_storage);
@@ -207,6 +223,8 @@ int main(int argc, char* argv[])
     for (p = serverInfo; p != NULL; p = p->ai_next)
     {
         listenerfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+        //set the socket to non-blocking
+        //fcntl(listenerfd, F_SETFL, O_NONBLOCK);
         if (listenerfd < 0)
         {
             continue;
@@ -235,9 +253,9 @@ int main(int argc, char* argv[])
     fdmax = listenerfd;
 
     char* tsBuffer = (char*) calloc(152, sizeof(char)); 
-    std::cout << "Creating send thread" << std::endl;
+    std::cout << "Creating server thread" << std::endl;
     gameOn = true;
-    SDL_CreateThread(sendThread, "send thread", (void*) tsBuffer);
+    SDL_CreateThread(serverThread, "server thread", (void*) tsBuffer);
 
     //Game stuff here
     while(gameOn){
