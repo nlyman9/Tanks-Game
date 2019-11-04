@@ -58,8 +58,8 @@ void Edge::set_weight(int w) {
 }
 
 void Edge::print_edge() {
-    std::cout << get_src_id() << " -> " << get_dest_id() << std::endl;
-        // << " weight: " << weight << std::endl;
+    std::cout << get_src_id() << " -> " << get_dest_id()
+        << " weight: " << weight << std::endl;
 }
 
 // int main() {
