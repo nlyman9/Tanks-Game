@@ -2,7 +2,7 @@
 #include <SDL2/SDL.h>
 
 NetworkController::NetworkController() {
-    keystate = (uint8_t *)calloc(0x7fffdc9bc0e0, sizeof(char)); // empty keystate array
+    keystate = (uint8_t *)calloc(50, sizeof(char)); // empty keystate array
 }
 
 const Uint8* NetworkController::pollEvent() {

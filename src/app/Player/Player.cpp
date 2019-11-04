@@ -223,7 +223,6 @@ void Player::setClient(Client* cl) {
 
 void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, SDL_Event* e) {
 
-    std::cout << "get keystate" << std::endl;
     delta_velocity = 0;
     x_deltav = 0;
     y_deltav = 0;
@@ -233,13 +232,9 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, S
     const Uint8* keystate; 
     if(keyController != nullptr) {
         keystate = keyController->pollEvent();
-        std::cout << "get keycontroller state" << std::endl;
     } else {
         keystate = netController->pollEvent();
-        std::cout << "get netcontroller state" << std::endl;
     }
-
-    std::cout << "poll keystate" << std::endl;
 
     if (keystate[SDL_SCANCODE_W]) {
         delta_velocity += MAX_PLAYER_VELOCITY;
@@ -259,7 +254,6 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, S
         theta_v += PHI;
     }
 
-    std::cout << "poll mouse" << std::endl;
     if(e->type == SDL_MOUSEBUTTONDOWN) {
   		Uint32 current_time = SDL_GetTicks();
 
@@ -343,12 +337,10 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, S
         SDL_GetMouseState(&mouseX, &mouseY);
     }
 
-    std::cout << "fill buffer" << std::endl;
     if(keyController != nullptr) {
        std::vector<char>* fBuffer = client->getFillBuffer();
        fBuffer->push_back((char)(*keystate));
     }
-     std::cout << "fin" << std::endl;
 }
 
 /**

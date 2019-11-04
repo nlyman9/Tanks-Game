@@ -115,7 +115,6 @@ int GameLoop::networkRun() {
 	Sprite *shell = new Sprite(render->getRenderer(), "src/res/images/shell.png");
 		shell->init();
 
-	std::cout << "loop" << std::endl;
 	while (client->gameOn)
 	{
 		current_time = std::chrono::system_clock::now();
@@ -136,12 +135,9 @@ int GameLoop::networkRun() {
 			}
 		}
 		
-		std::cout << "get event" << std::endl;
 		player->getEvent(elapsed_time, &e);
-		std::cout << "get event 2" << std::endl;
 		player2->getEvent(elapsed_time, &e);
 
-		std::cout << "check fire" << std::endl;
 		//network version of player firing bullet
 		if (player->getFire() == true) {
 
@@ -162,7 +158,6 @@ int GameLoop::networkRun() {
 		// 2. Update
 		// Update if time since last update is >= MS_PER_UPDATE
 		while(lag_time >= MS_PER_UPDATE) {
-			std::cout << "update" << std::endl;
 			player->update();
 			player2->update();
 
