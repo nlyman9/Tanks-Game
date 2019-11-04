@@ -74,6 +74,7 @@ int serverThread(void* data){
     {
         //std::cout << "server looping" << std::endl;
         client_fds = master;
+        fcntl(listenerfd, F_SETFL, O_NONBLOCK); // non blocking socket
         if (select(fdmax + 1, &client_fds, NULL, NULL, timeout) == -1)
         {
             std::cout << "Select error" << std::endl;
@@ -123,9 +124,11 @@ int serverThread(void* data){
                     }
                 }
                 else
-                {
+                {   
+                    nbytes = recv(i, rBuffer->data(), rBuffer->size(), 0);
+                    std::cout << "SERVER: received: " << nbytes << " bytes" << std::endl;
                     // Handle data from clients
-                    if ((nbytes = (recv(i, rBuffer->data(), rBuffer->size(), 0))) <= 0)
+                    if (nbytes <= 0)
                     {
                         // Either error or closed connection
                         if (nbytes == 0)
@@ -149,18 +152,17 @@ int serverThread(void* data){
                         // We have real data from client
                         for (j = 0; j <= fdmax; j++)
                         {
-
                             // relay message to connections
                             if (FD_ISSET(j, &master))
                             {
                                 // except the listener and ourselves
                                 if (j != listenerfd && j != i)
                                 {
-
-                                    //if (send(j, sBuffer->data(), sBuffer->size(), 0) == -1)
-                                   // {
-                                   //    std::cout << "Send error" << std::endl;
-                                   // }
+                                    std::cout << "SERVER: passing message through" << std::endl;
+                                    if (send(j, sBuffer->data(), sBuffer->size(), 0) == -1)
+                                    {
+                                        std::cout << "Send error" << std::endl;
+                                    }
                                 }
                                 else if (j == listenerfd)
                                 {

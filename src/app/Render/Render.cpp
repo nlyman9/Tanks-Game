@@ -220,7 +220,9 @@ int Render::draw(double update_lag) {
 	}
 
 	// Render player
-	gPlayer->draw(gRenderer, update_lag);
+	for (auto player : gPlayers) {
+		player->draw(gRenderer, update_lag);
+	}
 
 	// Render all the enemies
 	for (auto enemy: gEnemies) {
@@ -249,8 +251,8 @@ SDL_Renderer* Render::getRenderer() {
 	return gRenderer;
 }
 
-void Render::setPlayer(Player* player) {
-	gPlayer = player;
+void Render::setPlayer(std::vector<Player *> players) {
+	gPlayers = players;
 }
 
 void Render::setEnemies(std::vector<Enemy *> enemies) {
