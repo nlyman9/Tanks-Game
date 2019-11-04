@@ -14,11 +14,8 @@
 #include <iostream>
 #include <vector>
 #include <unistd.h>
-#include <SDL2/SDL_thread.h>
 
-char* tsBuffer;
-//buffer to fill in
-std::vector<char>* fBuffer;
+// #include <SDL2/SDL_thread.h>
 //receive buffer
 char* sendBuffer;
 char* recvBuffer;

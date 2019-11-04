@@ -1,6 +1,6 @@
 #include "Network.hpp"
 
-void Network::sender(int fd, std::vector<int>* buffer, size_t t, int flags, int csFlag){
+void sender(int fd, std::vector<int>* buffer, size_t t, int flags, int csFlag){
     switch(csFlag){ //can decide how to handle this -- bitwise?
         case 0:
             sendMap(fd, buffer, t, flags, csFlag); //dont delete map
@@ -15,7 +15,7 @@ void Network::sender(int fd, std::vector<int>* buffer, size_t t, int flags, int 
             break;
     }
 }
-void Network::sender(int fd, std::vector<char>* buffer, size_t t, int flags, int csFlag){
+void sender(int fd, std::vector<char>* buffer, size_t t, int flags, int csFlag){
     switch(csFlag){
         case 0:
             send(fd, buffer, t, flags); 
@@ -46,7 +46,7 @@ void Network::sender(int fd, std::vector<char>* buffer, size_t t, int flags, int
 //functions ideas: packInt : packChar - pack a vector of ints or chars
 //change it to take in N bits you want to pack to?
 
-std::vector<char>* Network::packMap(std::vector<int>* map, std::vector<char>* mapPacked)
+std::vector<char>* packMap(std::vector<int>* map, std::vector<char>* mapPacked)
 {
 
     std::vector<bool> workingSet;
@@ -72,7 +72,7 @@ std::vector<char>* Network::packMap(std::vector<int>* map, std::vector<char>* ma
 
     return mapPacked;
 }
-std::vector<char>* Network::pack(std::vector<int>* x, std::vector<char>* packed, int bits)
+std::vector<char>* pack(std::vector<int>* x, std::vector<char>* packed, int bits)
 {   
     std::vector<bool> workingSet;
     for (auto curr : *x)
@@ -98,7 +98,7 @@ std::vector<char>* Network::pack(std::vector<int>* x, std::vector<char>* packed,
 
     return packed;
 }
-std::vector<int> *Network::unpack(std::vector<char>* packed, std::vector<int> *unPacked, int bits){
+std::vector<int> *unpack(std::vector<char>* packed, std::vector<int> *unPacked, int bits){
 	std::vector<bool> workSet;
     int i;
 	for(auto curr : *packed){
@@ -119,7 +119,7 @@ std::vector<int> *Network::unpack(std::vector<char>* packed, std::vector<int> *u
 	}
     return unPacked;
 }
-std::vector<int> *Network::unpack(std::vector<char>* packed, std::vector<int> *unPacked, int bits, int numbers){
+std::vector<int> *unpack(std::vector<char>* packed, std::vector<int> *unPacked, int bits, int numbers){
 	std::vector<bool> workSet;
     int i;
 	for(auto curr : *packed){
@@ -145,7 +145,7 @@ std::vector<int> *Network::unpack(std::vector<char>* packed, std::vector<int> *u
     return unPacked;
 }
 
-std::vector<int>* Network::unpackMap(std::vector<char> mapPacked, std::vector<int> *map){
+std::vector<int>* unpackMap(std::vector<char> mapPacked, std::vector<int> *map){
     //std::cout << "UNPACKING\n";
 	std::vector<bool> workSet;
     //first turn the packed map into a bool array
@@ -178,7 +178,7 @@ std::vector<int>* Network::unpackMap(std::vector<char> mapPacked, std::vector<in
 	}
     return map;
 }
-void Network::sendMap(int fd, std::vector<int>* map, size_t t, int flags, int csFlag){
+void sendMap(int fd, std::vector<int>* map, size_t t, int flags, int csFlag){
     //create a char array to send it in
     std::vector<char>* mapPacked = new std::vector<char>();   
     packMap(map, mapPacked);

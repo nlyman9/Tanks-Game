@@ -11,16 +11,18 @@
 #include <vector>
 #include <unistd.h>
 //constexpr int headersize = 20;
-class Network{
-    public:
-        void sender(int fd, std::vector<int>* buffer, size_t t, int flags, int csFlag);
-        void sender(int fd, std::vector<char>* buffer, size_t t, int flags, int csFlag);
-        std::vector<char>* pack(std::vector<int>* x, std::vector<char>* packed, int bits);
-        std::vector<int> *unpack(std::vector<char>* packed, std::vector<int> *unPacked, int bits);
-        std::vector<int> *unpack(std::vector<char>* packed, std::vector<int> *unPacked, int bits, int numbers);
-        std::vector<int> *unpackMap(std::vector<char> mapPacked, std::vector<int> *map);
-        std::vector<char>* packMap(std::vector<int>* map, std::vector<char>* mapPacked);
-    private:
-        void sendMap(int fd, std::vector<int>* map, size_t t, int flags, int csFlag);
-};
+void sender(int fd, std::vector<int>* buffer, size_t t, int flags, int csFlag);
+void sender(int fd, std::vector<char>* buffer, size_t t, int flags, int csFlag);
+std::vector<char>* pack(std::vector<int>* x, std::vector<char>* packed, int bits);
+std::vector<int> *unpack(std::vector<char>* packed, std::vector<int> *unPacked, int bits);
+std::vector<int> *unpack(std::vector<char>* packed, std::vector<int> *unPacked, int bits, int numbers);
+std::vector<int> *unpackMap(std::vector<char> mapPacked, std::vector<int> *map);
+std::vector<char>* packMap(std::vector<int>* map, std::vector<char>* mapPacked);
+void sendMap(int fd, std::vector<int>* map, size_t t, int flags, int csFlag);
+//buffer received
+static std::vector<char>* rcBuffer;
+//to send buffer
+static std::vector<char>* tsBuffer;
+//buffer to fill in
+static std::vector<char>* fBuffer;
 #endif

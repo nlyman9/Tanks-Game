@@ -1,7 +1,15 @@
-#include <vector>
-#include <string>
+#if __APPLE__
+#include <SDL2/SDL.h>
+#include <SDL2_image/SDL_image.h>
+#include <SDL2_ttf/SDL_ttf.h>
+#else
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
+#endif
+
+#include <vector>
+#include <string>
 #include <time.h>
 
 #include "Render.hpp"
@@ -29,8 +37,10 @@ bool Render::init()
 		std::cout << "Window could not be created! SDL_Error: " << SDL_GetError() << std::endl;
 		return false;
 	}
-
+	#if __APPLE__
+	#else
 	gScreenSurface = SDL_GetWindowSurface( gWindow );
+	#endif
 
 	// Set up rendered with out vsync
 	gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
