@@ -257,10 +257,13 @@ int GameLoop::runSinglePlayer()
 	lag_time = 0.0;	// Set duration of time to 0
 	//Create bullet sprite
 	Sprite *bullet = new Sprite(render->getRenderer(), "src/res/images/bullet.png");
-		bullet->init();
+	bullet->init();
 	//Create shell sprite
 	Sprite *shell = new Sprite(render->getRenderer(), "src/res/images/shell.png");
-		shell->init();
+	shell->init();
+
+	ImageLoader imgLoad;
+	SDL_Texture* cursor = imgLoad.loadImage("src/res/images/cursor.png", render->getRenderer());
 
 	while (isGameOn)
 	{
@@ -310,9 +313,20 @@ int GameLoop::runSinglePlayer()
 			lag_time -= MS_PER_UPDATE;
 		}
 
+		// quick and dirty ;)
+		int cursorX = 0, cursorY = 0;
+
+		if(e.type == SDL_MOUSEMOTION || e.type == SDL_MOUSEBUTTONDOWN) {
+			SDL_GetMouseState(&cursorX, &cursorY);
+		}
+
+		SDL_Rect cursorRect = {cursorX, cursorY, 30, 30};
+
+
 		// 3. Render
 		// Render everything
 		render->draw(lag_time / MS_PER_UPDATE);
+		SDL_RenderCopy(render->getRenderer(), cursor, NULL, &cursorRect);
 	}
 
 	// Exit normally
