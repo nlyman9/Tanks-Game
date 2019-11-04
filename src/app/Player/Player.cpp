@@ -39,10 +39,8 @@ Player::Player(float x, float y, KeyboardController* keyboardController, Network
 }
 
 Player::Player(float x, float y, NetworkController* networkController) : netController{networkController} {
-    std::cout << "Player constructor" << std::endl;
     setPos(x, y);
     keyController = nullptr;
-    std::cout << "Constructed" << std::endl;
 }
 /**
  * @brief Destroy the Player:: Player object
@@ -338,8 +336,9 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, S
     }
 
     if(keyController != nullptr) {
-       std::vector<char>* fBuffer = client->getFillBuffer();
-       fBuffer->push_back((char)(*keystate));
+        std::vector<char>* fBuffer = client->getFillBuffer();
+        fBuffer->push_back((char)(*keystate));
+        appendHeader(fBuffer, (char) 1); // append keystate header
     }
 }
 

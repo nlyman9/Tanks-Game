@@ -89,19 +89,13 @@ int receiveThread(void* data) {
                 exit(10);
             } else if(nbytes > 0) {
                 //recieved data
-                std::cout << "receiving map data..." << std::endl;
-                std::cout << std::endl;
-                for(int i = 0; i < rcBuffer->size(); i++){
-                    std::cout << (int) rcBuffer->at(i);
-                }
-                std::cout << std::endl;
-
                 int header = stripHeader(rcBuffer);
                 switch(header)
                 {
                     // Recieve Map
                     case 0:
-                    {
+                    {   
+                        std::cout << "receiving map data..." << std::endl;
                         std::vector<int>* map = new std::vector<int>();
                         if(!mapReceived) {
                             unpack(rcBuffer, map, 3);
@@ -119,6 +113,7 @@ int receiveThread(void* data) {
                     case 1:
                     {
                         netController->setKeystate((uint8_t*)(rcBuffer->at(0)));
+                        std::cout << "keystate received!" << std::endl;
                         break;
                     }
                     

@@ -55,6 +55,8 @@ bool GameLoop::networkInit(Args *options) {
 	player_turrent->init();	
 	player2->setSprite(player_tank);
 	player2->setTurretSprite(player_turrent);
+	players.push_back(player2);
+	render->setPlayer(players);
 	// Create client process
 	client = new Client(options->ip, options->port);
 	// Init 
@@ -194,10 +196,8 @@ bool GameLoop::init(Render* renderer) {
 	player = new Player(SCREEN_WIDTH/2 + 100, 50, keyController, netController);
 	enemies.clear();
 	tileArray.clear();
-	// enemies.push_back(new Enemy( SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, player));
 	render = renderer;
-	render->setPlayer(player);
-	// render->setEnemies(enemies);
+	players.push_back(player);
 
 	Sprite *player_tank = new Sprite(render->getRenderer(), "src/res/images/red_tank.png");
 	Sprite *player_turrent = new Sprite(render->getRenderer(), "src/res/images/red_turret.png");
@@ -205,15 +205,6 @@ bool GameLoop::init(Render* renderer) {
 	player_turrent->init();	
 	player->setSprite(player_tank);
 	player->setTurretSprite(player_turrent);
-
-	// Init the enemy
-	// enemies.push_back(new Enemy( SCREEN_WIDTH - TANK_WIDTH/2 - 75, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, player));
-	// render->setEnemies(enemies);
-	// Sprite *enemy_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
-	// enemy_tank->init();
-	// for (auto enemy : enemies) {
-	// 	enemy->setSprite(enemy_tank);
-	// }
 
 	isGameOn = true;
 
@@ -251,7 +242,17 @@ void GameLoop::initMapSinglePlayer() {
  *
  */
 int GameLoop::runSinglePlayer()
-{
+{	
+	// Init single player only settngs
+	render->setPlayer(players); 
+	enemies.push_back(new Enemy( SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, player));
+	render->setEnemies(enemies);
+	Sprite *enemy_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
+	enemy_tank->init();
+	for (auto enemy : enemies) {
+		enemy->setSprite(enemy_tank);
+	}
+
 	SDL_Event e;
 	previous_time = std::chrono::system_clock::now(); // get current time of system
 	lag_time = 0.0;	// Set duration of time to 0
