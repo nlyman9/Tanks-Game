@@ -11,6 +11,7 @@ target_link_libraries(Enemy
   Sprite
   Constants
   Controllers
+  Networking
 )
 
 target_include_directories(Enemy

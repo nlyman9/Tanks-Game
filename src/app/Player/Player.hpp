@@ -19,6 +19,7 @@
 #include "Controller.hpp"
 #include "KeyboardController.hpp"
 #include "NetworkController.hpp"
+#include "Client.hpp"
 
 const int THETA_WINDOW = 5;
 
@@ -28,6 +29,7 @@ class Player : public Object {
         Sprite *turret;
         KeyboardController *keyController;
         NetworkController *netController;
+        Client *client;
         float x_vel, y_vel; // x and y velocity
         int lives; //health points left
         int theta = 0;
@@ -45,7 +47,9 @@ class Player : public Object {
         Uint32 fire_last_time = 0;
     public:
         Player(Sprite *sprite, Sprite *turret, float x, float y, KeyboardController* keyController, NetworkController* netController); //constructor, initialize the x, y, and sprite
+        Player(Sprite *sprite, Sprite *turret, float x, float y, NetworkController* netController);
         Player(float x, float y, KeyboardController* keyController, NetworkController* netController); //constructor, initialize the x, snd y
+        Player(float x, float y, NetworkController* netController);
 
         void draw(SDL_Renderer *gRenderer, double update_lag) override;
         void update() override;
@@ -59,7 +63,8 @@ class Player : public Object {
 
         int getTheta();
         int getTurretTheta();
-        const Uint8* getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, SDL_Event* e);
+        void getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, SDL_Event* e);
+        void setClient(Client* client);
 
         BoundingBox* getBoundingBox() override;
 

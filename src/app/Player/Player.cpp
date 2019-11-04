@@ -27,10 +27,23 @@ Player::Player(Sprite *sprite, Sprite *turret, float x, float y, KeyboardControl
     setPos(x, y);
 }
 
+Player::Player(Sprite *sprite, Sprite *turret, float x, float y, NetworkController* networkController) : netController{networkController} {
+    setSprite(sprite);
+    setTurretSprite(turret);
+    setPos(x, y);
+    keyController = nullptr;
+}
+
 Player::Player(float x, float y, KeyboardController* keyboardController, NetworkController* networkController) : keyController{keyboardController}, netController{networkController} {
     setPos(x, y);
 }
 
+Player::Player(float x, float y, NetworkController* networkController) : netController{networkController} {
+    std::cout << "Player constructor" << std::endl;
+    setPos(x, y);
+    keyController = nullptr;
+    std::cout << "Constructed" << std::endl;
+}
 /**
  * @brief Destroy the Player:: Player object
  *
@@ -204,8 +217,13 @@ int Player::getTurretTheta() {
     return turretTheta;
 }
 
-const Uint8* Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, SDL_Event* e) {
+void Player::setClient(Client* cl) {
+    client = cl;
+}
 
+void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, SDL_Event* e) {
+
+    std::cout << "get keystate" << std::endl;
     delta_velocity = 0;
     x_deltav = 0;
     y_deltav = 0;
@@ -215,9 +233,13 @@ const Uint8* Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>>
     const Uint8* keystate; 
     if(keyController != nullptr) {
         keystate = keyController->pollEvent();
+        std::cout << "get keycontroller state" << std::endl;
     } else {
         keystate = netController->pollEvent();
+        std::cout << "get netcontroller state" << std::endl;
     }
+
+    std::cout << "poll keystate" << std::endl;
 
     if (keystate[SDL_SCANCODE_W]) {
         delta_velocity += MAX_PLAYER_VELOCITY;
@@ -237,6 +259,7 @@ const Uint8* Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>>
         theta_v += PHI;
     }
 
+    std::cout << "poll mouse" << std::endl;
     if(e->type == SDL_MOUSEBUTTONDOWN) {
   		Uint32 current_time = SDL_GetTicks();
 
@@ -320,7 +343,12 @@ const Uint8* Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>>
         SDL_GetMouseState(&mouseX, &mouseY);
     }
 
-    return keystate;
+    std::cout << "fill buffer" << std::endl;
+    if(keyController != nullptr) {
+       std::vector<char>* fBuffer = client->getFillBuffer();
+       fBuffer->push_back((char)(*keystate));
+    }
+     std::cout << "fin" << std::endl;
 }
 
 /**

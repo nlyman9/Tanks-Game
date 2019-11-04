@@ -35,6 +35,7 @@ class GameLoop {
     // Render class to render the game
     Render *render;
     Player *player;
+    Player* player2;
     std::vector<Enemy *> enemies;
 		std::vector<Projectile *> projectiles;
     bool isGameOn;

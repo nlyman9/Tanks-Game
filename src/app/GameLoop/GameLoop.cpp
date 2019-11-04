@@ -48,7 +48,7 @@ bool GameLoop::networkInit(Args *options) {
 	}
 
 	netController = new NetworkController();
-	Player* player2 = new Player(SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, nullptr, netController);
+	player2 = new Player(SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, netController);
 	Sprite *player_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
 	Sprite *player_turrent = new Sprite(render->getRenderer(), "src/res/images/red_turret.png");
 	player_tank->init();
@@ -96,6 +96,7 @@ void GameLoop::initMapMultiPlayer() {
 	render->setTileMap(&map2D);
 
 	player->setObstacleLocations(&tileArray);
+	player2->setObstacleLocations(&tileArray);
 	for (auto enemy : enemies) {
 		enemy->setObstacleLocations(&tileArray);
 		enemy->setTileMap(&map2D);
@@ -114,6 +115,7 @@ int GameLoop::networkRun() {
 	Sprite *shell = new Sprite(render->getRenderer(), "src/res/images/shell.png");
 		shell->init();
 
+	std::cout << "loop" << std::endl;
 	while (client->gameOn)
 	{
 		current_time = std::chrono::system_clock::now();
@@ -134,10 +136,12 @@ int GameLoop::networkRun() {
 			}
 		}
 		
-		const Uint8* keystate = player->getEvent(elapsed_time, &e);
-		std::vector<char>* fBuffer = client->getFillBuffer();
-		fBuffer->push_back((const unsigned char)*keystate);
+		std::cout << "get event" << std::endl;
+		player->getEvent(elapsed_time, &e);
+		std::cout << "get event 2" << std::endl;
+		player2->getEvent(elapsed_time, &e);
 
+		std::cout << "check fire" << std::endl;
 		//network version of player firing bullet
 		if (player->getFire() == true) {
 
@@ -158,7 +162,9 @@ int GameLoop::networkRun() {
 		// 2. Update
 		// Update if time since last update is >= MS_PER_UPDATE
 		while(lag_time >= MS_PER_UPDATE) {
+			std::cout << "update" << std::endl;
 			player->update();
+			player2->update();
 
 			for (auto enemy: enemies) {
 				enemy->update();
