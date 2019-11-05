@@ -26,10 +26,10 @@ const int THETA_WINDOW = 5;
 class Player : public Object {
     private:
         /* data */
-        Sprite *turret;
-        KeyboardController *keyController;
-        NetworkController *netController;
-        Client *client;
+        Sprite *turret = nullptr;
+        KeyboardController *keyController = nullptr;
+        NetworkController *netController = nullptr;
+        Client *client = nullptr;
         float x_vel, y_vel; // x and y velocity
         int lives; //health points left
         int theta = 0;
