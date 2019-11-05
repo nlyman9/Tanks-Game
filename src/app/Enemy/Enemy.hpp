@@ -34,6 +34,8 @@ class Enemy : public OBJECT {
 
         bool checkPos(float playX, float playY, float enemX, float enemY);
         bool checkWall(float x, float y);
+				bool isValidBlock(int x, int y);
+				coordinate findClosestOpenBlock(coordinate start);
 		//	just wondering if we want to put some kind of custom acceleration on enemies?
 		//	this is just a note for the future since the online pitt library won't let me open the book I found
 		//	but maybe we'll eventually have a setting for the ai's current state (searching, pathing, running away, etc)
@@ -42,6 +44,7 @@ class Enemy : public OBJECT {
         int yArrPos(float pos);
         int findXBlock(float pos);
         int findYBlock(float pos);
+				coordinate newGhostPos(int gX, int gY, int eX, int eY);
         std::vector<coordinate> generatePath(std::vector<std::vector<int>> move_map, Player player, Enemy enemy);
         bool validMove(coordinate moveTo, coordinate currentlyAt);
         std::vector<std::vector<int>> tile_map;
@@ -62,6 +65,8 @@ class Enemy : public OBJECT {
         float getX();
         float getY();
         void updatePos();
+
+        BoundingBox* getBoundingBox() override;
 
         void setPathway(std::vector<std::vector<int>> move_map, Player player, Enemy enemy);
         void setTileMap(std::vector<std::vector<int>>* tileMap);
