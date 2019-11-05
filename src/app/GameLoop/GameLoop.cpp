@@ -48,13 +48,15 @@ bool GameLoop::networkInit(Args *options) {
 	}
 
 	netController = new NetworkController();
-	Player* player2 = new Player(SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, nullptr, netController);
+	player2 = new Player(SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, netController);
 	Sprite *player_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
 	Sprite *player_turrent = new Sprite(render->getRenderer(), "src/res/images/red_turret.png");
 	player_tank->init();
 	player_turrent->init();	
 	player2->setSprite(player_tank);
 	player2->setTurretSprite(player_turrent);
+	players.push_back(player2);
+	render->setPlayer(players);
 	// Create client process
 	client = new Client(options->ip, options->port);
 	// Init 
@@ -96,6 +98,7 @@ void GameLoop::initMapMultiPlayer() {
 	render->setTileMap(&map2D);
 
 	player->setObstacleLocations(&tileArray);
+	player2->setObstacleLocations(&tileArray);
 	for (auto enemy : enemies) {
 		enemy->setObstacleLocations(&tileArray);
 		enemy->setTileMap(&map2D);
@@ -134,9 +137,8 @@ int GameLoop::networkRun() {
 			}
 		}
 		
-		const Uint8* keystate = player->getEvent(elapsed_time, &e);
-		std::vector<char>* fBuffer = client->getFillBuffer();
-		fBuffer->push_back((const unsigned char)*keystate);
+		player->getEvent(elapsed_time, &e);
+		player2->getEvent(elapsed_time, &e);
 
 		//network version of player firing bullet
 		if (player->getFire() == true) {
@@ -159,6 +161,7 @@ int GameLoop::networkRun() {
 		// Update if time since last update is >= MS_PER_UPDATE
 		while(lag_time >= MS_PER_UPDATE) {
 			player->update();
+			player2->update();
 
 			for (auto enemy: enemies) {
 				enemy->update();
@@ -193,10 +196,8 @@ bool GameLoop::init(Render* renderer) {
 	player = new Player(SCREEN_WIDTH/2 + 100, 50, keyController, netController);
 	enemies.clear();
 	tileArray.clear();
-	// enemies.push_back(new Enemy( SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, player));
 	render = renderer;
-	render->setPlayer(player);
-	// render->setEnemies(enemies);
+	players.push_back(player);
 
 	Sprite *player_tank = new Sprite(render->getRenderer(), "src/res/images/red_tank.png");
 	Sprite *player_turrent = new Sprite(render->getRenderer(), "src/res/images/red_turret.png");
@@ -204,15 +205,6 @@ bool GameLoop::init(Render* renderer) {
 	player_turrent->init();	
 	player->setSprite(player_tank);
 	player->setTurretSprite(player_turrent);
-
-	// Init the enemy
-	// enemies.push_back(new Enemy( SCREEN_WIDTH - TANK_WIDTH/2 - 75, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, player));
-	// render->setEnemies(enemies);
-	// Sprite *enemy_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
-	// enemy_tank->init();
-	// for (auto enemy : enemies) {
-	// 	enemy->setSprite(enemy_tank);
-	// }
 
 	isGameOn = true;
 
@@ -250,16 +242,29 @@ void GameLoop::initMapSinglePlayer() {
  *
  */
 int GameLoop::runSinglePlayer()
-{
+{	
+	// Init single player only settngs
+	render->setPlayer(players); 
+	enemies.push_back(new Enemy( SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, player));
+	render->setEnemies(enemies);
+	Sprite *enemy_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
+	enemy_tank->init();
+	for (auto enemy : enemies) {
+		enemy->setSprite(enemy_tank);
+	}
+
 	SDL_Event e;
 	previous_time = std::chrono::system_clock::now(); // get current time of system
 	lag_time = 0.0;	// Set duration of time to 0
 	//Create bullet sprite
 	Sprite *bullet = new Sprite(render->getRenderer(), "src/res/images/bullet.png");
-		bullet->init();
+	bullet->init();
 	//Create shell sprite
 	Sprite *shell = new Sprite(render->getRenderer(), "src/res/images/shell.png");
-		shell->init();
+	shell->init();
+
+	ImageLoader imgLoad;
+	SDL_Texture* cursor = imgLoad.loadImage("src/res/images/cursor.png", render->getRenderer());
 
 	while (isGameOn)
 	{
@@ -309,9 +314,20 @@ int GameLoop::runSinglePlayer()
 			lag_time -= MS_PER_UPDATE;
 		}
 
+		// quick and dirty ;)
+		int cursorX = 0, cursorY = 0;
+
+		if(e.type == SDL_MOUSEMOTION || e.type == SDL_MOUSEBUTTONDOWN) {
+			SDL_GetMouseState(&cursorX, &cursorY);
+		}
+
+		SDL_Rect cursorRect = {cursorX, cursorY, 30, 30};
+
+
 		// 3. Render
 		// Render everything
 		render->draw(lag_time / MS_PER_UPDATE);
+		SDL_RenderCopy(render->getRenderer(), cursor, NULL, &cursorRect);
 	}
 
 	// Exit normally

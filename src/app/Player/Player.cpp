@@ -27,10 +27,21 @@ Player::Player(Sprite *sprite, Sprite *turret, float x, float y, KeyboardControl
     setPos(x, y);
 }
 
+Player::Player(Sprite *sprite, Sprite *turret, float x, float y, NetworkController* networkController) : netController{networkController} {
+    setSprite(sprite);
+    setTurretSprite(turret);
+    setPos(x, y);
+    keyController = nullptr;
+}
+
 Player::Player(float x, float y, KeyboardController* keyboardController, NetworkController* networkController) : keyController{keyboardController}, netController{networkController} {
     setPos(x, y);
 }
 
+Player::Player(float x, float y, NetworkController* networkController) : netController{networkController} {
+    setPos(x, y);
+    keyController = nullptr;
+}
 /**
  * @brief Destroy the Player:: Player object
  *
@@ -204,7 +215,11 @@ int Player::getTurretTheta() {
     return turretTheta;
 }
 
-const Uint8* Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, SDL_Event* e) {
+void Player::setClient(Client* cl) {
+    client = cl;
+}
+
+void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, SDL_Event* e) {
 
     delta_velocity = 0;
     x_deltav = 0;
@@ -320,7 +335,11 @@ const Uint8* Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>>
         SDL_GetMouseState(&mouseX, &mouseY);
     }
 
-    return keystate;
+    if(keyController != nullptr) {
+        std::vector<char>* fBuffer = client->getFillBuffer();
+        fBuffer->push_back((char)(*keystate));
+        appendHeader(fBuffer, (char) 1); // append keystate header
+    }
 }
 
 /**

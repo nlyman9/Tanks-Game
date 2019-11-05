@@ -154,6 +154,17 @@ int Render::drawMenu() {
 			SDL_RenderCopy(gRenderer, menuNone, NULL, &fullscreen); 
 		}
 
+		SDL_Texture* cursor = imgLoad.loadImage("src/res/images/cursor.png", gRenderer);
+
+		int cursorX = 0, cursorY = 0;
+
+		if(e.type == SDL_MOUSEMOTION || e.type == SDL_MOUSEBUTTONDOWN) {
+			SDL_GetMouseState(&cursorX, &cursorY);
+		}
+
+		SDL_Rect cursorRect = {cursorX, cursorY, 30, 30};
+		SDL_RenderCopy(gRenderer, cursor, NULL, &cursorRect);
+
 		SDL_RenderPresent(gRenderer);
 	}
 
@@ -209,7 +220,9 @@ int Render::draw(double update_lag) {
 	}
 
 	// Render player
-	gPlayer->draw(gRenderer, update_lag);
+	for (auto player : gPlayers) {
+		player->draw(gRenderer, update_lag);
+	}
 
 	// Render all the enemies
 	for (auto enemy: gEnemies) {
@@ -238,8 +251,8 @@ SDL_Renderer* Render::getRenderer() {
 	return gRenderer;
 }
 
-void Render::setPlayer(Player* player) {
-	gPlayer = player;
+void Render::setPlayer(std::vector<Player *> players) {
+	gPlayers = players;
 }
 
 void Render::setEnemies(std::vector<Enemy *> enemies) {

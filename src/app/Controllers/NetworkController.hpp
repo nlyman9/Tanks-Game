@@ -5,6 +5,7 @@
 
 class NetworkController : public Controller {
     public:
+        NetworkController();
         const Uint8* pollEvent() override;
         void setKeystate(uint8_t* state);
     private:

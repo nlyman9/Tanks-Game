@@ -30,7 +30,7 @@ class Render {
         std::vector<Projectile *> gProjectiles;
 
         Render() {}
-        Render(Player* player, std::vector<Enemy*> enemies): gPlayer{player}, gEnemies{enemies} {}
+        Render(std::vector<Player*> players, std::vector<Enemy*> enemies): gPlayers{players}, gEnemies{enemies} {}
         ~Render();
 
         int draw(double update_lag);
@@ -43,7 +43,7 @@ class Render {
         void setTileMap(std::vector<std::vector<int>>* tileMap);
         void addProjectile(Projectile* newProjectile);
 
-        void setPlayer(Player* player);
+        void setPlayer(std::vector<Player*> players);
         void setEnemies(std::vector<Enemy *> enemies);
     private:
 
@@ -52,7 +52,7 @@ class Render {
         SDL_Renderer* gRenderer;
         SDL_Surface* gScreenSurface;
 
-        Player* gPlayer;
+        std::vector<Player*> gPlayers;
 
         SDL_Texture* gTileSheet;
         SDL_Rect gTileRects[3];
