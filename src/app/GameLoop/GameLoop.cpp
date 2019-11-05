@@ -243,6 +243,7 @@ void GameLoop::initMapSinglePlayer() {
 int GameLoop::runSinglePlayer()
 {	
 	// Init single player only settngs
+	std::cout << "Made it to the run single player" << std::endl;
 	render->setPlayer(players); 
 	enemies.push_back(new Enemy( SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, player));
 	render->setEnemies(enemies);
