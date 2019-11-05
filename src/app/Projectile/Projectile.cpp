@@ -63,16 +63,10 @@ void Projectile::update() {
     SDL_Rect* overlap;
     SDL_Rect currentPos = {(int)getX(),(int) getY(), PROJECTILE_WIDTH, PROJECTILE_HEIGHT};
 
-
     for(auto obstacle : obstacles) {
 
         overlap = check_collision(&currentPos, &obstacle);
         if(overlap != nullptr) {
-
-			if (bounces == 3) {
-				alive = false;
-				break;
-			}
 
 			theta_v = theta % 90;
 
@@ -123,6 +117,7 @@ void Projectile::update() {
 			theta = 270 - (theta - 270);
 		else
 			theta = acos(num) * 180 / M_PI;
+		bounces++;
 
     }
     if (getX() < TILE_SIZE + BORDER_GAP)	// left border
@@ -134,6 +129,7 @@ void Projectile::update() {
 			theta = 270 - (theta - 270);
 		else
 			theta = acos(num) * 180 / M_PI;
+		bounces++;
 
     }
     if (getY() < TILE_SIZE)	// Top border
@@ -144,6 +140,7 @@ void Projectile::update() {
 			theta = 270 - (theta - 270);
 		else
 			theta = asin(num) * 180 / M_PI;
+		bounces++;
 
     }
     if (getY() + PROJECTILE_HEIGHT > SCREEN_HEIGHT - TILE_SIZE)	// bottom border
@@ -155,8 +152,12 @@ void Projectile::update() {
 			theta = 270 - (theta - 270);
 		else
 			theta = asin(num) * 180 / M_PI;
-
+		bounces++;
     }
+	//check if the bullet is still alive comment out for bounce testing
+	if (bounces == 3) {
+		alive = false;
+	}
 }
 
 bool Projectile::bouncePriority(int x, int y) {

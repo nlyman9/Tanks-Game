@@ -306,12 +306,16 @@ int GameLoop::runSinglePlayer()
 			}
 
 			for (int i = 0; i < projectiles.size(); i++) {
+				//update projectile
 				projectiles.at(i)->update();
+				//check if the projectile needs to be deleted
 				if(!projectiles.at(i)->isAlive()){
+					//remove the projectile from the render array so the image does not stay
 					render->gProjectiles.erase(render->gProjectiles.begin()+i);
+					//remove projectile from projectiles array
 					projectiles.erase(projectiles.begin()+i);
 					//MAKE EXPLOSION!?!?!?!
-					i--;
+					i--; //since we removed an element, the next increment will skip an element so decrement
 				}
 			}
 			lag_time -= MS_PER_UPDATE;
