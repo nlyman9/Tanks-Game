@@ -69,7 +69,6 @@ void Projectile::update() {
 
 			if (bounces == 3) {
 				//should delete here.
-
 			}
 
 			theta_v = theta % 90;
@@ -77,10 +76,9 @@ void Projectile::update() {
 			int x_dist = currentPos.x - obstacle.x;
 			int y_dist = currentPos.y - obstacle.y;
 			bool x_bounce = bouncePriority(x_dist, y_dist);
-
 			//std::cout << "new\n";
 			//std::cout << "x_dist = " << x_dist << " ; y_dist = " << y_dist << std::endl;
-
+			
 			if(x_bounce) { // collision left or right
 				//std::cout << "SIDES" << std::endl;
 				double num = -1 * cos((theta * M_PI) / 180);
@@ -93,11 +91,12 @@ void Projectile::update() {
 			}
 			else { // collision up or down
 				//std::cout << "TOPSIES" << std::endl;
-				double num = -1 * sin((theta * M_PI) / 180);
+				theta = 360 - theta;
+				/*double num = -1 * sin((theta * M_PI) / 180);
 				if(theta > 180)
 					theta = 270 - (theta - 270);
 				else
-					theta = asin(num) * 180 / M_PI;
+					theta = asin(num) * 180 / M_PI;*/
 				//std::cout << "num = " << num << std::endl;
 				//std::cout << "theta = " << theta << std::endl << std::endl;
 			}
@@ -112,7 +111,7 @@ void Projectile::update() {
             break;
         }
     }
-
+	
 	if (getX() + PROJECTILE_WIDTH > SCREEN_WIDTH - TILE_SIZE - BORDER_GAP)	// Right border
     {
         setX(SCREEN_WIDTH - TILE_SIZE - PROJECTILE_WIDTH - BORDER_GAP);
@@ -137,22 +136,25 @@ void Projectile::update() {
     }
     if (getY() < TILE_SIZE)	// Top border
     {
+		theta = 360 - theta;
         setY(TILE_SIZE);
-		double num = -1 * sin((theta * M_PI) / 180);
+		/*double num = -1 * sin((theta * M_PI) / 180);
 		if(theta > 180)
 			theta = 270 - (theta - 270);
 		else
-			theta = asin(num) * 180 / M_PI;
+			theta = asin(num) * 180 / M_PI;*/
 
     }
     if (getY() + PROJECTILE_HEIGHT > SCREEN_HEIGHT - TILE_SIZE)	// bottom border
     {
+		theta = 360 - theta;
+		
         setY(SCREEN_HEIGHT - TILE_SIZE - PROJECTILE_HEIGHT);
-		double num = -1 * sin((theta * M_PI) / 180);
+		/*double num = -1 * sin((theta * M_PI) / 180);
 		if(theta > 180)
 			theta = 270 - (theta - 270);
 		else
-			theta = asin(num) * 180 / M_PI;
+			theta = asin(num) * 180 / M_PI;*/
 
     }
 }

@@ -30,6 +30,7 @@
 #include "MapGenerator.hpp"
 #include "Network.hpp"
 
+#define R_BUFFER_SIZE 152
 //bools for receive
 bool receiveReady = true;
 bool receivedData = false;
@@ -100,7 +101,9 @@ int serverThread(void* data){
                 SDL_AtomicLock(&slock);
                 if(sendReady){ 
                     //data ready to send
-
+                    //we do send to i, right? 
+                    send(i, sBuffer->data(), sBuffer->size(), 0);
+                    sBuffer->clear();
                 }
                 SDL_AtomicUnlock(&slock);
                 // Check if it is a new connection
@@ -122,7 +125,7 @@ int serverThread(void* data){
                         {
                             fdmax = newfd; // Keep track of max
                         }
-                        std::cout << "New connection from" << inet_ntop(remoteaddr.ss_family, &remoteaddr, remoteIP, INET_ADDRSTRLEN) << " on socket " << newfd << std::endl;
+                        std::cout << "SERVER: New connection from" << inet_ntop(remoteaddr.ss_family, &remoteaddr, remoteIP, INET_ADDRSTRLEN) << " on socket " << newfd << std::endl;
                         //new connection so need to send map data here accepted so send data
                         std::vector<char> toSend;
                         //accessing buffer so lock it
@@ -131,10 +134,9 @@ int serverThread(void* data){
                         for(int i = 0; i < packedMap.size(); i++){
                             sBuffer->push_back(packedMap.at(i));
                         }
-                        //std::cout << std::endl;
-                        //std::cout << " size of toSend" << sBuffer->size();
-                        //std::cout << std::endl;
+                        int size = sBuffer->size();
                         appendHeader(sBuffer, (char) 0);
+                        appendHeader(sBuffer, (char) size);
                         for(int i = 0 ; i < sBuffer->size() ; i++){
                             std::cout << (int) sBuffer->at(i) << " ";
                         }
@@ -149,17 +151,20 @@ int serverThread(void* data){
                 else
                 {   
                     if(receiveReady){ //if the receive buffer has been copied to the second buffer, be ready to receive more!
-                        nbytes = recv(i, rBuffer->data(), rBuffer->size(), 0);
+                        nbytes = recv(i, rBuffer->data(), R_BUFFER_SIZE, 0);
                         receiveReady = false;
                     }
-                    
                         std::cout << "SERVER: received: " << nbytes << " bytes" << std::endl;
-                        std::cout << "Locking!" << std::endl;
+                        std::cout << "SERVER: Locking receive buffer!" << std::endl;
                         SDL_AtomicLock(&rlock);
-                        /* OPTION 1 --------------
+                        /* 
                         ALWAYS appends to the rcbuffer and only clears the rcBuffer when data has been used
-                        this makes packet checking more tedious in the gameloop, maybe adding the size of each packet
-                        to the header, and using pointer math?
+                        this makes packet checking more tedious in the gameloop
+                        add the size of each packet to the header?
+                        To do this, we can just appendHeader(size,appendHeader(type, buffer))
+                        strip header -> get size
+                        strip header again -> get type
+                        size should not include header/type so we don't overshoot into the next packet in the queue
                         */
                         
                         if(!receivedData){
@@ -168,30 +173,15 @@ int serverThread(void* data){
                         }
                         //otherwise just push it to the end of the buffer
                         //copy the receive buffer to the double buffer for gloop to use
-                        for(int i = 0; i < rBuffer->size(); i++)
+                        for(int i = 0; i < R_BUFFER_SIZE; i++)
                             rcBuffer->push_back(rBuffer->at(i));
                         rBuffer->clear(); //clear the receive buffer
+                        rBuffer->resize(R_BUFFER_SIZE);
                         receivedData = true; 
                         receiveReady = true;
 
-                        // OPTION 2-----------------------
-                        /* DOES NOT append to rcbuffer unless previous data has been used
-                            makes it simpler to sort the data, but only 1 client can send data per game loop!
-                            probably does not matter for how fast this game runs though.
-                        */
-                        /*
-                            if(!receivedData){ //if we have used up the data
-                                rcBuffer->clear();
-                                for(int i = 0; i < rBuffer->size(); i++)
-                                    rcBuffer->push_back(rBuffer->at(i));
-                                rBuffer->clear(); //clear the receive buffer
-                                receivedData = true; 
-                                receiveReady = true;
-                            }
-
-                        */
                         SDL_AtomicUnlock(&rlock);
-                        std::cout << "rBuffer cleared! Unlocked, rcBuffer contains rBuffer!" << std::endl;
+                        std::cout << "SERVER: rBuffer cleared! Unlocked, rcBuffer contains rBuffer!" << std::endl;
                         //}
                     
                     if (nbytes <= 0)
@@ -199,7 +189,7 @@ int serverThread(void* data){
                         // Either error or closed connection
                         if (nbytes == 0)
                         { // Connection closed
-                            std::cout << "Socket " << i <<" disconnected." << std::endl;
+                            std::cout << "SERVER: Socket " << i <<" disconnected." << std::endl;
                             // remember to close the fd
                             close(i);
                             FD_CLR(i, &master); // Remove from master set
@@ -208,15 +198,15 @@ int serverThread(void* data){
                         {
                             //client disconnected... for testing purposes just closing the server
                             //so we dont have to in task manager
-                            std::cout << "Recv error server server exiting" << std::endl;
+                            std::cout << "SERVER: Recv error server server exiting" << std::endl;
                             exit(0);
                         }
                         
                     }
                     else
                     {
-                        // We have real data from client
-                        for (j = 0; j <= fdmax; j++)
+                        // We have real data from client dont really need this for our purposes
+                        /*for (j = 0; j <= fdmax; j++)
                         {
                             // relay message to connections
                             if (FD_ISSET(j, &master))
@@ -227,7 +217,7 @@ int serverThread(void* data){
                                     std::cout << "SERVER: passing message through" << std::endl;
                                     if (send(j, sBuffer->data(), sBuffer->size(), 0) == -1)
                                     {
-                                        std::cout << "Send error" << std::endl;
+                                        std::cout << "SERVER: Send error" << std::endl;
                                     }
                                 }
                                 else if (j == listenerfd)
@@ -235,7 +225,7 @@ int serverThread(void* data){
                                     fflush(stdout);
                                 }
                             }
-                        }
+                        }*/
                     }
                 }
             }
@@ -262,7 +252,7 @@ int main(int argc, char* argv[])
 {
     //init buffers
     //buffer received
-    rBuffer = new std::vector<char>();
+    rBuffer = new std::vector<char>(R_BUFFER_SIZE);
     //double buffered receive
     rcBuffer = new std::vector<char>();;
     //to send buffer
@@ -300,7 +290,7 @@ int main(int argc, char* argv[])
     // Set address info for listening address '0.0.0.0'
     if ((status = getaddrinfo(server_ip, server_port, &hints, &serverInfo)) != 0)
     {
-        std::cout << "Failed to get address info." << std::endl;
+        std::cout << "SERVER: Failed to get address info." << std::endl;
         exit(3);
     }
 
@@ -335,35 +325,42 @@ int main(int argc, char* argv[])
     FD_SET(listenerfd, &master);
 
     fdmax = listenerfd;
-    std::cout << "Creating server thread" << std::endl;
+    std::cout << "SERVER: Creating server thread" << std::endl;
     gameOn = true;
     SDL_CreateThread(serverThread, "server thread", NULL);
 
     //Game stuff here
     while(gameOn){
         //beginning of loop check received data
-        SDL_AtomicLock(&rlock); //lock that rcBuffer up
+        
         if(receivedData){    
-            std::cout << "Data received, locking buffer" << std::endl;
+            SDL_AtomicLock(&rlock); //lock that rcBuffer up
+            std::cout << "SERVER: Data received, locking buffer." << std::endl;
             //apply rcBuffer
-            rcBuffer->clear();
-            receivedData = false; //ready to receive more data
-            std::cout << "Unlocking buffer" << std::endl;
-        }
-        SDL_AtomicUnlock(&rlock);
-        //game stuff! fill in sfBuffer as we go
 
+            //clear rcBuffer
+            rcBuffer->clear();
+
+            //ready to receive more data
+            receivedData = false; 
+            std::cout << "SERVER: Unlocking buffer." << std::endl;
+            SDL_AtomicUnlock(&rlock);
+        }
+        
+        //game stuff! fill in sfBuffer as we go
 
 
 
         //std::cout << "gloop ended, locking buffer" << std::endl;
         //fill in the send buffer from the sfBuffer
+        //if time condition? -- this will be sending the whole game state
         SDL_AtomicLock(&slock);
         if(!sendReady){ //make sure the other thread is not sending anything atm
             //std::cout << "Copying sf buffer into s buffer" <<  std::endl;
-            //could add a && i < max send buffer size in case its sending too much later
+            //could add a && i < max send buffer size in case its sending too much
             //then instead of clear, delete from 0 to max send buffer size and shift
-            //and send the rest of the data next loop
+            //but that raises issues more than it solves so lets try to avoid
+            //and send the rest of the data next loop -- still adding more data 
             for(int i = 0; i < sfBuffer->size(); i++)
                 sBuffer->push_back(sfBuffer->at(i));
                 //set send to ready

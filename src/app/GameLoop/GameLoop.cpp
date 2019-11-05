@@ -131,7 +131,6 @@ int GameLoop::networkRun() {
 			{
 				client->gameOn = false;
 				// Kill server/client thread
-
 				std::cout << "Killing server process " << server_pid << std::endl;
 				kill(server_pid, SIGTERM);
 			}
