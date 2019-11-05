@@ -27,6 +27,7 @@ class Enemy : public OBJECT {
         /* data */
         // Sprite sprite;
         // Sprite turret;
+				int randCut = 2;
         float x_enemy_pos, y_enemy_pos;
         Player* gPlayer;
         bool left = true;

@@ -129,8 +129,9 @@ float Enemy::getY(){
 }
 
 void Enemy::updatePos() {
-  if(enemyPath.size() < 2){
+  if(enemyPath.size() < randCut){
     setPathway(this->tile_map, *this->gPlayer, *this);
+    randCut = rand() % 4 + 2;
   }
   float x_pos = gPlayer->getX();
   float y_pos = gPlayer->getY();
@@ -355,28 +356,46 @@ coordinate Enemy::newGhostPos(int gX, int gY, int eX, int eY){
     return newPos;
   }
   //player above enemy
-  if(gY <= eY){
+  if(gY < eY){
     //player left of enemy
-    if(gX <= eX){
+    if(gX < eX){
       //move up and to the left
       newPos.row -= 2;
       newPos.col -= 2;
     }
-    else{
+    //player right of enemy
+    else if(gX > eX){
       //move up and to the right
       newPos.row -= 2;
       newPos.col += 2;
     }
+    //player above only
+    else{
+      newPos.row -= 2;
+    }
   }
-  else{
-    if(gX <= eX){
+  //player below enemy
+  else if(gY > eY){
+    if(gX < eX){
       //move down and to the left
       newPos.row += 2;
       newPos.col -= 2;
     }
-    else{
+    else if(gX > eX){
       //move down and to the right
       newPos.row += 2;
+      newPos.col += 2;
+    }
+    else{
+      newPos.row += 2;
+    }
+  }
+  //player horizontally equal with enemy
+  else{
+    if(gX < eX){
+      newPos.col -= 2;
+    }
+    else{
       newPos.col += 2;
     }
   }
@@ -394,7 +413,6 @@ coordinate Enemy::findClosestOpenBlock(coordinate start){
     //check above
     if(count%8 == 0){
       test.row -= increment;
-      //printf("Target block = X: %d, Y: %d\n", test.row, test.col);
       if(isValidBlock(test.row, test.col)){
         return test;
       }
@@ -404,7 +422,6 @@ coordinate Enemy::findClosestOpenBlock(coordinate start){
     else if(count%8 == 1){
       test.row -= increment;
       test.col += increment;
-      //printf("Target block = X: %d, Y: %d\n", test.row, test.col);
       if(isValidBlock(test.row, test.col)){
         return test;
       }
@@ -414,7 +431,6 @@ coordinate Enemy::findClosestOpenBlock(coordinate start){
     //check right
     else if(count%8 == 2){
       test.col += increment;
-      //printf("Target block = X: %d, Y: %d\n", test.row, test.col);
       if(isValidBlock(test.row, test.col)){
         return test;
       }
@@ -424,7 +440,6 @@ coordinate Enemy::findClosestOpenBlock(coordinate start){
     else if(count%8 == 3){
       test.row += increment;
       test.col += increment;
-      //printf("Target block = X: %d, Y: %d\n", test.row, test.col);
       if(isValidBlock(test.row, test.col)){
         return test;
       }
@@ -434,7 +449,6 @@ coordinate Enemy::findClosestOpenBlock(coordinate start){
     //check below
     else if(count%8 == 4){
       test.row += increment;
-      //printf("Target block = X: %d, Y: %d\n", test.row, test.col);
       if(isValidBlock(test.row, test.col)){
         return test;
       }
@@ -444,7 +458,6 @@ coordinate Enemy::findClosestOpenBlock(coordinate start){
     else if(count%8 == 5){
       test.row += increment;
       test.col -= increment;
-      //printf("Target block = X: %d, Y: %d\n", test.row, test.col);
       if(isValidBlock(test.row, test.col)){
         return test;
       }
@@ -454,7 +467,6 @@ coordinate Enemy::findClosestOpenBlock(coordinate start){
     //check left
     else if(count%8 == 6){
       test.col -= increment;
-      //printf("Target block = X: %d, Y: %d\n", test.row, test.col);
       if(isValidBlock(test.row, test.col)){
         return test;
       }
@@ -464,7 +476,6 @@ coordinate Enemy::findClosestOpenBlock(coordinate start){
     else {
       test.row -= increment;
       test.col -= increment;
-      //printf("Target block = X: %d, Y: %d\n", test.row, test.col);
       if(isValidBlock(test.row, test.col)){
         return test;
       }
@@ -479,7 +490,6 @@ coordinate Enemy::findClosestOpenBlock(coordinate start){
 bool Enemy::isValidBlock(int x, int y){
   int curX = findXBlock(x_enemy_pos);
   int curY = findYBlock(y_enemy_pos);
-  //printf("Target Loc X: %d, Y; %d, CURRENT ENEMY X: %d, Y: %d\n", x, y, curX, curY);
   if(y < 0 || y > 23 || x < 0 || x > 12){
     return false;
   }
@@ -528,7 +538,7 @@ std::vector<coordinate> Enemy::generatePath(std::vector<std::vector<int>> move_m
   }
 
 	while(!keepGoing) {
-    printf("generating path %d\n", count);
+    //printf("generating path %d\n", count);
 	//add surrounding squares to list
 		coordListLength = coordList.size();
 		//printf("List length = %d\n", coordListLength);
@@ -608,9 +618,6 @@ std::vector<coordinate> Enemy::generatePath(std::vector<std::vector<int>> move_m
 			}
 		}
 		count++;
-    if(count > 25){
-      exit(0);
-    }
 	}
 
 	coordinate currentCoord = {yPlayer, xPlayer, count};
@@ -632,14 +639,14 @@ std::vector<coordinate> Enemy::generatePath(std::vector<std::vector<int>> move_m
 	/*
 	for(int i = 0; i < coordList.size(); i++){
 		printf("{%d, %d, %d}", coordList[i].row, coordList[i].col, coordList[i].weight);
-	}*/
+	}
 
 	for(int i = 0; i < finalPath.size(); i++){
 		printf("{%d, %d, %d}", finalPath[i].row, finalPath[i].col, finalPath[i].weight);
 	}
 
 	printf("\n");
-
+  */
 	return finalPath;
 }
 
