@@ -138,7 +138,7 @@ int receiveThread(void* data) {
                     }
                 }
             }else{
-                std::cout << "NO data received! check if buffer size is set!" << std::endl;
+                //std::cout << "NO data received! check if buffer size is set!" << std::endl;
             }
         } else if (tsReady) { 
             send(sockfd, tsBuffer->data(), tsBuffer->size(), 0);

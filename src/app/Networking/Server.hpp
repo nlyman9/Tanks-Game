@@ -35,8 +35,10 @@ bool gameOn;
 //server buffers
 //buffer received
 static std::vector<char>* rBuffer;
+//double buffered receive
+static std::vector<char>* rcBuffer;
 //to send buffer
 static std::vector<char>* sBuffer;
-//buffer to fill in
+//double buffered send
 static std::vector<char>* sfBuffer;
 #endif
