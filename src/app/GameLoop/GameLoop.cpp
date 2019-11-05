@@ -56,6 +56,7 @@ bool GameLoop::networkInit(Args *options) {
 	player2->setSprite(player_tank);
 	player2->setTurretSprite(player_turrent);
 	players.push_back(player2);
+	players.at(0)->setOnline(true);
 	render->setPlayer(players);
 	// Create client process
 	client = new Client(options->ip, options->port);
@@ -243,7 +244,7 @@ void GameLoop::initMapSinglePlayer() {
 int GameLoop::runSinglePlayer()
 {	
 	// Init single player only settngs
-	std::cout << "Made it to the run single player" << std::endl;
+	fflush(stdout);
 	render->setPlayer(players); 
 	enemies.push_back(new Enemy( SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, player));
 	render->setEnemies(enemies);
@@ -252,7 +253,6 @@ int GameLoop::runSinglePlayer()
 	for (auto enemy : enemies) {
 		enemy->setSprite(enemy_tank);
 	}
-
 	SDL_Event e;
 	previous_time = std::chrono::system_clock::now(); // get current time of system
 	lag_time = 0.0;	// Set duration of time to 0
@@ -262,7 +262,6 @@ int GameLoop::runSinglePlayer()
 	//Create shell sprite
 	Sprite *shell = new Sprite(render->getRenderer(), "src/res/images/shell.png");
 	shell->init();
-
 	ImageLoader imgLoad;
 	SDL_Texture* cursor = imgLoad.loadImage("src/res/images/cursor.png", render->getRenderer());
 
@@ -282,10 +281,8 @@ int GameLoop::runSinglePlayer()
 				isGameOn = false;
 			}
 		}
-
-		checkEscape();
+		//checkEscape();
 		player->getEvent(elapsed_time, &e);
-
 		//The player fired a bullet
 		if (player->getFire() == true) {
 
@@ -308,21 +305,25 @@ int GameLoop::runSinglePlayer()
 				enemy->update();
 			}
 
-			for (auto projectile: projectiles) {
-				projectile->update();
+			for (int i = 0; i < projectiles.size(); i++) {
+				projectiles.at(i)->update();
+				if(!projectiles.at(i)->isAlive()){
+					render->gProjectiles.erase(render->gProjectiles.begin()+i);
+					projectiles.erase(projectiles.begin()+i);
+					//MAKE EXPLOSION!?!?!?!
+					i--;
+				}
 			}
 			lag_time -= MS_PER_UPDATE;
 		}
 
 		// quick and dirty ;)
 		int cursorX = 0, cursorY = 0;
-
 		if(e.type == SDL_MOUSEMOTION || e.type == SDL_MOUSEBUTTONDOWN) {
 			SDL_GetMouseState(&cursorX, &cursorY);
 		}
 
 		SDL_Rect cursorRect = {cursorX, cursorY, 30, 30};
-
 
 		// 3. Render
 		// Render everything

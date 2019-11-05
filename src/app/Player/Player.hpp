@@ -45,11 +45,14 @@ class Player : public Object {
         float delta_velocity = 0;
         bool fire = false;
         Uint32 fire_last_time = 0;
+        bool online = false;
     public:
         Player(Sprite *sprite, Sprite *turret, float x, float y, KeyboardController* keyController, NetworkController* netController); //constructor, initialize the x, y, and sprite
         Player(Sprite *sprite, Sprite *turret, float x, float y, NetworkController* netController);
         Player(float x, float y, KeyboardController* keyController, NetworkController* netController); //constructor, initialize the x, snd y
         Player(float x, float y, NetworkController* netController);
+
+        void setOnline(bool online);
 
         void draw(SDL_Renderer *gRenderer, double update_lag) override;
         void update() override;

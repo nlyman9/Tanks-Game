@@ -47,7 +47,9 @@ void Projectile::draw(SDL_Renderer *gRenderer, double update_lag) {
 	dst->h = PROJECTILE_HEIGHT;
     SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), NULL, dst, theta, NULL, SDL_FLIP_NONE);
 }
-
+bool Projectile::isAlive(){
+	return this->alive;
+}
 void Projectile::update() {
 
     //rotateProjectile(theta_v);
@@ -68,7 +70,8 @@ void Projectile::update() {
         if(overlap != nullptr) {
 
 			if (bounces == 3) {
-				//should delete here.
+				alive = false;
+				break;
 			}
 
 			theta_v = theta % 90;
@@ -91,12 +94,11 @@ void Projectile::update() {
 			}
 			else { // collision up or down
 				//std::cout << "TOPSIES" << std::endl;
-				theta = 360 - theta;
-				/*double num = -1 * sin((theta * M_PI) / 180);
+				double num = -1 * sin((theta * M_PI) / 180);
 				if(theta > 180)
 					theta = 270 - (theta - 270);
 				else
-					theta = asin(num) * 180 / M_PI;*/
+					theta = asin(num) * 180 / M_PI;
 				//std::cout << "num = " << num << std::endl;
 				//std::cout << "theta = " << theta << std::endl << std::endl;
 			}
@@ -136,25 +138,23 @@ void Projectile::update() {
     }
     if (getY() < TILE_SIZE)	// Top border
     {
-		theta = 360 - theta;
         setY(TILE_SIZE);
-		/*double num = -1 * sin((theta * M_PI) / 180);
+		double num = -1 * sin((theta * M_PI) / 180);
 		if(theta > 180)
 			theta = 270 - (theta - 270);
 		else
-			theta = asin(num) * 180 / M_PI;*/
+			theta = asin(num) * 180 / M_PI;
 
     }
     if (getY() + PROJECTILE_HEIGHT > SCREEN_HEIGHT - TILE_SIZE)	// bottom border
     {
-		theta = 360 - theta;
 		
         setY(SCREEN_HEIGHT - TILE_SIZE - PROJECTILE_HEIGHT);
-		/*double num = -1 * sin((theta * M_PI) / 180);
+		double num = -1 * sin((theta * M_PI) / 180);
 		if(theta > 180)
 			theta = 270 - (theta - 270);
 		else
-			theta = asin(num) * 180 / M_PI;*/
+			theta = asin(num) * 180 / M_PI;
 
     }
 }

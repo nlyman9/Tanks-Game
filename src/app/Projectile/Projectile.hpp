@@ -21,6 +21,7 @@ class Projectile : public Object {
         float velocity = 0;
         float delta_velocity = 0;
 		bool friendly = false;
+        bool alive = true;
 
     public:
         Projectile(Sprite *missile, float x, float y); //constructor, initialize the x, y, and sprite
@@ -32,7 +33,7 @@ class Projectile : public Object {
         void update() override;
         bool move(float x, float y) override; //move x offset from current x and y offset from current y
         bool place(float x, float y) override; //place/teleport to an x and y
-
+        bool isAlive();
 		int getTheta();
 		bool rotateProjectile(float theta);	// rotates the projectile
 		bool bouncePriority(int x, int y);
