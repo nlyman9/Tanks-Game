@@ -40,7 +40,7 @@ bool GameLoop::networkInit(Args *options) {
 			} else {
 				// exit normally
 				exit(0);
-			} 
+			}
 		} else { // Parent
 			server_pid = pid;
 			std::cout << "Created server process " << server_pid << std::endl;
@@ -51,14 +51,14 @@ bool GameLoop::networkInit(Args *options) {
 	Sprite* player_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
 	Sprite* player_turrent = new Sprite(render->getRenderer(), "src/res/images/red_turret.png");
 	player_tank->init();
-	player_turrent->init();	
+	player_turrent->init();
 	player2->setSprite(player_tank);
 	player2->setTurretSprite(player_turrent);
 	players.push_back(player2);
 	render->setPlayer(players);
 	// Create client process
 	client = new Client(options->ip, options->port);
-	// Init 
+	// Init
 	client->init();
 	return true;
 }
@@ -126,7 +126,7 @@ int GameLoop::networkRun() {
 		elapsed_time = current_time - previous_time;
 		previous_time = current_time;
 		lag_time += elapsed_time.count();
-		
+
 		// 1. Process input
 		while (SDL_PollEvent(&e))
 		{
@@ -138,10 +138,10 @@ int GameLoop::networkRun() {
 				kill(server_pid, SIGTERM);
 			}
 		}
-		
+
 		for(auto player : players) {
 			player->getEvent(elapsed_time, &e);
-		
+
 			//network version of player firing bullet
 			if (player->getFire() == true) {
 
@@ -188,7 +188,7 @@ int GameLoop::networkRun() {
 
 
 		// 3. Render
-		// Render everything 
+		// Render everything
 		render->draw(lag_time / MS_PER_UPDATE);
 		SDL_RenderCopy(render->getRenderer(), cursor, NULL, &cursorRect);
 		client->getGameBufferReady(true);
@@ -216,7 +216,7 @@ bool GameLoop::init(Render* renderer) {
 	Sprite *player_tank = new Sprite(render->getRenderer(), "src/res/images/red_tank.png");
 	Sprite *player_turrent = new Sprite(render->getRenderer(), "src/res/images/red_turret.png");
 	player_tank->init();
-	player_turrent->init();	
+	player_turrent->init();
 	player->setSprite(player_tank);
 	player->setTurretSprite(player_turrent);
 
@@ -250,15 +250,18 @@ void GameLoop::initMapSinglePlayer() {
 	enemies.push_back(new Enemy( SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, players.at(0))); // single player means player vector is size 1
 	render->setEnemies(enemies);
 	Sprite *enemy_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
+	Sprite *enemy_turrent = new Sprite(render-> getRenderer(), "src/res/images/blue_turret.png");
 	enemy_tank->init();
+	enemy_turrent->init();
 	for (auto enemy : enemies) {
 		enemy->setSprite(enemy_tank);
+		enemy->setTurretSprite(enemy_turrent);
 	}
 
 	for (auto enemy : enemies) {
 		enemy->setObstacleLocations(&tileArray);
 		enemy->setTileMap(map);
-		enemy->setPathway(*map, *players.at(0), *enemy); // single player means player vector is size 1
+		//enemy->setPathway(*map, *players.at(0), *enemy); // single player means player vector is size 1
 	}
 }
 
@@ -267,11 +270,11 @@ void GameLoop::initMapSinglePlayer() {
  *
  */
 int GameLoop::runSinglePlayer()
-{	
+{
 	std::cout << "single player" << std::endl;
 	// Init single player only settngs
 	fflush(stdout);
-	render->setPlayer(players); 
+	render->setPlayer(players);
 
 	SDL_Event e;
 	previous_time = std::chrono::system_clock::now(); // get current time of system
@@ -305,7 +308,7 @@ int GameLoop::runSinglePlayer()
 		for(auto player : players) {
 
 			player->getEvent(elapsed_time, &e);
-		
+
 			//The player fired a bullet
 			if (player->getFire() == true) {
 
