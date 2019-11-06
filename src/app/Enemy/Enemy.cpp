@@ -1,9 +1,17 @@
 #include "Constants.hpp"
 #include "Enemy.hpp"
+#include <math.h>
 
-// Enemy::Enemy(Sprite sprite, Sprite turret, int x, int y) : sprite{sprite}, turret{turret}, x_enemy_pos{x}, y_enemy_pos{y} {}
+Enemy::Enemy(Sprite* sprite, Sprite* turret, int x, int y, Player* player){
+  setSprite(sprite);
+  setTurretSprite(turret);
+  setPos(x, y);
+  gPlayer = player;
+}
 
-Enemy::Enemy(float x, float y, Player* player) :  x_enemy_pos{x}, y_enemy_pos{y}, gPlayer{player} {}
+Enemy::Enemy(float x, float y, Player* player) : x_enemy_pos{x}, y_enemy_pos{y} {
+  gPlayer = player;
+}
 
 Enemy::~Enemy() {}
 
@@ -14,22 +22,26 @@ Enemy::~Enemy() {}
  *
  * @param update_lag - the value to extrapolate by
  */
-void Enemy::draw(SDL_Renderer *gRenderer, double update_lag) {
+ void Enemy::draw(SDL_Renderer *gRenderer, double update_lag) {
 
-  // Extrapolate the x and y positions
-  // "Solves" stuck in the middle rendering.
-  // TODO change MAX_VELOCITY to the enemy's velocity
+   // Extrapolate the x and y positions
+   // "Solves" stuck in the middle rendering.
+   // TODO change MAX_VELOCITY to the enemy's velocity
 
-  // int x_pos = getX() + x_velocity * update_lag;
-  // int y_pos = getY() + y_velocity * update_lag;
+   //int x_pos = getX();// + x_velocity * update_lag;
+   //int y_pos = getY();// + y_velocity * update_lag;
+   //printf("x: %d, y: %d\n", x_pos, y_pos);
 
-  // Render enemy
-  // SDL_Rect src = {0, 0, 48, 48};
-  // SDL_Rect dst = {x_enemy_pos, y_enemy_pos, 39, 48};
-  // SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), &src, &dst, 0, NULL, SDL_FLIP_NONE);
-  SDL_Rect pos = {(int)x_enemy_pos, (int)y_enemy_pos, TANK_WIDTH, TANK_HEIGHT};
-  SDL_RenderCopy(gRenderer, getSprite()->getTexture(), NULL, &pos);
-}
+   // Render enemy
+   // SDL_Rect src = {0, 0, 48, 48};
+   SDL_Rect dst = {x_enemy_pos, y_enemy_pos, TANK_WIDTH, TANK_HEIGHT};
+   // SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), &src, &dst, 0, NULL, SDL_FLIP_NONE);
+   //SDL_Rect pos = {(int)x_enemy_pos, (int)y_enemy_pos, TANK_WIDTH, TANK_HEIGHT};
+   //SDL_Rect* dst = get_box();
+   //SDL_Rect* turret_dst = get_box();
+   SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), NULL, &dst, theta, NULL, SDL_FLIP_NONE);
+   SDL_RenderCopyEx(gRenderer, getTurretSprite()->getTexture(), NULL, &dst, turretTheta, NULL, SDL_FLIP_NONE);
+ }
 
 /**
  * @brief update the Enemy object
@@ -129,6 +141,15 @@ float Enemy::getY(){
 }
 
 void Enemy::updatePos() {
+  float delta_x = gPlayer->getX() - (getX() + TANK_WIDTH / 2);
+  float delta_y = gPlayer->getY() - (getY() + TANK_HEIGHT / 2);
+  float theta_radians = atan2(delta_y, delta_x);
+  turretTheta = (int)(theta_radians * 180 / M_PI);
+
+  if(enemyPath.size() < randCut){
+    setPathway(this->tile_map, *this->gPlayer, *this);
+    randCut = rand() % 4 + 2;
+  }
 
   float x_pos = gPlayer->getX();
   float y_pos = gPlayer->getY();
@@ -302,12 +323,12 @@ void Enemy::setTileMap(std::vector<std::vector<int>>* tileMap) {
 
 /** TODO Finish implementation once theta is added to enemy.
  * @brief Get the bounding box of the player's tank
- * 
+ *
  * The bounding box is based off 4 points: backLeft, backRight, frontLeft, frontRight;
  *  - The front of the tank is the direction the tank is pointing. The back is the opposit.
  *  - The left side is the lefthand side of the direction the the tank is facing. The right is the right hand side.
- * 
- * @return BoundingBox* 
+ *
+ * @return BoundingBox*
  */
 BoundingBox* Enemy::getBoundingBox() {
     BoundingBox *box = new BoundingBox();
@@ -331,7 +352,169 @@ BoundingBox* Enemy::getBoundingBox() {
     return box;
 }
 void Enemy::setPathway(std::vector<std::vector<int>> move_map, Player player, Enemy enemy){
-  enemyPath = generatePath(move_map, player, enemy);
+  int ghostXblock = findXBlock(player.getX());
+  int ghostYblock = findYBlock(player.getY());
+  int enemyXblock = findXBlock(enemy.getX());
+  int enemyYblock = findYBlock(enemy.getY());
+  if(abs(ghostXblock - enemyXblock) < 2 && abs(ghostYblock - enemyYblock) < 2){
+    enemyPath = generatePath(move_map, player, enemy);
+  }
+  else{
+    coordinate newGhostPos = Enemy::newGhostPos(ghostXblock, ghostYblock, enemyXblock, enemyYblock);
+    int ghostX = newGhostPos.col * TILE_SIZE + TILE_SIZE + BORDER_GAP;
+    int ghostY = newGhostPos.row * TILE_SIZE + TILE_SIZE;
+    Player* ghost = new Player(ghostX, ghostY, true);
+    enemyPath = generatePath(move_map, *ghost, enemy);
+  }
+}
+
+coordinate Enemy::newGhostPos(int gX, int gY, int eX, int eY){
+  coordinate newPos = {eY, eX, 0};
+  if(gX == eX && gY == eY){
+    return newPos;
+  }
+  //player above enemy
+  if(gY < eY){
+    //player left of enemy
+    if(gX < eX){
+      //move up and to the left
+      newPos.row -= 1;
+      newPos.col -= 1;
+    }
+    //player right of enemy
+    else if(gX > eX){
+      //move up and to the right
+      newPos.row -= 1;
+      newPos.col += 1;
+    }
+    //player above only
+    else{
+      newPos.row -= 1;
+    }
+  }
+  //player below enemy
+  else if(gY > eY){
+    if(gX < eX){
+      //move down and to the left
+      newPos.row += 1;
+      newPos.col -= 1;
+    }
+    else if(gX > eX){
+      //move down and to the right
+      newPos.row += 1;
+      newPos.col += 1;
+    }
+    else{
+      newPos.row += 1;
+    }
+  }
+  //player horizontally equal with enemy
+  else{
+    if(gX < eX){
+      newPos.col -= 1;
+    }
+    else{
+      newPos.col += 1;
+    }
+  }
+  if(!isValidBlock(newPos.row, newPos.col)){
+    newPos = findClosestOpenBlock(newPos);
+  }
+  return newPos;
+}
+
+coordinate Enemy::findClosestOpenBlock(coordinate start){
+  coordinate test = {start.row, start.col, 0};
+  int count = 0;
+  int increment = 1;
+  while(1){
+    //check above
+    if(count%8 == 0){
+      test.row -= increment;
+      if(isValidBlock(test.row, test.col)){
+        return test;
+      }
+      test.row += increment;
+    }
+    //check above & right
+    else if(count%8 == 1){
+      test.row -= increment;
+      test.col += increment;
+      if(isValidBlock(test.row, test.col)){
+        return test;
+      }
+      test.row += increment;
+      test.col -= increment;
+    }
+    //check right
+    else if(count%8 == 2){
+      test.col += increment;
+      if(isValidBlock(test.row, test.col)){
+        return test;
+      }
+      test.col -= increment;
+    }
+    //check below & right
+    else if(count%8 == 3){
+      test.row += increment;
+      test.col += increment;
+      if(isValidBlock(test.row, test.col)){
+        return test;
+      }
+      test.row -= increment;
+      test.col -= increment;
+    }
+    //check below
+    else if(count%8 == 4){
+      test.row += increment;
+      if(isValidBlock(test.row, test.col)){
+        return test;
+      }
+      test.row -= increment;
+    }
+    //check below & left
+    else if(count%8 == 5){
+      test.row += increment;
+      test.col -= increment;
+      if(isValidBlock(test.row, test.col)){
+        return test;
+      }
+      test.row -= increment;
+      test.col += increment;
+    }
+    //check left
+    else if(count%8 == 6){
+      test.col -= increment;
+      if(isValidBlock(test.row, test.col)){
+        return test;
+      }
+      test.col += increment;
+    }
+    //check above & left
+    else {
+      test.row -= increment;
+      test.col -= increment;
+      if(isValidBlock(test.row, test.col)){
+        return test;
+      }
+      test.row += increment;
+      test.col += increment;
+      increment++;
+    }
+    count++;
+  }
+}
+
+bool Enemy::isValidBlock(int x, int y){
+  int curX = findXBlock(x_enemy_pos);
+  int curY = findYBlock(y_enemy_pos);
+  if(y < 0 || y > 23 || x < 0 || x > 12){
+    return false;
+  }
+  if((tile_map[y][x] == 0) && !(y == curX && x == curY)){
+    return true;
+  }
+  return false;
 }
 
 bool Enemy::validMove(coordinate moveTo, coordinate currentlyAt){
@@ -359,7 +542,6 @@ bool Enemy::validMove(coordinate moveTo, coordinate currentlyAt){
 std::vector<coordinate> Enemy::generatePath(std::vector<std::vector<int>> move_map, Player player, Enemy enemy){
 	int xPlayer = findXBlock(player.getX());
 	int yPlayer = findYBlock(player.getY());
-	printf("XPlayer = %d, YPlayer = %d\n", xPlayer, yPlayer);
 	std::vector<coordinate> coordList;
 	std::vector<coordinate> finalPath;
 	coordinate enemyStart = {findYBlock(enemy.getY()), findXBlock(enemy.getX()), 0};
@@ -368,6 +550,10 @@ std::vector<coordinate> Enemy::generatePath(std::vector<std::vector<int>> move_m
 	bool inList = false;
 	int count = 0;
 	int coordListLength;
+
+  if(abs(yPlayer - enemyStart.row) < 1 && abs(xPlayer - enemyStart.col) < 1){
+    return coordList;
+  }
 
 	while(!keepGoing) {
     printf("generating path %d\n", count);
@@ -471,14 +657,14 @@ std::vector<coordinate> Enemy::generatePath(std::vector<std::vector<int>> move_m
 	/*
 	for(int i = 0; i < coordList.size(); i++){
 		printf("{%d, %d, %d}", coordList[i].row, coordList[i].col, coordList[i].weight);
-	}*/
+	}
 
 	for(int i = 0; i < finalPath.size(); i++){
 		printf("{%d, %d, %d}", finalPath[i].row, finalPath[i].col, finalPath[i].weight);
 	}
 
 	printf("\n");
-
+  */
 	return finalPath;
 }
 

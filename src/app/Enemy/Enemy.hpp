@@ -32,6 +32,10 @@ class Enemy : public Object {
         bool left = true;
         std::vector<coordinate> enemyPath;
 
+				int theta = 0;
+				float turretTheta = 0;
+				int randCut = 2;
+
         bool checkPos(float playX, float playY, float enemX, float enemY);
         bool checkWall(float x, float y);
 		//	just wondering if we want to put some kind of custom acceleration on enemies?
@@ -42,11 +46,14 @@ class Enemy : public Object {
         int yArrPos(float pos);
         int findXBlock(float pos);
         int findYBlock(float pos);
+				bool isValidBlock(int x, int y);
+				coordinate findClosestOpenBlock(coordinate start);
+				coordinate newGhostPos(int gX, int gY, int eX, int eY);
         std::vector<coordinate> generatePath(std::vector<std::vector<int>> move_map, Player player, Enemy enemy);
-        bool validMove(coordinate moveTo, coordinate currentlyAt);
+				bool validMove(coordinate moveTo, coordinate currentlyAt);
         std::vector<std::vector<int>> tile_map;
     public:
-        // Enemy(Sprite sprite, Sprite turret, int x, int y); //constructor, initialize the x, y, and sprite
+				Enemy(Sprite* sprite, Sprite* turret, int x, int y, Player* player); //constructor, initialize the x, y, and sprite
         Enemy(float x, float y, Player* player); //constructor, initialize the x, y, and sprite
 
 		//Object methods
