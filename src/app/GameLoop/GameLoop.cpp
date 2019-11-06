@@ -221,6 +221,14 @@ bool GameLoop::init(Render* renderer) {
 	player->setSprite(player_tank);
 	player->setTurretSprite(player_turrent);
 
+	enemies.push_back(new Enemy( SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, players.at(0))); // single player means player vector is size 1
+	render->setEnemies(enemies);
+	Sprite *enemy_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
+	enemy_tank->init();
+	for (auto enemy : enemies) {
+		enemy->setSprite(enemy_tank);
+	}
+
 	isGameOn = true;
 
 	// Initialized successfully
@@ -263,13 +271,6 @@ int GameLoop::runSinglePlayer()
 	std::cout << "single player" << std::endl;
 	// Init single player only settngs
 	render->setPlayer(players); 
-	enemies.push_back(new Enemy( SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, players.at(0))); // single player means player vector is size 1
-	render->setEnemies(enemies);
-	Sprite *enemy_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
-	enemy_tank->init();
-	for (auto enemy : enemies) {
-		enemy->setSprite(enemy_tank);
-	}
 
 	SDL_Event e;
 	previous_time = std::chrono::system_clock::now(); // get current time of system
