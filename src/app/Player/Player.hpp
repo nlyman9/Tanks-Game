@@ -45,8 +45,6 @@ class Player : public Object {
         Player(Sprite *sprite, Sprite *turret, float x, float y, bool local); //constructor, initialize the x, y, and sprite
         Player(float x, float y, bool local); //constructor, initialize the x, snd y
 
-        void setOnline(bool online);
-
         void draw(SDL_Renderer *gRenderer, double update_lag) override;
         void update() override;
         bool move(float x, float y) override; //move x offset from current x and y offset from current y

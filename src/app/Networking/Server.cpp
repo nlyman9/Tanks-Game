@@ -125,7 +125,7 @@ int serverThread(void* data){
                         {
                             fdmax = newfd; // Keep track of max
                         }
-                        std::cout << "SERVER: New connection from" << inet_ntop(remoteaddr.ss_family, &remoteaddr, remoteIP, INET_ADDRSTRLEN) << " on socket " << newfd << std::endl;
+                        std::cout << "SERVER: New connection from " << inet_ntop(remoteaddr.ss_family, &remoteaddr, remoteIP, INET_ADDRSTRLEN) << " on socket " << newfd << std::endl;
                         //new connection so need to send map data here accepted so send data
                         std::vector<char> toSend;
                         //accessing buffer so lock it
@@ -137,11 +137,6 @@ int serverThread(void* data){
                         int size = sBuffer->size();
                         appendHeader(sBuffer, (char) 0);
                         appendHeader(sBuffer, (char) size);
-                        for(int i = 0 ; i < sBuffer->size() ; i++){
-                            std::cout << (int) sBuffer->at(i) << " ";
-                        }
-                        std::cout << std::endl;
-
                         send(newfd, sBuffer->data(), sBuffer->size(), 0);
                         sBuffer->clear(); 
                         //} //end of if ready to send

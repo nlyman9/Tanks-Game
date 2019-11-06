@@ -207,9 +207,7 @@ int Player::getTurretTheta() {
 void Player::setClient(Client* cl) {
     client = cl;
 }
-void Player::setOnline(bool online){
-    this->online = online;
-}
+
 void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, SDL_Event* e) {
 
     delta_velocity = 0;

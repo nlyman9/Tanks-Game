@@ -109,7 +109,7 @@ int clientThread(void* data) {
                     // Recieve Map
                     case 0:
                     {   
-                        std::cout << "CLIENT: receiving map data..." << std::endl;
+                        std::cout << "CLIENT: receiving map data of size: " << size << std::endl;
                         std::vector<int>* map = new std::vector<int>();
                         unpack(rcBuffer, map, 3);
                         for(int i = 0; i < map->size();i++){

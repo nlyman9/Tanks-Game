@@ -55,7 +55,6 @@ bool GameLoop::networkInit(Args *options) {
 	player2->setSprite(player_tank);
 	player2->setTurretSprite(player_turrent);
 	players.push_back(player2);
-	players.at(0)->setOnline(true);
 	render->setPlayer(players);
 	// Create client process
 	client = new Client(options->ip, options->port);
