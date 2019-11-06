@@ -556,7 +556,7 @@ std::vector<coordinate> Enemy::generatePath(std::vector<std::vector<int>> move_m
   }
 
 	while(!keepGoing) {
-    printf("generating path %d\n", count);
+    //printf("generating path %d\n", count);
 	//add surrounding squares to list
 		coordListLength = coordList.size();
 		//printf("List length = %d\n", coordListLength);
