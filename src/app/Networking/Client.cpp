@@ -84,7 +84,7 @@ int receiveThread(void* data) {
             nbytes = recv(sockfd, rcBuffer->data(), rcBuffer->size(), 0);
             if (nbytes < 0) {
                 fprintf(stderr, "recv: %s (%d)\n", strerror(errno), errno);
-                std::cout << "Connection closing" << std::endl;
+                std::cout << "Connection closing.  Error Number: " << errno << std::endl;
                 close(sockfd);
                 exit(10);
             } else if(nbytes > 0) {
@@ -137,7 +137,7 @@ int receiveThread(void* data) {
                         break;
                     }
                 }
-            }else{
+            } else {
                 std::cout << "NO data received! check if buffer size is set!" << std::endl;
             }
         } else if (tsReady) { 

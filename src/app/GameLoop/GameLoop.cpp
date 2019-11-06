@@ -48,9 +48,9 @@ bool GameLoop::networkInit(Args *options) {
 	}
 
 	netController = new NetworkController();
-	player2 = new Player(SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, netController);
-	Sprite *player_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
-	Sprite *player_turrent = new Sprite(render->getRenderer(), "src/res/images/red_turret.png");
+	Player* player2 = new Player(SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, netController);
+	Sprite* player_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
+	Sprite* player_turrent = new Sprite(render->getRenderer(), "src/res/images/red_turret.png");
 	player_tank->init();
 	player_turrent->init();	
 	player2->setSprite(player_tank);
@@ -97,8 +97,10 @@ void GameLoop::initMapMultiPlayer() {
 
 	render->setTileMap(&map2D);
 
-	player->setObstacleLocations(&tileArray);
-	player2->setObstacleLocations(&tileArray);
+	for (auto player : players) {
+		player->setObstacleLocations(&tileArray);
+	}
+
 	for (auto enemy : enemies) {
 		enemy->setObstacleLocations(&tileArray);
 		enemy->setTileMap(&map2D);
@@ -112,10 +114,13 @@ int GameLoop::networkRun() {
 
 	//Create bullet sprite
 	Sprite *bullet = new Sprite(render->getRenderer(), "src/res/images/bullet.png");
-		bullet->init();
+	bullet->init();
 	//Create shell sprite
 	Sprite *shell = new Sprite(render->getRenderer(), "src/res/images/shell.png");
-		shell->init();
+	shell->init();
+
+	ImageLoader imgLoad;
+	SDL_Texture* cursor = imgLoad.loadImage("src/res/images/cursor.png", render->getRenderer());
 
 	while (client->gameOn)
 	{
@@ -137,31 +142,34 @@ int GameLoop::networkRun() {
 			}
 		}
 		
-		player->getEvent(elapsed_time, &e);
-		player2->getEvent(elapsed_time, &e);
+		for(auto player : players) {
+			player->getEvent(elapsed_time, &e);
+		
+			//network version of player firing bullet
+			if (player->getFire() == true) {
 
-		//network version of player firing bullet
-		if (player->getFire() == true) {
+				//std::cout << "pew\n";
 
-			//std::cout << "pew\n";
+				//Projectile *newlyFired = new Projectile(player->getX(), player->getY());
+				//projectiles.push_back(newlyFired);
+				projectiles.push_back(new Projectile(player->getX(), player->getY(), player->getTurretTheta()));
 
-			//Projectile *newlyFired = new Projectile(player->getX(), player->getY());
-			//projectiles.push_back(newlyFired);
-			projectiles.push_back(new Projectile(player->getX(), player->getY(), player->getTurretTheta()));
+				std::cout << projectiles.back()->getX() << ", " << projectiles.back()->getY() << "; " << projectiles.back()->getTheta() << std::endl;
 
-			std::cout << projectiles.back()->getX() << ", " << projectiles.back()->getY() << "; " << projectiles.back()->getTheta() << std::endl;
-
-			render->gProjectiles.push_back(projectiles.back());
-			projectiles.back()->setSprite(shell);
-			//newlyFired->setSprite(bullet);
-			projectiles.back()->setObstacleLocations(&tileArray);
-			player->setFire(false);
+				render->gProjectiles.push_back(projectiles.back());
+				projectiles.back()->setSprite(shell);
+				//newlyFired->setSprite(bullet);
+				projectiles.back()->setObstacleLocations(&tileArray);
+				player->setFire(false);
+			}
 		}
+
 		// 2. Update
 		// Update if time since last update is >= MS_PER_UPDATE
 		while(lag_time >= MS_PER_UPDATE) {
-			player->update();
-			player2->update();
+			for(auto player : players) {
+				player->update();
+			}
 
 			for (auto enemy: enemies) {
 				enemy->update();
@@ -172,10 +180,22 @@ int GameLoop::networkRun() {
 			lag_time -= MS_PER_UPDATE;
 		}
 
+		// quick and dirty ;)
+		int cursorX = 0, cursorY = 0;
+
+		if(e.type == SDL_MOUSEMOTION || e.type == SDL_MOUSEBUTTONDOWN) {
+			SDL_GetMouseState(&cursorX, &cursorY);
+		}
+
+		SDL_Rect cursorRect = {cursorX, cursorY, CROSSHAIR_SIZE, CROSSHAIR_SIZE};
+
+
 		// 3. Render
 		// Render everything 
 		render->draw(lag_time / MS_PER_UPDATE);
+		SDL_RenderCopy(render->getRenderer(), cursor, NULL, &cursorRect);
 		client->getGameBufferReady(true);
+
 	}
 
 	// Exit normally
@@ -193,9 +213,7 @@ int GameLoop::networkRun() {
 bool GameLoop::init(Render* renderer) {
 	keyController = new KeyboardController();
 	netController = new NetworkController();
-	player = new Player(SCREEN_WIDTH/2 + 100, 50, keyController, netController);
-	enemies.clear();
-	tileArray.clear();
+	Player* player = new Player(SCREEN_WIDTH/2 + 100, 50, keyController, netController);
 	render = renderer;
 	players.push_back(player);
 
@@ -229,11 +247,13 @@ void GameLoop::initMapSinglePlayer() {
 		}
 	}
 
-	player->setObstacleLocations(&tileArray);
+	for (auto player : players) {
+		player->setObstacleLocations(&tileArray);
+	}
 	for (auto enemy : enemies) {
 		enemy->setObstacleLocations(&tileArray);
 		enemy->setTileMap(map);
-		enemy->setPathway(*map, *player, *enemy);
+		enemy->setPathway(*map, *players.at(0), *enemy); // single player means player vector is size 1
 	}
 }
 
@@ -243,9 +263,10 @@ void GameLoop::initMapSinglePlayer() {
  */
 int GameLoop::runSinglePlayer()
 {	
+	std::cout << "single player" << std::endl;
 	// Init single player only settngs
 	render->setPlayer(players); 
-	enemies.push_back(new Enemy( SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, player));
+	enemies.push_back(new Enemy( SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, players.at(0))); // single player means player vector is size 1
 	render->setEnemies(enemies);
 	Sprite *enemy_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
 	enemy_tank->init();
@@ -253,6 +274,7 @@ int GameLoop::runSinglePlayer()
 		enemy->setSprite(enemy_tank);
 	}
 
+	std::cout << "single player init" << std::endl;
 	SDL_Event e;
 	previous_time = std::chrono::system_clock::now(); // get current time of system
 	lag_time = 0.0;	// Set duration of time to 0
@@ -266,6 +288,7 @@ int GameLoop::runSinglePlayer()
 	ImageLoader imgLoad;
 	SDL_Texture* cursor = imgLoad.loadImage("src/res/images/cursor.png", render->getRenderer());
 
+	std::cout << "game loop" << std::endl;
 	while (isGameOn)
 	{
 		current_time = std::chrono::system_clock::now();
@@ -273,7 +296,7 @@ int GameLoop::runSinglePlayer()
 		previous_time = current_time;
 		lag_time += elapsed_time.count();
 
-
+		std::cout << "input events" << std::endl;
 		// 1. Process input
 		while (SDL_PollEvent(&e))
 		{
@@ -283,26 +306,34 @@ int GameLoop::runSinglePlayer()
 			}
 		}
 
+		std::cout << "check fire" << std::endl;
 		checkEscape();
-		player->getEvent(elapsed_time, &e);
+		for(auto player : players) {
 
-		//The player fired a bullet
-		if (player->getFire() == true) {
+			player->getEvent(elapsed_time, &e);
+		
+			//The player fired a bullet
+			if (player->getFire() == true) {
 
-			projectiles.push_back(new Projectile(player->getX(), player->getY(), player->getTurretTheta()));
+				projectiles.push_back(new Projectile(player->getX(), player->getY(), player->getTurretTheta()));
 
-			std::cout << projectiles.back()->getX() << ", " << projectiles.back()->getY() << "; " << projectiles.back()->getTheta() << std::endl;
+				std::cout << projectiles.back()->getX() << ", " << projectiles.back()->getY() << "; " << projectiles.back()->getTheta() << std::endl;
 
-			render->gProjectiles.push_back(projectiles.back());
-			projectiles.back()->setSprite(shell);
-			//newlyFired->setSprite(bullet);
-			projectiles.back()->setObstacleLocations(&tileArray);
-			player->setFire(false);
+				render->gProjectiles.push_back(projectiles.back());
+				projectiles.back()->setSprite(shell);
+				//newlyFired->setSprite(bullet);
+				projectiles.back()->setObstacleLocations(&tileArray);
+				player->setFire(false);
+			}
 		}
-		// 2. Update
+
+		std::cout << "Update" << std::endl;
+ 		// 2. Update
 		// Update if time since last update is >= MS_PER_UPDATE
 		while(lag_time >= MS_PER_UPDATE) {
-			player->update();
+			for(auto player : players) {
+				player->update();
+			}
 
 			for (auto enemy: enemies) {
 				enemy->update();
@@ -321,9 +352,9 @@ int GameLoop::runSinglePlayer()
 			SDL_GetMouseState(&cursorX, &cursorY);
 		}
 
-		SDL_Rect cursorRect = {cursorX, cursorY, 30, 30};
+		SDL_Rect cursorRect = {cursorX, cursorY, CROSSHAIR_SIZE, CROSSHAIR_SIZE};
 
-
+		std::cout << "render" << std::endl;
 		// 3. Render
 		// Render everything
 		render->draw(lag_time / MS_PER_UPDATE);
