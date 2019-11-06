@@ -18,6 +18,7 @@
 #include <sys/socket.h>
 #include <fcntl.h>
 #include <sys/time.h>
+#include <sys/select.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <stdlib.h>
@@ -84,12 +85,11 @@ int serverThread(void* data){
     // Loop of server
     while (gameOn)
     {
-        //std::cout << "server looping" << std::endl;
         client_fds = master;
-        fcntl(listenerfd, F_SETFL, O_NONBLOCK); // non blocking socket
+        // fcntl(listenerfd, F_SETFL, O_NONBLOCK); // non blocking socket
         if (select(fdmax + 1, &client_fds, NULL, NULL, timeout) == -1)
         {
-            std::cout << "Select error" << std::endl;
+            std::cout << "SERVER: Select error: " << strerror(errno) << std::endl;
             exit(4);
         }
         // Loop through our connections
@@ -114,7 +114,7 @@ int serverThread(void* data){
                     if (newfd == -1)
                     {
                         // Failed to accept
-                        perror("accept");
+                        std::cout << "SERVER: failed to accept" << std::endl;
                         continue;
                     }
                     else
@@ -141,6 +141,7 @@ int serverThread(void* data){
                             std::cout << (int) sBuffer->at(i) << " ";
                         }
                         std::cout << std::endl;
+
                         send(newfd, sBuffer->data(), sBuffer->size(), 0);
                         sBuffer->clear(); 
                         //} //end of if ready to send
@@ -203,7 +204,7 @@ int serverThread(void* data){
                         }
                         
                     }
-                    else
+                    else if (nbytes > 0)
                     {
                         // We have real data from client dont really need this for our purposes
                         /*for (j = 0; j <= fdmax; j++)

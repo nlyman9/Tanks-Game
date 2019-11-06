@@ -17,7 +17,6 @@
 #include <vector>
 #include <unistd.h>
 #include "Network.hpp"
-#include "NetworkController.hpp"
 #include <SDL2/SDL_thread.h>
 
 static bool gameBufferReady = false; 
@@ -27,8 +26,8 @@ static std::vector<char>* rcBuffer;
 static std::vector<char>* tsBuffer;
 //buffer to fill in
 static std::vector<char>* fBuffer;
-// Network Controller
-static NetworkController* netController;
+//keystate double buffer
+static std::vector<Uint8*>* keystates;
 
 class Client {
   public:
@@ -48,8 +47,7 @@ class Client {
     void getGameBufferReady(bool flag);
 
     std::vector<char>* getFillBuffer();
-
-    void setController(NetworkController* controller);
+    Uint8* pollKeystate();
 
   private:
 };

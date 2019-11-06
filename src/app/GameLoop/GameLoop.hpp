@@ -34,8 +34,6 @@ class GameLoop {
   private:
     // Render class to render the game
     Render *render;
-    Player *player;
-    Player* player2;
     std::vector<Enemy *> enemies;
     std::vector<Player *> players;
 		std::vector<Projectile *> projectiles;
@@ -60,10 +58,6 @@ class GameLoop {
 
     // Server pid
     int server_pid;
-
-    // Controllers
-    NetworkController* netController;
-    KeyboardController* keyController;
 
 };
 #endif

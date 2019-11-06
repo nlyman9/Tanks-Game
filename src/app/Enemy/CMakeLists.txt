@@ -10,7 +10,6 @@ target_link_libraries(Enemy
   Player
   Sprite
   Constants
-  Controllers
   Networking
 )
 

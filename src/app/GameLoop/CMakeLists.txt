@@ -15,7 +15,6 @@ target_link_libraries(GameLoop
   MapGenerator
   Projectile
   Networking
-  Controllers
 )
 
 target_include_directories(GameLoop

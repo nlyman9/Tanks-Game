@@ -162,7 +162,7 @@ int Render::drawMenu() {
 			SDL_GetMouseState(&cursorX, &cursorY);
 		}
 
-		SDL_Rect cursorRect = {cursorX, cursorY, 30, 30};
+		SDL_Rect cursorRect = {cursorX, cursorY, CROSSHAIR_SIZE, CROSSHAIR_SIZE};
 		SDL_RenderCopy(gRenderer, cursor, NULL, &cursorRect);
 
 		SDL_RenderPresent(gRenderer);

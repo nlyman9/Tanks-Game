@@ -26,7 +26,7 @@ int sockfd;
 fd_set master;      // Master of file descriptors
 fd_set read_fds;    // Read fd's returned from select
 fd_set client_fds;
-int fdmax;          // maximym file descriptor number
+int fdmax;          // maximum file descriptor number
 int nbytes;
 socklen_t addr_len;
 std::vector<char> packedMap;
