@@ -8,10 +8,17 @@
 #include <SDL2/SDL_thread.h>
 #include <SDL2/SDL.h>
 
+#define R_BUFFER_SIZE 152
+
 bool mapReceived = false;
 bool tsReady = false;
 
-int receiveThread(void* data) {
+//receive lock
+SDL_SpinLock rlock = 0;
+//send lock
+SDL_SpinLock slock = 0;
+
+int clientThread(void* data) {
     // Unpack data in the Client object
     Client* crClient = (Client*) data;
     std::cout << "Client thread created!" << std::endl;
@@ -65,14 +72,15 @@ int receiveThread(void* data) {
     // Game loop
     while(crClient->gameOn) {
         if(gameBufferReady) {
+            SDL_AtomicLock(&slock);
             for(auto item : *fBuffer) {
                 tsBuffer->push_back(item);
             }
             gameBufferReady = false;
-            tsReady = true;
+            tsReady = true; //make sure to set the flag within the lock
+            SDL_AtomicUnlock(&slock);
             fBuffer->clear();
         }
-
         read_fds = master;
         // Check for any response from serrver
         if (select(fdmax+1, &read_fds, NULL, NULL, timeout) == -1) {
@@ -81,14 +89,20 @@ int receiveThread(void* data) {
         }
         // If from server
         if (FD_ISSET(sockfd, &read_fds)) {
-            nbytes = recv(sockfd, rcBuffer->data(), rcBuffer->size(), 0);
+                nbytes = recv(sockfd, rcBuffer->data(), R_BUFFER_SIZE, 0);
             if (nbytes < 0) {
                 fprintf(stderr, "CLIENT: recv: %s (%d)\n", strerror(errno), errno);
                 std::cout << "CLIENT: Connection closing.  Error Number: " << errno << std::endl;
                 close(sockfd);
                 exit(10);
             } else if(nbytes > 0) {
-                //recieved data
+                /*
+                    With the changes in the server
+                    ->strip header once get the size of the packet
+                    ->strip again get the type of the packet
+                */
+                //received data
+                int size = stripHeader(rcBuffer);
                 int header = stripHeader(rcBuffer);
                 switch(header)
                 {
@@ -97,13 +111,11 @@ int receiveThread(void* data) {
                     {   
                         std::cout << "CLIENT: receiving map data..." << std::endl;
                         std::vector<int>* map = new std::vector<int>();
-                        if(!mapReceived) {
-                            unpack(rcBuffer, map, 3);
-                            for(int i = 0; i < map->size();i++){
-                                crClient->gameMap->push_back(map->at(i));                 
-                            }
-                            mapReceived = true;
+                        unpack(rcBuffer, map, 3);
+                        for(int i = 0; i < map->size();i++){
+                            crClient->gameMap->push_back(map->at(i));                 
                         }
+                        mapReceived = true;
                         delete map;
                         std::cout << "CLIENT: map data received!" << std::endl;
                         break;
@@ -138,14 +150,20 @@ int receiveThread(void* data) {
                         std::cout << "CLIENT: HELP ILLEGAL PACKET RECEIVED" << std::endl;
                         break;
                     }
+                    //clear rcBuffer and set it back to correct size for receive
+                    rcBuffer->clear();
+                    rcBuffer->resize(R_BUFFER_SIZE);
                 }
+
             } else {
-                std::cout << "CLIENT: No data received! check if buffer size is set!" << std::endl;
+                //std::cout << "CLIENT: NO data received! check if buffer size is set!" << std::endl;
             }
         } else if (tsReady) { 
-            // send(sockfd, tsBuffer->data(), tsBuffer->size(), 0);
-            // tsBuffer->clear();
-            tsReady = false;
+            SDL_AtomicLock(&slock);
+                send(sockfd, tsBuffer->data(), tsBuffer->size(), 0);
+                tsBuffer->clear();
+                tsReady = false;
+            SDL_AtomicUnlock(&slock);
         }
     }
 }
@@ -172,7 +190,7 @@ bool Client::init() {
     gameMap = new std::vector<int>();
     //initialize all buffers
     //receive buffer
-    rcBuffer = new std::vector<char>(152);
+    rcBuffer = new std::vector<char>(R_BUFFER_SIZE);
     //to send buffer
     //buffer to fill in
     fBuffer = new std::vector<char>();
@@ -182,7 +200,7 @@ bool Client::init() {
     void* clientInfo = malloc(sizeof(long));
     clientInfo = (void*) this;
     gameOn = true;
-    rcThread = SDL_CreateThread(receiveThread, "myThread", (void*) clientInfo);
+    rcThread = SDL_CreateThread(clientThread, "myThread", (void*) clientInfo);
     return true;
 }
 

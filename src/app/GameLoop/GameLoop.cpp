@@ -55,6 +55,7 @@ bool GameLoop::networkInit(Args *options) {
 	player2->setSprite(player_tank);
 	player2->setTurretSprite(player_turrent);
 	players.push_back(player2);
+	players.at(0)->setOnline(true);
 	render->setPlayer(players);
 	// Create client process
 	client = new Client(options->ip, options->port);
@@ -134,7 +135,6 @@ int GameLoop::networkRun() {
 			{
 				client->gameOn = false;
 				// Kill server/client thread
-
 				std::cout << "Killing server process " << server_pid << std::endl;
 				kill(server_pid, SIGTERM);
 			}
@@ -271,6 +271,7 @@ int GameLoop::runSinglePlayer()
 {	
 	std::cout << "single player" << std::endl;
 	// Init single player only settngs
+	fflush(stdout);
 	render->setPlayer(players); 
 
 	SDL_Event e;
@@ -282,7 +283,6 @@ int GameLoop::runSinglePlayer()
 	//Create shell sprite
 	Sprite *shell = new Sprite(render->getRenderer(), "src/res/images/shell.png");
 	shell->init();
-
 	ImageLoader imgLoad;
 	SDL_Texture* cursor = imgLoad.loadImage("src/res/images/cursor.png", render->getRenderer());
 
@@ -302,7 +302,7 @@ int GameLoop::runSinglePlayer()
 			}
 		}
 
-		checkEscape();
+		//checkEscape();
 		for(auto player : players) {
 
 			player->getEvent(elapsed_time, &e);
@@ -333,15 +333,24 @@ int GameLoop::runSinglePlayer()
 				enemy->update();
 			}
 
-			for (auto projectile: projectiles) {
-				projectile->update();
+			for (int i = 0; i < projectiles.size(); i++) {
+				//update projectile
+				projectiles.at(i)->update();
+				//check if the projectile needs to be deleted
+				if(!projectiles.at(i)->isAlive()){
+					//remove the projectile from the render array so the image does not stay
+					render->gProjectiles.erase(render->gProjectiles.begin()+i);
+					//remove projectile from projectiles array
+					projectiles.erase(projectiles.begin()+i);
+					//MAKE EXPLOSION!?!?!?!
+					i--; //since we removed an element, the next increment will skip an element so decrement
+				}
 			}
 			lag_time -= MS_PER_UPDATE;
 		}
 
 		// quick and dirty ;)
 		int cursorX = 0, cursorY = 0;
-
 		if(e.type == SDL_MOUSEMOTION || e.type == SDL_MOUSEBUTTONDOWN) {
 			SDL_GetMouseState(&cursorX, &cursorY);
 		}

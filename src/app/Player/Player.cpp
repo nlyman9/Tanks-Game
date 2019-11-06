@@ -207,7 +207,9 @@ int Player::getTurretTheta() {
 void Player::setClient(Client* cl) {
     client = cl;
 }
-
+void Player::setOnline(bool online){
+    this->online = online;
+}
 void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, SDL_Event* e) {
 
     delta_velocity = 0;
@@ -222,7 +224,6 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, S
     } else {
         keystate = client->pollKeystate();
     }
-
     if (keystate[SDL_SCANCODE_W]) {
         delta_velocity += MAX_PLAYER_VELOCITY;
         x_deltav += delta_velocity * cos((theta * M_PI) / 180);
@@ -248,12 +249,10 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, S
   			fire_last_time = current_time;
   		}
   	}
-
     if(theta < 0) {
         theta = 360 + theta;
     }
     theta %= 360;
-
     // Set Player's X velocity
     if (x_deltav == 0) {
         // No user-supplied "push", return to rest
@@ -273,7 +272,6 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, S
         x_vel = x_deltav; //* time.count();
         //x_vel *= cos((theta * M_PI) / 180);
     }
-
     // Set Player's Y velocity
     if (y_deltav == 0) {
         // No user-supplied "push", return to rest
@@ -294,7 +292,6 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, S
         y_vel = y_deltav; //* time.count();
         //y_vel *= sin((theta * M_PI) / 180);
     }
-
 
     //Keep for debug purposes
     //std::cout << theta << ":" << x_deltav << ":" << y_deltav << "|" << x_vel << ":" << y_vel << std::endl;
@@ -317,7 +314,6 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, S
     {
         y_vel = -MAX_PLAYER_VELOCITY;
     }
-
     // Mouse Motion Handling
     if(e->type == SDL_MOUSEMOTION) {
         SDL_GetMouseState(&mouseX, &mouseY);

@@ -47,7 +47,9 @@ void Projectile::draw(SDL_Renderer *gRenderer, double update_lag) {
 	dst->h = PROJECTILE_HEIGHT;
     SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), NULL, dst, theta, NULL, SDL_FLIP_NONE);
 }
-
+bool Projectile::isAlive(){
+	return this->alive;
+}
 void Projectile::update() {
 
     //rotateProjectile(theta_v);
@@ -61,26 +63,19 @@ void Projectile::update() {
     SDL_Rect* overlap;
     SDL_Rect currentPos = {(int)getX(),(int) getY(), PROJECTILE_WIDTH, PROJECTILE_HEIGHT};
 
-
     for(auto obstacle : obstacles) {
 
         overlap = check_collision(&currentPos, &obstacle);
         if(overlap != nullptr) {
-
-			if (bounces == 3) {
-				//should delete here.
-
-			}
 
 			theta_v = theta % 90;
 
 			int x_dist = currentPos.x - obstacle.x;
 			int y_dist = currentPos.y - obstacle.y;
 			bool x_bounce = bouncePriority(x_dist, y_dist);
-
 			//std::cout << "new\n";
 			//std::cout << "x_dist = " << x_dist << " ; y_dist = " << y_dist << std::endl;
-
+			
 			if(x_bounce) { // collision left or right
 				//std::cout << "SIDES" << std::endl;
 				double num = -1 * cos((theta * M_PI) / 180);
@@ -112,7 +107,7 @@ void Projectile::update() {
             break;
         }
     }
-
+	
 	if (getX() + PROJECTILE_WIDTH > SCREEN_WIDTH - TILE_SIZE - BORDER_GAP)	// Right border
     {
         setX(SCREEN_WIDTH - TILE_SIZE - PROJECTILE_WIDTH - BORDER_GAP);
@@ -122,6 +117,7 @@ void Projectile::update() {
 			theta = 270 - (theta - 270);
 		else
 			theta = acos(num) * 180 / M_PI;
+		bounces++;
 
     }
     if (getX() < TILE_SIZE + BORDER_GAP)	// left border
@@ -133,6 +129,7 @@ void Projectile::update() {
 			theta = 270 - (theta - 270);
 		else
 			theta = acos(num) * 180 / M_PI;
+		bounces++;
 
     }
     if (getY() < TILE_SIZE)	// Top border
@@ -143,18 +140,24 @@ void Projectile::update() {
 			theta = 270 - (theta - 270);
 		else
 			theta = asin(num) * 180 / M_PI;
+		bounces++;
 
     }
     if (getY() + PROJECTILE_HEIGHT > SCREEN_HEIGHT - TILE_SIZE)	// bottom border
     {
+		
         setY(SCREEN_HEIGHT - TILE_SIZE - PROJECTILE_HEIGHT);
 		double num = -1 * sin((theta * M_PI) / 180);
 		if(theta > 180)
 			theta = 270 - (theta - 270);
 		else
 			theta = asin(num) * 180 / M_PI;
-
+		bounces++;
     }
+	//check if the bullet is still alive comment out for bounce testing
+	if (bounces == 3) {
+		alive = false;
+	}
 }
 
 bool Projectile::bouncePriority(int x, int y) {
