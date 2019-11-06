@@ -59,9 +59,5 @@ class GameLoop {
     // Server pid
     int server_pid;
 
-    // Controllers
-    NetworkController* netController;
-    KeyboardController* keyController;
-
 };
 #endif

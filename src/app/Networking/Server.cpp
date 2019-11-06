@@ -18,6 +18,7 @@
 #include <sys/socket.h>
 #include <fcntl.h>
 #include <sys/time.h>
+#include <sys/select.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <stdlib.h>
@@ -72,12 +73,11 @@ int serverThread(void* data){
     // Loop of server
     while (gameOn)
     {
-        //std::cout << "server looping" << std::endl;
         client_fds = master;
-        fcntl(listenerfd, F_SETFL, O_NONBLOCK); // non blocking socket
+        // fcntl(listenerfd, F_SETFL, O_NONBLOCK); // non blocking socket
         if (select(fdmax + 1, &client_fds, NULL, NULL, timeout) == -1)
         {
-            std::cout << "Select error" << std::endl;
+            std::cout << "SERVER: Select error: " << strerror(errno) << std::endl;
             exit(4);
         }
         // Loop through our connections
@@ -94,7 +94,7 @@ int serverThread(void* data){
                     if (newfd == -1)
                     {
                         // Failed to accept
-                        perror("accept");
+                        std::cout << "SERVER: failed to accept" << std::endl;
                         continue;
                     }
                     else
@@ -105,20 +105,15 @@ int serverThread(void* data){
                         {
                             fdmax = newfd; // Keep track of max
                         }
-                        std::cout << "New connection from" << inet_ntop(remoteaddr.ss_family, &remoteaddr, remoteIP, INET_ADDRSTRLEN) << " on socket " << newfd << std::endl;
+                        std::cout << "SERVER: New connection from " << inet_ntop(remoteaddr.ss_family, &remoteaddr, remoteIP, INET_ADDRSTRLEN) << " on socket " << newfd << std::endl;
+                        
                         //new connection so need to send map data here accepted so send data
-                        std::vector<char> toSend;
                         for(int i = 0; i < packedMap.size(); i++){
                             sBuffer->push_back(packedMap.at(i));
                         }
-                        std::cout << std::endl;
-                        std::cout << " size of toSend" << sBuffer->size();
-                        std::cout << std::endl;
+                        
+                        // Appender the map header and send the map
                         appendHeader(sBuffer, (char) 0);
-                        for(int i = 0 ; i < sBuffer->size() ; i++){
-                            std::cout << (int) sBuffer->at(i) << " ";
-                        }
-                        std::cout << std::endl;
                         send(newfd, sBuffer->data(), sBuffer->size(), 0);
                         sBuffer->clear();
                     }
@@ -128,12 +123,12 @@ int serverThread(void* data){
                     nbytes = recv(i, rBuffer->data(), rBuffer->size(), 0);
                     std::cout << "SERVER: received: " << nbytes << " bytes" << std::endl;
                     // Handle data from clients
-                    if (nbytes <= 0)
+                    if (nbytes < 0)
                     {
                         // Either error or closed connection
                         if (nbytes == 0)
                         { // Connection closed
-                            std::cout << "Socket " << i <<" disconnected." << std::endl;
+                            std::cout << "SERVER: Socket " << i <<" disconnected." << std::endl;
                             // remember to close the fd
                             close(i);
                             FD_CLR(i, &master); // Remove from master set
@@ -142,12 +137,12 @@ int serverThread(void* data){
                         {
                             //client disconnected... for testing purposes just closing the server
                             //so we dont have to in task manager
-                            std::cout << "Recv error server server exiting" << std::endl;
+                            std::cout << "SERVER: Recv error server server exiting" << std::endl;
                             exit(0);
                         }
                         
                     }
-                    else
+                    else if (nbytes > 0)
                     {
                         // We have real data from client
                         for (j = 0; j <= fdmax; j++)
@@ -161,7 +156,7 @@ int serverThread(void* data){
                                     std::cout << "SERVER: passing message through" << std::endl;
                                     if (send(j, sBuffer->data(), sBuffer->size(), 0) == -1)
                                     {
-                                        std::cout << "Send error" << std::endl;
+                                        std::cout << "SERVER: Send error" << std::endl;
                                     }
                                 }
                                 else if (j == listenerfd)
@@ -170,6 +165,8 @@ int serverThread(void* data){
                                 }
                             }
                         }
+                    } else {
+                        std::cout << "SERVER: Recieved zero bytes" << std::endl;
                     }
                 }
             }

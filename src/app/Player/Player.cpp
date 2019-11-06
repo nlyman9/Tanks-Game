@@ -21,27 +21,16 @@
  * @param x
  * @param y
  */
-Player::Player(Sprite *sprite, Sprite *turret, float x, float y, KeyboardController* keyboardController, NetworkController* networkController) : keyController{keyboardController}, netController{networkController} {
+Player::Player(Sprite *sprite, Sprite *turret, float x, float y, bool local) : localPlayer{local} {
     setSprite(sprite);
     setTurretSprite(turret);
     setPos(x, y);
 }
 
-Player::Player(Sprite *sprite, Sprite *turret, float x, float y, NetworkController* networkController) : netController{networkController} {
-    setSprite(sprite);
-    setTurretSprite(turret);
-    setPos(x, y);
-    keyController = nullptr;
-}
-
-Player::Player(float x, float y, KeyboardController* keyboardController, NetworkController* networkController) : keyController{keyboardController}, netController{networkController} {
+Player::Player(float x, float y, bool local) : localPlayer{local}{
     setPos(x, y);
 }
 
-Player::Player(float x, float y, NetworkController* networkController) : netController{networkController} {
-    setPos(x, y);
-    keyController = nullptr;
-}
 /**
  * @brief Destroy the Player:: Player object
  *
@@ -228,12 +217,11 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, S
     fire = false;
 
     const Uint8* keystate; 
-    if(keyController != nullptr) {
-        keystate = keyController->pollEvent();
+    if(localPlayer) {
+        keystate = SDL_GetKeyboardState(nullptr);
     } else {
-        keystate = netController->pollEvent();
+        keystate = client->pollKeystate();
     }
-    std::cout << "keystate passed" << std::endl;
 
     if (keystate[SDL_SCANCODE_W]) {
         delta_velocity += MAX_PLAYER_VELOCITY;
@@ -252,7 +240,6 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, S
     if (keystate[SDL_SCANCODE_D]) {
         theta_v += PHI;
     }
-    std::cout << "keystate access" << std::endl;
     if(e->type == SDL_MOUSEBUTTONDOWN) {
   		Uint32 current_time = SDL_GetTicks();
 
@@ -336,13 +323,11 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, S
         SDL_GetMouseState(&mouseX, &mouseY);
     }
 
-    if(keyController != nullptr && client != nullptr) {
+    if(localPlayer && client != nullptr) {
         std::vector<char>* fBuffer = client->getFillBuffer();
         fBuffer->push_back((char)(*keystate));
-        std::cout << "fill buffer" << std::endl;
         appendHeader(fBuffer, (char) 1); // append keystate header
     }
-    std::cout << "append header" << std::endl;
 }
 
 /**

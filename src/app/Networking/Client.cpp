@@ -37,9 +37,9 @@ int receiveThread(void* data) {
     hints.ai_family = AF_INET;          // IPv4
     hints.ai_socktype = SOCK_STREAM;    // TCP
     // Get address info of server
-    std::cout << "Connecting to " << crClient->server_ip << " on port " << crClient->server_port << std::endl;
+    std::cout << "CLIENT: Connecting to " << crClient->server_ip << " on port " << crClient->server_port << std::endl;
     if ((status = getaddrinfo(crClient->server_ip.c_str(), crClient->server_port.c_str(), &hints, &serverInfo)) != 0) {
-        std::cout << "Failed to get address info" << std::endl;
+        std::cout << "CLIENT: Failed to get address info" << std::endl;
         exit(4);
     }
     // Create a socket based on server info 
@@ -47,10 +47,10 @@ int receiveThread(void* data) {
     sleep(2);
     // Connect to server
     while (connect(sockfd, serverInfo->ai_addr, serverInfo->ai_addrlen) < 0) {
-        std::cout << "Waiting for connection..." << std::endl;
+        std::cout << "CLIENT: Waiting for connection..." << std::endl;
         sleep(1);
     }
-    std::cout << "Connected ip:" << crClient->server_ip << " Port: " << crClient->server_port << std::endl;
+    std::cout << "CLIENT: Connected ip: " << crClient->server_ip << " Port: " << crClient->server_port << std::endl;
     //set the socket to non-blocking
     fcntl(sockfd, F_SETFL, O_NONBLOCK);
     // Add server fd to master
@@ -60,7 +60,7 @@ int receiveThread(void* data) {
 
     fdmax = sockfd;
 
-    std::cout << "Receive thread created!" << std::endl;
+    std::cout << "CLIENT: Receive thread created!" << std::endl;
 
     // Game loop
     while(crClient->gameOn) {
@@ -76,15 +76,15 @@ int receiveThread(void* data) {
         read_fds = master;
         // Check for any response from serrver
         if (select(fdmax+1, &read_fds, NULL, NULL, timeout) == -1) {
-            std::cout << "Select error" << std::endl;
+            std::cout << "CLIENT: Select error: " << strerror(errno) <<  std::endl;
             continue;
         }
         // If from server
         if (FD_ISSET(sockfd, &read_fds)) {
             nbytes = recv(sockfd, rcBuffer->data(), rcBuffer->size(), 0);
             if (nbytes < 0) {
-                fprintf(stderr, "recv: %s (%d)\n", strerror(errno), errno);
-                std::cout << "Connection closing.  Error Number: " << errno << std::endl;
+                fprintf(stderr, "CLIENT: recv: %s (%d)\n", strerror(errno), errno);
+                std::cout << "CLIENT: Connection closing.  Error Number: " << errno << std::endl;
                 close(sockfd);
                 exit(10);
             } else if(nbytes > 0) {
@@ -95,7 +95,7 @@ int receiveThread(void* data) {
                     // Recieve Map
                     case 0:
                     {   
-                        std::cout << "receiving map data..." << std::endl;
+                        std::cout << "CLIENT: receiving map data..." << std::endl;
                         std::vector<int>* map = new std::vector<int>();
                         if(!mapReceived) {
                             unpack(rcBuffer, map, 3);
@@ -105,15 +105,17 @@ int receiveThread(void* data) {
                             mapReceived = true;
                         }
                         delete map;
-                        std::cout << "map data received!" << std::endl;
+                        std::cout << "CLIENT: map data received!" << std::endl;
                         break;
                     }
 
                     // Receive Keystate
                     case 1:
                     {
-                        netController->setKeystate((uint8_t*)(rcBuffer->at(0)));
-                        std::cout << "keystate received!" << std::endl;
+                        for(auto keystate : *rcBuffer) {
+                            keystates->push_back((Uint8*)&keystate);
+                        }
+                        std::cout << "CLIENT: keystate received!" << std::endl;
                         break;
                     }
                     
@@ -133,16 +135,16 @@ int receiveThread(void* data) {
 
                     default:
                     {
-                        std::cout << "HELP ILLEGAL PACKET RECEIVED" << std::endl;
+                        std::cout << "CLIENT: HELP ILLEGAL PACKET RECEIVED" << std::endl;
                         break;
                     }
                 }
             } else {
-                std::cout << "NO data received! check if buffer size is set!" << std::endl;
+                std::cout << "CLIENT: No data received! check if buffer size is set!" << std::endl;
             }
         } else if (tsReady) { 
-            send(sockfd, tsBuffer->data(), tsBuffer->size(), 0);
-            tsBuffer->clear();
+            // send(sockfd, tsBuffer->data(), tsBuffer->size(), 0);
+            // tsBuffer->clear();
             tsReady = false;
         }
     }
@@ -160,8 +162,10 @@ std::vector<char>* Client::getFillBuffer() {
     return fBuffer;
 }
 
-void Client::setController(NetworkController* controller) {
-    netController = controller;
+Uint8* Client::pollKeystate() {
+    auto state = keystates->back();
+    keystates->pop_back();
+    return state;
 }
 
 bool Client::init() {

@@ -16,7 +16,6 @@ target_link_libraries(Render
   Projectile
   MapGenerator
   ImageLoader
-  Controllers
   Networking
 )
 else()
@@ -30,7 +29,6 @@ target_link_libraries(Render
   Enemy
   Projectile
   ImageLoader
-  Controllers
   Networking
 )
 endif()

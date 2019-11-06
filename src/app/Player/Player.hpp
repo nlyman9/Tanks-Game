@@ -16,9 +16,6 @@
 #include <cmath>
 #include <SDL2/SDL.h>
 #include "Object.hpp"
-#include "Controller.hpp"
-#include "KeyboardController.hpp"
-#include "NetworkController.hpp"
 #include "Client.hpp"
 
 const int THETA_WINDOW = 5;
@@ -27,8 +24,6 @@ class Player : public Object {
     private:
         /* data */
         Sprite *turret = nullptr;
-        KeyboardController *keyController = nullptr;
-        NetworkController *netController = nullptr;
         Client *client = nullptr;
         float x_vel, y_vel; // x and y velocity
         int lives; //health points left
@@ -45,11 +40,10 @@ class Player : public Object {
         float delta_velocity = 0;
         bool fire = false;
         Uint32 fire_last_time = 0;
+        bool localPlayer;
     public:
-        Player(Sprite *sprite, Sprite *turret, float x, float y, KeyboardController* keyController, NetworkController* netController); //constructor, initialize the x, y, and sprite
-        Player(Sprite *sprite, Sprite *turret, float x, float y, NetworkController* netController);
-        Player(float x, float y, KeyboardController* keyController, NetworkController* netController); //constructor, initialize the x, snd y
-        Player(float x, float y, NetworkController* netController);
+        Player(Sprite *sprite, Sprite *turret, float x, float y, bool local); //constructor, initialize the x, y, and sprite
+        Player(float x, float y, bool local); //constructor, initialize the x, snd y
 
         void draw(SDL_Renderer *gRenderer, double update_lag) override;
         void update() override;

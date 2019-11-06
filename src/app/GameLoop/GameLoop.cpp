@@ -47,8 +47,7 @@ bool GameLoop::networkInit(Args *options) {
 		}
 	}
 
-	netController = new NetworkController();
-	Player* player2 = new Player(SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, netController);
+	Player* player2 = new Player(SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, false);
 	Sprite* player_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
 	Sprite* player_turrent = new Sprite(render->getRenderer(), "src/res/images/red_turret.png");
 	player_tank->init();
@@ -61,7 +60,6 @@ bool GameLoop::networkInit(Args *options) {
 	client = new Client(options->ip, options->port);
 	// Init 
 	client->init();
-	client->setController(netController);
 	return true;
 }
 
@@ -211,9 +209,8 @@ int GameLoop::networkRun() {
  * @return false - Failed to initialize
  */
 bool GameLoop::init(Render* renderer) {
-	keyController = new KeyboardController();
-	netController = new NetworkController();
-	Player* player = new Player(SCREEN_WIDTH/2 + 100, 50, keyController, netController);
+
+	Player* player = new Player(SCREEN_WIDTH/2 + 100, 50, true);
 	render = renderer;
 	players.push_back(player);
 
@@ -274,7 +271,6 @@ int GameLoop::runSinglePlayer()
 		enemy->setSprite(enemy_tank);
 	}
 
-	std::cout << "single player init" << std::endl;
 	SDL_Event e;
 	previous_time = std::chrono::system_clock::now(); // get current time of system
 	lag_time = 0.0;	// Set duration of time to 0
@@ -288,7 +284,6 @@ int GameLoop::runSinglePlayer()
 	ImageLoader imgLoad;
 	SDL_Texture* cursor = imgLoad.loadImage("src/res/images/cursor.png", render->getRenderer());
 
-	std::cout << "game loop" << std::endl;
 	while (isGameOn)
 	{
 		current_time = std::chrono::system_clock::now();
@@ -296,7 +291,6 @@ int GameLoop::runSinglePlayer()
 		previous_time = current_time;
 		lag_time += elapsed_time.count();
 
-		std::cout << "input events" << std::endl;
 		// 1. Process input
 		while (SDL_PollEvent(&e))
 		{
@@ -306,7 +300,6 @@ int GameLoop::runSinglePlayer()
 			}
 		}
 
-		std::cout << "check fire" << std::endl;
 		checkEscape();
 		for(auto player : players) {
 
@@ -327,7 +320,6 @@ int GameLoop::runSinglePlayer()
 			}
 		}
 
-		std::cout << "Update" << std::endl;
  		// 2. Update
 		// Update if time since last update is >= MS_PER_UPDATE
 		while(lag_time >= MS_PER_UPDATE) {
@@ -354,7 +346,6 @@ int GameLoop::runSinglePlayer()
 
 		SDL_Rect cursorRect = {cursorX, cursorY, CROSSHAIR_SIZE, CROSSHAIR_SIZE};
 
-		std::cout << "render" << std::endl;
 		// 3. Render
 		// Render everything
 		render->draw(lag_time / MS_PER_UPDATE);
