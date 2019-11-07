@@ -22,7 +22,6 @@ Enemy::~Enemy() {}
  *
  * @param update_lag - the value to extrapolate by
  */
-<<<<<<< HEAD
  void Enemy::draw(SDL_Renderer *gRenderer, double update_lag) {
 
    // Extrapolate the x and y positions
@@ -42,25 +41,25 @@ Enemy::~Enemy() {}
    //SDL_Rect* turret_dst = get_box();
    SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), NULL, &dst, theta, NULL, SDL_FLIP_NONE);
    SDL_RenderCopyEx(gRenderer, getTurretSprite()->getTexture(), NULL, &dst, turretTheta, NULL, SDL_FLIP_NONE);
+
+   findEndValues(turretTheta);
+
+   SDL_RenderDrawLine(gRenderer, x_enemy_pos + TANK_WIDTH/2, y_enemy_pos + TANK_HEIGHT/2, line1X, line1Y);
+   SDL_RenderDrawLine(gRenderer, x_enemy_pos + TANK_WIDTH/2, y_enemy_pos + TANK_HEIGHT/2, line2X, line2Y);
  }
-=======
-void Enemy::draw(SDL_Renderer *gRenderer, double update_lag) {
 
-  // Extrapolate the x and y positions
-  // "Solves" stuck in the middle rendering.
-  // TODO change MAX_VELOCITY to the enemy's velocity
-
-  // int x_pos = getX() + x_velocity * update_lag;
-  // int y_pos = getY() + y_velocity * update_lag;
-
-  // Render enemy
-  // SDL_Rect src = {0, 0, 48, 48};
-  // SDL_Rect dst = {x_enemy_pos, y_enemy_pos, 39, 48};
-  // SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), &src, &dst, 0, NULL, SDL_FLIP_NONE);
-  SDL_Rect pos = {(int)x_enemy_pos, (int)y_enemy_pos, TANK_WIDTH, TANK_HEIGHT};
-  SDL_RenderCopy(gRenderer, getSprite()->getTexture(), NULL, &pos);
-}
->>>>>>> 6d7d0db0e7e84e4fe44e72465b7a2adb7b138aaa
+ void Enemy::findEndValues(float angle){
+   angle *= -1;
+   //printf("angle: %f\n", angle);
+   angle = angle * M_PI / 180;
+   int length = SCREEN_WIDTH;
+   float ang1 = angle + .5;
+   float ang2 = angle - .5;
+   line1X = cos(ang1) * length + getX();
+   line1Y = getY() - sin(ang1) * length;
+   line2X = cos(ang2) * length + getX();
+   line2Y = getY() - sin(ang2) * length;
+ }
 
 /**
  * @brief update the Enemy object
@@ -159,23 +158,55 @@ float Enemy::getY(){
   return y_enemy_pos;
 }
 
-void Enemy::updatePos() {
-<<<<<<< HEAD
-  float delta_x = gPlayer->getX() - (getX() + TANK_WIDTH / 2);
-  float delta_y = gPlayer->getY() - (getY() + TANK_HEIGHT / 2);
-  float theta_radians = atan2(delta_y, delta_x);
-  turretTheta = (int)(theta_radians * 180 / M_PI);
+float Enemy::getTurretTheta(){
+  return turretTheta;
+}
 
-=======
->>>>>>> 6d7d0db0e7e84e4fe44e72465b7a2adb7b138aaa
+void Enemy::updatePos() {
+  if(updateCalls == 400){
+    if(rand() % 2 == 0){
+      trackOrMonitor = true;
+    }
+    else{
+      trackOrMonitor = false;
+    }
+    updateCalls = 0;
+  }
+  if(trackOrMonitor){
+    //hi frems
+    //track mode
+    float curTheta = getTurretTheta();
+    float delta_x = (gPlayer->getX() + TANK_WIDTH / 2) - (getX() + TANK_WIDTH / 2);
+    float delta_y = (gPlayer->getY() + TANK_HEIGHT / 2) - (getY() + TANK_HEIGHT / 2);
+    float theta_radians = atan2(delta_y, delta_x);
+    turretTheta = (int)(theta_radians * 180 / M_PI);
+  }
+  else{
+    //monitor mode
+    if(rotateUp){
+      turretTheta += 1;
+      if(turretTheta > 180){
+        turretTheta = -180;
+        rotateUp = false;
+      }
+    }
+    else{
+      turretTheta += 1;
+      if(turretTheta > 0){
+        turretTheta = 0;
+        rotateUp = true;
+      }
+    }
+  }
+  //printf("turret theta: %f\n", turretTheta);
+  updateCalls++;
+
+
   if(enemyPath.size() < randCut){
     setPathway(this->tile_map, *this->gPlayer, *this);
     randCut = rand() % 4 + 2;
   }
-<<<<<<< HEAD
 
-=======
->>>>>>> 6d7d0db0e7e84e4fe44e72465b7a2adb7b138aaa
   float x_pos = gPlayer->getX();
   float y_pos = gPlayer->getY();
   bool retreat;
@@ -388,11 +419,7 @@ void Enemy::setPathway(std::vector<std::vector<int>> move_map, Player player, En
     coordinate newGhostPos = Enemy::newGhostPos(ghostXblock, ghostYblock, enemyXblock, enemyYblock);
     int ghostX = newGhostPos.col * TILE_SIZE + TILE_SIZE + BORDER_GAP;
     int ghostY = newGhostPos.row * TILE_SIZE + TILE_SIZE;
-<<<<<<< HEAD
     Player* ghost = new Player(ghostX, ghostY, true);
-=======
-    Player* ghost = new Player(ghostX, ghostY);
->>>>>>> 6d7d0db0e7e84e4fe44e72465b7a2adb7b138aaa
     enemyPath = generatePath(move_map, *ghost, enemy);
   }
 }
@@ -407,39 +434,24 @@ coordinate Enemy::newGhostPos(int gX, int gY, int eX, int eY){
     //player left of enemy
     if(gX < eX){
       //move up and to the left
-<<<<<<< HEAD
       newPos.row -= 1;
       newPos.col -= 1;
-=======
-      newPos.row -= 2;
-      newPos.col -= 2;
->>>>>>> 6d7d0db0e7e84e4fe44e72465b7a2adb7b138aaa
     }
     //player right of enemy
     else if(gX > eX){
       //move up and to the right
-<<<<<<< HEAD
       newPos.row -= 1;
       newPos.col += 1;
     }
     //player above only
     else{
       newPos.row -= 1;
-=======
-      newPos.row -= 2;
-      newPos.col += 2;
-    }
-    //player above only
-    else{
-      newPos.row -= 2;
->>>>>>> 6d7d0db0e7e84e4fe44e72465b7a2adb7b138aaa
     }
   }
   //player below enemy
   else if(gY > eY){
     if(gX < eX){
       //move down and to the left
-<<<<<<< HEAD
       newPos.row += 1;
       newPos.col -= 1;
     }
@@ -450,34 +462,15 @@ coordinate Enemy::newGhostPos(int gX, int gY, int eX, int eY){
     }
     else{
       newPos.row += 1;
-=======
-      newPos.row += 2;
-      newPos.col -= 2;
-    }
-    else if(gX > eX){
-      //move down and to the right
-      newPos.row += 2;
-      newPos.col += 2;
-    }
-    else{
-      newPos.row += 2;
->>>>>>> 6d7d0db0e7e84e4fe44e72465b7a2adb7b138aaa
     }
   }
   //player horizontally equal with enemy
   else{
     if(gX < eX){
-<<<<<<< HEAD
       newPos.col -= 1;
     }
     else{
       newPos.col += 1;
-=======
-      newPos.col -= 2;
-    }
-    else{
-      newPos.col += 2;
->>>>>>> 6d7d0db0e7e84e4fe44e72465b7a2adb7b138aaa
     }
   }
   if(!isValidBlock(newPos.row, newPos.col)){
