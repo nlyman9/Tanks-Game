@@ -41,10 +41,41 @@ bool left = true;
 bool bullet_fire[3] = {false, false, false};
 bool enemy_bullet_fire = false;
 int** tile_map;
+int** move_map;
 std::vector<SDL_Texture*> gTex;
 SDL_Rect cur_out;
 SDL_Rect* tileArray;
 
+
+struct coordinate {
+	int row;
+	int col;
+	int weight;
+};
+
+void printTileMap(int** map){
+	printf("    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3\n    X X X X X X X X X X X X X X X X X X X X X X X X\n");
+	for(int i = 0; i < 13; i++){
+		printf("%d X ", (i%10));
+		for(int j = 0; j < 24; j++) {
+
+			if(map[j][i] == 2){
+				printf("X ");
+			}
+			else if(map[j][i] == 100){
+				printf("F ");
+			}
+			else if(map[j][i] == 101){
+				printf("S ");
+			}
+			else{
+				printf("_ ");
+			}
+
+		}
+		printf("\n");
+	}
+}
 
 bool init() {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -127,12 +158,10 @@ bool init() {
 			break;
 	}
 
-
+	printTileMap(tile_map);
 
 	return true;
 }
-
-
 
 SDL_Texture* loadImage(std::string fname) {
 	SDL_Texture* newText = nullptr;
@@ -355,6 +384,198 @@ int yArrPos(int pos){
 
 }
 
+//x block 0 - 23
+int findXblock(int pos){
+	int center = pos + BOX_WIDTH/2;
+	int trueX = center - TILE_SIZE - 16;
+	int block = trueX / TILE_SIZE;
+	return block;
+}
+
+//y block 0 - 12
+int findYBlock(int pos){
+	int center = pos + BOX_HEIGHT/2;
+	int trueY = center - TILE_SIZE;
+	int block = trueY / TILE_SIZE;
+	return block;
+}
+
+
+int** generateMoveMap(int** tile_map, SDL_Rect player, SDL_Rect enemy){
+	int** new_map;
+	new_map = new int*[24];
+
+	for(int j = 0; j < 24; j++)
+	{
+		new_map[j] = new int[13];
+		for(int h = 0; h < 13; h++)
+		{
+			new_map[j][h] = tile_map[j][h];
+		}
+	}
+
+	int xPlayer = findXblock(player.x);
+	int xEnemy = findXblock(enemy.x);
+	int yPlayer = findYBlock(player.y);
+	int yEnemy = findYBlock(enemy.y);
+
+	printf("Player coordinates: %d, %d\n", yPlayer, xPlayer);
+	printf("Enemy coordinates: %d, %d\n", yEnemy, xEnemy);
+
+	new_map[xPlayer][yPlayer] = 100;
+	new_map[xEnemy][yEnemy] = 101;
+
+	printTileMap(new_map);
+	return new_map;
+}
+
+bool validMove(coordinate moveTo, coordinate currentlyAt){
+	int moveToRow = moveTo.row;
+	int moveToCol = moveTo.col;
+	int moveToWeight = moveTo.weight;
+	int atRow = currentlyAt.row;
+	int atCol = currentlyAt.col;
+	int atWeight = currentlyAt.weight;
+
+	//if weights valid
+	if(moveToWeight == (atWeight - 1)){
+		//if same row different column
+		if((moveToRow == atRow) && (moveToCol == (atCol - 1) || (moveToCol == (atCol + 1)))){
+			return true;
+		}
+		//if same col different row
+		if((moveToCol == atCol) && (moveToRow == (atRow - 1) || (moveToRow == (atRow + 1)))){
+			return true;
+		}
+	}
+	return false;
+}
+
+std::vector<coordinate> generatePath(int** move_map, SDL_Rect player, SDL_Rect enemy){
+	int xPlayer = findXblock(player.x);
+	int yPlayer = findYBlock(player.y);
+	printf("XPlayer = %d, YPlayer = %d\n", xPlayer, yPlayer);
+	std::vector<coordinate> coordList;
+	std::vector<coordinate> finalPath;
+	coordinate enemyStart = {findYBlock(enemy.y), findXblock(enemy.x), 0};
+	coordList.push_back(enemyStart);
+	bool keepGoing = false;
+	bool inList = false;
+	int count = 0;
+	int coordListLength;
+
+	while(!keepGoing) {
+	//add surrounding squares to list
+		coordListLength = coordList.size();
+		//printf("List length = %d\n", coordListLength);
+		for(int i = 0; i < coordListLength; i++){
+			//printf("Current coordinate = {%d, %d, %d}\n", coordList[i].row, coordList[i].col, coordList[i].weight);
+			if(coordList[i].weight == count){
+				coordinate left = {coordList[i].row, coordList[i].col - 1, coordList[i].weight + 1};
+				//check isnt a wall
+				if(!(left.row < 0 || left.row > 12 || left.col < 0 || left.col > 23) && (move_map[left.col][left.row] != 2)){
+					//check isnt already in list
+					for(int j = 0; j < coordListLength; j++){
+						if(left.row == coordList[j].row && left.col == coordList[j].col){
+							inList = true;
+							break;
+						}
+					}
+					if(!inList){
+						coordList.push_back(left);
+						//printf("LEFT {%d, %d, %d}\n", left.row, left.col, left.weight);
+						if(left.row == yPlayer && left.col == xPlayer){
+							keepGoing = true;
+						}
+					}
+					inList = false;
+				}
+				coordinate right = {coordList[i].row, coordList[i].col + 1, coordList[i].weight + 1};
+				if(!(right.row < 0 || right.row > 12 || right.col < 0 || right.col > 23) && (move_map[right.col][right.row] != 2)){
+					for(int j = 0; j < coordListLength; j++){
+						if(right.row == coordList[j].row && right.col == coordList[j].col){
+							inList = true;
+							break;
+						}
+					}
+					if(!inList){
+						coordList.push_back(right);
+						//printf("RIGHT {%d, %d, %d}\n", right.row, right.col, right.weight);
+						if(right.row == yPlayer && right.col == xPlayer){
+							keepGoing = true;
+						}
+					}
+					inList = false;
+				}
+				coordinate up = {coordList[i].row - 1, coordList[i].col, coordList[i].weight + 1};
+				if(!(up.row < 0 || up.row > 12 || up.col < 0 || up.col > 23) && (move_map[up.col][up.row] != 2)){
+					for(int j = 0; j < coordListLength; j++){
+						if(up.row == coordList[j].row && up.col == coordList[j].col){
+							inList = true;
+							break;
+						}
+					}
+					if(!inList){
+						coordList.push_back(up);
+						//printf("UP {%d, %d, %d}\n", up.row, up.col, up.weight);
+						if(up.row == yPlayer && up.col == xPlayer){
+							keepGoing = true;
+						}
+					}
+					inList = false;
+				}
+				coordinate down = {coordList[i].row + 1, coordList[i].col, coordList[i].weight + 1};
+				if(!(down.row < 0 || down.row > 12 || down.col < 0 || down.col > 23) && (move_map[down.col][down.row] != 2)){
+					for(int j = 0; j < coordListLength; j++){
+						if(down.row == coordList[j].row && down.col == coordList[j].col){
+							inList = true;
+							break;
+						}
+					}
+					if(!inList){
+						coordList.push_back(down);
+						//printf("DOWN {%d, %d, %d}\n", down.row, down.col, down.weight);
+						if(down.row == yPlayer && down.col == xPlayer){
+							keepGoing = true;
+						}
+					}
+					inList = false;
+				}
+			}
+		}
+		count++;
+	}
+
+	coordinate currentCoord = {yPlayer, xPlayer, count};
+	finalPath.push_back(currentCoord);
+	coordListLength = coordList.size();
+
+	while(count != 0){
+		for(int i = 0; i < coordListLength; i++){
+			if(coordList[i].weight == (count - 1)){
+				if(validMove(coordList[i], currentCoord)){
+					finalPath.push_back(coordList[i]);
+					currentCoord = coordList[i];
+					count--;
+					break;
+				}
+			}
+		}
+	}
+	/*
+	for(int i = 0; i < coordList.size(); i++){
+		printf("{%d, %d, %d}", coordList[i].row, coordList[i].col, coordList[i].weight);
+	}*/
+
+	for(int i = 0; i < finalPath.size(); i++){
+		printf("{%d, %d, %d}", finalPath[i].row, finalPath[i].col, finalPath[i].weight);
+	}
+
+	printf("\n");
+
+	return finalPath;
+}
+
 bool shouldShoot(int x_player, int x_enemy, int y_player, int y_enemy){
 	int cannon = x_enemy - BOX_WIDTH/2;
 	int x_player_rightEdge = x_player + BOX_WIDTH;
@@ -400,18 +621,23 @@ int main() {
 
 	// Current position to render the box
 	// Start off with it in the middle
-	int x_pos = 75;
-	//int y_pos = SCREEN_HEIGHT - BOX_HEIGHT/2 - 60;
-	int y_pos = 60;
-
+	int x_pos = SCREEN_WIDTH - BOX_WIDTH/2 - 470;
+	int y_pos = SCREEN_HEIGHT - BOX_HEIGHT/2 - 54;
+	//int x_pos = 55;
+	//int y_pos = 60;
 	//Enemy box start position
-	int x_enemy_pos = SCREEN_WIDTH - BOX_WIDTH/2 - 75;
-	int y_enemy_pos = SCREEN_HEIGHT - BOX_HEIGHT/2 - 60;
+	int x_enemy_pos = SCREEN_WIDTH - BOX_WIDTH/2 - 275;
+	int y_enemy_pos = SCREEN_HEIGHT - BOX_HEIGHT/2 - 267;
 	int enemy_start_x = x_enemy_pos;
 	//int enemy_start_y = y_enemy_pos;
 	//Initialize enemy box
 	SDL_Rect enemy_box = {x_enemy_pos, y_enemy_pos, BOX_WIDTH, BOX_HEIGHT};
 	SDL_Rect player_box = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
+
+	//move_map = generateMoveMap(tile_map, player_box, enemy_box);
+
+	std::vector<coordinate> enemyPath = generatePath(tile_map, player_box, enemy_box);
+
 	// Current velocity of the box
 	// Start off at reset
 	int x_vel = 0;
@@ -567,6 +793,8 @@ int main() {
 			}
 		}
 
+		//printf("In Block %d, %d\n", findYBlock(y_pos), findXblock(x_pos));
+
 		//Prevent the box from going offscreen
 		if(x_pos > SCREEN_WIDTH - 2*BOX_WIDTH - TILE_SIZE) {
 			x_pos = SCREEN_WIDTH - 2*BOX_WIDTH - TILE_SIZE;
@@ -685,7 +913,7 @@ int main() {
 				}
 			}
 		}
-*/
+
 		if(left) {
 			if(tile_map[xArrPosL(x_enemy_pos)][yArrPos(y_enemy_pos)] == 2){
 				x_enemy_pos -= MAX_VELOCITY;
@@ -702,7 +930,53 @@ int main() {
 			else{
 				y_enemy_pos -= MAX_VELOCITY;
 			}
+		}*/
+
+		if(enemyPath.size() > 1){
+
+			coordinate moveFrom = enemyPath[enemyPath.size() - 1];
+			coordinate moveTo = enemyPath[enemyPath.size() - 2];
+
+			//move LEFT
+			if(moveFrom.col > moveTo.col){
+				x_enemy_pos -= MAX_VELOCITY;
+				y_enemy_pos += 0;
+				if(x_enemy_pos < (moveTo.col * TILE_SIZE + TILE_SIZE + 36)){
+					enemyPath.pop_back();
+				}
+			}
+			//move right
+			if(moveFrom.col < moveTo.col){
+				x_enemy_pos += MAX_VELOCITY;
+				y_enemy_pos += 0;
+				if(x_enemy_pos > (moveTo.col * TILE_SIZE + TILE_SIZE*2 - 20)){
+					enemyPath.pop_back();
+				}
+			}
+			//move up
+			if(moveFrom.row > moveTo.row){
+				x_enemy_pos += 0;
+				y_enemy_pos -= MAX_VELOCITY;
+				if(y_enemy_pos < (moveTo.row * TILE_SIZE + TILE_SIZE + 20)){
+					enemyPath.pop_back();
+				}
+			}
+			//move DOWN
+			if(moveFrom.row < moveTo.row){
+				x_enemy_pos += 0;
+				y_enemy_pos += MAX_VELOCITY;
+				if(y_enemy_pos > (moveTo.row * TILE_SIZE + TILE_SIZE + 20)){
+					enemyPath.pop_back();
+				}
+			}
 		}
+	/*
+		if(destinationReached(x_enemy_pos, y_enemy_pos, moveTo)){
+			enemyPath.pop_back();
+			printf("Move From: {%d, %d}\n", moveFrom.row, moveFrom.col);
+			printf("Move To:   {%d, %d}\n", moveTo.row, moveTo.col);
+		}
+*/
 
 		if(x_enemy_pos == 75){
 			left = false;
