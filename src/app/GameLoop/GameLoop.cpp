@@ -134,10 +134,6 @@ int GameLoop::networkRun() {
 			{
 				client->gameOn = false;
 				// Kill server/client thread
-<<<<<<< HEAD
-=======
-
->>>>>>> 6d7d0db0e7e84e4fe44e72465b7a2adb7b138aaa
 				std::cout << "Killing server process " << server_pid << std::endl;
 				kill(server_pid, SIGTERM);
 			}
@@ -212,37 +208,17 @@ int GameLoop::networkRun() {
  * @return false - Failed to initialize
  */
 bool GameLoop::init(Render* renderer) {
-<<<<<<< HEAD
 
 	Player* player = new Player(SCREEN_WIDTH/2 + 100, 50, true);
-=======
-	player = new Player(SCREEN_WIDTH/2 + 100, 50);
-	enemies.clear();
-	tileArray.clear();
-	enemies.push_back(new Enemy( SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 70, player));
->>>>>>> 6d7d0db0e7e84e4fe44e72465b7a2adb7b138aaa
 	render = renderer;
 	players.push_back(player);
 
 	Sprite *player_tank = new Sprite(render->getRenderer(), "src/res/images/red_tank.png");
 	Sprite *player_turrent = new Sprite(render->getRenderer(), "src/res/images/red_turret.png");
 	player_tank->init();
-<<<<<<< HEAD
 	player_turrent->init();
 	player->setSprite(player_tank);
 	player->setTurretSprite(player_turrent);
-=======
-	player->setSprite(player_tank);
-
-	// Init the enemy
-	//enemies.push_back(new Enemy( SCREEN_WIDTH/2 + 160, SCREEN_HEIGHT - TANK_HEIGHT/2 - 70, player));
-	render->setEnemies(enemies);
-	Sprite *enemy_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
-	enemy_tank->init();
-	for (auto enemy : enemies) {
-		enemy->setSprite(enemy_tank);
-	}
->>>>>>> 6d7d0db0e7e84e4fe44e72465b7a2adb7b138aaa
 
 	isGameOn = true;
 
@@ -285,11 +261,7 @@ void GameLoop::initMapSinglePlayer() {
 	for (auto enemy : enemies) {
 		enemy->setObstacleLocations(&tileArray);
 		enemy->setTileMap(map);
-<<<<<<< HEAD
 		//enemy->setPathway(*map, *players.at(0), *enemy); // single player means player vector is size 1
-=======
-		//enemy->setPathway(*map, *player, *enemy);
->>>>>>> 6d7d0db0e7e84e4fe44e72465b7a2adb7b138aaa
 	}
 }
 
@@ -332,15 +304,10 @@ int GameLoop::runSinglePlayer()
 			}
 		}
 
-<<<<<<< HEAD
 		//checkEscape();
 		for(auto player : players) {
 
 			player->getEvent(elapsed_time, &e);
-=======
-		checkEscape();
-		player->getEvent(elapsed_time);
->>>>>>> 6d7d0db0e7e84e4fe44e72465b7a2adb7b138aaa
 
 			//The player fired a bullet
 			if (player->getFire() == true) {
