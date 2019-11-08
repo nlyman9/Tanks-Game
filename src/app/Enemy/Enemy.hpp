@@ -51,6 +51,8 @@ class Enemy : public Object {
         int yArrPos(float pos);
         int findXBlock(float pos);
         int findYBlock(float pos);
+				float area(float x1, float y1, float x2, float y2, float x3, float y3);
+				bool isInRange(float x1, float y1, float x2, float y2, float x3, float y3, float playerX, float playerY);
 				bool isValidBlock(int x, int y);
 				coordinate findClosestOpenBlock(coordinate start);
 				coordinate newGhostPos(int gX, int gY, int eX, int eY);

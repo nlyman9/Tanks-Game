@@ -53,8 +53,8 @@ Enemy::~Enemy() {}
    //printf("angle: %f\n", angle);
    angle = angle * M_PI / 180;
    int length = SCREEN_WIDTH;
-   float ang1 = angle + .5;
-   float ang2 = angle - .5;
+   float ang1 = angle + .25;
+   float ang2 = angle - .25;
    line1X = cos(ang1) * length + getX();
    line1Y = getY() - sin(ang1) * length;
    line2X = cos(ang2) * length + getX();
@@ -111,6 +111,30 @@ bool Enemy::rotateTurret(float theta) {
     return false;
 }
 
+float Enemy::area(float x1, float y1, float x2, float y2, float x3, float y3){
+  return abs((x1*(y2-y3) + x2*(y3-y1)+ x3*(y1-y2))/2.0);
+}
+
+bool Enemy::isInRange(float x1, float y1, float x2, float y2, float x3, float y3, float playerX, float playerY){
+  //overall area
+  float A = area(x1, y1, x2, y2, x3, y3);
+  //trianlge PBC
+  float a1 = area(playerX, playerY, x2, y2, x3, y3);
+  //triangle PAC
+  float a2 = area(x1, y1, playerX, playerY, x3, y3);
+  //trianlge PAB
+  float a3 = area(x1, y1, x2, y2, playerX, playerY);
+
+  float sum = a1 + a2 + a3;
+
+  if(abs(A - sum) < 1){
+    return true;
+  }
+  else{
+    return false;
+  }
+}
+
 bool Enemy::checkPos(float playX, float playY, float enemX, float enemY) {
   double stepOne = (double)(pow((playX - enemX), 2) + pow((playY - enemY), 2));
 
@@ -163,6 +187,8 @@ float Enemy::getTurretTheta(){
 }
 
 void Enemy::updatePos() {
+  //printf("%d\t", isInRange(x_enemy_pos + TANK_WIDTH/2, y_enemy_pos + TANK_HEIGHT/2, line1X, line1Y, line2X, line2Y, gPlayer->getX() + TANK_WIDTH/2, gPlayer->getY() + TANK_HEIGHT/2));
+  isInRange(x_enemy_pos + TANK_WIDTH/2, y_enemy_pos + TANK_HEIGHT/2, line1X, line1Y, line2X, line2Y, gPlayer->getX() + TANK_WIDTH/2, gPlayer->getY() + TANK_HEIGHT/2);
   if(updateCalls == 400){
     if(rand() % 2 == 0){
       trackOrMonitor = true;
