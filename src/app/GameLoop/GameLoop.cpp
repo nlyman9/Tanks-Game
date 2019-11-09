@@ -60,12 +60,12 @@ bool GameLoop::networkInit(Args *options) {
 	client = new Client(options->ip, options->port);
 	// Init
 	client->init();
+	player2->setClient(client);
 	return true;
 }
 
 void GameLoop::initMapMultiPlayer() {
-	while(!client->pollMap()) {
-	}
+	while(!client->pollMap()) {}
 
 	std::vector<int> tile_map = *client->gameMap;
 	std::vector<std::vector<int>> map2D;
@@ -120,6 +120,7 @@ int GameLoop::networkRun() {
 	ImageLoader imgLoad;
 	SDL_Texture* cursor = imgLoad.loadImage("src/res/images/cursor.png", render->getRenderer());
 
+
 	while (client->gameOn)
 	{
 		current_time = std::chrono::system_clock::now();
@@ -139,14 +140,14 @@ int GameLoop::networkRun() {
 			}
 		}
 
+		std::cout << "Player len: " << players.size() << std::endl;
 		for(auto player : players) {
 			player->getEvent(elapsed_time, &e);
 
+			std::cout << "check fire " << player->getFire() << std::endl;
+
 			//network version of player firing bullet
 			if (player->getFire() == true) {
-
-				//std::cout << "pew\n";
-
 				//Projectile *newlyFired = new Projectile(player->getX(), player->getY());
 				//projectiles.push_back(newlyFired);
 				projectiles.push_back(new Projectile(player->getX(), player->getY(), player->getTurretTheta()));
@@ -159,8 +160,12 @@ int GameLoop::networkRun() {
 				projectiles.back()->setObstacleLocations(&tileArray);
 				player->setFire(false);
 			}
+			fflush(stdout);
+			std::cout << "finish player check fire" << std::endl;
+			fflush(stdout);
 		}
 
+		std::cout << "update" << std::endl;
 		// 2. Update
 		// Update if time since last update is >= MS_PER_UPDATE
 		while(lag_time >= MS_PER_UPDATE) {
@@ -177,6 +182,7 @@ int GameLoop::networkRun() {
 			lag_time -= MS_PER_UPDATE;
 		}
 
+		std::cout << "cursor" << std::endl;
 		// quick and dirty ;)
 		int cursorX = 0, cursorY = 0;
 
@@ -186,7 +192,7 @@ int GameLoop::networkRun() {
 
 		SDL_Rect cursorRect = {cursorX, cursorY, CROSSHAIR_SIZE, CROSSHAIR_SIZE};
 
-
+		std::cout << "render" << std::endl;
 		// 3. Render
 		// Render everything
 		render->draw(lag_time / MS_PER_UPDATE);

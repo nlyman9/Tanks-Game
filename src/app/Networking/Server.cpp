@@ -101,9 +101,7 @@ int serverThread(void* data){
                 SDL_AtomicLock(&slock);
                 if(sendReady){ 
                     //data ready to send
-                    //we do send to i, right? 
                     send(i, sBuffer->data(), sBuffer->size(), 0);
-                    sBuffer->clear();
                 }
                 SDL_AtomicUnlock(&slock);
                 // Check if it is a new connection
@@ -150,35 +148,34 @@ int serverThread(void* data){
                         nbytes = recv(i, rBuffer->data(), R_BUFFER_SIZE, 0);
                         receiveReady = false;
                     }
-                        std::cout << "SERVER: received: " << nbytes << " bytes" << std::endl;
-                        std::cout << "SERVER: Locking receive buffer!" << std::endl;
-                        SDL_AtomicLock(&rlock);
-                        /* 
-                        ALWAYS appends to the rcbuffer and only clears the rcBuffer when data has been used
-                        this makes packet checking more tedious in the gameloop
-                        add the size of each packet to the header?
-                        To do this, we can just appendHeader(size,appendHeader(type, buffer))
-                        strip header -> get size
-                        strip header again -> get type
-                        size should not include header/type so we don't overshoot into the next packet in the queue
-                        */
-                        
-                        if(!receivedData){
-                            //if we have used up received data, clear the buffer
-                            rcBuffer->clear();
-                        }
-                        //otherwise just push it to the end of the buffer
-                        //copy the receive buffer to the double buffer for gloop to use
-                        for(int i = 0; i < R_BUFFER_SIZE; i++)
-                            rcBuffer->push_back(rBuffer->at(i));
-                        rBuffer->clear(); //clear the receive buffer
-                        rBuffer->resize(R_BUFFER_SIZE);
-                        receivedData = true; 
-                        receiveReady = true;
+                    std::cout << "SERVER: received: " << nbytes << " bytes" << std::endl;
+                    std::cout << "SERVER: Locking receive buffer!" << std::endl;
+                    SDL_AtomicLock(&rlock);
+                    /* 
+                    ALWAYS appends to the rcbuffer and only clears the rcBuffer when data has been used
+                    this makes packet checking more tedious in the gameloop
+                    add the size of each packet to the header?
+                    To do this, we can just appendHeader(size,appendHeader(type, buffer))
+                    strip header -> get size
+                    strip header again -> get type
+                    size should not include header/type so we don't overshoot into the next packet in the queue
+                    */
+                    
+                    if(!receivedData){
+                        //if we have used up received data, clear the buffer
+                        rcBuffer->clear();
+                    }
+                    //otherwise just push it to the end of the buffer
+                    //copy the receive buffer to the double buffer for gloop to use
+                    for(int i = 0; i < R_BUFFER_SIZE; i++)
+                        rcBuffer->push_back(rBuffer->at(i));
+                    rBuffer->clear(); //clear the receive buffer
+                    rBuffer->resize(R_BUFFER_SIZE);
+                    receivedData = true; 
+                    receiveReady = true;
 
-                        SDL_AtomicUnlock(&rlock);
-                        std::cout << "SERVER: rBuffer cleared! Unlocked, rcBuffer contains rBuffer!" << std::endl;
-                        //}
+                    SDL_AtomicUnlock(&rlock);
+                    std::cout << "SERVER: rBuffer cleared! Unlocked, rcBuffer contains rBuffer!" << std::endl;
                     
                     if (nbytes <= 0)
                     {
@@ -226,6 +223,7 @@ int serverThread(void* data){
                 }
             }
         }
+
         //end of for loop so clear send buffers
         SDL_AtomicLock(&slock);
         sBuffer->clear();

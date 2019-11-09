@@ -38,7 +38,7 @@ class Player : public Object {
         float y_deltav = 0;
         float velocity = 0;
         float delta_velocity = 0;
-        bool fire = false;
+        bool shotsFired = false;
         Uint32 fire_last_time = 0;
         bool localPlayer;
     public:
