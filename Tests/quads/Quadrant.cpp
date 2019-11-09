@@ -14,6 +14,31 @@ std::vector<Tileset> Quadrant::get_quadrant() {
     return quadrant;
 }
 
+bool Quadrant::tileset_exists(int id) {
+    for (auto& tileset : quadrant) {
+        if (tileset.get_id() == id) return true; 
+    }
+    return false;
+}
+
+bool Quadrant::tileset_exists(Tileset t) {
+    return tileset_exists(t.get_id());
+}
+
+Tileset Quadrant::get_tileset(int id) {
+    // if (!tileset_exists(id)) return nullptr;
+    for (auto& tileset : quadrant) {
+        if (tileset.get_id() == id) {
+            return tileset;
+        }
+    }
+    return quadrant[0]; // return default
+}
+
+Tileset Quadrant::get_tileset(Tileset t) {
+    return get_tileset(t.get_id());
+}
+
 int Quadrant::size() {
     return quadrant.size();
 }

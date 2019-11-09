@@ -20,7 +20,7 @@ class Graph {
     void add_edge(Edge);
     bool edge_exists(Tileset, Tileset);
     void populate_edges();
-    void calculate_weights();
+    // void calculate_weights();
     void print_graph();
     void print_quads_in_graph();
 };

@@ -13,6 +13,10 @@ class Quadrant {
     Quadrant(int);
     // ~Quadrant();
     std::vector<Tileset> get_quadrant();
+    bool tileset_exists(int);
+    bool tileset_exists(Tileset);
+    Tileset get_tileset(int);
+    Tileset get_tileset(Tileset);
     int size();
     int get_id();
     void add(Tileset);

@@ -30,7 +30,7 @@ bool Graph::edge_exists(Tileset s, Tileset d) {
     for (int i = 0; i < adj.size(); i++) {
         if (adj[i].size() > 0) {
             for (int j = 0; j < adj[i].size(); j++) {
-                if (adj[i][j].get_src_id() == s && adj[i][j].get_dst_id() == d) return true;
+                if (adj[i][j].get_src_id() == s.get_id() && adj[i][j].get_dest_id() == d.get_id()) return true;
             }
         }
     }
@@ -47,9 +47,9 @@ bool Graph::edge_exists(Tileset s, Tileset d) {
 void Graph::populate_edges() {
     for (int i = 0; i < quads.size() - 2; i++) {
         for (int j = 0; j < quads[i].size(); j++) {
-            if (!edge_exists(quads[i][j], quads[i + 1][j])) {
-                Edge e(quads[i][j], quads[i + 1][j], 1, 0);
-                adj.add_edge(e);
+            if (!edge_exists(quads[i].get_tileset(j), quads[i + 1].get_tileset(j))) {
+                Edge e(quads[i].get_tileset(j), quads[i + 1].get_tileset(j), 1, 0);
+                adj[e.get_src_id()].push_back(e);
             }
         }
     }
@@ -62,11 +62,11 @@ void Graph::populate_edges() {
  *      Find the number of tilesets in the next quadrant it isn't connected to
  **/
 
-void Graph::calculate_weights() {
-    for (auto& quadrant : quads) {  
-        int tilesets = quadrant.size();
-    }
-}
+// void Graph::calculate_weights() {
+//     for (auto& quadrant : quads) {  
+//         int tilesets = quadrant.size();
+//     }
+// }
 
 void Graph::print_graph() {
     for (int i = 0; i < adj.size(); i++) {
@@ -92,8 +92,9 @@ int main() {
     // q.print_quads();
     // q.print_edges();
     Graph g(q.get_edges(), q.get_quads(), q.get_num_tilesets());
+    // g.populate_edges();
     g.print_graph();
-    g.calculate_weights();
+    // g.calculate_weights();
     // g.print_quads_in_graph();
     return 0;
 }
