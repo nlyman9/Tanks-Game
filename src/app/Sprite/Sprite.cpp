@@ -4,8 +4,7 @@
 Sprite::Sprite(SDL_Renderer *renderer, std::string fname) : gRenderer{renderer}, gFname{fname} {}
 
 void Sprite::init() {
-	ImageLoader imgLoad;
-	texture = imgLoad.loadImage(gFname, gRenderer);
+	texture = loadImage(gFname, gRenderer);
 }
 
 SDL_Texture* Sprite::getTexture() {

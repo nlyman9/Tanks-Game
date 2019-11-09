@@ -10,6 +10,7 @@
 #include "GameLoop.hpp"
 #include "Constants.hpp"
 #include "Sprite.hpp"
+#include "ImageLoader.hpp"
 #include <stdio.h>
 #include <unistd.h>
 #include <iostream>
@@ -117,8 +118,7 @@ int GameLoop::networkRun() {
 	Sprite *shell = new Sprite(render->getRenderer(), "src/res/images/shell.png");
 	shell->init();
 
-	ImageLoader imgLoad;
-	SDL_Texture* cursor = imgLoad.loadImage("src/res/images/cursor.png", render->getRenderer());
+	SDL_Texture* cursor = loadImage("src/res/images/cursor.png", render->getRenderer());
 
 
 	while (client->gameOn)
@@ -291,8 +291,7 @@ int GameLoop::runSinglePlayer()
 	//Create shell sprite
 	Sprite *shell = new Sprite(render->getRenderer(), "src/res/images/shell.png");
 	shell->init();
-	ImageLoader imgLoad;
-	SDL_Texture* cursor = imgLoad.loadImage("src/res/images/cursor.png", render->getRenderer());
+	SDL_Texture* cursor = loadImage("src/res/images/cursor.png", render->getRenderer());
 
 	while (isGameOn)
 	{
