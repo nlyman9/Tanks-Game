@@ -18,6 +18,8 @@ class Graph {
     Graph();
     // ~Graph();
     void add_edge(Edge);
+    Edge get_edge(int, int);
+    bool edge_exists(int, int);
     bool edge_exists(Tileset, Tileset);
     void populate_edges();
     // void calculate_weights();

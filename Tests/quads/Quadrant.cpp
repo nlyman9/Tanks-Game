@@ -27,12 +27,13 @@ bool Quadrant::tileset_exists(Tileset t) {
 
 Tileset Quadrant::get_tileset(int id) {
     // if (!tileset_exists(id)) return nullptr;
-    for (auto& tileset : quadrant) {
-        if (tileset.get_id() == id) {
-            return tileset;
-        }
-    }
-    return quadrant[0]; // return default
+    // for (auto& tileset : quadrant) {
+    //     if (tileset.get_id() == id) {
+    //         return tileset;
+    //     }
+    // }
+    // return quadrant[0]; // return default
+    return quadrant[id];
 }
 
 Tileset Quadrant::get_tileset(Tileset t) {

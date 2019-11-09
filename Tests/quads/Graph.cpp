@@ -26,6 +26,31 @@ void Graph::add_edge(Edge e) {
     adj[e.get_src_id()].push_back(e);
 }
 
+Edge Graph::get_edge(int s_id, int d_id) {
+    for (int i = 0; i < adj.size(); i++) {
+        if (adj[i].size() > 0) {
+            for (int j = 0; j < adj[i].size(); j++) {
+                if (adj[i][j].get_src_id() == s_id && adj[i][j].get_dest_id() == d_id) {
+                    return adj[i][j];
+                }
+            }
+        }
+    }
+}
+
+bool Graph::edge_exists(int s_id, int d_id) {
+    for (int i = 0; i < adj.size(); i++) {
+        if (adj[i].size() > 0) {
+            for (int j = 0; j < adj[i].size(); j++) {
+                if (adj[i][j].get_src_id() == s_id && adj[i][j].get_dest_id() == d_id) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
 bool Graph::edge_exists(Tileset s, Tileset d) {
     for (int i = 0; i < adj.size(); i++) {
         if (adj[i].size() > 0) {
@@ -45,12 +70,18 @@ bool Graph::edge_exists(Tileset s, Tileset d) {
  **/ 
 
 void Graph::populate_edges() {
-    for (int i = 0; i < quads.size() - 2; i++) {
+    for (int i = 0; i < quads.size() - 1; i++) {
         for (int j = 0; j < quads[i].size(); j++) {
-            if (!edge_exists(quads[i].get_tileset(j), quads[i + 1].get_tileset(j))) {
-                Edge e(quads[i].get_tileset(j), quads[i + 1].get_tileset(j), 1, 0);
-                adj[e.get_src_id()].push_back(e);
-            }
+            for (int k = 0; k < quads[i + 1].size(); k++) {
+                if (!edge_exists(quads[i].get_tileset(j).get_id(), quads[i + 1].get_tileset(k).get_id())) {
+                    Edge e(quads[i].get_tileset(j), quads[i + 1].get_tileset(k), 1, 0);
+                    std::cout << "Adding edge between " << e.get_src_id() << " and " << e.get_dest_id() << std::endl;
+                    adj[e.get_src_id()].push_back(e);
+                } else {
+                    std::cout << "Edge already exists between " << quads[i].get_tileset(j).get_id()
+                        << " and " << quads[i + 1].get_tileset(k).get_id() << std::endl;
+                }
+            } 
         }
     }
 }
@@ -92,7 +123,13 @@ int main() {
     // q.print_quads();
     // q.print_edges();
     Graph g(q.get_edges(), q.get_quads(), q.get_num_tilesets());
-    // g.populate_edges();
+    g.populate_edges();
+    // g.
+    // if (g.edge_exists(0, 1)) { 
+    //     std::cout << "Edge exists" << std::endl;
+    // } else {
+    //     std::cout << "Edge does not exist" << std::endl;
+    // }
     g.print_graph();
     // g.calculate_weights();
     // g.print_quads_in_graph();
