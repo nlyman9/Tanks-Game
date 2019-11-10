@@ -216,7 +216,7 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, S
     theta_v = 0;
     shotsFired = false;
 
-    std::cout << "get Event" << std::endl;
+    //std::cout << "get Event" << std::endl;
 
     const Uint8* keystate; 
     if(localPlayer) {
@@ -225,7 +225,7 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, S
         keystate = client->pollKeystate();
     }
 
-    std::cout << "access keystate" << std::endl;
+    //std::cout << "access keystate" << std::endl;
     if (keystate[SDL_SCANCODE_W]) {
         delta_velocity += MAX_PLAYER_VELOCITY;
         x_deltav += delta_velocity * cos((theta * M_PI) / 180);
@@ -244,7 +244,7 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, S
         theta_v += PHI;
     }
 
-    std::cout << "finish keystate" << std::endl;
+    //std::cout << "finish keystate" << std::endl;
     if(e->type == SDL_MOUSEBUTTONDOWN) {
   		Uint32 current_time = SDL_GetTicks();
 
@@ -323,13 +323,13 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, S
     if(e->type == SDL_MOUSEMOTION) {
         SDL_GetMouseState(&mouseX, &mouseY);
     }
-    std::cout << "finish mouse" << std::endl;
+    //std::cout << "finish mouse" << std::endl;
     if(localPlayer && client != nullptr) {
         std::vector<char>* fBuffer = client->getFillBuffer();
         fBuffer->push_back((char)(*keystate));
         appendHeader(fBuffer, (char) 1); // append keystate header
     }
-    std::cout << "finish fill buffer" << std::endl;
+    //std::cout << "finish fill buffer" << std::endl;
 }
 
 /**
