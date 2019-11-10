@@ -38,6 +38,10 @@ Edge Graph::get_edge(int s_id, int d_id) {
     }
 }
 
+std::vector<std::vector<Edge>>* Graph::get_adj() {
+    return &adj;
+}
+
 bool Graph::edge_exists(int s_id, int d_id) {
     for (int i = 0; i < adj.size(); i++) {
         if (adj[i].size() > 0) {
@@ -75,12 +79,12 @@ void Graph::populate_edges() {
             for (int k = 0; k < quads[i + 1].size(); k++) {
                 if (!edge_exists(quads[i].get_tileset(j).get_id(), quads[i + 1].get_tileset(k).get_id())) {
                     Edge e(quads[i].get_tileset(j), quads[i + 1].get_tileset(k), 1, 0);
-                    std::cout << "Adding edge between " << e.get_src_id() << " and " << e.get_dest_id() << std::endl;
+                    // std::cout << "Adding edge between " << e.get_src_id() << " and " << e.get_dest_id() << std::endl;
                     adj[e.get_src_id()].push_back(e);
-                } else {
-                    std::cout << "Edge already exists between " << quads[i].get_tileset(j).get_id()
-                        << " and " << quads[i + 1].get_tileset(k).get_id() << std::endl;
-                }
+                }// } else {
+                //     std::cout << "Edge already exists between " << quads[i].get_tileset(j).get_id()
+                //         << " and " << quads[i + 1].get_tileset(k).get_id() << std::endl;
+                // }
             } 
         }
     }
@@ -93,11 +97,35 @@ void Graph::populate_edges() {
  *      Find the number of tilesets in the next quadrant it isn't connected to
  **/
 
-// void Graph::calculate_weights() {
-//     for (auto& quadrant : quads) {  
-//         int tilesets = quadrant.size();
-//     }
-// }
+void Graph::calculate_weight(std::vector<Edge> edges) {
+    int size = 0, div = 0, remainder = 0, mult = 0, mult_count = 0;
+    size = edges.size();
+    for (int i = 0; i < size; i++) {
+        mult = edges[i].get_multiplier();
+        mult_count += mult;
+    }
+    std::cout << "mult_count: " << mult_count << std::endl;
+    if (mult_count != 0) {
+        div = 100 / mult_count;
+        remainder = 100 % mult_count;
+        for (int i = 0; i < size; i++) {
+            mult = edges[i].get_multiplier();
+            if (remainder > 0) {
+                edges[i].set_weight((mult * div) + remainder);
+                remainder = 0;
+            } else {
+                edges[i].set_weight(mult * div);
+            }
+        std::cout << "Edge[" << i << "] w: " << edges[i].get_weight() << std::endl;
+        }
+    }
+}
+
+void Graph::calculate_weights() {
+    for (auto& v : adj) {
+        calculate_weight(v);
+    }
+}
 
 void Graph::print_graph() {
     for (int i = 0; i < adj.size(); i++) {
@@ -124,12 +152,15 @@ int main() {
     // q.print_edges();
     Graph g(q.get_edges(), q.get_quads(), q.get_num_tilesets());
     g.populate_edges();
+    // std::vector<std::vector<Edge>> edge = g.get_adj();
+    // g.calculate_weight(g.adj[0]);
     // g.
     // if (g.edge_exists(0, 1)) { 
     //     std::cout << "Edge exists" << std::endl;
     // } else {
     //     std::cout << "Edge does not exist" << std::endl;
     // }
+    g.calculate_weights();
     g.print_graph();
     // g.calculate_weights();
     // g.print_quads_in_graph();

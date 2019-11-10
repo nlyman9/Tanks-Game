@@ -10,19 +10,21 @@
 
 class Graph {
   private:
-    std::vector<std::vector<Edge>> adj;
     std::vector<Quadrant> quads;
   public:
+    std::vector<std::vector<Edge>> adj;
     Graph(std::vector<Edge>, std::vector<Quadrant>, int);
     Graph(int);
     Graph();
     // ~Graph();
     void add_edge(Edge);
     Edge get_edge(int, int);
+    std::vector<std::vector<Edge>>* get_adj();
     bool edge_exists(int, int);
     bool edge_exists(Tileset, Tileset);
     void populate_edges();
-    // void calculate_weights();
+    void calculate_weight(std::vector<Edge>);
+    void calculate_weights();
     void print_graph();
     void print_quads_in_graph();
 };
