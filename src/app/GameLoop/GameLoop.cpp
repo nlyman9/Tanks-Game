@@ -312,7 +312,7 @@ int GameLoop::runSinglePlayer()
 			//The player fired a bullet
 			if (player->getFire() == true) {
 
-				projectiles.push_back(new Projectile(player->getX(), player->getY(), player->getTurretTheta()));
+				projectiles.push_back(new Projectile(player->getX() + TANK_WIDTH/4, player->getY() + TANK_HEIGHT/4, player->getTurretTheta()));
 
 				std::cout << projectiles.back()->getX() << ", " << projectiles.back()->getY() << "; " << projectiles.back()->getTheta() << std::endl;
 
@@ -321,6 +321,17 @@ int GameLoop::runSinglePlayer()
 				//newlyFired->setSprite(bullet);
 				projectiles.back()->setObstacleLocations(&tileArray);
 				player->setFire(false);
+			}
+		}
+
+		for(auto enemy : enemies) {
+			if(enemy->getFire() == true){
+				projectiles.push_back(new Projectile(enemy->getX() + TANK_WIDTH/4, enemy->getY() + TANK_HEIGHT/4, enemy->getTurretTheta()));
+
+				render->gProjectiles.push_back(projectiles.back());
+				projectiles.back()->setSprite(shell);
+				projectiles.back()->setObstacleLocations(&tileArray);
+				enemy->setFire(false);
 			}
 		}
 
