@@ -32,6 +32,8 @@
 #include "Network.hpp"
 
 #define R_BUFFER_SIZE 152
+
+#define NUM_PLAYERS 2
 //bools for receive
 bool receiveReady = true;
 bool receivedData = false;
@@ -139,7 +141,7 @@ int serverThread(void* data){
                         //sBuffer sent so unlock it
                         SDL_AtomicUnlock(&slock);
                         std::cout << "SERVER: Sent map data number of connections : " << connections << std::endl;
-                        if(connections == 2){   
+                        if(connections == NUM_PLAYERS){   
                             std::cout << "is this setting true?" << std::endl;
                             *sendSignal = true;        
                         }
@@ -169,7 +171,10 @@ int serverThread(void* data){
     }
     std::cout << "SERVER: Proceeding to send/receive loop there are: " << connections << " connections." << std::endl;
     delete sendSignal;
-    int sentTo[2] = {0,0};
+    int sentTo[NUM_PLAYERS];
+    for(int i = 0 ; i < NUM_PLAYERS ; i++){
+        sentTo[i] = 0;
+    }
     // Loop of server
     while (gameOn)
     {
@@ -189,12 +194,17 @@ int serverThread(void* data){
                 SDL_AtomicLock(&slock);
                 if(sendReady){ 
                     //data ready to send
-                    if(sentTo[0] == 0 || sentTo[1] == 0)
-                        send(i, sBuffer->data(), sBuffer->size(), 0);
-                    if(sentTo[0] > 0)
-                        sentTo[1] = i+1;
-                    else
-                        sentTo[0] = i+1;
+                    //check if there are any players left to send data to
+                    //since this loops 0 to max we should not have to
+                    //deal with checking if the current socket has already been sent to
+                    //if we do need to deal with that, add a for loop
+                    //check if i+1 is within the sentTo array
+                    for(int j = 0; j < NUM_PLAYERS; j++){
+                        if(sentTo[j] == 0){
+                            send(i, sBuffer->data(), sBuffer->size(), 0);
+                            sentTo[j] = i+1;
+                        }
+                    }
                 }
                 SDL_AtomicUnlock(&slock);  
                 if(receiveReady){ //if the receive buffer has been copied to the second buffer, be ready to receive more!
@@ -261,13 +271,17 @@ int serverThread(void* data){
         }
 
         //end of for loop so clear send buffers - if we've sent to both players
-        if(sentTo[0] > 0 && sentTo[1] > 0){
-            SDL_AtomicLock(&slock);
-            sBuffer->clear();
-            sendReady = false;
-            SDL_AtomicUnlock(&slock);
-            sentTo[0] = 0;
-            sentTo[1] = 0;
+        for(int j = 0; j < NUM_PLAYERS; j++){
+            if(sentTo[j] == 0) //a player has not received data yet!
+                break;
+            if(j == NUM_PLAYERS - 1){ //all players were sent the data, clear the buffer
+                SDL_AtomicLock(&slock);
+                sBuffer->clear();
+                sendReady = false;
+                SDL_AtomicUnlock(&slock);
+                sentTo[0] = 0;
+                sentTo[1] = 0;
+            }
         }
     }
 
