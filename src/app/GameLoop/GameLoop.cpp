@@ -144,7 +144,7 @@ int GameLoop::networkRun() {
 		for(auto player : players) {
 			player->getEvent(elapsed_time, &e);
 
-			//std::cout << "check fire " << player->getFire() << std::endl;
+			std::cout << "check fire " << player->getFire() << std::endl;
 
 			//network version of player firing bullet
 			if (player->getFire() == true) {
@@ -161,7 +161,7 @@ int GameLoop::networkRun() {
 				player->setFire(false);
 			}
 			fflush(stdout);
-			//std::cout << "finish player check fire" << std::endl;
+			std::cout << "finish player check fire" << std::endl;
 			fflush(stdout);
 		}
 
@@ -314,7 +314,7 @@ int GameLoop::runSinglePlayer()
 
 		//checkEscape();
 		for(auto player : players) {
-
+			
 			player->getEvent(elapsed_time, &e);
 
 			//The player fired a bullet

@@ -152,13 +152,13 @@ int serverThread(void* data){
                     std::cout << "SERVER: Locking receive buffer!" << std::endl;
                     SDL_AtomicLock(&rlock);
                     /* 
-                    ALWAYS appends to the rcbuffer and only clears the rcBuffer when data has been used
-                    this makes packet checking more tedious in the gameloop
-                    add the size of each packet to the header?
-                    To do this, we can just appendHeader(size,appendHeader(type, buffer))
-                    strip header -> get size
-                    strip header again -> get type
-                    size should not include header/type so we don't overshoot into the next packet in the queue
+                        ALWAYS appends to the rcbuffer and only clears the rcBuffer when data has been used
+                        this makes packet checking more tedious in the gameloop
+                        add the size of each packet to the header?
+                        To do this, we can just appendHeader(size,appendHeader(type, buffer))
+                        strip header -> get size
+                        strip header again -> get type
+                        size should not include header/type so we don't overshoot into the next packet in the queue
                     */
                     
                     if(!receivedData){
@@ -175,8 +175,10 @@ int serverThread(void* data){
                     receiveReady = true;
 
                     SDL_AtomicUnlock(&rlock);
-                    std::cout << "SERVER: rBuffer cleared! Unlocked, rcBuffer contains rBuffer!" << std::endl;
-                    
+                    std::cout << "SERVER: rBuffer cleared! Unlocked, rcBuffer contains rBuffer! In rcBuffer we have : ";
+                    for(auto x : *rcBuffer)
+                        std::cout << x << " ";
+                    std::cout << std::endl;
                     if (nbytes <= 0)
                     {
                         // Either error or closed connection
@@ -186,6 +188,8 @@ int serverThread(void* data){
                             // remember to close the fd
                             close(i);
                             FD_CLR(i, &master); // Remove from master set
+                            //exit if someone disconnects
+                            exit(0);
                         }
                         else
                         {
