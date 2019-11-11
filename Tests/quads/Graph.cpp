@@ -18,10 +18,6 @@ Graph::Graph() {
     adj.resize(10);
 }
 
-// Graph::~Graph() {
-//     delete[] &adj;
-// }
-
 void Graph::add_edge(Edge e) {
     adj[e.get_src_id()].push_back(e);
 }
@@ -148,21 +144,10 @@ void Graph::print_quads_in_graph() {
 int main() {
     Quads q;
     q.make_quads();
-    // q.print_quads();
-    // q.print_edges();
     Graph g(q.get_edges(), q.get_quads(), q.get_num_tilesets());
     g.populate_edges();
-    // std::vector<std::vector<Edge>> edge = g.get_adj();
-    // g.calculate_weight(g.adj[0]);
-    // g.
-    // if (g.edge_exists(0, 1)) { 
-    //     std::cout << "Edge exists" << std::endl;
-    // } else {
-    //     std::cout << "Edge does not exist" << std::endl;
-    // }
     g.calculate_weights();
     g.print_graph();
-    // g.calculate_weights();
-    // g.print_quads_in_graph();
+    g.print_quads_in_graph();
     return 0;
 }
