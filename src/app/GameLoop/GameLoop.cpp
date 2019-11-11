@@ -119,8 +119,9 @@ int GameLoop::networkRun() {
 	shell->init();
 
 	SDL_Texture* cursor = loadImage("src/res/images/cursor.png", render->getRenderer());
-
-
+	//wait for both players to connect
+	while(!client->startGame)
+	sleep(0.1); 
 	while (client->gameOn)
 	{
 		current_time = std::chrono::system_clock::now();
@@ -141,9 +142,12 @@ int GameLoop::networkRun() {
 		}
 
 		std::cout << "Player len: " << players.size() << std::endl;
+		int i = 0;
 		for(auto player : players) {
+			std::cout << "i is : " << i << std::endl;
+			fflush(stdout);
 			player->getEvent(elapsed_time, &e);
-
+			
 			std::cout << "check fire " << player->getFire() << std::endl;
 
 			//network version of player firing bullet
@@ -163,6 +167,7 @@ int GameLoop::networkRun() {
 			fflush(stdout);
 			std::cout << "finish player check fire" << std::endl;
 			fflush(stdout);
+			i++;
 		}
 
 		std::cout << "update" << std::endl;

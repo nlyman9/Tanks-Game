@@ -68,7 +68,7 @@ int clientThread(void* data) {
     fdmax = sockfd;
 
     std::cout << "CLIENT: Receive thread created!" << std::endl;
-
+    crClient->startGame = false;
     // Game loop
     while(crClient->gameOn) {
         if(gameBufferReady) {
@@ -102,6 +102,7 @@ int clientThread(void* data) {
                     ->strip again get the type of the packet
                 */
                 //received data
+                std::cout << "CLIENT: Received data in rcBuffer : " << rcBuffer->data() << std::endl;
                 int size = stripHeader(rcBuffer);
                 int header = stripHeader(rcBuffer);
                 switch(header)
@@ -145,6 +146,13 @@ int clientThread(void* data) {
                        break;
                     }
 
+                    // Receive game start flag from server
+                    case 4:
+                    {
+                        std::cout << "Received start game packet!" << std::endl;
+                        crClient->startGame = true;
+                        break;
+                    }
                     default:
                     {
                         std::cout << "CLIENT: HELP ILLEGAL PACKET RECEIVED" << std::endl;
@@ -209,7 +217,6 @@ Uint8* Client::pollKeystate() {
         return emptyKeystate;
     }
 }
-
 bool Client::init() {
     gameMap = new std::vector<int>();
     //initialize all buffers
@@ -225,8 +232,8 @@ bool Client::init() {
     // Pack Client into void pointer for thread
     void* clientInfo = malloc(sizeof(long));
     clientInfo = (void*) this;
-    gameOn = true;
     rcThread = SDL_CreateThread(clientThread, "myThread", (void*) clientInfo);
+    gameOn = true;
     return true;
 }
 

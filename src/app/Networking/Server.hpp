@@ -30,7 +30,6 @@ int fdmax;          // maximum file descriptor number
 int nbytes;
 socklen_t addr_len;
 std::vector<char> packedMap;
-
 bool gameOn;
 //server buffers
 //buffer received
