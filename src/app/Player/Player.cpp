@@ -61,7 +61,12 @@ void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
     SDL_Rect* dst = get_box();
     SDL_Rect* turret_dst = get_box();
 
-    SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), NULL, dst, theta, NULL, SDL_FLIP_NONE);
+	if (x_vel != 0 || y_vel != 0 && SDL_GetTicks() - anim_last_time > 100) {
+		frame = (frame + 1) % 3;
+		anim_last_time = SDL_GetTicks();
+	}
+
+    SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), getSprite()->getFrame(frame), dst, theta, NULL, SDL_FLIP_NONE);
     SDL_RenderCopyEx(gRenderer, getTurretSprite()->getTexture(), NULL, turret_dst, turretTheta, NULL, SDL_FLIP_NONE);
 }
 

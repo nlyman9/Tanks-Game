@@ -220,9 +220,14 @@ bool GameLoop::init(Render* renderer) {
 	players.push_back(player);
 
 	Sprite *player_tank = new Sprite(render->getRenderer(), "src/res/images/red_tank.png");
-	Sprite *player_turrent = new Sprite(render->getRenderer(), "src/res/images/red_turret.png");
+	Sprite *pinksplosion =  new Sprite(render->getRenderer(), "src/res/images/pinksplosion.png");
 	player_tank->init();
+	player_tank->sheetSetup(30, 30, 3);
+	
+	
+	Sprite *player_turrent = new Sprite(render->getRenderer(), "src/res/images/red_turret.png");
 	player_turrent->init();
+	
 	player->setSprite(player_tank);
 	player->setTurretSprite(player_turrent);
 
@@ -256,9 +261,12 @@ void GameLoop::initMapSinglePlayer() {
 	enemies.push_back(new Enemy( SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, players.at(0))); // single player means player vector is size 1
 	render->setEnemies(enemies);
 	Sprite *enemy_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
-	Sprite *enemy_turrent = new Sprite(render-> getRenderer(), "src/res/images/blue_turret.png");
 	enemy_tank->init();
+	enemy_tank->sheetSetup(30, 30, 3);
+	
+	Sprite *enemy_turrent = new Sprite(render-> getRenderer(), "src/res/images/blue_turret.png");
 	enemy_turrent->init();
+
 	for (auto enemy : enemies) {
 		enemy->setSprite(enemy_tank);
 		enemy->setTurretSprite(enemy_turrent);

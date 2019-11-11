@@ -30,6 +30,8 @@ class Enemy : public Object {
         float x_enemy_pos, y_enemy_pos;
         Player* gPlayer;
         bool left = true;
+		int frame = 0;
+		bool anim_last_time = 0;
         std::vector<coordinate> enemyPath;
 
 				int theta = 0;
@@ -52,6 +54,8 @@ class Enemy : public Object {
         std::vector<coordinate> generatePath(std::vector<std::vector<int>> move_map, Player player, Enemy enemy);
 				bool validMove(coordinate moveTo, coordinate currentlyAt);
         std::vector<std::vector<int>> tile_map;
+		
+		
     public:
 				Enemy(Sprite* sprite, Sprite* turret, int x, int y, Player* player); //constructor, initialize the x, y, and sprite
         Enemy(float x, float y, Player* player); //constructor, initialize the x, y, and sprite

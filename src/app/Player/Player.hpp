@@ -41,6 +41,9 @@ class Player : public Object {
         bool shotsFired = false;
         Uint32 fire_last_time = 0;
         bool localPlayer;
+		Uint32 anim_last_time = 0;
+		int frame = 0;
+		
     public:
         Player(Sprite *sprite, Sprite *turret, float x, float y, bool local); //constructor, initialize the x, y, and sprite
         Player(float x, float y, bool local); //constructor, initialize the x, snd y
