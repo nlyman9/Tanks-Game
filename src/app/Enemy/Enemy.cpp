@@ -186,10 +186,26 @@ float Enemy::getTurretTheta(){
   return turretTheta;
 }
 
+bool Enemy::getFire(){
+  return shotsFired;
+}
+
+void Enemy::setFire(bool fire){
+  shotsFired = fire;
+}
+
 void Enemy::updatePos() {
   //printf("%d\t", isInRange(x_enemy_pos + TANK_WIDTH/2, y_enemy_pos + TANK_HEIGHT/2, line1X, line1Y, line2X, line2Y, gPlayer->getX() + TANK_WIDTH/2, gPlayer->getY() + TANK_HEIGHT/2));
-  isInRange(x_enemy_pos + TANK_WIDTH/2, y_enemy_pos + TANK_HEIGHT/2, line1X, line1Y, line2X, line2Y, gPlayer->getX() + TANK_WIDTH/2, gPlayer->getY() + TANK_HEIGHT/2);
-  if(updateCalls == 400){
+
+  if(isInRange(x_enemy_pos + TANK_WIDTH/2, y_enemy_pos + TANK_HEIGHT/2, line1X, line1Y, line2X, line2Y, gPlayer->getX() + TANK_WIDTH/2, gPlayer->getY() + TANK_HEIGHT/2)){
+    Uint32 current_time = SDL_GetTicks();
+    if(current_time > fire_last_time + 3000){
+      setFire(true);
+      fire_last_time = current_time;
+    }
+  }
+
+  if(updateCalls == 300){
     if(rand() % 2 == 0){
       trackOrMonitor = true;
     }

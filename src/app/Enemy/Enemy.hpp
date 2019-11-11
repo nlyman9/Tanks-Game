@@ -40,6 +40,9 @@ class Enemy : public Object {
 				bool trackOrMonitor = false;
 				bool rotateUp = true;
 
+				Uint32 fire_last_time = 0;
+				bool shotsFired = false;
+
         bool checkPos(float playX, float playY, float enemX, float enemY);
         bool checkWall(float x, float y);
 		//	just wondering if we want to put some kind of custom acceleration on enemies?
@@ -73,6 +76,8 @@ class Enemy : public Object {
         bool rotateEnemy(float theta);	//	rotate the object
         bool rotateTurret(float theta);	//	rotate the turret
 
+				bool getFire();
+				void setFire(bool fire);
         float getX();
         float getY();
 				float getTurretTheta();
