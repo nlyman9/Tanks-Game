@@ -103,8 +103,8 @@ bool Enemy::fire() {
     return false;
 }
 
-bool Enemy::rotateEnemy(float theta) {
-    return false;
+bool Enemy::rotateEnemy(float t) {
+  return true;
 }
 
 bool Enemy::rotateTurret(float theta) {
@@ -276,6 +276,25 @@ void Enemy::updatePos() {
 
   int startingPosition =  SCREEN_WIDTH - TANK_WIDTH/2 - 75;
 
+  //Get direction of current direction moving
+  if (theta == 0) {
+    moveRight = true;
+    rightLeft = true;
+  }
+  else if (theta == 90){
+    moveDown = true;
+    upDown = true;
+  }
+  else if (theta == 180) {
+    moveLeft = true;
+    rightLeft = true;
+  }
+  else if (theta == 270) {
+    moveUp = true;
+    upDown = true;
+  }
+
+
   if(enemyPath.size() > 1){
 
     coordinate moveFrom = enemyPath[enemyPath.size() - 1];
@@ -283,59 +302,116 @@ void Enemy::updatePos() {
 
     //move LEFT
     if(moveFrom.col > moveTo.col){
-      //std::cout << "Moving left" << std::endl;
-      x_enemy_pos -= MAX_VELOCITY;
-      y_enemy_pos += 0;
-      if(x_enemy_pos < (moveTo.col * TILE_SIZE + TILE_SIZE + 36)){
-        enemyPath.pop_back();
+      if (moveLeft || rightLeft) {
+        //std::cout << "Moving left" << std::endl;
+        x_enemy_pos -= MAX_VELOCITY;
+        y_enemy_pos += 0;
+        if(x_enemy_pos < (moveTo.col * TILE_SIZE + TILE_SIZE + 36)){
+          enemyPath.pop_back();
+        }
+        //check collision with player
+        if (overlap != nullptr) {
+          x_enemy_pos += MAX_VELOCITY;
+          //std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
+        }
       }
-      //check collision with player
-      if (overlap != nullptr) {
-        x_enemy_pos += MAX_VELOCITY;
-        //std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
+      else {
+        //don't move and rotate the tank by updating the theta
+        if (theta > 180) {
+          theta -= PHI;
+        }
+        else {
+          theta += PHI;
+        }
+        //std::cout << "Updated theta to go left: " << theta << std::endl;
+        setFalse();
       }
     }
     //move right
     if(moveFrom.col < moveTo.col){
-      //std::cout << "Moving right" << std::endl;
-      x_enemy_pos += MAX_VELOCITY;
-      y_enemy_pos += 0;
-      if(x_enemy_pos > (moveTo.col * TILE_SIZE + TILE_SIZE*2 - 20)){
-        enemyPath.pop_back();
+      if (moveRight || rightLeft) {
+        //std::cout << "Moving right" << std::endl;
+        x_enemy_pos += MAX_VELOCITY;
+        y_enemy_pos += 0;
+        if(x_enemy_pos > (moveTo.col * TILE_SIZE + TILE_SIZE*2 - 20)){
+          enemyPath.pop_back();
+        }
+        //check collision
+        if (overlap != nullptr) {
+          x_enemy_pos -= MAX_VELOCITY;
+          //std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
+        }
       }
-      //check collision
-      if (overlap != nullptr) {
-        x_enemy_pos -= MAX_VELOCITY;
-        //std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
+      else {
+        if (theta > 270) {
+          //If pointed up, rotate right
+          theta += PHI;
+          if (theta == 360) { //ensure it can go to the right now
+            theta = 0;
+          }
+        }
+        else {
+          //If pointed down, rotate left
+          theta -= PHI;
+        }
+        //std::cout << "Updated theta to go right: " << theta << std::endl;
+        setFalse();
       }
     }
     //move up
     if(moveFrom.row > moveTo.row){
-      x_enemy_pos += 0;
-      y_enemy_pos -= MAX_VELOCITY;
-      if(y_enemy_pos < (moveTo.row * TILE_SIZE + TILE_SIZE + 20)){
-        enemyPath.pop_back();
+      if (moveUp || upDown) {
+        x_enemy_pos += 0;
+        y_enemy_pos -= MAX_VELOCITY;
+        if(y_enemy_pos < (moveTo.row * TILE_SIZE + TILE_SIZE + 20)){
+          enemyPath.pop_back();
+        }
+        //check collision
+        if (overlap != nullptr) {
+          y_enemy_pos += MAX_VELOCITY;
+          //std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
+        }
       }
-      //check collision
-      if (overlap != nullptr) {
-        y_enemy_pos += MAX_VELOCITY;
-        //std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
+      else {
+        if (theta > 270) {
+          theta -= PHI;
+        }
+        else {    //theta has to be 0 here and since 0 - 3 would not work, set to 360
+          theta = 360;
+          theta -= PHI;
+        }
+        //std::cout << "Updated theta to go up: " << theta << std::endl;
+        setFalse();
       }
     }
     //move DOWN
     if(moveFrom.row < moveTo.row){
-      x_enemy_pos += 0;
-      y_enemy_pos += MAX_VELOCITY;
-      if(y_enemy_pos > (moveTo.row * TILE_SIZE + TILE_SIZE + 20)){
-        enemyPath.pop_back();
+      if (moveDown || upDown) {
+        x_enemy_pos += 0;
+        y_enemy_pos += MAX_VELOCITY;
+        if(y_enemy_pos > (moveTo.row * TILE_SIZE + TILE_SIZE + 20)){
+          enemyPath.pop_back();
+        }
+        //check collision
+        if (overlap != nullptr) {
+          y_enemy_pos -= MAX_VELOCITY;
+          //std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
+        }
       }
-      //check collision
-      if (overlap != nullptr) {
-        y_enemy_pos -= MAX_VELOCITY;
-        //std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
+      else {
+        if (theta > 90) {
+          theta -= PHI;
+        }
+        else {
+          theta += PHI;
+        }
+        //std::cout << "Updated theta to go down: " << theta << std::endl;
+        setFalse();
       }
     }
   }
+  rotateEnemy(theta);       //update enemy rotation to match direction
+
 
   SDL_Rect* box = get_box(); // required to update box    //Enemy box is within 8 pixels of an obstacle
   /*
@@ -418,6 +494,7 @@ int Enemy::xArrPosL(float pos) {
 void Enemy::setTileMap(std::vector<std::vector<int>>* tileMap) {
 	tile_map = *tileMap;
 }
+
 
 /** TODO Finish implementation once theta is added to enemy.
  * @brief Get the bounding box of the player's tank
@@ -778,4 +855,13 @@ int Enemy::findYBlock(float pos) {
 	int trueY = center - TILE_SIZE;
 	int block = trueY / TILE_SIZE;
 	return block;
+}
+
+void Enemy::setFalse() {
+  moveUp = false;
+  moveDown = false;
+  moveLeft = false;
+  moveRight = false;
+  rightLeft = false;
+  upDown = false;
 }

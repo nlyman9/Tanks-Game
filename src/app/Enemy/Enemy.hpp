@@ -39,6 +39,13 @@ class Enemy : public Object {
 				int updateCalls = 0;
 				bool trackOrMonitor = false;
 				bool rotateUp = true;
+				bool moveUp = false;
+				bool moveDown = false;
+				bool moveLeft = false;
+				bool moveRight = false;
+				bool rightLeft = false;
+				bool upDown = false;
+
 
 				Uint32 fire_last_time = 0;
 				bool shotsFired = false;
@@ -49,6 +56,7 @@ class Enemy : public Object {
 		//	this is just a note for the future since the online pitt library won't let me open the book I found
 		//	but maybe we'll eventually have a setting for the ai's current state (searching, pathing, running away, etc)
 				void findEndValues(float angle);
+				void setFalse();	//reset direction booleans to false
 				int xArrPosL(float pos);
         int xArrPosR(float pos);
         int yArrPos(float pos);
