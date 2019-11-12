@@ -76,7 +76,7 @@ void Player::update() {
     float delta_y = mouseY - (getY() + TANK_HEIGHT / 2);
     float theta_radians = atan2(delta_y, delta_x);
     mouseTheta = (int)(theta_radians * 180 / M_PI);
-    mouseTheta = (int)(theta_radians * 180 / M_PI); 
+    mouseTheta = (int)(theta_radians * 180 / M_PI);
     turretTheta = mouseTheta;
 
     // Move player
@@ -216,7 +216,6 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, S
     theta_v = 0;
     fire = false;
 
-    const Uint8* keystate;
     const Uint8* keystate; 
     if(localPlayer) {
         keystate = SDL_GetKeyboardState(nullptr);
