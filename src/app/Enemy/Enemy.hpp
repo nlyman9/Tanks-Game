@@ -45,9 +45,12 @@ class Enemy : public Object {
 				bool moveRight = false;
 				bool rightLeft = false;
 				bool upDown = false;
+				bool wander = false;
 
 
 				Uint32 fire_last_time = 0;
+				Uint32 last_state_change = 0;
+				Uint32 turret_mode_change = 0;
 				bool shotsFired = false;
 
         bool checkPos(float playX, float playY, float enemX, float enemY);
@@ -67,6 +70,7 @@ class Enemy : public Object {
 				bool isValidBlock(int x, int y);
 				coordinate findClosestOpenBlock(coordinate start);
 				coordinate newGhostPos(int gX, int gY, int eX, int eY);
+				coordinate randGhostPos(int eX, int eY);
         std::vector<coordinate> generatePath(std::vector<std::vector<int>> move_map, Player player, Enemy enemy);
 				bool validMove(coordinate moveTo, coordinate currentlyAt);
         std::vector<std::vector<int>> tile_map;

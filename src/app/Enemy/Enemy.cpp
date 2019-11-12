@@ -34,7 +34,7 @@ Enemy::~Enemy() {}
 
    // Render enemy
    // SDL_Rect src = {0, 0, 48, 48};
-   SDL_Rect dst = {x_enemy_pos, y_enemy_pos, TANK_WIDTH, TANK_HEIGHT};
+   SDL_Rect dst = {(int)x_enemy_pos, (int)y_enemy_pos, TANK_WIDTH, TANK_HEIGHT};
    // SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), &src, &dst, 0, NULL, SDL_FLIP_NONE);
    //SDL_Rect pos = {(int)x_enemy_pos, (int)y_enemy_pos, TANK_WIDTH, TANK_HEIGHT};
    //SDL_Rect* dst = get_box();
@@ -196,23 +196,23 @@ void Enemy::setFire(bool fire){
 
 void Enemy::updatePos() {
   //printf("%d\t", isInRange(x_enemy_pos + TANK_WIDTH/2, y_enemy_pos + TANK_HEIGHT/2, line1X, line1Y, line2X, line2Y, gPlayer->getX() + TANK_WIDTH/2, gPlayer->getY() + TANK_HEIGHT/2));
+  Uint32 current_time = SDL_GetTicks();
 
   if(isInRange(x_enemy_pos + TANK_WIDTH/2, y_enemy_pos + TANK_HEIGHT/2, line1X, line1Y, line2X, line2Y, gPlayer->getX() + TANK_WIDTH/2, gPlayer->getY() + TANK_HEIGHT/2)){
-    Uint32 current_time = SDL_GetTicks();
     if(current_time > fire_last_time + 3000){
       setFire(true);
       fire_last_time = current_time;
     }
   }
 
-  if(updateCalls == 300){
+  if(current_time > turret_mode_change + 3000){
     if(rand() % 2 == 0){
       trackOrMonitor = true;
     }
     else{
       trackOrMonitor = false;
     }
-    updateCalls = 0;
+    turret_mode_change = current_time;
   }
   if(trackOrMonitor){
     //hi frems
@@ -240,9 +240,17 @@ void Enemy::updatePos() {
       }
     }
   }
-  //printf("turret theta: %f\n", turretTheta);
-  updateCalls++;
 
+  if(current_time > last_state_change + 5000){
+    if(rand() % 3 == 0){
+      wander = true;
+    }
+    else{
+      wander = false;
+    }
+    enemyPath.clear();
+    last_state_change = current_time;
+  }
 
   if(enemyPath.size() < randCut){
     setPathway(this->tile_map, *this->gPlayer, *this);
@@ -436,18 +444,21 @@ void Enemy::updatePos() {
     }
 	}
 
-
-  if(x_enemy_pos > SCREEN_WIDTH - 2*TANK_WIDTH) {
-    x_enemy_pos = SCREEN_WIDTH - 2*TANK_WIDTH;
+  if (x_enemy_pos + TANK_WIDTH > SCREEN_WIDTH - TILE_SIZE - 16)
+  {
+      x_enemy_pos = SCREEN_WIDTH - TILE_SIZE - 16 - TANK_WIDTH;
   }
-  if(x_enemy_pos < TILE_SIZE){
-    x_enemy_pos = TILE_SIZE;
+  if (x_enemy_pos < TILE_SIZE + 16)
+  {
+      x_enemy_pos = TILE_SIZE + 16;
   }
-  if(y_enemy_pos < TILE_SIZE){
-    y_enemy_pos = TILE_SIZE;
+  if (y_enemy_pos < TILE_SIZE)
+  {
+      y_enemy_pos = TILE_SIZE;
   }
-  if(y_enemy_pos > SCREEN_HEIGHT - 2*TANK_HEIGHT) {
-    y_enemy_pos = SCREEN_HEIGHT - 2*TANK_HEIGHT;
+  if (y_enemy_pos + TANK_HEIGHT > SCREEN_HEIGHT - TILE_SIZE)
+  {
+      y_enemy_pos = SCREEN_HEIGHT - TILE_SIZE - TANK_HEIGHT;
   }
 }
 
@@ -531,16 +542,51 @@ void Enemy::setPathway(std::vector<std::vector<int>> move_map, Player player, En
   int ghostYblock = findYBlock(player.getY());
   int enemyXblock = findXBlock(enemy.getX());
   int enemyYblock = findYBlock(enemy.getY());
-  if(abs(ghostXblock - enemyXblock) < 2 && abs(ghostYblock - enemyYblock) < 2){
+  if(abs(ghostXblock - enemyXblock) < 2 && abs(ghostYblock - enemyYblock) < 2 && !wander){
     enemyPath = generatePath(move_map, player, enemy);
   }
   else{
-    coordinate newGhostPos = Enemy::newGhostPos(ghostXblock, ghostYblock, enemyXblock, enemyYblock);
-    int ghostX = newGhostPos.col * TILE_SIZE + TILE_SIZE + BORDER_GAP;
-    int ghostY = newGhostPos.row * TILE_SIZE + TILE_SIZE;
-    Player* ghost = new Player(ghostX, ghostY, true);
-    enemyPath = generatePath(move_map, *ghost, enemy);
+    if(wander){
+      coordinate randGhostPos = Enemy::randGhostPos(enemyXblock, enemyYblock);
+      int randGhostX = randGhostPos.col * TILE_SIZE + TILE_SIZE + BORDER_GAP;
+      int randGhostY = randGhostPos.row * TILE_SIZE + TILE_SIZE;
+      Player* randGhost = new Player(randGhostX, randGhostY, true);
+      enemyPath = generatePath(move_map, *randGhost, enemy);
+    }
+    else{
+      coordinate newGhostPos = Enemy::newGhostPos(ghostXblock, ghostYblock, enemyXblock, enemyYblock);
+      int ghostX = newGhostPos.col * TILE_SIZE + TILE_SIZE + BORDER_GAP;
+      int ghostY = newGhostPos.row * TILE_SIZE + TILE_SIZE;
+      Player* ghost = new Player(ghostX, ghostY, true);
+      enemyPath = generatePath(move_map, *ghost, enemy);
+    }
   }
+}
+
+coordinate Enemy::randGhostPos(int eX, int eY){
+  int randX = rand() % 3;
+  int randY = rand() % 3;
+  coordinate newPos = {eY, eX, 0};
+
+  if(randX == 0){
+    newPos.row -= 1;
+  }
+  else if(randX == 1){
+    newPos.row += 1;
+  }
+
+  if(randY == 0){
+    newPos.col -= 1;
+  }
+  else if(randY == 1){
+    newPos.col += 1;
+  }
+
+  if(!isValidBlock(newPos.row, newPos.col)){
+    newPos = findClosestOpenBlock(newPos);
+  }
+  return newPos;
+
 }
 
 coordinate Enemy::newGhostPos(int gX, int gY, int eX, int eY){
@@ -839,7 +885,7 @@ std::vector<coordinate> Enemy::generatePath(std::vector<std::vector<int>> move_m
 	}
 
 	printf("\n");
-  */
+*/
 	return finalPath;
 }
 
