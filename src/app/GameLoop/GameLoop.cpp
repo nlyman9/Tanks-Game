@@ -48,20 +48,20 @@ bool GameLoop::networkInit(Args *options) {
 		}
 	}
 
-	Player* player2 = new Player(SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, false);
-	Sprite* player_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
-	Sprite* player_turrent = new Sprite(render->getRenderer(), "src/res/images/red_turret.png");
-	player_tank->init();
-	player_turrent->init();
-	player2->setSprite(player_tank);
-	player2->setTurretSprite(player_turrent);
-	players.push_back(player2);
-	render->setPlayer(players);
+	// Player* player2 = new Player(SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, false);
+	// Sprite* player_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
+	// Sprite* player_turrent = new Sprite(render->getRenderer(), "src/res/images/red_turret.png");
+	// player_tank->init();
+	// player_turrent->init();
+	// player2->setSprite(player_tank);
+	// player2->setTurretSprite(player_turrent);
+	// players.push_back(player2);
+	// render->setPlayer(players);
 	// Create client process
 	client = new Client(options->ip, options->port);
 	// Init
 	client->init();
-	player2->setClient(client);
+	// player2->setClient(client);
 	return true;
 }
 

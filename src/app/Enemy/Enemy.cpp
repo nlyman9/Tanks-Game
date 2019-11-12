@@ -34,7 +34,7 @@ Enemy::~Enemy() {}
 
    // Render enemy
    // SDL_Rect src = {0, 0, 48, 48};
-   SDL_Rect dst = {x_enemy_pos, y_enemy_pos, TANK_WIDTH, TANK_HEIGHT};
+   SDL_Rect dst = {(int)x_enemy_pos, (int)y_enemy_pos, TANK_WIDTH, TANK_HEIGHT};
    // SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), &src, &dst, 0, NULL, SDL_FLIP_NONE);
    //SDL_Rect pos = {(int)x_enemy_pos, (int)y_enemy_pos, TANK_WIDTH, TANK_HEIGHT};
    //SDL_Rect* dst = get_box();

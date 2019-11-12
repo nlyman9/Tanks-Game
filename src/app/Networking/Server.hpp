@@ -14,8 +14,37 @@
 #include <iostream>
 #include <vector>
 #include <unistd.h>
+#include "Multiplayer.hpp"
 
 // #include <SDL2/SDL_thread.h>
+
+class Server {
+    public:
+        ServerConnection *host;
+
+        Server(std::string ip, int port) {
+            host = new ServerConnection(ip, port);
+            std::cout << " Created Server Object " << std::endl;
+        }
+
+        bool connect() {
+            return host->connect();
+        }
+
+        bool listen() {
+            return host->listen();
+        }
+
+        bool accept() {
+            if (host->accept()) {
+                std::cout << "Server: accepted incoming connection" << std::endl;
+                return true;
+            } else {
+                return false;
+            }
+        }
+};
+
 int status;
 struct addrinfo hints;
 struct addrinfo *serverInfo, *p;
@@ -33,12 +62,12 @@ std::vector<char> packedMap;
 
 bool gameOn;
 //server buffers
-//buffer received
-static std::vector<char>* rBuffer;
-//double buffered receive
-static std::vector<char>* rcBuffer;
-//to send buffer
-static std::vector<char>* sBuffer;
-//double buffered send
-static std::vector<char>* sfBuffer;
+// //buffer received
+// static std::vector<char>* rBuffer;
+// //double buffered receive
+// static std::vector<char>* rcBuffer;
+// //to send buffer
+// static std::vector<char>* sBuffer;
+// //double buffered send
+// static std::vector<char>* sfBuffer;
 #endif

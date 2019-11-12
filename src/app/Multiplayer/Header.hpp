@@ -97,6 +97,10 @@ class Header {
             return data->data();
         }
 
+        size_t size() {
+            return header.size() + value.size();
+        }
+
 
         friend std::ostream& operator <<(std::ostream &out, const Header head);
 };

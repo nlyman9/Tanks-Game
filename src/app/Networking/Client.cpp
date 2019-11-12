@@ -20,12 +20,22 @@ SDL_SpinLock slock = 0;
 
 int clientThread(void* data) {
     // Unpack data in the Client object
-    Client* client = (Client*) data;
+    Client *client = (Client*) data;
     std::cout << "Client thread created!" << std::endl;
 
     
-    client->server->currSocket()->connectSocket();
+    // client->connect();
     
+
+    while(true) {
+        std::cout << "Client-Network: looping" << std::endl;
+        while (!client->connect()) {
+            std::cout << "Client-Network: trying to connect to server..." << std::endl;
+            sleep(1);
+        }
+
+        sleep(1);
+    }
 
     return -1;
 
@@ -169,8 +179,9 @@ bool Client::init() {
     // // keystate buffer
     // keystates = new std::vector<Uint8*>();
     // Pack Client into void pointer for thread
-
-    void* clientInfo = malloc(sizeof(long));
+    
+    std::cout << "Client init()" << std::endl;
+    void* clientInfo = (void *) malloc(sizeof(Client));
     clientInfo = (void*) this;
     gameOn = true;
     rcThread = SDL_CreateThread(clientThread, "myThread", (void*) clientInfo);

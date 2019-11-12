@@ -15,6 +15,12 @@ void StartUpMenu::launch(Args *options)
     gLoop.runSinglePlayer();
   } else if(gameMode == MENU_MULTI) {
     gLoop.networkInit(options);
+    std::cout << "HELLO" << std::endl;
+    fflush(stdout);
+    while(true) {
+      std::cout << "Client-Game: looping" << std::endl;
+      sleep(1);
+    }
     gLoop.initMapMultiPlayer();
     //run the game loop
 	  gLoop.networkRun();

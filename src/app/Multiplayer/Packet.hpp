@@ -28,11 +28,26 @@ class Packet {
     private:
         std::vector<Header> headers;
         std::vector<std::string> datas;
+        size_t packet_size;
+
+        void resetSize() {
+            size_t length = 0;
+            for (auto head : headers) {
+                length += sizeof(head.size());
+            }
+
+            for (auto d : datas) {
+                length += sizeof(d.size());
+            }
+
+            packet_size = length;
+        }
     public:
         Packet(PackType type)
         {   
             Header *init = new Header("INIT", std::to_string((int)type));
             headers.push_back(*init);
+            
         }
 
         // Setters
@@ -99,6 +114,10 @@ class Packet {
             }
 
             return raw_data->data();
+        }
+
+        size_t size() {
+            return packet_size;
         }
 };
 

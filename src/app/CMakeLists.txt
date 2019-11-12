@@ -44,6 +44,7 @@ target_link_libraries(ServerProcess
   ${SDL2_LIBRARY}
   ${SDL2_IMAGE_LIBRARIES}
   ${SDL2_TTF_LIBRARIES}
+  Multiplayer
 )
 else()
 target_link_libraries(Game

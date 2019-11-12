@@ -36,14 +36,20 @@ class Client {
 
     Client(std::string ip, int port) {
       server = new ClientConnection(ip, port);
+      std::cout << "Created client connection " << std::endl;
+      fflush(stdout);
     };
 
     ~Client() {
       delete server;
     }
+
     bool init();
     Client initClient(Client c);
 
+    bool connect() {
+      return server->connect();
+    }
 
     bool gameOn;
     SDL_Thread* rcThread;
