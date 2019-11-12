@@ -27,8 +27,8 @@ class Server {
             std::cout << " Created Server Object " << std::endl;
         }
 
-        bool connect() {
-            return host->connect();
+        bool bind() {
+            return host->bind();
         }
 
         bool listen() {
@@ -43,7 +43,14 @@ class Server {
                 return false;
             }
         }
+
+        int numClients() {
+            return host->numClients();
+        }
 };
+
+int serverProcess();
+std::vector<int>* serverMapGen();
 
 int status;
 struct addrinfo hints;

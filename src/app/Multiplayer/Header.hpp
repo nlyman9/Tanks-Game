@@ -22,9 +22,10 @@ class Header {
     private:
         std::string header, value; 
     public:
-        Header(std::string header, std::string value) {
-            header = header;
-            value = value;
+        Header(std::string head, std::string val) {
+            header = head;
+            value = val;
+            std::cout << "HEADER: " << header << " VALUE " << value << std::endl;
         };
 
         Header(std::string header) {
@@ -90,11 +91,11 @@ class Header {
         }
 
         const char* data() {
-            std::string *data = new std::string();
-            data->append(header);
-            data->append(value);
+            std::string *d = new std::string();
+            d->append(header);
+            d->append(value);
 
-            return data->data();
+            return d->data();
         }
 
         size_t size() {

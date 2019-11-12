@@ -45,9 +45,10 @@ class Packet {
     public:
         Packet(PackType type)
         {   
-            Header *init = new Header("INIT", std::to_string((int)type));
+            Header *init = new Header("TYPE", std::to_string((int)type));
             headers.push_back(*init);
-            
+            std::cout << "Initialized packet with # " << headers.size() << " - Data: " << *(init->data()) << std::endl;
+            resetSize();
         }
 
         // Setters
@@ -120,7 +121,5 @@ class Packet {
             return packet_size;
         }
 };
-
-const Header HEAD = Header("INIT", std::to_string((int)PackType::NUM_TYPES));
 
 #endif

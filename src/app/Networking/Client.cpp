@@ -29,7 +29,7 @@ int clientThread(void* data) {
 
     while(true) {
         std::cout << "Client-Network: looping" << std::endl;
-        while (!client->connect()) {
+        while (!client->isConnected() && !client->connect()) {
             std::cout << "Client-Network: trying to connect to server..." << std::endl;
             sleep(1);
         }

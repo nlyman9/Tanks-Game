@@ -45,15 +45,125 @@ SDL_SpinLock rlock = 0;
 //send lock
 SDL_SpinLock slock = 0;
 
-// get sockaddr, IPv4 or IPv6:
-void *get_in_addr(struct sockaddr *sa)
+Server *server;
+
+/**
+ * @brief Main for Server process
+ * 
+ * @param argc - Number of arguments passed
+ * @param argv - Argument values
+ *     - Only one value should be passed. The option's arguments.
+ * @return int 
+ */
+int main(int argc, char* argv[])
 {
-    if (sa->sa_family == AF_INET)
-    {
-        return &(((struct sockaddr_in *)sa)->sin_addr);
+    // //init buffers
+    // //buffer received
+    // rBuffer = new std::vector<char>(R_BUFFER_SIZE);
+    // //double buffered receive
+    // rcBuffer = new std::vector<char>();;
+    // //to send buffer
+    // sBuffer = new std::vector<char>();
+    // //buffer to fill in
+    // sfBuffer = new std::vector<char>();
+
+    // Get the server option's
+    std::cout << "IP " << argv[1] << std::endl;
+    std::cout << "PORT " << argv[2] << std::endl;
+
+    std::vector<int>* map = serverMapGen();
+
+    std::string server_ip = std::string(argv[1]);
+    char *server_port = argv[2];
+
+    server = new Server(server_ip, std::atoi(server_port));
+
+    // Bind and start listening as server
+    server->bind();
+    server->listen();
+
+    // SDL_CreateThread(serverThread, "server thread", NULL);
+
+    serverProcess();
+    
+
+    // gameOn = true;
+    // SDL_CreateThread(serverThread, "server thread", NULL);
+
+    // //Game stuff here
+    // while(gameOn){
+    //     //beginning of loop check received data
+        
+    //     if(receivedData){    
+    //         SDL_AtomicLock(&rlock); //lock that rcBuffer up
+    //         std::cout << "SERVER: Data received, locking buffer." << std::endl;
+    //         //apply rcBuffer
+
+    //         //clear rcBuffer
+    //         rcBuffer->clear();
+
+    //         //ready to receive more data
+    //         receivedData = false; 
+    //         std::cout << "SERVER: Unlocking buffer." << std::endl;
+    //         SDL_AtomicUnlock(&rlock);
+    //     }
+        
+    //     //game stuff! fill in sfBuffer as we go
+
+
+
+    //     //std::cout << "gloop ended, locking buffer" << std::endl;
+    //     //fill in the send buffer from the sfBuffer
+    //     //if time condition? -- this will be sending the whole game state
+    //     SDL_AtomicLock(&slock);
+    //     if(!sendReady){ //make sure the other thread is not sending anything atm
+    //         //std::cout << "Copying sf buffer into s buffer" <<  std::endl;
+    //         //could add a && i < max send buffer size in case its sending too much
+    //         //then instead of clear, delete from 0 to max send buffer size and shift
+    //         //but that raises issues more than it solves so lets try to avoid
+    //         //and send the rest of the data next loop -- still adding more data 
+    //         for(int i = 0; i < sfBuffer->size(); i++)
+    //             sBuffer->push_back(sfBuffer->at(i));
+    //             //set send to ready
+    //             sendReady = true;
+    //             sfBuffer->clear(); //clear the to send buffer
+    //     }
+    //     //unlock
+    //     SDL_AtomicUnlock(&slock);
+    //     //std::cout << "buffer unlocked" << std::endl;
+    // }
+}
+
+int serverProcess() {
+    //timeval is passed into select and is used to say when select should timeout
+    //setting all the members to 0 tells select it should not block
+    struct timeval* timeout = (timeval*) calloc(1, sizeof(struct timeval));
+    timeout->tv_sec = 0;
+    timeout->tv_usec = 0;
+
+    // Generate map
+    auto map = serverMapGen();
+    pack(map, &packedMap, 3); //pack map into 3 bits
+    std::cout << "MAP PACKED " << std::endl;
+
+    // First wait for 2 clients
+    while (server->numClients() < 2) {
+        if (server->accept()) {
+            std::cout << "Server: New client connection accepted" << std::endl;
+        }
+
+        std::cout << "Server: Looping - numClients = " << server->numClients() << std::endl;
+        sleep(1);
     }
 
-    return &(((struct sockaddr_in6 *)sa)->sin6_addr);
+    // Send map! 
+    std::cout << "Server: Preparing to send map!" << std::endl;
+    Packet *temp = new Packet(PackType::MAP);
+    for (auto head : temp->getHeaders()) {
+        std::cout << "Packet header -> " << head.dataString() << std::endl;
+    }
+
+    std::cout << "Size is " << temp->size() << std::endl;
 }
 
 std::vector<int>* serverMapGen(){
@@ -73,19 +183,6 @@ std::vector<int>* serverMapGen(){
     return map1D;
 }
 
-int serverProcess() {
-    //timeval is passed into select and is used to say when select should timeout
-    //setting all the members to 0 tells select it should not block
-    struct timeval* timeout = (timeval*) calloc(1, sizeof(struct timeval));
-    timeout->tv_sec = 0;
-    timeout->tv_usec = 0;
-
-    while (true) {
-        std::cout << "Server is looping" << std::endl;
-        sleep(1);
-    }
-}
-
 int serverThread(){
     int newfd;
     int nbytes;
@@ -97,6 +194,7 @@ int serverThread(){
     timeout->tv_usec = 0;
 
     while (true) {
+        server->accept();
         std::cout << "Server is looping" << std::endl;
         sleep(1);
     }
@@ -254,93 +352,14 @@ int serverThread(){
     return 0;
 }
 
-/**
- * @brief Main for Server process
- * 
- * @param argc - Number of arguments passed
- * @param argv - Argument values
- *     - Only one value should be passed. The option's arguments.
- * @return int 
- */
-int main(int argc, char* argv[])
+
+// get sockaddr, IPv4 or IPv6:
+void *get_in_addr(struct sockaddr *sa)
 {
-    // //init buffers
-    // //buffer received
-    // rBuffer = new std::vector<char>(R_BUFFER_SIZE);
-    // //double buffered receive
-    // rcBuffer = new std::vector<char>();;
-    // //to send buffer
-    // sBuffer = new std::vector<char>();
-    // //buffer to fill in
-    // sfBuffer = new std::vector<char>();
+    if (sa->sa_family == AF_INET)
+    {
+        return &(((struct sockaddr_in *)sa)->sin_addr);
+    }
 
-    // Get the server option's
-    std::cout << "IP " << argv[1] << std::endl;
-    std::cout << "PORT " << argv[2] << std::endl;
-
-    std::vector<int>* map = serverMapGen();
-
-    std::string server_ip = std::string(argv[1]);
-    char *server_port = argv[2];
-    
-    pack(map, &packedMap, 3); //pack map into 3 bits
-
-    std::cout << "MAP PACKED " << argv[2] << std::endl;
-
-    Server *server = new Server(server_ip, std::atoi(server_port));
-
-    server->connect();
-    server->listen();
-    server->accept();
-
-    // SDL_CreateThread(serverThread, "server thread", NULL);
-
-    serverProcess();
-    
-
-    // gameOn = true;
-    // SDL_CreateThread(serverThread, "server thread", NULL);
-
-    // //Game stuff here
-    // while(gameOn){
-    //     //beginning of loop check received data
-        
-    //     if(receivedData){    
-    //         SDL_AtomicLock(&rlock); //lock that rcBuffer up
-    //         std::cout << "SERVER: Data received, locking buffer." << std::endl;
-    //         //apply rcBuffer
-
-    //         //clear rcBuffer
-    //         rcBuffer->clear();
-
-    //         //ready to receive more data
-    //         receivedData = false; 
-    //         std::cout << "SERVER: Unlocking buffer." << std::endl;
-    //         SDL_AtomicUnlock(&rlock);
-    //     }
-        
-    //     //game stuff! fill in sfBuffer as we go
-
-
-
-    //     //std::cout << "gloop ended, locking buffer" << std::endl;
-    //     //fill in the send buffer from the sfBuffer
-    //     //if time condition? -- this will be sending the whole game state
-    //     SDL_AtomicLock(&slock);
-    //     if(!sendReady){ //make sure the other thread is not sending anything atm
-    //         //std::cout << "Copying sf buffer into s buffer" <<  std::endl;
-    //         //could add a && i < max send buffer size in case its sending too much
-    //         //then instead of clear, delete from 0 to max send buffer size and shift
-    //         //but that raises issues more than it solves so lets try to avoid
-    //         //and send the rest of the data next loop -- still adding more data 
-    //         for(int i = 0; i < sfBuffer->size(); i++)
-    //             sBuffer->push_back(sfBuffer->at(i));
-    //             //set send to ready
-    //             sendReady = true;
-    //             sfBuffer->clear(); //clear the to send buffer
-    //     }
-    //     //unlock
-    //     SDL_AtomicUnlock(&slock);
-    //     //std::cout << "buffer unlocked" << std::endl;
-    // }
+    return &(((struct sockaddr_in6 *)sa)->sin6_addr);
 }

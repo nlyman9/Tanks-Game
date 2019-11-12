@@ -51,6 +51,10 @@ class Client {
       return server->connect();
     }
 
+    bool isConnected() {
+      return server->isConnected();
+    }
+
     bool gameOn;
     SDL_Thread* rcThread;
 

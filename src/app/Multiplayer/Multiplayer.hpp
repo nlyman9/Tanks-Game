@@ -25,7 +25,7 @@ class ServerConnection {
             listener = listener_tcp;
         }
 
-        bool connect() {
+        bool bind() {
             // Set up sockets to connect online
             if (listener_tcp->bindSocket() && listener_udp->bindSocket()) {
                 std::cout << "SUCCESS: Binded TCP and UDP connections" << std::endl;
@@ -63,6 +63,10 @@ class ServerConnection {
             // Recieve data from a client
         }
 
+        void addPacket(Packet p) {
+            sendBuffer.push_back(p);
+        }
+
         void sendTo(int fd) {
             // Send to specific client
             size_t num_bytes_sent;
@@ -79,6 +83,10 @@ class ServerConnection {
 
         void broadcast() {
             // Send to all clients 
+        }
+
+        int numClients() {
+            return clients.size();
         }
     
 };
@@ -166,11 +174,13 @@ class ClientConnection {
             return true;
         }
 
-        void addPacket(Packet p) {
+        void addPacketToSend(Packet p) {
             sendBuffer.push_back(p);
         }
 
-
+        bool isConnected() {
+            return server->isOnline();
+        }
 };
 
 #endif
