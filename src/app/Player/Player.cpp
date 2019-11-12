@@ -57,7 +57,6 @@ void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
 
     // SDL_Rect pos = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
     // SDL_RenderCopy(gRenderer, getSprite()->getTexture(), NULL, &pos);
-
     SDL_Rect* dst = get_box();
     SDL_Rect* turret_dst = get_box();
 
@@ -77,6 +76,7 @@ void Player::update() {
     float delta_y = mouseY - (getY() + TANK_HEIGHT / 2);
     float theta_radians = atan2(delta_y, delta_x);
     mouseTheta = (int)(theta_radians * 180 / M_PI);
+    mouseTheta = (int)(theta_radians * 180 / M_PI); 
     turretTheta = mouseTheta;
 
     // Move player
@@ -217,6 +217,7 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, S
     fire = false;
 
     const Uint8* keystate;
+    const Uint8* keystate; 
     if(localPlayer) {
         keystate = SDL_GetKeyboardState(nullptr);
     } else {

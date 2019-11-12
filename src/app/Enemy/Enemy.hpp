@@ -46,6 +46,7 @@ class Enemy : public Object {
 				bool rightLeft = false;
 				bool upDown = false;
 
+
 				Uint32 fire_last_time = 0;
 				bool shotsFired = false;
 
