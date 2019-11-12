@@ -11,6 +11,7 @@ target_link_libraries(Enemy
   Sprite
   Constants
   Networking
+  Multiplayer
 )
 
 target_include_directories(Enemy

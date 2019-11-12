@@ -3,23 +3,18 @@ add_library(Multiplayer
   Multiplayer.hpp
   Multiplayer.cpp
 )
+target_include_directories(Multiplayer
+  PUBLIC
+  .
+)
 if(${APPLE})
 target_link_libraries(Multiplayer
   PRIVATE
-  Object
-  Constants
-  Sprite
   ${SDL2_LIBRARY}
-  Enemy
-  Networking
 )
 else()
 target_link_libraries(Multiplayer
   PRIVATE
-  Object
-  Constants
-  Sprite
-  Networking
 )
 endif()
 
@@ -28,23 +23,18 @@ add_library(Header
   Header.hpp
   Header.cpp
 )
+target_include_directories(Header
+  PUBLIC
+  .
+)
 if(${APPLE})
 target_link_libraries(Header
   PRIVATE
-  Object
-  Constants
-  Sprite
   ${SDL2_LIBRARY}
-  Enemy
-  Networking
 )
 else()
 target_link_libraries(Header
   PRIVATE
-  Object
-  Constants
-  Sprite
-  Networking
 )
 endif()
 
@@ -53,22 +43,17 @@ add_library(Packet
   Packet.hpp
   Packet.cpp
 )
+target_include_directories(Packet
+  PUBLIC
+  .
+)
 if(${APPLE})
 target_link_libraries(Packet
   PRIVATE
-  Object
-  Constants
-  Sprite
   ${SDL2_LIBRARY}
-  Enemy
-  Networking
 )
 else()
 target_link_libraries(Packet
   PRIVATE
-  Object
-  Constants
-  Sprite
-  Networking
 )
 endif()

@@ -61,6 +61,17 @@ class ClientConnection {
             timeout->tv_usec = 0;
         };
 
+        Socket* currSocket() {
+            return server;
+        }
+
+        void swapSocket() {
+            if (server == server_tcp)
+                server = server_udp;
+            else
+                server = server_tcp;
+        }
+
         void recieve() {
             assert(server->isOnline());
 

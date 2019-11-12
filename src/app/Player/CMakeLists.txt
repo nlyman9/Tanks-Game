@@ -12,6 +12,7 @@ target_link_libraries(Player
   ${SDL2_LIBRARY}
   Enemy
   Networking
+  Multiplayer
 )
 else()
 target_link_libraries(Player
@@ -20,6 +21,7 @@ target_link_libraries(Player
   Constants
   Sprite
   Networking
+  Multiplayer
 )
 endif()
 

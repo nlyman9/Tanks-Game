@@ -66,23 +66,23 @@ bool GameLoop::networkInit(Args *options) {
 }
 
 void GameLoop::initMapMultiPlayer() {
-	while(!client->pollMap()) {}
+	// while(!client->pollMap()) {}
 
-	std::vector<int> tile_map = *client->gameMap;
+	// std::vector<int> tile_map = *client->gameMap;
 	std::vector<std::vector<int>> map2D;
 	// init the first row
 	map2D.push_back(std::vector<int>((SCREEN_WIDTH - BORDER_GAP - TILE_SIZE) / TILE_SIZE - 1));
 	int row = 0;
 	int col = 0;
-	for (auto tile : tile_map) {
-		if(col == (SCREEN_HEIGHT - TILE_SIZE) / TILE_SIZE - 1) {
-			row++;
-			col = 0;
-			map2D.push_back(std::vector<int>((SCREEN_WIDTH - BORDER_GAP - TILE_SIZE) / TILE_SIZE - 1));
-		}
-		map2D[row][col] = tile;
-		col++;
-	}
+	// for (auto tile : tile_map) {
+	// 	if(col == (SCREEN_HEIGHT - TILE_SIZE) / TILE_SIZE - 1) {
+	// 		row++;
+	// 		col = 0;
+	// 		map2D.push_back(std::vector<int>((SCREEN_WIDTH - BORDER_GAP - TILE_SIZE) / TILE_SIZE - 1));
+	// 	}
+	// 	map2D[row][col] = tile;
+	// 	col++;
+	// }
 
 	int count = 0;
 	for (int x = BORDER_GAP + TILE_SIZE, i = 0; x < SCREEN_WIDTH - BORDER_GAP - TILE_SIZE; x+=TILE_SIZE, i++) {
@@ -197,7 +197,7 @@ int GameLoop::networkRun() {
 		// Render everything
 		render->draw(lag_time / MS_PER_UPDATE);
 		SDL_RenderCopy(render->getRenderer(), cursor, NULL, &cursorRect);
-		client->getGameBufferReady(true);
+		// client->getGameBufferReady(true);
 
 	}
 

@@ -227,7 +227,7 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, S
     if(localPlayer) {
         keystate = SDL_GetKeyboardState(nullptr);
     } else {
-        keystate = client->pollKeystate();
+        // keystate = client->pollKeystate();
     }
 
     //std::cout << "access keystate" << std::endl;
@@ -329,11 +329,11 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, S
         SDL_GetMouseState(&mouseX, &mouseY);
     }
     //std::cout << "finish mouse" << std::endl;
-    if(localPlayer && client != nullptr) {
-        std::vector<char>* fBuffer = client->getFillBuffer();
-        fBuffer->push_back((char)(*keystate));
-        appendHeader(fBuffer, (char) 1); // append keystate header
-    }
+    // if(localPlayer && client != nullptr) {
+    //     std::vector<char>* fBuffer = client->getFillBuffer();
+    //     fBuffer->push_back((char)(*keystate));
+    //     appendHeader(fBuffer, (char) 1); // append keystate header
+    // }
     //std::cout << "finish fill buffer" << std::endl;
 }
 
