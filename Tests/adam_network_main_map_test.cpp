@@ -383,9 +383,9 @@ int main()
                         {
                             fdmax = newfd; // Keep track of max
                         }
-                        printf("New connection from %s on socket %d.\n",
-                               inet_ntop(remoteaddr.ss_family, &remoteaddr, remoteIP, INET_ADDRSTRLEN),
-                               newfd);
+                        // printf("New connection from %s on socket %d.\n",
+                        //        inet_ntop(remoteaddr.ss_family, &remoteaddr, remoteIP, INET_ADDRSTRLEN),
+                        //        newfd);
                         //new connection so need to send map data here accepted so send data
                         send(newfd, test2.data(), test2.size(), 0);
                     }

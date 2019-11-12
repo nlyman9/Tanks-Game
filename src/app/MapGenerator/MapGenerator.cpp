@@ -119,16 +119,16 @@ std::vector<std::vector<int>> MapGenerator::generateHMazeMap()
 					}
 
 					if(!can_go_north) { // add another cell to ensure passage north
-						if(j+1 > 23) {
-							array[j][i] = 0;
-							array[j-1][i] = 0;
-							continue;
-						} else {
-							set.push_back(j+1);
+						if (j + 1 > 23) {
+              array[j][i] = 0;
+              array[j-1][i] = 0;
+              continue;
+            } else {
+              set.push_back(j+1);
 							north_set.push_back(j+1);
 							set_size = set.size();
 							j++;
-						}
+            }
 					}
 
 					int path_north = rand() % north_set.size();
@@ -189,7 +189,7 @@ std::vector<std::vector<int>> MapGenerator::presetCheckerMap()
 				}
 				else {
 					room[i][j] = 2;
-				}	
+				}
 			}
 			for(int i = 4; i < X_WIDE; i+=4) {
 				room[i][j] = 2;
@@ -203,39 +203,37 @@ std::vector<std::vector<int>> MapGenerator::generateOpenLineMap()
 {
 	std::vector<std::vector<int>> room = generateEmptyMap();
 	int random_index;
-	int pre_array[5] = {2, 6, 11, 16, 20};
+	std::vector<int> pre_array = {2, 6, 11, 16, 20};
 	srand(time(NULL));
 
-	for(int i = 0; i < (sizeof(pre_array)/sizeof(pre_array[0])); i++) {
+	for(auto val : pre_array) {
 		random_index = rand() % (Y_HIGH - 2);
-
 		for(int j = 0; j < Y_HIGH; j++) {
 			if(random_index == j || random_index == j + 1) {
-				room[pre_array[i]][j] = 0;
-				room[pre_array[i] + 1][j] = 0;
+				room[val][j] = 0;
+				room[val + 1][j] = 0;
 			} else {
-				room[pre_array[i]][j] = 2;
-				room[pre_array[i] + 1][j] = 2;
+				room[val][j] = 2;
+				room[val + 1][j] = 2;
 			}
-
 		}
 	}
+
 	return room;
 }
 
 std::vector<std::vector<int>>* MapGenerator::generateMap()
 {
-	// UPDATE THESE WHEN ADDING NEW MAP TYPES
+  	// UPDATE THESE WHEN ADDING NEW MAP TYPES
 	int NUM_GEN = 3;
 	int NUM_PRE = 3;
-	
 	// init tile map
 	tile_map = generateEmptyMap();
 
 	srand(time(NULL));
 
 	switch(rand() % (int) ceil(NUM_GEN * 1.2))
-	{
+  	{
 		case 1:
 			tile_map = generateLineMap();
 			break;
@@ -243,8 +241,9 @@ std::vector<std::vector<int>>* MapGenerator::generateMap()
 			tile_map = generateHMazeMap();
 			break;
 		case 3:
-			tile_map = generateOpenLineMap();
-			break;
+			// tile_map = generateOpenLineMap();
+			// break;
+			// Fall through b/c seg fault
 		default:
 			switch(rand() % NUM_PRE)
 			{
@@ -259,6 +258,8 @@ std::vector<std::vector<int>>* MapGenerator::generateMap()
 					break;
 			}
 	}
+
+	tile_map = generateHMazeMap();
 
 	return &tile_map;
 }

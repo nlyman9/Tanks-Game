@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <SDL2/SDL.h>
 
-class Tile : public OBJECT {
+class Tile : public Object {
 
     const int TILE_WIDTH = 48;
     const int TILE_HEIGHT = 48;
@@ -23,7 +23,7 @@ class Tile : public OBJECT {
 
 };
 
-OBJECT::~Tile() {
+Object::~Tile() {
     std::cout << "Tile destructure" << std::endl;
 }
 

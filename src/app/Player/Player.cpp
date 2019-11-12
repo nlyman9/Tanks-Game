@@ -21,12 +21,13 @@
  * @param x
  * @param y
  */
-Player::Player(Sprite *sprite, Sprite *turret, float x, float y) {
+Player::Player(Sprite *sprite, Sprite *turret, float x, float y, bool local) : localPlayer{local} {
     setSprite(sprite);
+    setTurretSprite(turret);
     setPos(x, y);
 }
 
-Player::Player(float x, float y) {
+Player::Player(float x, float y, bool local) : localPlayer{local}{
     setPos(x, y);
 }
 
@@ -36,9 +37,10 @@ Player::Player(float x, float y) {
  */
 Player::~Player() {}
 
+
 /**
  * @brief draws the player object
- *  Overrides base class OBJECT
+ *  Overrides base class Object
  *
  * @param update_lag - the value to extrapolate by
  */
@@ -56,23 +58,28 @@ void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
     // SDL_Rect pos = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
     // SDL_RenderCopy(gRenderer, getSprite()->getTexture(), NULL, &pos);
 
-	// Danny: to get the tank to render correctly, I replaced %src with NULL.
-    // SDL_Rect src = {0, 0, 20, 20};
-
     SDL_Rect* dst = get_box();
-    float temp_theta = 0;
-    temp_theta = theta;
-    SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), NULL, dst, temp_theta, NULL, SDL_FLIP_NONE);
+    SDL_Rect* turret_dst = get_box();
+
+    SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), NULL, dst, theta, NULL, SDL_FLIP_NONE);
+    SDL_RenderCopyEx(gRenderer, getTurretSprite()->getTexture(), NULL, turret_dst, turretTheta, NULL, SDL_FLIP_NONE);
 }
 
 /**
  * @brief update the player object
- *  Overrides base class OBJECT
+ *  Overrides base class Object
  *
  */
 void Player::update() {
-    // Move player
+    // Move the turret
+    // Center the delta x and y by the center of the tank
+    float delta_x = mouseX - (getX() + TANK_WIDTH / 2);
+    float delta_y = mouseY - (getY() + TANK_HEIGHT / 2);
+    float theta_radians = atan2(delta_y, delta_x);
+    mouseTheta = (int)(theta_radians * 180 / M_PI);
+    turretTheta = mouseTheta;
 
+    // Move player
     // Rotate player
     rotatePlayer(theta_v);
 
@@ -116,43 +123,6 @@ void Player::update() {
             }
             break;
         }
-
-        // BoundingBox *box = getBoundingBox();
-            
-        // // Collides with top of box
-        // if (box->frontRight.x > obstacle.x && box->frontRight.x < obstacle.x + obstacle.w &&
-        //     box->frontRight.y > obstacle.y && box->frontRight.y < obstacle.y + obstacle.h ||
-        //     box->frontLeft.x > obstacle.x && box->frontLeft.x < obstacle.x + obstacle.w &&
-        //     box->frontLeft.y > obstacle.y && box->frontLeft.y < obstacle.y + obstacle.h) {
-
-        //     if (y_vel > 0) {
-        //         float y_overlap = std::max((box->frontRight.y - (obstacle.y)), (box->frontLeft.y - (obstacle.y)));
-        //         std::cout << box->frontRight.y << " -- " << obstacle.y << " -> " << y_overlap << std::endl;
-        //         setX(getX());
-        //         setY(getY() - y_overlap);
-        //         break;
-        //     } else if (y_vel < 0) {
-        //         float y_overlap = std::max(((obstacle.y + obstacle.h) - box->frontRight.y), ((obstacle.y + obstacle.h) - box->frontLeft.y));
-        //         std::cout << box->frontRight.y << " -- " << obstacle.y << " -> " << y_overlap << std::endl;
-        //         setX(getX());
-        //         setY(getY() + y_overlap);
-        //         break;
-        //     }
-        // }
-        // // Collides with left side of box
-        // if (box->frontRight.x > obstacle.x && box->frontRight.x < obstacle.x + obstacle.w/4 &&
-        //     box->frontRight.y > obstacle.y && box->frontRight.y < obstacle.y + obstacle.h) {
-        //     int norm_vel = abs(y_vel)/y_vel;
-        //     if (isnan(norm_vel)) 
-        //         norm_vel = 1;
-
-        //     float x_overlap = box->frontRight.x - (obstacle.x * norm_vel);
-        //     std::cout << box->frontRight.x << " -- " << obstacle.x << " -> " << x_overlap << std::endl;
-        //     setX(getX() - x_overlap);
-        //     setY(getY());
-        //     break;
-
-        // }
     }
 
     // Check he isn't moving outside of the map
@@ -176,7 +146,7 @@ void Player::update() {
 
 /**
  * @brief move the player an offset from its current x-y position
- *  Overrides base class OBJECT
+ *  Overrides base class Object
  *
  * @param x - how much to move player's current x position by
  * @param y - how much to move player's current y position by
@@ -230,7 +200,15 @@ int Player::getTheta() {
     return theta;
 }
 
-void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time) {
+int Player::getTurretTheta() {
+    return turretTheta;
+}
+
+void Player::setClient(Client* cl) {
+    client = cl;
+}
+
+void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, SDL_Event* e) {
 
     delta_velocity = 0;
     x_deltav = 0;
@@ -238,7 +216,12 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time) {
     theta_v = 0;
     fire = false;
 
-    const Uint8* keystate = SDL_GetKeyboardState(nullptr);
+    const Uint8* keystate;
+    if(localPlayer) {
+        keystate = SDL_GetKeyboardState(nullptr);
+    } else {
+        keystate = client->pollKeystate();
+    }
     if (keystate[SDL_SCANCODE_W]) {
         delta_velocity += MAX_PLAYER_VELOCITY;
         x_deltav += delta_velocity * cos((theta * M_PI) / 180);
@@ -256,8 +239,8 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time) {
     if (keystate[SDL_SCANCODE_D]) {
         theta_v += PHI;
     }
-
-    if (keystate[SDL_SCANCODE_SPACE]) {
+    //std::cout << "Theta: " << theta << std::endl;
+    if(e->type == SDL_MOUSEBUTTONDOWN) {
   		Uint32 current_time = SDL_GetTicks();
 
   		if (current_time > fire_last_time + 3000) {
@@ -265,12 +248,10 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time) {
   			fire_last_time = current_time;
   		}
   	}
-
     if(theta < 0) {
         theta = 360 + theta;
     }
     theta %= 360;
-
     // Set Player's X velocity
     if (x_deltav == 0) {
         // No user-supplied "push", return to rest
@@ -290,7 +271,6 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time) {
         x_vel = x_deltav; //* time.count();
         //x_vel *= cos((theta * M_PI) / 180);
     }
-
     // Set Player's Y velocity
     if (y_deltav == 0) {
         // No user-supplied "push", return to rest
@@ -311,7 +291,6 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time) {
         y_vel = y_deltav; //* time.count();
         //y_vel *= sin((theta * M_PI) / 180);
     }
-
 
     //Keep for debug purposes
     //std::cout << theta << ":" << x_deltav << ":" << y_deltav << "|" << x_vel << ":" << y_vel << std::endl;
@@ -334,16 +313,26 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time) {
     {
         y_vel = -MAX_PLAYER_VELOCITY;
     }
+    // Mouse Motion Handling
+    if(e->type == SDL_MOUSEMOTION) {
+        SDL_GetMouseState(&mouseX, &mouseY);
+    }
+
+    if(localPlayer && client != nullptr) {
+        std::vector<char>* fBuffer = client->getFillBuffer();
+        fBuffer->push_back((char)(*keystate));
+        appendHeader(fBuffer, (char) 1); // append keystate header
+    }
 }
 
 /**
  * @brief Get the bounding box of the player's tank
- * 
+ *
  * The bounding box is based off 4 points: backLeft, backRight, frontLeft, frontRight;
  *  - The front of the tank is the direction the tank is pointing. The back is the opposit.
  *  - The left side is the lefthand side of the direction the the tank is facing. The right is the right hand side.
- * 
- * @return BoundingBox* 
+ *
+ * @return BoundingBox*
  */
 BoundingBox* Player::getBoundingBox() {
     BoundingBox *box = new BoundingBox();

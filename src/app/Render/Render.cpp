@@ -77,12 +77,17 @@ void Render::close() {
 int Render::drawMenu() {
 
 	ImageLoader imgLoad;
+	SDL_Texture* menuNone = imgLoad.loadImage("src/res/images/menu_none.png", gRenderer);
 	SDL_Texture* menuSinglePlayer = imgLoad.loadImage("src/res/images/menu_single_player.png", gRenderer);
 	SDL_Texture* menuMultiPlayer = imgLoad.loadImage("src/res/images/menu_multi_player.png", gRenderer);
 	SDL_Texture* menuCredits = imgLoad.loadImage("src/res/images/menu_credits.png", gRenderer);
 
 	bool quit = false;
-	int menuOption = MENU_SINGLE;
+	int menuOption = MENU_NONE;
+
+	SDL_Rect singlePlayerBox = {452, 144, 377, 111};
+	SDL_Rect multiPlayerBox = {452, 288, 377, 111};
+	SDL_Rect creditsBox = {452, 435, 377, 111};
   	while(!quit) {
 		SDL_Event e;
 
@@ -91,6 +96,9 @@ int Render::drawMenu() {
 				quit = true;
 				return -1;
 			} else if(e.type == SDL_KEYDOWN) {
+				if(menuOption == MENU_NONE) {
+					menuOption = MENU_SINGLE;
+				}
 				switch(e.key.keysym.sym) {
 					case SDLK_DOWN:
 						menuOption++;
@@ -108,6 +116,22 @@ int Render::drawMenu() {
 						return menuOption;
 						break;
 				} 
+			} else if(e.type == SDL_MOUSEBUTTONDOWN) {
+				int x, y;
+				SDL_GetMouseState(&x, &y);
+				SDL_Rect clickBox = {x, y, 1, 1};
+				SDL_Rect intersection;
+
+				// Check for box clicks
+				if(SDL_IntersectRect(&clickBox, &singlePlayerBox, &intersection)) {
+					return MENU_SINGLE;
+				}
+				if(SDL_IntersectRect(&clickBox, &multiPlayerBox, &intersection)) {
+					return MENU_MULTI;
+				}
+				if(SDL_IntersectRect(&clickBox, &creditsBox, &intersection)) {
+					return MENU_CREDITS;
+				}
 			}
 		}
 
@@ -124,9 +148,22 @@ int Render::drawMenu() {
 			SDL_RenderCopy(gRenderer, menuSinglePlayer, NULL, &fullscreen); 
 		} else if(menuOption == MENU_MULTI) {
 			SDL_RenderCopy(gRenderer, menuMultiPlayer, NULL, &fullscreen); 
-		} else {
+		} else if(menuOption == MENU_CREDITS) {
 			SDL_RenderCopy(gRenderer, menuCredits, NULL, &fullscreen); 
+		} else {
+			SDL_RenderCopy(gRenderer, menuNone, NULL, &fullscreen); 
 		}
+
+		SDL_Texture* cursor = imgLoad.loadImage("src/res/images/cursor.png", gRenderer);
+
+		int cursorX = 0, cursorY = 0;
+
+		if(e.type == SDL_MOUSEMOTION || e.type == SDL_MOUSEBUTTONDOWN) {
+			SDL_GetMouseState(&cursorX, &cursorY);
+		}
+
+		SDL_Rect cursorRect = {cursorX, cursorY, CROSSHAIR_SIZE, CROSSHAIR_SIZE};
+		SDL_RenderCopy(gRenderer, cursor, NULL, &cursorRect);
 
 		SDL_RenderPresent(gRenderer);
 	}
@@ -183,7 +220,9 @@ int Render::draw(double update_lag) {
 	}
 
 	// Render player
-	gPlayer->draw(gRenderer, update_lag);
+	for (auto player : gPlayers) {
+		player->draw(gRenderer, update_lag);
+	}
 
 	// Render all the enemies
 	for (auto enemy: gEnemies) {
@@ -212,8 +251,8 @@ SDL_Renderer* Render::getRenderer() {
 	return gRenderer;
 }
 
-void Render::setPlayer(Player* player) {
-	gPlayer = player;
+void Render::setPlayer(std::vector<Player *> players) {
+	gPlayers = players;
 }
 
 void Render::setEnemies(std::vector<Enemy *> enemies) {

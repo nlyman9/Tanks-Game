@@ -10,10 +10,20 @@ target_include_directories(Networking
   PUBLIC
   .
 )
-
+if(${APPLE})
 target_link_libraries(Networking
-  GameLoop
+  PRIVATE
+  MapGenerator
+  ${SDL2_LIBRARY}
+  ${SDL2_IMAGE_LIBRARIES}
 )
+else()
+target_link_libraries(Networking
+  PRIVATE
+  MapGenerator
+)
+endif()
+
 
 add_library(Server
   STATIC
@@ -26,8 +36,16 @@ target_include_directories(Server
   .
 )
 
+if(${APPLE})
 target_link_libraries(Server
   PRIVATE
   MapGenerator
-  GameLoop
+  ${SDL2_LIBRARY}
+  ${SDL2_IMAGE_LIBRARIES}
 )
+else()
+target_link_libraries(Server
+  PRIVATE
+  MapGenerator
+)
+endif()
