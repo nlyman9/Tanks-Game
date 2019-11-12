@@ -1,10 +1,8 @@
 add_library(Constants
-  STATIC
-  Constants.hpp
-  Constants.cpp
+  INTERFACE
 )
 
 target_include_directories(Constants
-  PUBLIC
+  INTERFACE
   .
 )

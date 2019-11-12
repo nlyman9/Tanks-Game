@@ -34,8 +34,8 @@ class GameLoop {
   private:
     // Render class to render the game
     Render *render;
-    Player *player;
     std::vector<Enemy *> enemies;
+    std::vector<Player *> players;
 		std::vector<Projectile *> projectiles;
     bool isGameOn;
     Client* client;

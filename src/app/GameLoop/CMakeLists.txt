@@ -15,7 +15,6 @@ target_link_libraries(GameLoop
   MapGenerator
   Projectile
   Networking
-  StartUpMenu
 )
 
 target_include_directories(GameLoop
