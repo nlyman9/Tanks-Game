@@ -1,0 +1,74 @@
+add_library(Multiplayer
+  STATIC
+  Multiplayer.hpp
+  Multiplayer.cpp
+)
+if(${APPLE})
+target_link_libraries(Multiplayer
+  PRIVATE
+  Object
+  Constants
+  Sprite
+  ${SDL2_LIBRARY}
+  Enemy
+  Networking
+)
+else()
+target_link_libraries(Multiplayer
+  PRIVATE
+  Object
+  Constants
+  Sprite
+  Networking
+)
+endif()
+
+add_library(Header
+  STATIC
+  Header.hpp
+  Header.cpp
+)
+if(${APPLE})
+target_link_libraries(Header
+  PRIVATE
+  Object
+  Constants
+  Sprite
+  ${SDL2_LIBRARY}
+  Enemy
+  Networking
+)
+else()
+target_link_libraries(Header
+  PRIVATE
+  Object
+  Constants
+  Sprite
+  Networking
+)
+endif()
+
+add_library(Packet
+  STATIC
+  Packet.hpp
+  Packet.cpp
+)
+if(${APPLE})
+target_link_libraries(Packet
+  PRIVATE
+  Object
+  Constants
+  Sprite
+  ${SDL2_LIBRARY}
+  Enemy
+  Networking
+)
+else()
+target_link_libraries(Packet
+  PRIVATE
+  Object
+  Constants
+  Sprite
+  Networking
+)
+endif()

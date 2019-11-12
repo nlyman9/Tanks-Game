@@ -11,6 +11,7 @@ add_subdirectory(Constants)
 add_subdirectory(StartUpMenu)
 add_subdirectory(MapGenerator)
 add_subdirectory(ImageLoader)
+add_subdirectory(Multiplayer)
 
 if(${APPLE}) 
 find_package(SDL2 REQUIRED)
