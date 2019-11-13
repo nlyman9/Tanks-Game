@@ -80,13 +80,6 @@ class ServerConnection {
             fflush(stdout);
             num_bytes_sent = send(clients.at(index)->fd(), mail.data(), mail.size(), 0);
             std::cout << "Sent packet of size: " << mail.size() << " with data = " << mail.data() << std::endl;
-
-            // for (auto client : clients) {
-            //     if (client->fd() == fd) {
-            //         num_bytes_sent = send(client->fd(), mail.data(), mail.size(), 0);
-            //         break;
-            //     }
-            // }
         }
 
         void broadcast() {
@@ -171,9 +164,15 @@ class ClientConnection {
             // Casting works as so
             // Header head = (Header) rawbuffer; 
             // Or using constructor
-            Header head = Header(rawbuffer); 
-            std::cout << "HOLY SHIT THE HEADER IS " << head.data() << std::endl;
-            std::cout << "HOLY SHIT THE TYPE IS " << head.getValue() << std::endl;
+            Header size_header = Header(rawbuffer); 
+            std::cout << "THE HEADER IS " << size_header.data() << std::endl;
+            std::cout << "THE TYPE IS " << size_header.getValue() << std::endl;
+            std::cout << "THE SIZE IS " << size_header.size() << std::endl;
+            fflush(stdout);
+            Header type_header = Header(&rawbuffer[size_header.size()+1]);
+            std::cout << "HOLY SHIT THE HEADER IS " << type_header.data() << std::endl;
+            std::cout << "HOLY SHIT THE TYPE IS " << type_header.getValue() << std::endl;
+            
         }
 
         Packet* getPacket() {

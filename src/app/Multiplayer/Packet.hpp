@@ -133,14 +133,12 @@ class Packet {
             for (auto head : headers) {
                 raw_data->append(head.data());
                 raw_data->push_back(' ');
-                std::cout << "HEAD: " << head.data() << " | ";
+                // std::cout << "HEAD: " << head.data() << " | ";
             }
-
-            raw_data->push_back(' ');
 
             for (auto d : datas) {
                 raw_data->append(d.data());
-                std::cout << "DATA: " << d.data() << std::endl;
+                // std::cout << "DATA: " << d.data() << std::endl;
             }
 
             return raw_data->data();
@@ -153,8 +151,6 @@ class Packet {
             for (auto i = headers.begin(); i != headers.end(); i++) {
                 s += i->size() + 1; // + 1 = push_back(' ');
             }
-
-            s += 1; // push_back(' ');
 
             // Get the size of the data 
             for (auto i = datas.begin(); i != datas.end(); i++) {
