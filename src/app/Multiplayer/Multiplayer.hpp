@@ -141,13 +141,13 @@ class ClientConnection {
             assert(server->isOnline());
 
             // Recieve from connection, add to buffer.
-            char rawbuffer[sizeof(HEAD)];
+            char rawbuffer[HEAD.size()];
             int num_bytes;
 
             // Recieve initial header
             if (server == server_tcp) {
                 // Use tcp
-                num_bytes = recv(server->fd(), rawbuffer, sizeof(HEAD), 0);
+                num_bytes = recv(server->fd(), rawbuffer, HEAD.size(), 0);
                 if (num_bytes == -1) {
                     std::cerr << "CLIENT: read error: " << strerror(errno) <<  std::endl;
                 }
@@ -172,6 +172,8 @@ class ClientConnection {
             Header type_header = Header(&rawbuffer[size_header.size()+1]);
             std::cout << "HOLY SHIT THE HEADER IS " << type_header.data() << std::endl;
             std::cout << "HOLY SHIT THE TYPE IS " << type_header.getValue() << std::endl;
+
+
             
         }
 
