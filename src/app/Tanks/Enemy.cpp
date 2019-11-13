@@ -105,20 +105,6 @@ bool Enemy::place(float x, float y) {
     return false;
 }
 
-/* Enemy Specific Functions */
-
-bool Enemy::fire() {
-    return false;
-}
-
-bool Enemy::rotateEnemy(float t) {
-  return true;
-}
-
-bool Enemy::rotateTurret(float theta) {
-    return false;
-}
-
 float Enemy::area(float x1, float y1, float x2, float y2, float x3, float y3){
   return abs((x1*(y2-y3) + x2*(y3-y1)+ x3*(y1-y2))/2.0);
 }
@@ -188,18 +174,6 @@ float Enemy::getX(){
 
 float Enemy::getY(){
   return y_enemy_pos;
-}
-
-float Enemy::getTurretTheta(){
-  return turretTheta;
-}
-
-bool Enemy::getFire(){
-  return shotsFired;
-}
-
-void Enemy::setFire(bool fire){
-  shotsFired = fire;
 }
 
 void Enemy::updatePos() {
@@ -426,7 +400,7 @@ void Enemy::updatePos() {
       }
     }
   }
-  rotateEnemy(theta);       //update enemy rotation to match direction
+  rotate(theta);       //update enemy rotation to match direction
 
 
   SDL_Rect* box = get_box(); // required to update box    //Enemy box is within 8 pixels of an obstacle
