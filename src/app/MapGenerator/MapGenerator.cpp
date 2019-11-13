@@ -69,7 +69,7 @@ std::vector<std::vector<int>> MapGenerator::generateLineMap()
 				if(j == random_index || j == random_index_bonus)
 					room[j][i] = 0;
 				else
-					room[j][i] = tile_randomizer;
+					room[j][i] = 1;
 			}
 			else {
 				room[j][i] = 0;
