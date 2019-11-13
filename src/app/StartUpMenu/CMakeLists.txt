@@ -17,7 +17,6 @@ target_link_libraries(StartUpMenu
   GameLoop
   SDL2
   Render
-  Projectile
 )
 endif()
 

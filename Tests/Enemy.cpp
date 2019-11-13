@@ -29,7 +29,7 @@ Enemy::~Enemy() {
 
 /**
  * @brief draws the Enemy object 
- *  Overrides base class OBJECT
+ *  Overrides base class Object
  * 
  * @param update_lag - the value to extrapolate by
  */
@@ -39,7 +39,7 @@ void Enemy::draw(float update_lag) {
 
 /**
  * @brief update the Enemy object
- *  Overrides base class OBJECT
+ *  Overrides base class Object
  * 
  */
 void Enemy::update() {
@@ -48,7 +48,7 @@ void Enemy::update() {
 
 /**
  * @brief move the enemy an offset from its current x-y position
- *  Overrides base class OBJECT
+ *  Overrides base class Object
  * 
  * @param x - how much to move enemy's current x position by
  * @param y - how much to move enemy's current y position by

@@ -7,7 +7,7 @@
 #include <SDL2/SDL.h>
 #include "Object.hpp"
 
-class Projectile : public OBJECT {
+class Projectile : public Object {
     private:
         /* data */
         Sprite missile;
@@ -21,6 +21,10 @@ class Projectile : public OBJECT {
         float velocity = 0;
         float delta_velocity = 0;
 		bool friendly = false;
+        bool exploding = false;
+		int frame = 0;
+		Uint32 anim_last_time = 0;
+		bool finished = false;
 
     public:
         Projectile(Sprite *missile, float x, float y); //constructor, initialize the x, y, and sprite
@@ -32,12 +36,15 @@ class Projectile : public OBJECT {
         void update() override;
         bool move(float x, float y) override; //move x offset from current x and y offset from current y
         bool place(float x, float y) override; //place/teleport to an x and y
-
+		
+		
 		int getTheta();
 		bool rotateProjectile(float theta);	// rotates the projectile
-		bool bouncePriority(int x, int y);
+		bool bouncePriority(SDL_Rect* A, SDL_Rect *B); // checks the side of the tile that the projectile is colliding with
         bool wall();	//	return true if projectile hits a wall. X and Y projectile should change depending on orientation
-
+        bool isExploding();
+		bool isFinished();
+		
         BoundingBox* getBoundingBox() override;
         
         ~Projectile();

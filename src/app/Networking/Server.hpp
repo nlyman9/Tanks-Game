@@ -16,9 +16,6 @@
 #include <unistd.h>
 
 // #include <SDL2/SDL_thread.h>
-//receive buffer
-char* sendBuffer;
-char* recvBuffer;
 int status;
 struct addrinfo hints;
 struct addrinfo *serverInfo, *p;
@@ -28,11 +25,19 @@ int listenerfd;
 int sockfd;
 fd_set master;      // Master of file descriptors
 fd_set read_fds;    // Read fd's returned from select
-int fdmax;          // maximym file descriptor number
+fd_set client_fds;
+int fdmax;          // maximum file descriptor number
 int nbytes;
 socklen_t addr_len;
 std::vector<char> packedMap;
-
 bool gameOn;
- 
+//server buffers
+//buffer received
+static std::vector<char>* rBuffer;
+//double buffered receive
+static std::vector<char>* rcBuffer;
+//to send buffer
+static std::vector<char>* sBuffer;
+//double buffered send
+static std::vector<char>* sfBuffer;
 #endif

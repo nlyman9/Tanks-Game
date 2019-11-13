@@ -16,24 +16,39 @@
 #include <cmath>
 #include <SDL2/SDL.h>
 #include "Object.hpp"
+#include "Client.hpp"
 
-class Player : public OBJECT {
+const int THETA_WINDOW = 5;
+
+class Player : public Object {
     private:
         /* data */
-        Sprite *turret;
+        Sprite *turret = nullptr;
+        Client *client = nullptr;
         float x_vel, y_vel; // x and y velocity
         int lives; //health points left
         int theta = 0;
         int theta_v = 0;
+        int mouseTheta = 0;
+        int mouseX = 0;
+        int mouseY = 0;
+        float turretTheta = 0;
+        int turretTheta_v = 0;
         float x_deltav = 0;
         float y_deltav = 0;
         float velocity = 0;
         float delta_velocity = 0;
-        bool fire = false;
+        bool shotsFired = false;
         Uint32 fire_last_time = 0;
+        bool localPlayer;
+        bool connected;
+        Uint32 anim_last_time = 0;
+        int frame = 0;
+
     public:
-        Player(Sprite *sprite, Sprite *turret, float x, float y); //constructor, initialize the x, y, and sprite
-        Player(float x, float y); //constructor, initialize the x, snd y
+        
+        Player(Sprite *sprite, Sprite *turret, float x, float y, bool local); //constructor, initialize the x, y, and sprite
+        Player(float x, float y, bool local); //constructor, initialize the x, snd y
 
         void draw(SDL_Renderer *gRenderer, double update_lag) override;
         void update() override;
@@ -44,9 +59,12 @@ class Player : public OBJECT {
         bool setFire(bool fire);	// sets fire value
         bool rotatePlayer(float theta); //rotate the object
         bool rotateTurret(float theta); //rotate the turret
+        bool isConnected(); //check if the player has entered the game
 
         int getTheta();
-        void getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time);
+        int getTurretTheta();
+        void getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, SDL_Event* e);
+        void setClient(Client* client);
 
         BoundingBox* getBoundingBox() override;
 

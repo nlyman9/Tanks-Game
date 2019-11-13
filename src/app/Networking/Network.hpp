@@ -19,10 +19,6 @@ std::vector<int> *unpack(std::vector<char>* packed, std::vector<int> *unPacked, 
 std::vector<int> *unpackMap(std::vector<char> mapPacked, std::vector<int> *map);
 std::vector<char>* packMap(std::vector<int>* map, std::vector<char>* mapPacked);
 void sendMap(int fd, std::vector<int>* map, size_t t, int flags, int csFlag);
-//buffer received
-static std::vector<char>* rcBuffer;
-//to send buffer
-static std::vector<char>* tsBuffer;
-//buffer to fill in
-static std::vector<char>* fBuffer;
+void appendHeader(std::vector<char>* packet, char toAppend);
+int stripHeader(std::vector<char>* packet);
 #endif

@@ -16,20 +16,20 @@ target_link_libraries(Render
   Projectile
   MapGenerator
   ImageLoader
+  Networking
 )
 else()
 target_link_libraries(Render
   PRIVATE
   SDL2
-  SDL2_image
   Constants
   Player
   Object
   Sprite
   Enemy
   Projectile
-  MapGenerator
   ImageLoader
+  Networking
 )
 endif()
 

@@ -34,8 +34,8 @@ class GameLoop {
   private:
     // Render class to render the game
     Render *render;
-    Player *player;
     std::vector<Enemy *> enemies;
+    std::vector<Player *> players;
 		std::vector<Projectile *> projectiles;
     bool isGameOn;
     Client* client;
@@ -55,6 +55,12 @@ class GameLoop {
 
     // Map Building Variables
     std::vector<SDL_Rect> tileArray;
+    // Enemy needs to see holes as full block, otherwise it will run through them
+    std::vector<SDL_Rect> enemyTileArray;
+    // Projectiles don't see holes as obstacles, keep separate array
+    std::vector<SDL_Rect> projectileObstacles;
+
+    std::vector<int> spawnEnemy(std::vector<std::vector<int>> *map);
 
     // Server pid
     int server_pid;
