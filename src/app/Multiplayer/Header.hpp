@@ -8,6 +8,7 @@
 #include <arpa/inet.h>
 
 #include <string>
+#include <string.h>
 #include <iostream>
 #include <vector>
 #include <stdlib.h>
@@ -33,9 +34,12 @@ class Header {
             value = nullptr;
         }
 
-        ~Header() {
-            delete this;
+        Header(const char* data) {
+            header = strtok((char *)data, " ");
+            value = strtok(NULL, " ");
         }
+
+        ~Header() {}
 
         void setValue(std::string val) {
             value = val;
@@ -92,8 +96,9 @@ class Header {
 
         const char* data() {
             std::string *d = new std::string();
-            d->append(header);
-            d->append(value);
+            d->append(header.c_str());
+            d->push_back(' ');
+            d->append(value.c_str());
 
             return d->data();
         }

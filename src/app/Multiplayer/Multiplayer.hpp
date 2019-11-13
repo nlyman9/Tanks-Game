@@ -64,22 +64,29 @@ class ServerConnection {
             // Recieve data from a client
         }
 
-        void addPacket(Packet p) {
+        int addPacket(Packet p) {
+            int index = sendBuffer.size();
             sendBuffer.push_back(p);
+            return index;
         }
 
-        void sendTo(int fd) {
+        void sendTo(int index) {
             // Send to specific client
             size_t num_bytes_sent;
             Packet mail = sendBuffer.at(0);
             sendBuffer.erase(sendBuffer.begin());
+            
+            std::cout << "Sending to client " << index << "..." << std::endl;
+            fflush(stdout);
+            num_bytes_sent = send(clients.at(index)->fd(), mail.data(), mail.size(), 0);
+            std::cout << "Sent packet of size: " << mail.size() << " with data = " << mail.data() << std::endl;
 
-            for (auto client : clients) {
-                if (client->fd() == fd) {
-                    num_bytes_sent = send(client->fd(), mail.data(), mail.size(), 0);
-                    break;
-                }
-            }
+            // for (auto client : clients) {
+            //     if (client->fd() == fd) {
+            //         num_bytes_sent = send(client->fd(), mail.data(), mail.size(), 0);
+            //         break;
+            //     }
+            // }
         }
 
         void broadcast() {
@@ -142,20 +149,41 @@ class ClientConnection {
 
             // Recieve from connection, add to buffer.
             char rawbuffer[sizeof(HEAD)];
+            int num_bytes;
 
             // Recieve initial header
             if (server == server_tcp) {
                 // Use tcp
-                int numbytes = recv(server->fd(), rawbuffer, sizeof(HEAD), 0);
-                if (numbytes == -1) {
+                num_bytes = recv(server->fd(), rawbuffer, sizeof(HEAD), 0);
+                if (num_bytes == -1) {
                     std::cerr << "CLIENT: read error: " << strerror(errno) <<  std::endl;
                 }
             } else {
                 // Use udp
             }
 
-            Header head = (Header) rawbuffer; 
-            std::cout << "HOLY SHIT THE TYPE IS " << (int) PackType(5) << std::endl;
+            if (num_bytes == 0) {
+                return;
+            }
+            // else 
+
+            // Two ways of creating header from data
+            // Casting works as so
+            // Header head = (Header) rawbuffer; 
+            // Or using constructor
+            Header head = Header(rawbuffer); 
+            std::cout << "HOLY SHIT THE HEADER IS " << head.data() << std::endl;
+            std::cout << "HOLY SHIT THE TYPE IS " << head.getValue() << std::endl;
+        }
+
+        Packet* getPacket() {
+            if (recvBuffer.size() == 0) {
+                return nullptr;
+            } else {
+                Packet *p = new Packet(recvBuffer.at(0));
+                recvBuffer.erase(recvBuffer.begin());
+                return p;
+            }
         }
 
         

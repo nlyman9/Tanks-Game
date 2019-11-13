@@ -55,6 +55,11 @@ class Client {
       return server->isConnected();
     }
 
+    Packet* recieve() {
+      server->recieve();
+      return server->getPacket();
+    }
+
     bool gameOn;
     SDL_Thread* rcThread;
 

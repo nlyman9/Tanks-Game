@@ -8,6 +8,7 @@
 #include <arpa/inet.h>
 
 #include <string>
+#include <string.h>
 #include <iostream>
 #include <vector>
 #include <stdlib.h>
@@ -30,25 +31,12 @@ class Packet {
         std::vector<std::string> datas;
         size_t packet_size;
 
-        void resetSize() {
-            size_t length = 0;
-            for (auto head : headers) {
-                length += sizeof(head.size());
-            }
-
-            for (auto d : datas) {
-                length += sizeof(d.size());
-            }
-
-            packet_size = length;
-        }
     public:
         Packet(PackType type)
         {   
             Header *init = new Header("TYPE", std::to_string((int)type));
             headers.push_back(*init);
-            std::cout << "Initialized packet with # " << headers.size() << " - Data: " << *(init->data()) << std::endl;
-            resetSize();
+            std::cout << "Initialized packet with # " << headers.size() << " - Data: " << init->data() << std::endl;
         }
 
         // Setters
@@ -64,7 +52,14 @@ class Packet {
         std::tuple<std::vector<Header>, std::vector<std::string>> getTuple() {
             return std::make_tuple(headers, datas);
         }
-
+        
+        /**
+         * @brief Get the Headers object
+         * @warning Using a for-each loop causes segfaults, 
+         *     use a normal for loop to iterate, or an iterator.
+         * 
+         * @return std::vector<Header> 
+         */
         std::vector<Header> getHeaders() {
             return headers;
         }
@@ -108,17 +103,19 @@ class Packet {
             std::string *raw_data = new std::string();
             for (auto head : headers) {
                 raw_data->append(head.data());
+                std::cout << "HEAD: " << head.data() << std::endl;
             }
 
             for (auto d : datas) {
                 raw_data->append(d.data());
+                std::cout << "DATA: " << d.data() << std::endl;
             }
 
             return raw_data->data();
         }
 
         size_t size() {
-            return packet_size;
+            return sizeof(headers) + sizeof(datas);
         }
 };
 

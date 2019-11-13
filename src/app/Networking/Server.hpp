@@ -44,6 +44,19 @@ class Server {
             }
         }
 
+        int addPacket(Packet p) {
+            return host->addPacket(p);
+        }
+
+        bool sendTo(int client, Packet p) {
+            int index = host->addPacket(p);
+            host->sendTo(client);
+            if (index > 0) {
+                return false;
+            }
+            return true;
+        }
+
         int numClients() {
             return host->numClients();
         }

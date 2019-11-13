@@ -159,11 +159,17 @@ int serverProcess() {
     // Send map! 
     std::cout << "Server: Preparing to send map!" << std::endl;
     Packet *temp = new Packet(PackType::MAP);
-    for (auto head : temp->getHeaders()) {
-        std::cout << "Packet header -> " << head.data() << std::endl;
-    }
-
+    auto headers = temp->getHeaders();
+	for (auto i = headers.begin(); i != headers.end(); i++) {
+		std::cout << "Packet header -> " << i->data() << std::endl;
+	}
     std::cout << "Size is " << temp->size() << std::endl;
+    std::cout << "Sending... " << std::endl;
+        fflush(stdout);
+    std::cout << "Adding packet to position" << server->addPacket(*temp) <<std::endl;
+    fflush(stdout);
+    server->sendTo(0, *temp);
+    server->sendTo(1, *temp);
 }
 
 std::vector<int>* serverMapGen(){

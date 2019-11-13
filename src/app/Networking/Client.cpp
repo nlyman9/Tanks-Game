@@ -23,16 +23,21 @@ int clientThread(void* data) {
     Client *client = (Client*) data;
     std::cout << "Client thread created!" << std::endl;
 
-    
-    // client->connect();
-    
+    // Try to connect to server... Usually only loops is the server is offline.
+    while (!client->isConnected() && !client->connect()) {
+            std::cout << "Client-Network: trying to connect to server..." << std::endl;
+            sleep(1);
+    }
 
     while(true) {
         std::cout << "Client-Network: looping" << std::endl;
-        while (!client->isConnected() && !client->connect()) {
-            std::cout << "Client-Network: trying to connect to server..." << std::endl;
-            sleep(1);
+        Packet *mail = client->recieve();
+        if (mail != nullptr) {
+            // Do stuff 
+            std::cout << "You got mail!" << std::endl;
+            std::cout << "Mail: " << mail->data() << std::endl;
         }
+        //else just sleep
 
         sleep(1);
     }

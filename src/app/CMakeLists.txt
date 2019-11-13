@@ -36,6 +36,7 @@ target_link_libraries(Game
   ${SDL2_LIBRARY}
   ${SDL2_IMAGE_LIBRARIES}
   ${SDL2_TTF_LIBRARIES}
+  Multiplayer
 )
 
 target_link_libraries(ServerProcess
@@ -50,6 +51,7 @@ else()
 target_link_libraries(Game
   PRIVATE
   StartUpMenu
+  Multiplayer
 )
 target_link_libraries(ServerProcess
   PRIVATE
