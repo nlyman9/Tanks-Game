@@ -29,3 +29,12 @@ bool Tank::rotate(float t){
 bool Tank::rotateTurret(float t){
     turretTheta = t;
 }
+
+void Tank::setTurretSprite(Sprite *new_sprite) 
+{
+    turretSprite = *new_sprite;
+}
+
+Sprite* Tank::getTurretSprite(){
+    return &turretSprite;
+}

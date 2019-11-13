@@ -59,7 +59,6 @@ class Object
 {
 private:
     Sprite sprite;
-    Sprite turretSprite;
     float x;
     float y;
     SDL_Rect box;
@@ -73,7 +72,6 @@ public:
     SDL_Rect *get_box();
     bool check_bounds();
     void setSprite(Sprite *new_sprite);
-    void setTurretSprite(Sprite* new_sprite);
 
     void setPos(float x, float y);
     void setX(float x);
@@ -87,7 +85,7 @@ public:
     
     std::vector<SDL_Rect> obstacles;
     Sprite* getSprite();
-    Sprite* getTurretSprite();
+
     /**
          * @brief Updates the Object at a fixed timestep;
          * 
