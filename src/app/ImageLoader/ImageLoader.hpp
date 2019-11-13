@@ -11,9 +11,7 @@
 #include <SDL2/SDL_image.h>
 #endif
 
-class ImageLoader {
-    public:
-        SDL_Texture* loadImage(std::string filename, SDL_Renderer* renderer);
-};
+SDL_Texture* loadImage(std::string filename, SDL_Renderer* renderer);
+
 
 #endif

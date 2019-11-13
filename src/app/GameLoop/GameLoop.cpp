@@ -10,6 +10,7 @@
 #include "GameLoop.hpp"
 #include "Constants.hpp"
 #include "Sprite.hpp"
+#include "ImageLoader.hpp"
 #include <stdio.h>
 #include <unistd.h>
 #include <iostream>
@@ -60,12 +61,12 @@ bool GameLoop::networkInit(Args *options) {
 	client = new Client(options->ip, options->port);
 	// Init
 	client->init();
+	player2->setClient(client);
 	return true;
 }
 
 void GameLoop::initMapMultiPlayer() {
-	while(!client->pollMap()) {
-	}
+	while(!client->pollMap()) {}
 
 	std::vector<int> tile_map = *client->gameMap;
 	std::vector<std::vector<int>> map2D;
@@ -117,8 +118,8 @@ int GameLoop::networkRun() {
 	Sprite *shell = new Sprite(render->getRenderer(), "src/res/images/shell.png");
 	shell->init();
 
-	ImageLoader imgLoad;
-	SDL_Texture* cursor = imgLoad.loadImage("src/res/images/cursor.png", render->getRenderer());
+	SDL_Texture* cursor = loadImage("src/res/images/cursor.png", render->getRenderer());
+
 
 	while (client->gameOn)
 	{
@@ -139,14 +140,14 @@ int GameLoop::networkRun() {
 			}
 		}
 
+		std::cout << "Player len: " << players.size() << std::endl;
 		for(auto player : players) {
 			player->getEvent(elapsed_time, &e);
 
+			//std::cout << "check fire " << player->getFire() << std::endl;
+
 			//network version of player firing bullet
 			if (player->getFire() == true) {
-
-				//std::cout << "pew\n";
-
 				//Projectile *newlyFired = new Projectile(player->getX(), player->getY());
 				//projectiles.push_back(newlyFired);
 				projectiles.push_back(new Projectile(player->getX(), player->getY(), player->getTurretTheta()));
@@ -159,8 +160,12 @@ int GameLoop::networkRun() {
 				projectiles.back()->setObstacleLocations(&tileArray);
 				player->setFire(false);
 			}
+			fflush(stdout);
+			//std::cout << "finish player check fire" << std::endl;
+			fflush(stdout);
 		}
 
+		std::cout << "update" << std::endl;
 		// 2. Update
 		// Update if time since last update is >= MS_PER_UPDATE
 		while(lag_time >= MS_PER_UPDATE) {
@@ -177,6 +182,7 @@ int GameLoop::networkRun() {
 			lag_time -= MS_PER_UPDATE;
 		}
 
+		std::cout << "cursor" << std::endl;
 		// quick and dirty ;)
 		int cursorX = 0, cursorY = 0;
 
@@ -186,7 +192,7 @@ int GameLoop::networkRun() {
 
 		SDL_Rect cursorRect = {cursorX, cursorY, CROSSHAIR_SIZE, CROSSHAIR_SIZE};
 
-
+		std::cout << "render" << std::endl;
 		// 3. Render
 		// Render everything
 		render->draw(lag_time / MS_PER_UPDATE);
@@ -214,9 +220,14 @@ bool GameLoop::init(Render* renderer) {
 	players.push_back(player);
 
 	Sprite *player_tank = new Sprite(render->getRenderer(), "src/res/images/red_tank.png");
-	Sprite *player_turrent = new Sprite(render->getRenderer(), "src/res/images/red_turret.png");
+	Sprite *pinksplosion =  new Sprite(render->getRenderer(), "src/res/images/pinksplosion.png");
 	player_tank->init();
+	player_tank->sheetSetup(30, 30, 3);
+	
+	
+	Sprite *player_turrent = new Sprite(render->getRenderer(), "src/res/images/red_turret.png");
 	player_turrent->init();
+	
 	player->setSprite(player_tank);
 	player->setTurretSprite(player_turrent);
 
@@ -250,9 +261,12 @@ void GameLoop::initMapSinglePlayer() {
 	enemies.push_back(new Enemy( SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, players.at(0))); // single player means player vector is size 1
 	render->setEnemies(enemies);
 	Sprite *enemy_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
-	Sprite *enemy_turrent = new Sprite(render-> getRenderer(), "src/res/images/blue_turret.png");
 	enemy_tank->init();
+	enemy_tank->sheetSetup(30, 30, 3);
+	
+	Sprite *enemy_turrent = new Sprite(render-> getRenderer(), "src/res/images/blue_turret.png");
 	enemy_turrent->init();
+
 	for (auto enemy : enemies) {
 		enemy->setSprite(enemy_tank);
 		enemy->setTurretSprite(enemy_turrent);
@@ -285,9 +299,11 @@ int GameLoop::runSinglePlayer()
 	//Create shell sprite
 	Sprite *shell = new Sprite(render->getRenderer(), "src/res/images/shell.png");
 	shell->init();
-	ImageLoader imgLoad;
-	SDL_Texture* cursor = imgLoad.loadImage("src/res/images/cursor.png", render->getRenderer());
-
+	SDL_Texture* cursor = loadImage("src/res/images/cursor.png", render->getRenderer());
+	Sprite *pinksplosion =  new Sprite(render->getRenderer(), "src/res/images/pinksplosion.png");
+	pinksplosion->init();
+	pinksplosion->sheetSetup(42, 42, 6);
+	
 	while (isGameOn)
 	{
 		current_time = std::chrono::system_clock::now();
@@ -350,12 +366,17 @@ int GameLoop::runSinglePlayer()
 				//update projectile
 				projectiles.at(i)->update();
 				//check if the projectile needs to be deleted
-				if(!projectiles.at(i)->isAlive()){
+				if(projectiles.at(i)->isExploding()){
+					//replace the projectile's image with the explosion
+					projectiles.at(i)->setSprite(pinksplosion);
+				}
+				else if(projectiles.at(i)->isFinished()){
+					projectiles.at(i)->~Projectile();
 					//remove the projectile from the render array so the image does not stay
 					render->gProjectiles.erase(render->gProjectiles.begin()+i);
+
 					//remove projectile from projectiles array
 					projectiles.erase(projectiles.begin()+i);
-					//MAKE EXPLOSION!?!?!?!
 					i--; //since we removed an element, the next increment will skip an element so decrement
 				}
 			}

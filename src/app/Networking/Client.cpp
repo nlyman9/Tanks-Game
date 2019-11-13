@@ -181,9 +181,16 @@ std::vector<char>* Client::getFillBuffer() {
 }
 
 Uint8* Client::pollKeystate() {
-    auto state = keystates->back();
-    keystates->pop_back();
-    return state;
+    fflush(stdout);
+    if(keystates->size() != 0) {
+        auto state = keystates->back();
+        keystates->pop_back();  
+        return state;
+    } else {
+        Uint8* emptyKeystate;
+        *emptyKeystate = 0;
+        return emptyKeystate;
+    }
 }
 
 bool Client::init() {
@@ -195,7 +202,9 @@ bool Client::init() {
     //buffer to fill in
     fBuffer = new std::vector<char>();
     //to send buffer
-    tsBuffer = new std::vector<char>();;
+    tsBuffer = new std::vector<char>();
+    // keystate buffer
+    keystates = new std::vector<Uint8*>();
     // Pack Client into void pointer for thread
     void* clientInfo = malloc(sizeof(long));
     clientInfo = (void*) this;
