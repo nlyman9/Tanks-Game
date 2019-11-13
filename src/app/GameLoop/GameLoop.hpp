@@ -60,7 +60,7 @@ class GameLoop {
     // Projectiles don't see holes as obstacles, keep separate array
     std::vector<SDL_Rect> projectileObstacles;
 
-    std::vector<int> spawnEnemy(std::vector<std::vector<int>> *map);
+    std::vector<int> spawnEnemies(std::vector<std::vector<int>> *map, int count);
 
     // Server pid
     int server_pid;
