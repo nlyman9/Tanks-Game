@@ -51,7 +51,7 @@ int clientThread(void* data) {
     }
     // Create a socket based on server info 
     sockfd = socket(serverInfo->ai_family, serverInfo->ai_socktype, serverInfo->ai_protocol);
-    sleep(2);
+    sleep(1);
     // Connect to server
     while (connect(sockfd, serverInfo->ai_addr, serverInfo->ai_addrlen) < 0) {
         std::cout << "CLIENT: Waiting for connection..." << std::endl;
@@ -68,7 +68,7 @@ int clientThread(void* data) {
     fdmax = sockfd;
 
     std::cout << "CLIENT: Receive thread created!" << std::endl;
-
+    crClient->startGame = false;
     // Game loop
     while(crClient->gameOn) {
         if(gameBufferReady) {
@@ -102,6 +102,7 @@ int clientThread(void* data) {
                     ->strip again get the type of the packet
                 */
                 //received data
+                std::cout << "CLIENT: Received data in rcBuffer : " << rcBuffer->data() << std::endl;
                 int size = stripHeader(rcBuffer);
                 int header = stripHeader(rcBuffer);
                 switch(header)
@@ -145,6 +146,13 @@ int clientThread(void* data) {
                        break;
                     }
 
+                    // Receive game start flag from server
+                    case 4:
+                    {
+                        std::cout << "Received start game packet!" << std::endl;
+                        crClient->startGame = true;
+                        break;
+                    }
                     default:
                     {
                         std::cout << "CLIENT: HELP ILLEGAL PACKET RECEIVED" << std::endl;
@@ -158,11 +166,15 @@ int clientThread(void* data) {
             } else {
                 //std::cout << "CLIENT: NO data received! check if buffer size is set!" << std::endl;
             }
-        } else if (tsReady) { 
+        }
+        if (tsReady) { 
             SDL_AtomicLock(&slock);
-                send(sockfd, tsBuffer->data(), tsBuffer->size(), 0);
-                tsBuffer->clear();
-                tsReady = false;
+            send(sockfd, tsBuffer->data(), tsBuffer->size(), 0);
+            std::cout << "CLIENT: Buffer that was sent : ";
+            for(auto x: *tsBuffer)
+                std::cout << x << " " << std::endl;
+            tsBuffer->clear();
+            tsReady = false;
             SDL_AtomicUnlock(&slock);
         }
     }
@@ -173,6 +185,19 @@ bool Client::pollMap() {
 }
 
 void Client::getGameBufferReady(bool flag) {
+    while(tsReady); //wait for the client to send the data -- could switch to a semaphore for that REAL multithreading style
+    SDL_AtomicLock(&slock); //dont try to modify the data if the client is trying to!
+    std::cout << "Filling up the tsBuffer from the Fbuffer" << std::endl;
+    for(auto item : *fBuffer) {
+        tsBuffer->push_back(item);
+    }
+    //was testing if the tsbuffer was sent once and cleared correctly
+    //tsBuffer->push_back('h');
+    gameBufferReady = false;
+    tsReady = true;
+    SDL_AtomicUnlock(&slock);
+    fBuffer->clear();
+    std::cout << "Filled" << std::endl;
     gameBufferReady = flag;
 }
 
@@ -192,7 +217,6 @@ Uint8* Client::pollKeystate() {
         return emptyKeystate;
     }
 }
-
 bool Client::init() {
     gameMap = new std::vector<int>();
     //initialize all buffers
@@ -208,8 +232,8 @@ bool Client::init() {
     // Pack Client into void pointer for thread
     void* clientInfo = malloc(sizeof(long));
     clientInfo = (void*) this;
-    gameOn = true;
     rcThread = SDL_CreateThread(clientThread, "myThread", (void*) clientInfo);
+    gameOn = true;
     return true;
 }
 
