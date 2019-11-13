@@ -46,6 +46,8 @@ std::vector<std::vector<int>> MapGenerator::generateLineMap()
 
 	srand(time(NULL));
 
+	int tile_randomonizer = rand() % 2 + 1;
+
 	for(int i = 0; i < Y_HIGH; i++) {
 		random_index = rand() % X_WIDE;
 		if(rand() % 3 == 0)
@@ -67,7 +69,7 @@ std::vector<std::vector<int>> MapGenerator::generateLineMap()
 				if(j == random_index || j == random_index_bonus)
 					room[j][i] = 0;
 				else
-					room[j][i] = 2;
+					room[j][i] = tile_randomonizer;
 			}
 			else {
 				room[j][i] = 0;
@@ -168,6 +170,36 @@ std::vector<std::vector<int>> MapGenerator::presetCenterCubes()
 	return array;
 }
 
+std::vector<std::vector<int>> MapGenerator::presetHoleMap()
+{
+    std::vector<std::vector<int>> array = generateEmptyMap();
+
+	for(int i = 0; i < X_WIDE; i++) {
+		if(i != 5 && i != 7) {
+			array[i][3] = 1;
+		}
+	}
+
+	for(int i = 0; i < X_WIDE; i++) {
+		if(i != 16 && i != 18) {
+			array[i][9] = 1;
+		}
+	}
+
+	for(int i = 0; i < Y_HIGH; i++) {
+		if(i != 8 && i != 10) {
+			array[6][i] = 1;
+		}
+	}
+
+	for(int i = 0; i < Y_HIGH; i++) {
+		if(i != 2 && i != 4) {
+			array[17][i] = 1;
+		}
+	}
+	return array;
+}
+
 std::vector<std::vector<int>> MapGenerator::presetCheckerMap()
 {
     std::vector<std::vector<int>> room = generateEmptyMap();
@@ -241,9 +273,9 @@ std::vector<std::vector<int>>* MapGenerator::generateMap()
 			tile_map = generateHMazeMap();
 			break;
 		case 3:
-			// tile_map = generateOpenLineMap();
-			// break;
-			// Fall through b/c seg fault
+			tile_map = generateOpenLineMap();
+			break;
+			// double check for seg fault
 		default:
 			switch(rand() % NUM_PRE)
 			{
@@ -258,8 +290,6 @@ std::vector<std::vector<int>>* MapGenerator::generateMap()
 					break;
 			}
 	}
-
-	tile_map = generateHMazeMap();
 
 	return &tile_map;
 }

@@ -253,8 +253,15 @@ void GameLoop::initMapSinglePlayer() {
 	for (int x = BORDER_GAP + TILE_SIZE, i = 0; x < SCREEN_WIDTH - BORDER_GAP - TILE_SIZE; x+=TILE_SIZE, i++) {
 		for (int y = TILE_SIZE, j = 0; y < SCREEN_HEIGHT - TILE_SIZE; y+=TILE_SIZE, j++) {
 			SDL_Rect cur_out = { x, y, TILE_SIZE, TILE_SIZE};
+			SDL_Rect hole_tile = { x+5, y+5, TILE_SIZE-5, TILE_SIZE-5 }; //does not work, enemy AI needs update
 			if(mapVectors[i][j] == 2){
 				tileArray.push_back(cur_out);
+				enemyTileArray.push_back(cur_out);
+				projectileObstacles.push_back(cur_out);
+			}
+			else if(mapVectors[i][j] == 1){
+				tileArray.push_back(hole_tile);
+				enemyTileArray.push_back(cur_out);
 			}
 		}
 	}
@@ -263,7 +270,9 @@ void GameLoop::initMapSinglePlayer() {
 		player->setObstacleLocations(&tileArray);
 	}
 
-	enemies.push_back(new Enemy( SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, players.at(0))); // single player means player vector is size 1
+	std::vector<int> enemySpawn = GameLoop::spawnEnemy(map);
+	enemies.push_back(new Enemy( enemySpawn.at(0), enemySpawn.at(1), players.at(0))); // single player means player vector is size 1
+
 	render->setEnemies(enemies);
 	Sprite *enemy_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
 	enemy_tank->init();
@@ -282,6 +291,31 @@ void GameLoop::initMapSinglePlayer() {
 		enemy->setTileMap(map);
 		//enemy->setPathway(*map, *players.at(0), *enemy); // single player means player vector is size 1
 	}
+}
+
+// Returns a vector with two int values, x at 0 and y at 1
+// Values represent pixel coordinates of enemy spawn point
+std::vector<int> GameLoop::spawnEnemy(std::vector<std::vector<int>> *map)
+{
+	std::vector<std::vector<int>> tileMap = *map;
+	std::vector<int> coords;
+	int enemy_x, enemy_y;
+
+	while(true)
+	{
+		enemy_x = (rand() % 16) + 4;
+		enemy_y = (rand() % 4) + 9;
+
+		if(tileMap[enemy_y][enemy_x] == 0)
+		{
+			break;
+		}
+	}
+
+	coords.push_back(enemy_x * 48 + 100);
+	coords.push_back(enemy_y * 48 + 48);
+
+	return coords;
 }
 
 /**
@@ -325,7 +359,7 @@ int GameLoop::runSinglePlayer()
 			}
 		}
 
-		//checkEscape();
+		// checkEscape();
 		for(auto player : players) {
 			
 			player->getEvent(elapsed_time, &e);
@@ -340,7 +374,7 @@ int GameLoop::runSinglePlayer()
 				render->gProjectiles.push_back(projectiles.back());
 				projectiles.back()->setSprite(shell);
 				//newlyFired->setSprite(bullet);
-				projectiles.back()->setObstacleLocations(&tileArray);
+				projectiles.back()->setObstacleLocations(&projectileObstacles);
 				player->setFire(false);
 			}
 		}
