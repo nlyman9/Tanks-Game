@@ -84,6 +84,18 @@ class ServerConnection {
 
         void broadcast() {
             // Send to all clients 
+            std::cout << "Broadcasting to clients..." << std::endl;
+
+            size_t num_bytes_sent;
+            Packet mail = sendBuffer.at(0);
+            sendBuffer.erase(sendBuffer.begin());
+
+            for (auto client : clients) {
+                num_bytes_sent = send(client->fd(), mail.data(), mail.size(), 0);
+            }
+
+            std::cout << "Broadcasted to clients!" << std::endl;
+
         }
 
         int numClients() {

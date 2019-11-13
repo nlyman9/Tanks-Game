@@ -147,7 +147,7 @@ int serverProcess() {
     std::cout << "MAP PACKED " << std::endl;
 
     // First wait for 2 clients
-    while (server->numClients() < 1) {
+    while (server->numClients() < 2) {
         if (server->accept()) {
             std::cout << "Server: New client connection accepted" << std::endl;
         }
@@ -162,8 +162,7 @@ int serverProcess() {
     std::cout << "MAp size is " << map->size() << std::endl;
     mapPacket.appendData(*map);
 
-    server->sendTo(0, mapPacket);
-    // server->sendTo(1, mapPacket);
+    server->broadcast(mapPacket);
 }
 
 std::vector<int>* serverMapGen(){

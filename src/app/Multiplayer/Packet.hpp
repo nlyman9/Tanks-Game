@@ -120,7 +120,7 @@ class Packet {
             return atoi(headers.at(1).getValue().c_str());
         }
 
-        // std::vector<char*>* get() {
+        // std::vector<char>* get() {
         //     std::vector<char*> *raw = new std::vector<char*>();
         //     // Set up headers
         //     for (auto head : headers) {
@@ -137,6 +137,15 @@ class Packet {
         //     }
         //     return raw;
         // }
+
+        std::vector<char>* getDataAt(int i) {
+            assert(i < datas.size());
+
+            std::string temp = datas.at(i);
+
+            return new std::vector<char>(temp.begin(), temp.end());
+            
+        }
 
         // std::string* dataString() {
         //     std::string *raw_data = new std::string();

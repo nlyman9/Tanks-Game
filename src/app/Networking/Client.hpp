@@ -32,8 +32,17 @@ static std::vector<Uint8*>* keystates;
 
 class Client {
   public:
+    // Network
     ClientConnection *server;
+
+    // Game 
+    bool gameOn;
+
+    // Game map
     std::vector<int> *gameMap;
+    bool mapReceived;
+
+    SDL_Thread* rcThread;
 
     Client(std::string ip, int port) {
       server = new ClientConnection(ip, port);
@@ -61,12 +70,11 @@ class Client {
       return server->getPacket();
     }
 
-    bool gameOn;
-    SDL_Thread* rcThread;
 
 
-
-    // bool pollMap();
+    bool pollMap() {
+      return mapReceived;
+    }
     // void getGameBufferReady(bool flag);
 
     // std::vector<char>* getFillBuffer();

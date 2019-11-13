@@ -31,7 +31,7 @@ int clientThread(void* data) {
 
     // Wait for map
     while(true) {
-        std::cout << "Client-Network: looping" << std::endl;
+        std::cout << "Client-Network: Waiting for map" << std::endl;
         Packet *mail = client->receive();
         if (mail != nullptr) {
             // Do stuff 
@@ -39,12 +39,30 @@ int clientThread(void* data) {
             std::cout << "Mail: " << mail->data() << std::endl;
 
             if (mail->getType() == (int)PackType::MAP) {
-                
+                std::cout << "Client: Loading map... " << mail->data() << std::endl;
+                std::vector<int>* map = new std::vector<int>();
+
+                unpack(mail->getDataAt(0), map, 3);
+                for (int i = 0; i < map->size();i++){
+                    client->gameMap->push_back(map->at(i));                 
+                }
+
+                mapReceived = true;
+                delete map;
 
                 break;
             }
         }
         //else just sleep
+
+        sleep(1);
+    }
+
+    while (true) {
+        std::cout << "Client-Network: Loop" << std::endl;
+        Packet *mail = client->receive();
+        if (mail != nullptr) {
+        }
 
         sleep(1);
     }

@@ -57,6 +57,12 @@ class Server {
             return true;
         }
 
+        bool broadcast(Packet p) {
+            int index = host->addPacket(p);
+            host->broadcast();
+            return true;
+        }
+
         int numClients() {
             return host->numClients();
         }

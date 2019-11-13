@@ -48,41 +48,44 @@ bool GameLoop::networkInit(Args *options) {
 		}
 	}
 
-	// Player* player2 = new Player(SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, false);
-	// Sprite* player_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
-	// Sprite* player_turrent = new Sprite(render->getRenderer(), "src/res/images/red_turret.png");
-	// player_tank->init();
-	// player_turrent->init();
-	// player2->setSprite(player_tank);
-	// player2->setTurretSprite(player_turrent);
-	// players.push_back(player2);
-	// render->setPlayer(players);
+	Player* player2 = new Player(SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, false);
+	Sprite* player_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
+	Sprite* player_turrent = new Sprite(render->getRenderer(), "src/res/images/red_turret.png");
+	player_tank->init();
+	player_turrent->init();
+	player2->setSprite(player_tank);
+	player2->setTurretSprite(player_turrent);
+	players.push_back(player2);
+	render->setPlayer(players);
 	// Create client process
 	client = new Client(options->ip, options->port);
 	// Init
 	client->init();
-	// player2->setClient(client);
+	player2->setClient(client);
 	return true;
 }
 
 void GameLoop::initMapMultiPlayer() {
-	// while(!client->pollMap()) {}
+	while(!client->pollMap()) {}
 
-	// std::vector<int> tile_map = *client->gameMap;
+	std::cout << "GAME: Setting Tile Map..." << std::endl;
+	fflush(stdout);
+
+	std::vector<int> tile_map = *client->gameMap;
 	std::vector<std::vector<int>> map2D;
 	// init the first row
 	map2D.push_back(std::vector<int>((SCREEN_WIDTH - BORDER_GAP - TILE_SIZE) / TILE_SIZE - 1));
 	int row = 0;
 	int col = 0;
-	// for (auto tile : tile_map) {
-	// 	if(col == (SCREEN_HEIGHT - TILE_SIZE) / TILE_SIZE - 1) {
-	// 		row++;
-	// 		col = 0;
-	// 		map2D.push_back(std::vector<int>((SCREEN_WIDTH - BORDER_GAP - TILE_SIZE) / TILE_SIZE - 1));
-	// 	}
-	// 	map2D[row][col] = tile;
-	// 	col++;
-	// }
+	for (auto tile : tile_map) {
+		if(col == (SCREEN_HEIGHT - TILE_SIZE) / TILE_SIZE - 1) {
+			row++;
+			col = 0;
+			map2D.push_back(std::vector<int>((SCREEN_WIDTH - BORDER_GAP - TILE_SIZE) / TILE_SIZE - 1));
+		}
+		map2D[row][col] = tile;
+		col++;
+	}
 
 	int count = 0;
 	for (int x = BORDER_GAP + TILE_SIZE, i = 0; x < SCREEN_WIDTH - BORDER_GAP - TILE_SIZE; x+=TILE_SIZE, i++) {
@@ -95,6 +98,9 @@ void GameLoop::initMapMultiPlayer() {
 	}
 
 	render->setTileMap(&map2D);
+
+	std::cout << "GAME: Set Tile Map" << std::endl;
+	fflush(stdout);
 
 	for (auto player : players) {
 		player->setObstacleLocations(&tileArray);
