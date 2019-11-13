@@ -34,13 +34,39 @@ Enemy::~Enemy() {}
 
    // Render enemy
    // SDL_Rect src = {0, 0, 48, 48};
-   SDL_Rect dst = {x_enemy_pos, y_enemy_pos, TANK_WIDTH, TANK_HEIGHT};
+   SDL_Rect dst = {(int)x_enemy_pos, (int)y_enemy_pos, TANK_WIDTH, TANK_HEIGHT};
    // SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), &src, &dst, 0, NULL, SDL_FLIP_NONE);
    //SDL_Rect pos = {(int)x_enemy_pos, (int)y_enemy_pos, TANK_WIDTH, TANK_HEIGHT};
    //SDL_Rect* dst = get_box();
    //SDL_Rect* turret_dst = get_box();
-   SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), NULL, &dst, theta, NULL, SDL_FLIP_NONE);
+   
+   
+   if (/*x_vel != 0 || y_vel != 0 && */SDL_GetTicks() - anim_last_time > 100) {
+		frame = (frame + 1) % 3;
+		anim_last_time = SDL_GetTicks();
+	}
+   
+   
+   SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), getSprite()->getFrame(frame), &dst, theta, NULL, SDL_FLIP_NONE);
    SDL_RenderCopyEx(gRenderer, getTurretSprite()->getTexture(), NULL, &dst, turretTheta, NULL, SDL_FLIP_NONE);
+
+   findEndValues(turretTheta);
+
+   SDL_RenderDrawLine(gRenderer, x_enemy_pos + TANK_WIDTH/2, y_enemy_pos + TANK_HEIGHT/2, line1X, line1Y);
+   SDL_RenderDrawLine(gRenderer, x_enemy_pos + TANK_WIDTH/2, y_enemy_pos + TANK_HEIGHT/2, line2X, line2Y);
+ }
+
+ void Enemy::findEndValues(float angle){
+   angle *= -1;
+   //printf("angle: %f\n", angle);
+   angle = angle * M_PI / 180;
+   int length = SCREEN_WIDTH;
+   float ang1 = angle + .25;
+   float ang2 = angle - .25;
+   line1X = cos(ang1) * length + getX();
+   line1Y = getY() - sin(ang1) * length;
+   line2X = cos(ang2) * length + getX();
+   line2Y = getY() - sin(ang2) * length;
  }
 
 /**
@@ -85,12 +111,36 @@ bool Enemy::fire() {
     return false;
 }
 
-bool Enemy::rotateEnemy(float theta) {
-    return false;
+bool Enemy::rotateEnemy(float t) {
+  return true;
 }
 
 bool Enemy::rotateTurret(float theta) {
     return false;
+}
+
+float Enemy::area(float x1, float y1, float x2, float y2, float x3, float y3){
+  return abs((x1*(y2-y3) + x2*(y3-y1)+ x3*(y1-y2))/2.0);
+}
+
+bool Enemy::isInRange(float x1, float y1, float x2, float y2, float x3, float y3, float playerX, float playerY){
+  //overall area
+  float A = area(x1, y1, x2, y2, x3, y3);
+  //trianlge PBC
+  float a1 = area(playerX, playerY, x2, y2, x3, y3);
+  //triangle PAC
+  float a2 = area(x1, y1, playerX, playerY, x3, y3);
+  //trianlge PAB
+  float a3 = area(x1, y1, x2, y2, playerX, playerY);
+
+  float sum = a1 + a2 + a3;
+
+  if(abs(A - sum) < 1){
+    return true;
+  }
+  else{
+    return false;
+  }
 }
 
 bool Enemy::checkPos(float playX, float playY, float enemX, float enemY) {
@@ -140,11 +190,75 @@ float Enemy::getY(){
   return y_enemy_pos;
 }
 
+float Enemy::getTurretTheta(){
+  return turretTheta;
+}
+
+bool Enemy::getFire(){
+  return shotsFired;
+}
+
+void Enemy::setFire(bool fire){
+  shotsFired = fire;
+}
+
 void Enemy::updatePos() {
-  float delta_x = gPlayer->getX() - (getX() + TANK_WIDTH / 2);
-  float delta_y = gPlayer->getY() - (getY() + TANK_HEIGHT / 2);
-  float theta_radians = atan2(delta_y, delta_x);
-  turretTheta = (int)(theta_radians * 180 / M_PI);
+  //printf("%d\t", isInRange(x_enemy_pos + TANK_WIDTH/2, y_enemy_pos + TANK_HEIGHT/2, line1X, line1Y, line2X, line2Y, gPlayer->getX() + TANK_WIDTH/2, gPlayer->getY() + TANK_HEIGHT/2));
+  Uint32 current_time = SDL_GetTicks();
+
+  if(isInRange(x_enemy_pos + TANK_WIDTH/2, y_enemy_pos + TANK_HEIGHT/2, line1X, line1Y, line2X, line2Y, gPlayer->getX() + TANK_WIDTH/2, gPlayer->getY() + TANK_HEIGHT/2)){
+    if(current_time > fire_last_time + 3000){
+      setFire(true);
+      fire_last_time = current_time;
+    }
+  }
+
+  if(current_time > turret_mode_change + 3000){
+    if(rand() % 2 == 0){
+      trackOrMonitor = true;
+    }
+    else{
+      trackOrMonitor = false;
+    }
+    turret_mode_change = current_time;
+  }
+  if(trackOrMonitor){
+    //hi frems
+    //track mode
+    float curTheta = getTurretTheta();
+    float delta_x = (gPlayer->getX() + TANK_WIDTH / 2) - (getX() + TANK_WIDTH / 2);
+    float delta_y = (gPlayer->getY() + TANK_HEIGHT / 2) - (getY() + TANK_HEIGHT / 2);
+    float theta_radians = atan2(delta_y, delta_x);
+    turretTheta = (int)(theta_radians * 180 / M_PI);
+  }
+  else{
+    //monitor mode
+    if(rotateUp){
+      turretTheta += 1;
+      if(turretTheta > 180){
+        turretTheta = -180;
+        rotateUp = false;
+      }
+    }
+    else{
+      turretTheta += 1;
+      if(turretTheta > 0){
+        turretTheta = 0;
+        rotateUp = true;
+      }
+    }
+  }
+
+  if(current_time > last_state_change + 5000){
+    if(rand() % 3 == 0){
+      wander = true;
+    }
+    else{
+      wander = false;
+    }
+    enemyPath.clear();
+    last_state_change = current_time;
+  }
 
   if(enemyPath.size() < randCut){
     setPathway(this->tile_map, *this->gPlayer, *this);
@@ -178,6 +292,25 @@ void Enemy::updatePos() {
 
   int startingPosition =  SCREEN_WIDTH - TANK_WIDTH/2 - 75;
 
+  //Get direction of current direction moving
+  if (theta == 0) {
+    moveRight = true;
+    rightLeft = true;
+  }
+  else if (theta == 90){
+    moveDown = true;
+    upDown = true;
+  }
+  else if (theta == 180) {
+    moveLeft = true;
+    rightLeft = true;
+  }
+  else if (theta == 270) {
+    moveUp = true;
+    upDown = true;
+  }
+
+
   if(enemyPath.size() > 1){
 
     coordinate moveFrom = enemyPath[enemyPath.size() - 1];
@@ -185,59 +318,116 @@ void Enemy::updatePos() {
 
     //move LEFT
     if(moveFrom.col > moveTo.col){
-      //std::cout << "Moving left" << std::endl;
-      x_enemy_pos -= MAX_VELOCITY;
-      y_enemy_pos += 0;
-      if(x_enemy_pos < (moveTo.col * TILE_SIZE + TILE_SIZE + 36)){
-        enemyPath.pop_back();
+      if (moveLeft || rightLeft) {
+        //std::cout << "Moving left" << std::endl;
+        x_enemy_pos -= MAX_VELOCITY;
+        y_enemy_pos += 0;
+        if(x_enemy_pos < (moveTo.col * TILE_SIZE + TILE_SIZE + 36)){
+          enemyPath.pop_back();
+        }
+        //check collision with player
+        if (overlap != nullptr) {
+          x_enemy_pos += MAX_VELOCITY;
+          //std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
+        }
       }
-      //check collision with player
-      if (overlap != nullptr) {
-        x_enemy_pos += MAX_VELOCITY;
-        //std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
+      else {
+        //don't move and rotate the tank by updating the theta
+        if (theta > 180) {
+          theta -= PHI;
+        }
+        else {
+          theta += PHI;
+        }
+        //std::cout << "Updated theta to go left: " << theta << std::endl;
+        setFalse();
       }
     }
     //move right
     if(moveFrom.col < moveTo.col){
-      //std::cout << "Moving right" << std::endl;
-      x_enemy_pos += MAX_VELOCITY;
-      y_enemy_pos += 0;
-      if(x_enemy_pos > (moveTo.col * TILE_SIZE + TILE_SIZE*2 - 20)){
-        enemyPath.pop_back();
+      if (moveRight || rightLeft) {
+        //std::cout << "Moving right" << std::endl;
+        x_enemy_pos += MAX_VELOCITY;
+        y_enemy_pos += 0;
+        if(x_enemy_pos > (moveTo.col * TILE_SIZE + TILE_SIZE*2 - 20)){
+          enemyPath.pop_back();
+        }
+        //check collision
+        if (overlap != nullptr) {
+          x_enemy_pos -= MAX_VELOCITY;
+          //std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
+        }
       }
-      //check collision
-      if (overlap != nullptr) {
-        x_enemy_pos -= MAX_VELOCITY;
-        //std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
+      else {
+        if (theta > 270) {
+          //If pointed up, rotate right
+          theta += PHI;
+          if (theta == 360) { //ensure it can go to the right now
+            theta = 0;
+          }
+        }
+        else {
+          //If pointed down, rotate left
+          theta -= PHI;
+        }
+        //std::cout << "Updated theta to go right: " << theta << std::endl;
+        setFalse();
       }
     }
     //move up
     if(moveFrom.row > moveTo.row){
-      x_enemy_pos += 0;
-      y_enemy_pos -= MAX_VELOCITY;
-      if(y_enemy_pos < (moveTo.row * TILE_SIZE + TILE_SIZE + 20)){
-        enemyPath.pop_back();
+      if (moveUp || upDown) {
+        x_enemy_pos += 0;
+        y_enemy_pos -= MAX_VELOCITY;
+        if(y_enemy_pos < (moveTo.row * TILE_SIZE + TILE_SIZE + 20)){
+          enemyPath.pop_back();
+        }
+        //check collision
+        if (overlap != nullptr) {
+          y_enemy_pos += MAX_VELOCITY;
+          //std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
+        }
       }
-      //check collision
-      if (overlap != nullptr) {
-        y_enemy_pos += MAX_VELOCITY;
-        //std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
+      else {
+        if (theta > 270) {
+          theta -= PHI;
+        }
+        else {    //theta has to be 0 here and since 0 - 3 would not work, set to 360
+          theta = 360;
+          theta -= PHI;
+        }
+        //std::cout << "Updated theta to go up: " << theta << std::endl;
+        setFalse();
       }
     }
     //move DOWN
     if(moveFrom.row < moveTo.row){
-      x_enemy_pos += 0;
-      y_enemy_pos += MAX_VELOCITY;
-      if(y_enemy_pos > (moveTo.row * TILE_SIZE + TILE_SIZE + 20)){
-        enemyPath.pop_back();
+      if (moveDown || upDown) {
+        x_enemy_pos += 0;
+        y_enemy_pos += MAX_VELOCITY;
+        if(y_enemy_pos > (moveTo.row * TILE_SIZE + TILE_SIZE + 20)){
+          enemyPath.pop_back();
+        }
+        //check collision
+        if (overlap != nullptr) {
+          y_enemy_pos -= MAX_VELOCITY;
+          //std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
+        }
       }
-      //check collision
-      if (overlap != nullptr) {
-        y_enemy_pos -= MAX_VELOCITY;
-        //std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
+      else {
+        if (theta > 90) {
+          theta -= PHI;
+        }
+        else {
+          theta += PHI;
+        }
+        //std::cout << "Updated theta to go down: " << theta << std::endl;
+        setFalse();
       }
     }
   }
+  rotateEnemy(theta);       //update enemy rotation to match direction
+
 
   SDL_Rect* box = get_box(); // required to update box    //Enemy box is within 8 pixels of an obstacle
   /*
@@ -262,18 +452,21 @@ void Enemy::updatePos() {
     }
 	}
 
-
-  if(x_enemy_pos > SCREEN_WIDTH - 2*TANK_WIDTH) {
-    x_enemy_pos = SCREEN_WIDTH - 2*TANK_WIDTH;
+  if (x_enemy_pos + TANK_WIDTH > SCREEN_WIDTH - TILE_SIZE - 16)
+  {
+      x_enemy_pos = SCREEN_WIDTH - TILE_SIZE - 16 - TANK_WIDTH;
   }
-  if(x_enemy_pos < TILE_SIZE){
-    x_enemy_pos = TILE_SIZE;
+  if (x_enemy_pos < TILE_SIZE + 16)
+  {
+      x_enemy_pos = TILE_SIZE + 16;
   }
-  if(y_enemy_pos < TILE_SIZE){
-    y_enemy_pos = TILE_SIZE;
+  if (y_enemy_pos < TILE_SIZE)
+  {
+      y_enemy_pos = TILE_SIZE;
   }
-  if(y_enemy_pos > SCREEN_HEIGHT - 2*TANK_HEIGHT) {
-    y_enemy_pos = SCREEN_HEIGHT - 2*TANK_HEIGHT;
+  if (y_enemy_pos + TANK_HEIGHT > SCREEN_HEIGHT - TILE_SIZE)
+  {
+      y_enemy_pos = SCREEN_HEIGHT - TILE_SIZE - TANK_HEIGHT;
   }
 }
 
@@ -321,6 +514,7 @@ void Enemy::setTileMap(std::vector<std::vector<int>>* tileMap) {
 	tile_map = *tileMap;
 }
 
+
 /** TODO Finish implementation once theta is added to enemy.
  * @brief Get the bounding box of the player's tank
  *
@@ -356,16 +550,51 @@ void Enemy::setPathway(std::vector<std::vector<int>> move_map, Player player, En
   int ghostYblock = findYBlock(player.getY());
   int enemyXblock = findXBlock(enemy.getX());
   int enemyYblock = findYBlock(enemy.getY());
-  if(abs(ghostXblock - enemyXblock) < 2 && abs(ghostYblock - enemyYblock) < 2){
+  if(abs(ghostXblock - enemyXblock) < 2 && abs(ghostYblock - enemyYblock) < 2 && !wander){
     enemyPath = generatePath(move_map, player, enemy);
   }
   else{
-    coordinate newGhostPos = Enemy::newGhostPos(ghostXblock, ghostYblock, enemyXblock, enemyYblock);
-    int ghostX = newGhostPos.col * TILE_SIZE + TILE_SIZE + BORDER_GAP;
-    int ghostY = newGhostPos.row * TILE_SIZE + TILE_SIZE;
-    Player* ghost = new Player(ghostX, ghostY, true);
-    enemyPath = generatePath(move_map, *ghost, enemy);
+    if(wander){
+      coordinate randGhostPos = Enemy::randGhostPos(enemyXblock, enemyYblock);
+      int randGhostX = randGhostPos.col * TILE_SIZE + TILE_SIZE + BORDER_GAP;
+      int randGhostY = randGhostPos.row * TILE_SIZE + TILE_SIZE;
+      Player* randGhost = new Player(randGhostX, randGhostY, true);
+      enemyPath = generatePath(move_map, *randGhost, enemy);
+    }
+    else{
+      coordinate newGhostPos = Enemy::newGhostPos(ghostXblock, ghostYblock, enemyXblock, enemyYblock);
+      int ghostX = newGhostPos.col * TILE_SIZE + TILE_SIZE + BORDER_GAP;
+      int ghostY = newGhostPos.row * TILE_SIZE + TILE_SIZE;
+      Player* ghost = new Player(ghostX, ghostY, true);
+      enemyPath = generatePath(move_map, *ghost, enemy);
+    }
   }
+}
+
+coordinate Enemy::randGhostPos(int eX, int eY){
+  int randX = rand() % 3;
+  int randY = rand() % 3;
+  coordinate newPos = {eY, eX, 0};
+
+  if(randX == 0){
+    newPos.row -= 1;
+  }
+  else if(randX == 1){
+    newPos.row += 1;
+  }
+
+  if(randY == 0){
+    newPos.col -= 1;
+  }
+  else if(randY == 1){
+    newPos.col += 1;
+  }
+
+  if(!isValidBlock(newPos.row, newPos.col)){
+    newPos = findClosestOpenBlock(newPos);
+  }
+  return newPos;
+
 }
 
 coordinate Enemy::newGhostPos(int gX, int gY, int eX, int eY){
@@ -664,7 +893,7 @@ std::vector<coordinate> Enemy::generatePath(std::vector<std::vector<int>> move_m
 	}
 
 	printf("\n");
-  */
+*/
 	return finalPath;
 }
 
@@ -680,4 +909,13 @@ int Enemy::findYBlock(float pos) {
 	int trueY = center - TILE_SIZE;
 	int block = trueY / TILE_SIZE;
 	return block;
+}
+
+void Enemy::setFalse() {
+  moveUp = false;
+  moveDown = false;
+  moveLeft = false;
+  moveRight = false;
+  rightLeft = false;
+  upDown = false;
 }
