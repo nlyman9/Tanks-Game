@@ -55,8 +55,8 @@ class Client {
       return server->isConnected();
     }
 
-    Packet* recieve() {
-      server->recieve();
+    Packet* receive() {
+      server->receive();
       return server->getPacket();
     }
 

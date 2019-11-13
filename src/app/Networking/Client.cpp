@@ -31,7 +31,7 @@ int clientThread(void* data) {
 
     while(true) {
         std::cout << "Client-Network: looping" << std::endl;
-        Packet *mail = client->recieve();
+        Packet *mail = client->receive();
         if (mail != nullptr) {
             // Do stuff 
             std::cout << "You got mail!" << std::endl;

@@ -46,6 +46,17 @@ class Packet {
             std::cout << "Initialized packet with  " << headers.size() << " headers - Data: " << this->data() << std::endl;
         }
 
+        Packet(Header size, Header type, const char* data) {
+            headers.push_back(size);
+            headers.push_back(type);
+
+            char *temp_data = strtok((char *)data, " ");
+            while (temp_data != nullptr) {
+                datas.push_back(temp_data);
+                temp_data = strtok(NULL, " ");
+            }
+        }
+
         // Setters
         void appendData(std::string d) {
             datas.push_back(d);
@@ -138,6 +149,7 @@ class Packet {
 
             for (auto d : datas) {
                 raw_data->append(d.data());
+                raw_data->push_back(' ');
                 // std::cout << "DATA: " << d.data() << std::endl;
             }
 
@@ -154,7 +166,7 @@ class Packet {
 
             // Get the size of the data 
             for (auto i = datas.begin(); i != datas.end(); i++) {
-                s += i->size();
+                s += i->size() + 1;
             }
 
             return s;

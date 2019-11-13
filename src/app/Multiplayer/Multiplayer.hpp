@@ -137,19 +137,19 @@ class ClientConnection {
             }
         }
 
-        void recieve() {
+        void receive() {
             assert(server->isOnline());
 
             // Recieve from connection, add to buffer.
-            char rawbuffer[HEAD.size()];
+            char headBuffer[HEAD.size()];
             int num_bytes;
 
             // Recieve initial header
             if (server == server_tcp) {
                 // Use tcp
-                num_bytes = recv(server->fd(), rawbuffer, HEAD.size(), 0);
+                num_bytes = recv(server->fd(), headBuffer, HEAD.size(), 0);
                 if (num_bytes == -1) {
-                    std::cerr << "CLIENT: read error: " << strerror(errno) <<  std::endl;
+                    std::cerr << "CLIENT: read header error: " << strerror(errno) <<  std::endl;
                 }
             } else {
                 // Use udp
@@ -164,17 +164,38 @@ class ClientConnection {
             // Casting works as so
             // Header head = (Header) rawbuffer; 
             // Or using constructor
-            Header size_header = Header(rawbuffer); 
+            Header size_header = Header(headBuffer); 
+
             std::cout << "THE HEADER IS " << size_header.data() << std::endl;
             std::cout << "THE TYPE IS " << size_header.getValue() << std::endl;
             std::cout << "THE SIZE IS " << size_header.size() << std::endl;
             fflush(stdout);
-            Header type_header = Header(&rawbuffer[size_header.size()+1]);
+
+            Header type_header = Header(&headBuffer[size_header.size()+1]);
             std::cout << "HOLY SHIT THE HEADER IS " << type_header.data() << std::endl;
             std::cout << "HOLY SHIT THE TYPE IS " << type_header.getValue() << std::endl;
 
+            // Create packet and add to recvBuffer
+            int packet_size = std::stoi(size_header.getValue()) - HEAD.size();
 
-            
+            char dataBuffer[packet_size];
+
+            if (packet_size > 0) {
+                // Receive rest of data
+                if (server == server_tcp) {
+                    // Use tcp
+                    num_bytes = recv(server->fd(), dataBuffer, packet_size, 0);
+                    if (num_bytes == -1) {
+                        std::cerr << "CLIENT: read packet error: " << strerror(errno) <<  std::endl;
+                    }
+                } else {
+                    // Use udp
+                }
+            }
+
+            // This buffer should just be the data segments of the packet
+            Packet mail = Packet(size_header, type_header, dataBuffer);
+            recvBuffer.push_back(mail);
         }
 
         Packet* getPacket() {
