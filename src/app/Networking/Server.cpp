@@ -147,7 +147,7 @@ int serverProcess() {
     std::cout << "MAP PACKED " << std::endl;
 
     // First wait for 2 clients
-    while (server->numClients() < 2) {
+    while (server->numClients() < 1) {
         if (server->accept()) {
             std::cout << "Server: New client connection accepted" << std::endl;
         }
@@ -158,18 +158,12 @@ int serverProcess() {
 
     // Send map! 
     std::cout << "Server: Preparing to send map!" << std::endl;
-    Packet *temp = new Packet(PackType::MAP);
-    auto headers = temp->getHeaders();
-	for (auto i = headers.begin(); i != headers.end(); i++) {
-		std::cout << "Packet header -> " << i->data() << std::endl;
-	}
-    std::cout << "Size is " << temp->size() << std::endl;
-    std::cout << "Sending... " << std::endl;
-    fflush(stdout);
-    std::cout << "Adding packet to position" << server->addPacket(*temp) <<std::endl;
-    fflush(stdout);
-    server->sendTo(0, *temp);
-    server->sendTo(1, *temp);
+    Packet mapPacket = Packet(PackType::MAP);
+    std::cout << "MAp size is " << map->size() << std::endl;
+    mapPacket.appendData(*map);
+
+    server->sendTo(0, mapPacket);
+    // server->sendTo(1, mapPacket);
 }
 
 std::vector<int>* serverMapGen(){

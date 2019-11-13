@@ -29,6 +29,7 @@ int clientThread(void* data) {
             sleep(1);
     }
 
+    // Wait for map
     while(true) {
         std::cout << "Client-Network: looping" << std::endl;
         Packet *mail = client->receive();
@@ -36,6 +37,12 @@ int clientThread(void* data) {
             // Do stuff 
             std::cout << "You got mail!" << std::endl;
             std::cout << "Mail: " << mail->data() << std::endl;
+
+            if (mail->getType() == (int)PackType::MAP) {
+                
+
+                break;
+            }
         }
         //else just sleep
 

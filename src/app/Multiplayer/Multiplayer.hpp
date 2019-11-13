@@ -177,9 +177,10 @@ class ClientConnection {
 
             // Create packet and add to recvBuffer
             int packet_size = std::stoi(size_header.getValue()) - HEAD.size();
+            std::cout << "Packet size remaining is " << packet_size << std::endl;
 
             char dataBuffer[packet_size];
-
+            num_bytes = 0;
             if (packet_size > 0) {
                 // Receive rest of data
                 if (server == server_tcp) {
@@ -193,6 +194,9 @@ class ClientConnection {
                 }
             }
 
+            std::cout << "Bytes received  " << num_bytes << std::endl;
+            std::cout << dataBuffer << std::endl;
+            fflush(stdout);
             // This buffer should just be the data segments of the packet
             Packet mail = Packet(size_header, type_header, dataBuffer);
             recvBuffer.push_back(mail);

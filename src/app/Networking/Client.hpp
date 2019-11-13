@@ -33,6 +33,7 @@ static std::vector<Uint8*>* keystates;
 class Client {
   public:
     ClientConnection *server;
+    std::vector<int> *gameMap;
 
     Client(std::string ip, int port) {
       server = new ClientConnection(ip, port);
@@ -69,7 +70,6 @@ class Client {
     // void getGameBufferReady(bool flag);
 
     // std::vector<char>* getFillBuffer();
-    // std::vector<int>* gameMap;
     // Uint8* pollKeystate();
 
   private:
