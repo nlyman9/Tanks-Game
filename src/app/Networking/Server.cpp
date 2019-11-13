@@ -165,7 +165,7 @@ int serverProcess() {
 	}
     std::cout << "Size is " << temp->size() << std::endl;
     std::cout << "Sending... " << std::endl;
-        fflush(stdout);
+    fflush(stdout);
     std::cout << "Adding packet to position" << server->addPacket(*temp) <<std::endl;
     fflush(stdout);
     server->sendTo(0, *temp);

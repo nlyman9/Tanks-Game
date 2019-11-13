@@ -34,9 +34,16 @@ class Packet {
     public:
         Packet(PackType type)
         {   
-            Header *init = new Header("TYPE", std::to_string((int)type));
-            headers.push_back(*init);
-            std::cout << "Initialized packet with # " << headers.size() << " - Data: " << init->data() << std::endl;
+            // The header for size is the first header.
+            Header packet_size = Header("SIZE", "00000000");
+            headers.push_back(packet_size);
+
+            // The header for the type is the second header.
+            Header packet_type = Header("TYPE", std::to_string((int)type));
+            headers.push_back(packet_type);
+
+            setPacketSize();
+            std::cout << "Initialized packet with  " << headers.size() << " headers - Data: " << this->data() << std::endl;
         }
 
         // Setters
@@ -47,6 +54,28 @@ class Packet {
         void insetData(std::string d, int index) {
             datas.insert(datas.begin()+index, d);
         }
+
+        void setPacketSize() {
+            Header& packet_size = headers.at(0);
+            std::cout << "Who is this pakcet ??" << packet_size.getHead() << std::endl;
+            fflush(stdout);
+            // Make sure the header is the size header
+            assert(packet_size.getHead().compare("SIZE") == 0);
+
+            std::string temp_size = std::to_string(this->size());
+            std::cout << "Size is = " << temp_size << std::endl;
+
+            // The size of a packet may only be of size 
+            assert(temp_size.size() <= 8);
+
+            // Pad with leading zeroes 
+            std::string size_str = std::string(8 - temp_size.size(), '0').append(temp_size);
+
+
+            packet_size.setValue(size_str);
+            std::cout << "Set size of packet to " << size_str << std::endl;
+        }
+
 
         // Getters 
         std::tuple<std::vector<Header>, std::vector<std::string>> getTuple() {
@@ -103,8 +132,11 @@ class Packet {
             std::string *raw_data = new std::string();
             for (auto head : headers) {
                 raw_data->append(head.data());
-                std::cout << "HEAD: " << head.data() << std::endl;
+                raw_data->push_back(' ');
+                std::cout << "HEAD: " << head.data() << " | ";
             }
+
+            raw_data->push_back(' ');
 
             for (auto d : datas) {
                 raw_data->append(d.data());
@@ -115,7 +147,21 @@ class Packet {
         }
 
         size_t size() {
-            return sizeof(headers) + sizeof(datas);
+            size_t s = 0;
+
+            // Get the size of the headers
+            for (auto i = headers.begin(); i != headers.end(); i++) {
+                s += i->size() + 1; // + 1 = push_back(' ');
+            }
+
+            s += 1; // push_back(' ');
+
+            // Get the size of the data 
+            for (auto i = datas.begin(); i != datas.end(); i++) {
+                s += i->size();
+            }
+
+            return s;
         }
 };
 

@@ -102,9 +102,16 @@ class Header {
 
             return d->data();
         }
-
+        
+        /**
+         * @brief Returns the size used for the network functions using data()
+         * NOT the size store locally
+         * 
+         * @return size_t - size in bytes
+         */
         size_t size() {
-            return header.size() + value.size();
+            // Plus 1 for the data() fucntion
+            return header.size() + 1 + value.size();
         }
 
 
