@@ -71,8 +71,6 @@ int main(int argc, char* argv[])
     std::cout << "IP " << argv[1] << std::endl;
     std::cout << "PORT " << argv[2] << std::endl;
 
-    std::vector<int>* map = serverMapGen();
-
     std::string server_ip = std::string(argv[1]);
     char *server_port = argv[2];
 
@@ -144,10 +142,10 @@ int serverProcess() {
     // Generate map
     auto map = serverMapGen();
     pack(map, &packedMap, 3); //pack map into 3 bits
-    std::cout << "MAP PACKED " << std::endl;
+
 
     // First wait for 2 clients
-    while (server->numClients() < 2) {
+    while (server->numClients() < 1) {
         if (server->accept()) {
             std::cout << "Server: New client connection accepted" << std::endl;
         }
@@ -159,8 +157,8 @@ int serverProcess() {
     // Send map! 
     std::cout << "Server: Preparing to send map!" << std::endl;
     Packet mapPacket = Packet(PackType::MAP);
-    std::cout << "MAp size is " << map->size() << std::endl;
-    mapPacket.appendData(*map);
+    std::cout << "MAp size is " << packedMap.size() << std::endl;
+    mapPacket.appendData(packedMap);
 
     server->broadcast(mapPacket);
 }

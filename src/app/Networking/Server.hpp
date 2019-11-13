@@ -18,6 +18,7 @@
 
 // #include <SDL2/SDL_thread.h>
 
+std::vector<char> packedMap;
 class Server {
     public:
         ServerConnection *host;
@@ -84,7 +85,6 @@ fd_set client_fds;
 int fdmax;          // maximum file descriptor number
 int nbytes;
 socklen_t addr_len;
-std::vector<char> packedMap;
 
 bool gameOn;
 //server buffers

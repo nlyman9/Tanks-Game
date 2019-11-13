@@ -28,7 +28,7 @@ enum class PackType {
 class Packet {
     private:
         std::vector<Header> headers;
-        std::vector<std::string> datas;
+        std::vector<char> datas;
         size_t packet_size;
 
     public:
@@ -46,36 +46,37 @@ class Packet {
             std::cout << "Initialized packet with  " << headers.size() << " headers - Data: " << this->data() << std::endl;
         }
 
-        Packet(Header size, Header type, const char* data) {
+        Packet(Header size, Header type, const char* data, int data_size) {
             headers.push_back(size);
             headers.push_back(type);
-
-            char *temp_data = strtok((char *)data, " ");
-            while (temp_data != nullptr) {
-                datas.push_back(temp_data);
-                temp_data = strtok(NULL, " ");
+            for (int i = 0; i < data_size; i++) {
+                datas.push_back((char) data[i]);
             }
+            std::cout << "Appended data = " << std::string(datas.data(), datas.size()) << std::endl;
+            
         }
 
         // Setters
         void appendData(std::string d) {
-            datas.push_back(d);
+            for (char c : d) {
+                datas.push_back(c);
+            }
             setPacketSize();
         }
 
         void appendData(std::vector<int> d) {
-            std::string str;
             for (int val : d) {
-                str.append(std::to_string(val));
-                
+                datas.push_back(val);
             }
-            std::cout << "Appended data = " << str << std::endl;
-            datas.push_back(str);
+            std::cout << "Appended data = " << std::string(datas.data(), datas.size()) << std::endl;
             setPacketSize();
         }
 
-        void insetData(std::string d, int index) {
-            datas.insert(datas.begin()+index, d);
+        void appendData(std::vector<char> d) {
+            for (char c : d) {
+                datas.push_back(c);
+            }
+            setPacketSize();
         }
 
         void setPacketSize() {
@@ -112,53 +113,13 @@ class Packet {
             return headers;
         }
 
-        std::vector<std::string> getData() {
-            return datas;
+        std::vector<char>* getData() {
+            return new std::vector<char>(datas);
         }
 
         int getType() {
             return atoi(headers.at(1).getValue().c_str());
         }
-
-        // std::vector<char>* get() {
-        //     std::vector<char*> *raw = new std::vector<char*>();
-        //     // Set up headers
-        //     for (auto head : headers) {
-        //         // Headers should only have two values so this is okay
-        //         auto temp = head.get()->data();
-        //         raw->push_back(temp[0]);
-        //         raw->push_back(temp[1]);
-        //         delete temp[0];
-        //         delete temp[1];
-        //     }
-
-        //     for (auto d : datas) {
-        //         raw->push_back((char *) d.data());
-        //     }
-        //     return raw;
-        // }
-
-        std::vector<char>* getDataAt(int i) {
-            assert(i < datas.size());
-
-            std::string temp = datas.at(i);
-
-            return new std::vector<char>(temp.begin(), temp.end());
-            
-        }
-
-        // std::string* dataString() {
-        //     std::string *raw_data = new std::string();
-        //     for (auto head : headers) {
-        //         raw_data->append(head.data());
-        //     }
-
-        //     for (auto d : datas) {
-        //         raw_data->append(d.data());
-        //     }
-
-        //     return raw_data;
-        // }
 
         const char* data() {
             std::string *raw_data = new std::string();
@@ -167,14 +128,7 @@ class Packet {
                 raw_data->push_back(' ');
                 // std::cout << "HEAD: " << head.data() << " | ";
             }
-
-            for (auto d : datas) {
-                raw_data->append(d.data());
-                raw_data->push_back(' ');
-                // std::cout << "DATA: " << d.data() << std::endl;
-            }
-
-            raw_data->pop_back();
+            raw_data->append(std::string(datas.data(), datas.size()));
 
             return raw_data->data();
         }
@@ -188,9 +142,7 @@ class Packet {
             }
 
             // Get the size of the data 
-            for (auto i = datas.begin(); i != datas.end(); i++) {
-                s += i->size() + 1;
-            }
+            s += datas.size();
 
             return s;
         }

@@ -207,10 +207,8 @@ class ClientConnection {
             }
 
             std::cout << "Bytes received  " << num_bytes << std::endl;
-            std::cout << dataBuffer << std::endl;
-            fflush(stdout);
             // This buffer should just be the data segments of the packet
-            Packet mail = Packet(size_header, type_header, dataBuffer);
+            Packet mail = Packet(size_header, type_header, dataBuffer, packet_size);
             recvBuffer.push_back(mail);
         }
 

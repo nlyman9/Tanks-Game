@@ -75,19 +75,24 @@
 std::vector<char>* pack(std::vector<int>* x, std::vector<char>* packed, int bits)
 {   
     std::vector<bool> workingSet;
+    std::cout << "Packing: ";
     for (auto curr : *x)
     {
+        std::cout << curr;
         int i;
         for(i = 0; i < bits; i++){
             workingSet.push_back((bool) (curr >> (bits - i - 1) & 1));
         }
     }
+    std::cout << std::endl;
     int i = 0;
     char temp = 0;
+    std::cout << "Result: ";
     for(auto currInSet : workingSet){
         temp = temp | ((char) currInSet << (7-i));
         if(i == 7){
             packed->push_back(temp);
+            printf(" %d ", temp);
             temp = 0;
             i = -1;
         }

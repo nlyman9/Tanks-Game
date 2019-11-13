@@ -42,7 +42,7 @@ int clientThread(void* data) {
                 std::cout << "Client: Loading map... " << mail->data() << std::endl;
                 std::vector<int>* map = new std::vector<int>();
 
-                unpack(mail->getDataAt(0), map, 3);
+                unpack((mail->getData()), map, 3);
                 for (int i = 0; i < map->size();i++){
                     client->gameMap->push_back(map->at(i));                 
                 }
