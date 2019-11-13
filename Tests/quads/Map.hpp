@@ -13,7 +13,7 @@ class Map {
     void assign_quad(vector_2d, int, int, int, int);
   public:
     Map();
-    void make_map(const vector_4d);
+    void make_map(std::vector<Tileset>);
     vector_2d get_map();
     void print_map();
 };

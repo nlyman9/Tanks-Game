@@ -41,24 +41,9 @@ void Map::assign_quad(vector_2d quad, int min_height, int max_height, int width_
     }
 }
 
-void Map::make_map(const vector_4d quads) {
-
-    vector_3d quadrant_1, quadrant_2, quadrant_3, 
-                quadrant_4, quadrant_5, quadrant_6, quadrant_all;
-
-    quadrant_1   = get_from(quads, 0);
-    quadrant_2   = get_from(quads, 1);
-    quadrant_3   = get_from(quads, 2);
-    quadrant_4   = get_from(quads, 3);
-    quadrant_5   = get_from(quads, 4);
-    quadrant_6   = get_from(quads, 5);
-    quadrant_all = get_from(quads, 6);
-    
-    srand(time(NULL));
-
-    for (int i = 0; i < quads.size() - 1; i++) {
-        int j = rand() % (quads[i].size() - 1);
-        assign_quad(quads[i][j], MIN_HEIGHTS[i], MAX_HEIGHTS[i], WIDTH_OFFSETS[i], HEIGHT_OFFSETS[i]);
+void Map::make_map(std::vector<Tileset> tiles) {
+    for (int i = 0; i <= tiles.size() - 1; i++) {
+        assign_quad(tiles[i].get_tiles(), MIN_HEIGHTS[i], MAX_HEIGHTS[i], WIDTH_OFFSETS[i], HEIGHT_OFFSETS[i]);
     }
 }
 
@@ -81,6 +66,10 @@ int main() {
     for (auto& tile : map_tiles) {
         tile.print_tiles();
     }
+    Map m;
+    m.make_map(map_tiles);
+    m.print_map();
+
 
     // g.print_graph();
     // g.print_quads_in_graph();
