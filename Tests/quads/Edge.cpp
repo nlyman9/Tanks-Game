@@ -50,7 +50,7 @@ void Edge::set_multiplier(int m) {
 }
 
 int Edge::get_weight() {
-    return weight;
+    return this->weight;
 }
 
 void Edge::set_weight(int w) {

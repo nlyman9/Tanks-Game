@@ -8,6 +8,7 @@
 #include "Quads.hpp"
 #include "QuadConstants.hpp"
 #include "Map.hpp"
+#include "Graph.hpp"
 
 void Map::print_map() {
     int count = 0;
@@ -71,13 +72,16 @@ vector_2d Map::get_map() {
 }
 
 int main() {
-    Quads q = Quads();
-    std::cout << "Made quads" << std::endl;
-    vector_4d quads = q.get_quads();
-    std::cout << "Got quads" << std::endl;
-    Map m = Map();
-    // m.make_map(quads);
-    std::cout << "Made map" << std::endl;
-    // m.print_map();
-    return 0;
+    Quads q;
+    q.make_quads();
+    Graph g(q.get_edges(), q.get_quads(), q.get_num_tilesets());
+    g.populate_edges();
+    g.calculate_weights();
+    std::vector<Tileset> map_tiles = g.get_tiles_for_map();
+    for (auto& tile : map_tiles) {
+        tile.print_tiles();
+    }
+
+    // g.print_graph();
+    // g.print_quads_in_graph();
 }

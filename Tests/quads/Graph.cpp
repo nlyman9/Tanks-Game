@@ -1,6 +1,8 @@
 #include <vector>
+#include <time.h>
 #include <iostream>
 #include "Graph.hpp"
+
 
 Graph::Graph(std::vector<Edge> e, std::vector<Quadrant> q, int n) {
     adj.resize(n);
@@ -34,8 +36,24 @@ Edge Graph::get_edge(int s_id, int d_id) {
     }
 }
 
+int Graph::select_edge_from_weight(std::vector<Edge> from_adj, int weight) {
+    int weight_count = 0;
+    for (int i = 0; i < from_adj.size(); i++) {
+        weight_count += from_adj[i].get_weight();
+        // std::cout << "weight_count: " << weight_count << std::endl;
+        if (weight_count >= weight) {
+            return from_adj[i].get_dest_id();
+        }
+    }
+    return from_adj[from_adj.size() - 1].get_dest_id();
+}
+
 std::vector<std::vector<Edge>>* Graph::get_adj() {
     return &adj;
+}
+
+std::vector<Edge>* Graph::get_from_adj(int i) {
+    return &adj[i];
 }
 
 bool Graph::edge_exists(int s_id, int d_id) {
@@ -93,34 +111,67 @@ void Graph::populate_edges() {
  *      Find the number of tilesets in the next quadrant it isn't connected to
  **/
 
-void Graph::calculate_weight(std::vector<Edge> edges) {
+void Graph::calculate_weight(std::vector<Edge> edges, int id) {
     int size = 0, div = 0, remainder = 0, mult = 0, mult_count = 0;
     size = edges.size();
     for (int i = 0; i < size; i++) {
         mult = edges[i].get_multiplier();
         mult_count += mult;
     }
-    std::cout << "mult_count: " << mult_count << std::endl;
+    // std::cout << "mult_count: " << mult_count << std::endl;
     if (mult_count != 0) {
         div = 100 / mult_count;
         remainder = 100 % mult_count;
         for (int i = 0; i < size; i++) {
             mult = edges[i].get_multiplier();
             if (remainder > 0) {
-                edges[i].set_weight((mult * div) + remainder);
+                adj[id][i].set_weight((mult * div) + remainder);
                 remainder = 0;
             } else {
-                edges[i].set_weight(mult * div);
+                adj[id][i].set_weight(mult * div);
             }
-        std::cout << "Edge[" << i << "] w: " << edges[i].get_weight() << std::endl;
+        // std::cout << "Edge[" << i << "] w: " << edges[i].get_weight() << std::endl;
         }
     }
 }
 
 void Graph::calculate_weights() {
-    for (auto& v : adj) {
-        calculate_weight(v);
+    // for (auto& v : adj) {
+    //     calculate_weight(v);
+    // }
+    for (int i = 0; i < adj.size(); i++) {
+        calculate_weight(adj[i], i);
     }
+}
+
+int Graph::select_from_quadrant(int quad_id, int rand) {
+    return quads[quad_id].get_tileset(rand).get_id();
+}
+
+std::vector<Tileset> Graph::get_tiles_for_map() {
+    srand(time(NULL));
+    std::vector<Tileset> map_tiles;
+    int rand_weight = 0;
+    int tile_id = select_from_quadrant(0, rand() % quads[0].size());
+    // std::cout << "tile_id: " << tile_id << std::endl;
+    map_tiles.push_back(adj[tile_id][0].get_src());
+    for (int i = 0; i < 4; i++) {
+        rand_weight = rand() % 100;
+        tile_id = select_edge_from_weight(adj[tile_id], rand_weight);
+        // std::cout << "tile_id: " << tile_id << std::endl;
+        // std::cout << "reached end" << std::endl;
+        map_tiles.push_back(adj[tile_id][0].get_src());
+    }
+    int weight_count = 0;
+    rand_weight = rand() % 100;
+    for (int i = 0; i < adj[tile_id].size(); i++) {
+        weight_count += adj[tile_id][i].get_weight();
+        if (weight_count >= rand_weight) {
+            map_tiles.push_back(adj[tile_id][i].get_dest());
+            break;
+        }
+    }
+    return map_tiles;
 }
 
 void Graph::print_graph() {
@@ -139,15 +190,4 @@ void Graph::print_quads_in_graph() {
     for (auto& q: quads) {
         q.print_quadrant();
     }
-}
-
-int main() {
-    Quads q;
-    q.make_quads();
-    Graph g(q.get_edges(), q.get_quads(), q.get_num_tilesets());
-    g.populate_edges();
-    g.calculate_weights();
-    g.print_graph();
-    g.print_quads_in_graph();
-    return 0;
 }
