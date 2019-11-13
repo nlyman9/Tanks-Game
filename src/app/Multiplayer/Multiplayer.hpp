@@ -15,6 +15,7 @@ class ServerConnection {
         std::vector<Packet> recvBuffer;
         std::vector<Packet> sendBuffer;
         const int MAX_PLAYERS = 10;
+        Header HEAD = Header("TYPE", std::to_string((int)5));
     
     public:
         ServerConnection(std::string ip, int port) {
@@ -101,6 +102,7 @@ class ClientConnection {
         std::vector<Packet> sendBuffer;
         
         struct timeval* timeout;
+        Header HEAD = Header("TYPE", std::to_string((int)5));
     public:
         ClientConnection(std::string ip, int port) {
             // Create tcp socket

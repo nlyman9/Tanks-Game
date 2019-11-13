@@ -160,7 +160,7 @@ int serverProcess() {
     std::cout << "Server: Preparing to send map!" << std::endl;
     Packet *temp = new Packet(PackType::MAP);
     for (auto head : temp->getHeaders()) {
-        std::cout << "Packet header -> " << head.dataString() << std::endl;
+        std::cout << "Packet header -> " << head.data() << std::endl;
     }
 
     std::cout << "Size is " << temp->size() << std::endl;
