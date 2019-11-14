@@ -220,22 +220,9 @@ int GameLoop::networkRun() {
  */
 bool GameLoop::init(Render* renderer) {
 
-	// CLEAR ALL VECTORS HERE
-	players.clear();
-	enemies.clear();
-	projectiles.clear();
-	tileArray.clear();
-	enemyTileArray.clear();
-	projectileObstacles.clear();
-
 	Player* player = new Player(SCREEN_WIDTH/2 + 100, 50, true);
 	render = renderer;
 	players.push_back(player);
-
-	// CLEAR PROJECTILES
-	if(render->gProjectiles.size() > 0)
-		render->gProjectiles.clear();
-
 
 	Sprite *player_tank = new Sprite(render->getRenderer(), "src/res/images/red_tank.png");
 	Sprite *pinksplosion =  new Sprite(render->getRenderer(), "src/res/images/pinksplosion.png");
@@ -266,7 +253,7 @@ void GameLoop::initMapSinglePlayer() {
 	for (int x = BORDER_GAP + TILE_SIZE, i = 0; x < SCREEN_WIDTH - BORDER_GAP - TILE_SIZE; x+=TILE_SIZE, i++) {
 		for (int y = TILE_SIZE, j = 0; y < SCREEN_HEIGHT - TILE_SIZE; y+=TILE_SIZE, j++) {
 			SDL_Rect cur_out = { x, y, TILE_SIZE, TILE_SIZE};
-			SDL_Rect hole_tile = { x+5, y+5, TILE_SIZE-10, TILE_SIZE-10 }; //does not work, enemy AI needs update
+			SDL_Rect hole_tile = { x+5, y+5, TILE_SIZE-5, TILE_SIZE-5 }; //does not work, enemy AI needs update
 			if(mapVectors[i][j] == 2){
 				tileArray.push_back(cur_out);
 				enemyTileArray.push_back(cur_out);
@@ -335,6 +322,31 @@ std::vector<int> GameLoop::spawnEnemies(std::vector<std::vector<int>> *map, int 
 			{	
 				break;
 			}
+		}
+	}
+
+	coords.push_back(enemy_x * 48 + 100);
+	coords.push_back(enemy_y * 48 + 48);
+
+	return coords;
+}
+
+// Returns a vector with two int values, x at 0 and y at 1
+// Values represent pixel coordinates of enemy spawn point
+std::vector<int> GameLoop::spawnEnemy(std::vector<std::vector<int>> *map)
+{
+	std::vector<std::vector<int>> tileMap = *map;
+	std::vector<int> coords;
+	int enemy_x, enemy_y;
+
+	while(true)
+	{
+		enemy_x = (rand() % 16) + 4;
+		enemy_y = (rand() % 4) + 9;
+
+		if(tileMap[enemy_y][enemy_x] == 0)
+		{
+			break;
 		}
 	}
 

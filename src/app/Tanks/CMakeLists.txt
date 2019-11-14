@@ -1,20 +1,24 @@
-add_library(Player
+add_library(Tank
   STATIC
+  Tank.hpp
+  Tank.cpp
   Player.hpp
   Player.cpp
+  Enemy.hpp
+  Enemy.cpp
 )
+
 if(${APPLE})
-target_link_libraries(Player
+target_link_libraries(Tank
   PRIVATE
   Object
   Constants
   Sprite
   ${SDL2_LIBRARY}
-  Enemy
   Networking
 )
 else()
-target_link_libraries(Player
+target_link_libraries(Tank
   PRIVATE
   Object
   Constants
@@ -23,8 +27,8 @@ target_link_libraries(Player
 )
 endif()
 
-
-target_include_directories(Player
+target_include_directories(Tank
   PUBLIC
   .
 )
+
