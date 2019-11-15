@@ -136,8 +136,6 @@ int GameLoop::networkRun() {
 
 	while (client->gameOn)
 	{
-		std::cout << "GAME LOOP " << std::endl;
-		fflush(stdout);
 		current_time = std::chrono::system_clock::now();
 		elapsed_time = current_time - previous_time;
 		previous_time = current_time;
@@ -155,8 +153,6 @@ int GameLoop::networkRun() {
 			}
 		}
 
-		std::cout << "Player len: " << players.size() << std::endl;
-		fflush(stdout);
 		int i = 0;
 		for(auto player : players) {
 			// std::cout << "i is : " << i << std::endl;

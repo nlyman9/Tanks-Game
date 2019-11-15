@@ -28,6 +28,7 @@ class Socket {
         std::string remotePort;
         int socket_fd;
 
+
         // True after connecSocket() or bind()
         bool isConnected;
         bool isListening;
@@ -178,6 +179,14 @@ class Socket {
             return true;
         }
 
+        int sendSocket(Packet *p) {
+            int num_bytes_sent = send(socket_fd, p->data(), p->size(), 0);
+            std::cout << "Sent packet of size: " << p->size() << std::endl;
+            free(p);
+    
+            return num_bytes_sent;
+        }
+
         Packet* receive() {
             assert(isConnected);
 
@@ -210,13 +219,13 @@ class Socket {
             fflush(stdout);
 
             Header type_header = Header(&headBuffer[size_header.size()+1]);
-            std::cout << "THE HEADER IS " << type_header.data() << std::endl;
-            std::cout << "THE VALUE IS " << type_header.getValue() << std::endl;
-            std::cout << "THE HEADER SIZE IS " << size_header.size() << std::endl;
+            // std::cout << "THE HEADER IS " << type_header.data() << std::endl;
+            // std::cout << "THE VALUE IS " << type_header.getValue() << std::endl;
+            // std::cout << "THE HEADER SIZE IS " << size_header.size() << std::endl;
             
             // Check to see if there is more data left
             int packet_size_left = std::stoi(size_header.getValue()) - HEAD.size();
-            std::cout << "Packet size remaining is " << packet_size_left << std::endl;
+            // std::cout << "Packet size remaining is " << packet_size_left << std::endl;
 
             // Check packet size is normal
             if (packet_size_left < 0) {

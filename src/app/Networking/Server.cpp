@@ -159,9 +159,9 @@ int serverProcess() {
 
     // Send map! 
     std::cout << "Server: Preparing to send map!" << std::endl;
-    Packet mapPacket = Packet(PackType::MAP);
+    Packet *mapPacket = new Packet(PackType::MAP);
     std::cout << "MAp size is " << packedMap.size() << std::endl;
-    mapPacket.appendData(packedMap);
+    mapPacket->appendData(packedMap);
 
     server->broadcast(mapPacket);
 }

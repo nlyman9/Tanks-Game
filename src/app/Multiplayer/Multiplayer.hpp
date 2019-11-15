@@ -12,8 +12,8 @@ class ServerConnection {
     private:
         Socket *listener, *listener_tcp, *listener_udp;
         std::vector<Socket*> clients;
-        std::vector<Packet> recvBuffer;
-        std::vector<Packet> sendBuffer;
+        std::vector<Packet*> recvBuffer;
+        std::vector<Packet*> sendBuffer;
         const int MAX_PLAYERS = 10;
     
     public:
@@ -63,22 +63,24 @@ class ServerConnection {
             // Recieve data from a client
         }
 
-        int addPacket(Packet p) {
+        int addPacket(Packet *p) {
             int index = sendBuffer.size();
             sendBuffer.push_back(p);
             return index;
         }
 
-        void sendTo(int index) {
+        bool sendTo(int index) {
             // Send to specific client
             size_t num_bytes_sent;
-            Packet mail = sendBuffer.at(0);
-            sendBuffer.erase(sendBuffer.begin());
-            
-            std::cout << "Sending to client " << index << "..." << std::endl;
-            fflush(stdout);
-            num_bytes_sent = send(clients.at(index)->fd(), mail.data(), mail.size(), 0);
-            std::cout << "Sent packet of size: " << mail.size() << " with data = " << mail.data() << std::endl;
+
+            if (sendBuffer.size() == 0) {
+                return false;
+            } else {
+                Packet *mail = sendBuffer.at(0);
+                sendBuffer.erase(sendBuffer.begin());
+                
+                num_bytes_sent = clients.at(index)->sendSocket(mail);
+            }
         }
 
         void broadcast() {
@@ -86,11 +88,11 @@ class ServerConnection {
             std::cout << "Broadcasting to clients..." << std::endl;
 
             size_t num_bytes_sent;
-            Packet mail = sendBuffer.at(0);
+            Packet *mail = sendBuffer.at(0);
             sendBuffer.erase(sendBuffer.begin());
 
             for (auto client : clients) {
-                num_bytes_sent = send(client->fd(), mail.data(), mail.size(), 0);
+                num_bytes_sent = client->sendSocket(mail);
             }
 
             std::cout << "Broadcasted to clients!" << std::endl;
@@ -148,7 +150,7 @@ class ClientConnection {
             }
         }
 
-        void receive() {
+        bool receive() {
             Packet *mail = server->receive();
             recvBuffer.push_back(mail);
         }

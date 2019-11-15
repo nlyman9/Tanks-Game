@@ -42,7 +42,7 @@ class Client {
     // Game 
     bool gameOn;
     bool startGame;
-    
+
     SDL_Thread* rcThread;
 
     Client(std::string ip, int port) {

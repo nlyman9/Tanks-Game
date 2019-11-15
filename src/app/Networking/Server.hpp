@@ -46,11 +46,11 @@ class Server {
             }
         }
 
-        int addPacket(Packet p) {
+        int addPacket(Packet *p) {
             return host->addPacket(p);
         }
 
-        bool sendTo(int client, Packet p) {
+        bool sendTo(int client, Packet *p) {
             int index = host->addPacket(p);
             host->sendTo(client);
             if (index > 0) {
@@ -59,7 +59,7 @@ class Server {
             return true;
         }
 
-        bool broadcast(Packet p) {
+        bool broadcast(Packet *p) {
             int index = host->addPacket(p);
             host->broadcast();
             return true;
