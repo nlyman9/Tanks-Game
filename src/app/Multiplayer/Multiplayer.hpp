@@ -16,7 +16,7 @@ class ServerConnection {
         Socket *listener, *listener_tcp, *listener_udp;
         std::vector<Socket*> clients;
         std::vector<std::list<Packet *> *> recvBuffer;
-        std::vector<Packet*> sendBuffer;
+        std::list<Packet*> sendBuffer;
         const int MAX_PLAYERS = 10;
 
         // Select FDs
@@ -179,10 +179,13 @@ class ServerConnection {
             if (sendBuffer.size() == 0) {
                 return false;
             } else {
-                Packet *mail = sendBuffer.at(0);
-                sendBuffer.erase(sendBuffer.begin());
+                Packet *mail = sendBuffer.front();
+                sendBuffer.pop_front();
                 
                 num_bytes_sent = clients.at(id)->sendSocket(mail);
+
+                delete mail;
+                return true;
             }
         }
 
@@ -195,8 +198,8 @@ class ServerConnection {
             }
 
             size_t num_bytes_sent;
-            Packet *mail = sendBuffer.at(0);
-            sendBuffer.erase(sendBuffer.begin());
+            Packet *mail =  sendBuffer.front();
+            sendBuffer.pop_front();
 
             for (auto client : clients) {
                 num_bytes_sent = client->sendSocket(mail);
