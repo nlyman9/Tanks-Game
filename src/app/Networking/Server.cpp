@@ -175,6 +175,7 @@ int serverProcess() {
 
         // Poll clients for pending messages 
         int pendingClients = server->pollClients();
+        
         if (pendingClients > 0) {
             // We have received Messages! Get packages from clients
             Packet *mail;

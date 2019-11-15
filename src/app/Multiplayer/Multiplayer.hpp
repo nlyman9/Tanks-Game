@@ -107,7 +107,7 @@ class ServerConnection {
 
 
             // wait for their info with the defined timeout (for now 1/30th of a second)
-            int numberOfPendingClients = select(fdmax+1, &read_fds, nullptr, nullptr, nullptr);//&poll_timeout, nullptr);
+            int numberOfPendingClients = pselect(fdmax+1, &read_fds, nullptr, nullptr, &poll_timeout, nullptr);//&poll_timeout, nullptr);
             if (numberOfPendingClients == EBADF) {
                 std::cout << "SELECT ERROR: BAD FD -- " << std::endl;
                 fflush(stdout);
