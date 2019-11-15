@@ -176,8 +176,6 @@ int GameLoop::networkRun() {
 				player->setFire(false);
 			}
 			fflush(stdout);
-			// std::cout << "finish player check fire" << std::endl;
-			fflush(stdout);
 			i++;
 		}
 

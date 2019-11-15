@@ -28,12 +28,11 @@ class Socket {
         std::string remotePort;
         int socket_fd;
 
-
         // True after connecSocket() or bind()
         bool isConnected;
         bool isListening;
 
-        // 
+        // Every packet should follow the structure of the HEAD packet
         Packet HEAD = Packet(PackType::INIT);
 
     public:
@@ -48,6 +47,13 @@ class Socket {
             std::cout << "Remote IP = " << remoteIP << std::endl;
         };
 
+        /**
+         * @brief Bind a socket based on the IP, Port, and protocol 
+         *        type given at object creation
+         * 
+         * @return true binded successfully
+         * @return false bnding failed
+         */
         bool bindSocket() {
             // We should only connect each socket once.
             assert(!isConnected);
@@ -82,7 +88,6 @@ class Socket {
                 close(socket_fd);
                 exit(5);
             }
-
             freeaddrinfo(serverInfo);
 
             
@@ -111,11 +116,12 @@ class Socket {
         Socket* acceptSocket() {
             assert(type == Protocol::TCP);
             assert(isListening);
+
             struct sockaddr_storage incomingConnection;
             socklen_t incomingSize = sizeof(incomingConnection);
 
             // Accept connection
-            std::cout << "ACCEPTINGGGG "<< std::endl;
+            std::cout << "Accepting... "<< std::endl;
             fflush(stdout);
             int clientFD = accept(socket_fd, (struct sockaddr *)&incomingConnection, &incomingSize);
 
@@ -126,17 +132,12 @@ class Socket {
 
             // Get IP of client connection
             char clientIP[INET_ADDRSTRLEN];
-            std::cout << "CLIEENNNT "<< std::endl;
-            fflush(stdout);
             inet_ntop(incomingConnection.ss_family, Socket::get_in_addr((struct sockaddr *)&incomingConnection), clientIP, sizeof(clientIP));
 
             Socket *client = new Socket(Protocol::TCP, std::string(clientIP), std::atoi(remoteIP.data()));
             client->socket_fd = clientFD;
 
-            std::cout << "REturninnggg "<< std::endl;
-
             return client;
-            
         }
 
         bool connectSocket() {
@@ -190,7 +191,7 @@ class Socket {
         Packet* receive() {
             assert(isConnected);
 
-            // Recieve from connection, add to buffer.
+            // Recieve HEAD from connection, add to buffer.
             char headBuffer[HEAD.size()];
             int num_bytes;
 
@@ -208,24 +209,15 @@ class Socket {
             if (num_bytes == 0) {
                 return nullptr;
             }
-            // else 
 
             // Grab the first two headers 
             //   - There should always be a SIZE and TYPE header in that order
             Header size_header = Header(headBuffer); 
-            std::cout << "THE HEADER IS " << size_header.data() << std::endl;
-            std::cout << "THE PACKET SIZE IS " << size_header.getValue() << std::endl;
-            std::cout << "THE HEADER SIZE IS " << size_header.size() << std::endl;
-            fflush(stdout);
-
             Header type_header = Header(&headBuffer[size_header.size()+1]);
-            // std::cout << "THE HEADER IS " << type_header.data() << std::endl;
-            // std::cout << "THE VALUE IS " << type_header.getValue() << std::endl;
-            // std::cout << "THE HEADER SIZE IS " << size_header.size() << std::endl;
             
             // Check to see if there is more data left
             int packet_size_left = std::stoi(size_header.getValue()) - HEAD.size();
-            // std::cout << "Packet size remaining is " << packet_size_left << std::endl;
+            std::cout << "Packet size remaining is " << packet_size_left << std::endl;
 
             // Check packet size is normal
             if (packet_size_left < 0) {

@@ -47,8 +47,6 @@ class Client {
 
     Client(std::string ip, int port) {
       server = new ClientConnection(ip, port);
-      std::cout << "Created client connection " << std::endl;
-      fflush(stdout);
     };
 
     ~Client() {
