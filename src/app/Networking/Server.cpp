@@ -170,12 +170,11 @@ int serverProcess() {
     while (server->gameOn) {
         std::cout << "SERVER: GAME - " << server->numClients() << std::endl;
         fflush(stdout);
-        // Get data from client
-        // Packet *mail = server->receiveFromID(0);
 
         // Poll clients for pending messages 
         int pendingClients = server->pollClients();
-        
+
+        // Get data from pending clients
         if (pendingClients > 0) {
             // We have received Messages! Get packages from clients
             Packet *mail;
@@ -187,11 +186,13 @@ int serverProcess() {
                     fflush(stdout);
                 } else {
                     std::cout << "SERVER: No mail :(" << std::endl;
+                    fflush(stdout);
                 }
 
             }
         } else if (pendingClients == 0) {
             // We have received nothing
+            std::cout << "SERVER: No mail :(" << std::endl;
         }
     }
 }

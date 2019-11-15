@@ -134,6 +134,8 @@ int GameLoop::networkRun() {
 		sleep(0.1); 
 	} 
 
+	const Uint8 *keystate;
+
 	while (client->gameOn)
 	{
 		current_time = std::chrono::system_clock::now();
@@ -159,13 +161,8 @@ int GameLoop::networkRun() {
 			// Lets just support 10 keys at the same time
 			// TODO Move scraping of player info to the update loop so it is deterministic
 			// TODO find a good rate to send player keystates
-			const Uint8 *keystate = SDL_GetKeyboardState(nullptr);
+			keystate = SDL_GetKeyboardState(nullptr);
 			player->getEvent(elapsed_time, &e, keystate);
-			temp += 1;
-			if (temp > 100) {
-				client->addKeyFrame(keystate);
-				temp = 0;
-			}
 
 			// std::cout << "check fire " << player->getFire() << std::endl;
 
@@ -193,6 +190,12 @@ int GameLoop::networkRun() {
 		while(lag_time >= MS_PER_UPDATE) {
 			for(auto player : players) {
 				player->update();
+			}
+
+			temp += 1;
+			if (temp > 100) {
+				client->addKeyFrame(keystate);
+				temp = 0;
 			}
 
 			for (auto enemy: enemies) {

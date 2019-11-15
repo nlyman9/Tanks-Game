@@ -5,6 +5,7 @@
 #include <assert.h> 
 #include <unistd.h>
 #include <signal.h>
+#include <list>
 
 #include "Header.hpp"
 #include "Packet.hpp"
@@ -14,7 +15,7 @@ class ServerConnection {
     private:
         Socket *listener, *listener_tcp, *listener_udp;
         std::vector<Socket*> clients;
-        std::vector<std::vector<Packet *> *> recvBuffer;
+        std::vector<std::list<Packet *> *> recvBuffer;
         std::vector<Packet*> sendBuffer;
         const int MAX_PLAYERS = 10;
 
@@ -75,7 +76,7 @@ class ServerConnection {
                 clients.push_back(client);
                 
                 // Add a recvBuffer for client
-                recvBuffer.push_back(new std::vector<Packet *>);
+                recvBuffer.push_back(new std::list<Packet *>);
 
                 // Add client's File descriptor to set
                 FD_SET(client->fd(), &client_fds);
@@ -109,7 +110,7 @@ class ServerConnection {
             // wait for their info with the defined timeout (for now 1/30th of a second)
             int numberOfPendingClients = pselect(fdmax+1, &read_fds, nullptr, nullptr, &poll_timeout, nullptr);//&poll_timeout, nullptr);
             if (numberOfPendingClients == EBADF) {
-                std::cout << "SELECT ERROR: BAD FD -- " << std::endl;
+                std::cout << "SELECT ERROR: BAD FD " << std::endl;
                 fflush(stdout);
                 return nullptr;
             }
@@ -139,8 +140,9 @@ class ServerConnection {
             if (recvBuffer.at(id)->size() == 0) 
                 return nullptr;
 
-            Packet *mail = recvBuffer.at(id)->at(0);
-            recvBuffer.at(id)->erase(recvBuffer.at(0)->begin());
+            Packet *mail = recvBuffer.at(id)->front();
+            recvBuffer.at(id)->pop_front();
+            std::cout << "Size of recv buffer is === " << recvBuffer.at(id)->size();
 
             return mail;
         }
