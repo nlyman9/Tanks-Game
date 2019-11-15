@@ -168,31 +168,25 @@ int serverProcess() {
 
     // Game Loop
     while (server->gameOn) {
-        std::cout << "SERVER: GAME - " << server->numClients() << std::endl;
+        std::cout << "\n\nSERVER: GAME - " << server->numClients() << std::endl;
         fflush(stdout);
 
         // Poll clients for pending messages 
         int pendingClients = server->pollClients();
 
-        // Get data from pending clients
-        if (pendingClients > 0) {
-            // We have received Messages! Get packages from clients
-            Packet *mail;
-            for (int c_id = 0; c_id < server->numClients(); c_id++) {
-                mail = server->receiveFromID(c_id);
-                if (mail != nullptr) {
-                    std::cout << "SERVER: You got mail!" << std::endl;
-                    mail->printData();
-                    fflush(stdout);
-                } else {
-                    std::cout << "SERVER: No mail :(" << std::endl;
-                    fflush(stdout);
-                }
-
+        //Get packages from clients
+        Packet *mail;
+        for (int c_id = 0; c_id < server->numClients(); c_id++) {
+            mail = server->getPacket(c_id);
+            if (mail != nullptr) {
+                std::cout << "SERVER: You got mail!" << std::endl;
+                mail->printData();
+                fflush(stdout);
+            } else {
+                std::cout << "SERVER: No mail :(" << std::endl;
+                fflush(stdout);
             }
-        } else if (pendingClients == 0) {
-            // We have received nothing
-            std::cout << "SERVER: No mail :(" << std::endl;
+
         }
     }
 }

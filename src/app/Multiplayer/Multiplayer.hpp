@@ -24,7 +24,7 @@ class ServerConnection {
         int fdmax;
 
         // Timeout / Rate the server will run at
-        const int TICKS_PER_SECOND = 1;
+        const int TICKS_PER_SECOND = 30;
         const long NANO_PER_SECOND = 1e+9;
 
         // Set timeout based on constants
@@ -240,8 +240,8 @@ class ClientConnection {
     private:
         Socket *server, *server_tcp, *server_udp;
 
-        std::vector<Packet*> recvBuffer;
-        std::vector<Packet*> sendBuffer;
+        std::list<Packet*> recvBuffer;
+        std::list<Packet*> sendBuffer;
         
         struct timeval* timeout;
         // Packet HEAD = Packet(PackType::INIT);
@@ -283,8 +283,8 @@ class ClientConnection {
             if (recvBuffer.size() == 0) {
                 return nullptr;
             } else {
-                Packet *p = recvBuffer.at(0);
-                recvBuffer.erase(recvBuffer.begin());
+                Packet *p = recvBuffer.front();
+                recvBuffer.pop_front();
                 return p;
             }
         }
@@ -308,8 +308,8 @@ class ClientConnection {
             }
 
             // Send first packet in vector to server
-            auto mail = sendBuffer.at(0);
-            sendBuffer.erase(sendBuffer.begin());
+            auto mail = sendBuffer.front();
+            sendBuffer.pop_front();
             server->sendSocket(mail);
 
             delete mail;

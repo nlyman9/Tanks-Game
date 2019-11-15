@@ -65,6 +65,10 @@ class Server {
             return numberOfPendingClients;
         }
 
+        Packet* getPacket(int id) {
+            return host->getPacket(id);
+        }
+
         Packet* receiveFromID(int id) {
             host->receiveFromID(id);
             return host->getPacket(id);
