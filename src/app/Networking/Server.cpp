@@ -175,10 +175,13 @@ int serverProcess() {
 
         if (mail != nullptr) {
             std::cout << "SERVER: You got mail!" << std::endl;
+            mail->printData();
+
+            fflush(stdout);
         } else {
             std::cout << "SERVER: No mail :(" << std::endl;
         }
-        sleep(0.05);
+        // sleep(0.05);
     }
 }
 

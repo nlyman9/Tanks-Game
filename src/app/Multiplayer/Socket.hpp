@@ -198,9 +198,6 @@ class Socket {
             char headBuffer[HEAD.size()];
             int num_bytes;
 
-            std::cout << "Receiving from " << socket_fd << std::endl;
-            fflush(stdout);
-
             // Recieve initial header
             if (type == Protocol::TCP) {
                 // Use tcp
