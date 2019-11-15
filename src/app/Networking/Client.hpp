@@ -39,7 +39,7 @@ class Client {
     bool gameOn;
 
     // Game map
-    std::vector<int> *gameMap;
+    std::vector<int> gameMap;
     bool mapReceived;
 
     SDL_Thread* rcThread;
@@ -70,11 +70,11 @@ class Client {
       return server->getPacket();
     }
 
-
-
     bool pollMap() {
       return mapReceived;
     }
+
+    static int clientThread(void *data);
     // void getGameBufferReady(bool flag);
 
     // std::vector<char>* getFillBuffer();

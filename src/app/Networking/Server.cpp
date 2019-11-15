@@ -141,6 +141,7 @@ int serverProcess() {
 
     // Generate map
     auto map = serverMapGen();
+    std::cout << "Map size is " << map->size() << std::endl;
     pack(map, &packedMap, 3); //pack map into 3 bits
 
 

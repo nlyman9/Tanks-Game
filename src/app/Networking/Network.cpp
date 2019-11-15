@@ -113,10 +113,12 @@ std::vector<int> *unpack(std::vector<char>* packed, std::vector<int> *unPacked, 
 	}
     i = 0;
 	int tmp = 0;
+    std::cout << "Result: ";
 	for(auto curr : workSet){
 		tmp = (tmp) | (curr << (bits - 1 - i));
 		if(i == (bits - 1)){
 			unPacked->push_back(tmp);
+            printf("%d", tmp);
 			tmp = 0;
 			i = -1;
 		}

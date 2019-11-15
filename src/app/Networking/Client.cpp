@@ -10,15 +10,22 @@
 
 #define R_BUFFER_SIZE 152
 
-bool mapReceived = false;
-bool tsReady = false;
-
 //receive lock
 SDL_SpinLock rlock = 0;
 //send lock
 SDL_SpinLock slock = 0;
 
-int clientThread(void* data) {
+
+bool Client::init() {
+    std::cout << "Client init()" << std::endl;
+    void* clientInfo = (void *) malloc(sizeof(Client));
+    clientInfo = (void*) this;
+    gameOn = true;
+    rcThread = SDL_CreateThread(this->clientThread, "myThread", (void*) clientInfo);
+    return true;
+}
+
+int Client::clientThread(void* data) {
     // Unpack data in the Client object
     Client *client = (Client*) data;
     std::cout << "Client thread created!" << std::endl;
@@ -40,15 +47,21 @@ int clientThread(void* data) {
 
             if (mail->getType() == (int)PackType::MAP) {
                 std::cout << "Client: Loading map... " << mail->data() << std::endl;
+                std::cout << mail->getDatasString() << std::endl;
                 std::vector<int>* map = new std::vector<int>();
 
-                unpack((mail->getData()), map, 3);
+                map = unpack(mail->getDatas(), map, 3);
+                std::cout << "Client: Unpacked map! size = "<< map->size() << std::endl;
+                fflush(stdout);
                 for (int i = 0; i < map->size();i++){
-                    client->gameMap->push_back(map->at(i));                 
+                    client->gameMap.push_back(map->at(i));                 
                 }
 
-                mapReceived = true;
+                client->mapReceived = true;
                 delete map;
+
+                std::cout << "Client: Loaded map!" << std::endl;
+                fflush(stdout);
 
                 break;
             }
@@ -195,27 +208,3 @@ int clientThread(void* data) {
 //         return emptyKeystate;
 //     }
 // }
-
-bool Client::init() {
-    // gameMap = new std::vector<int>();
-    // //initialize all buffers
-    // //receive buffer
-    // rcBuffer = new std::vector<char>(R_BUFFER_SIZE);
-    // //to send buffer
-    // //buffer to fill in
-    // fBuffer = new std::vector<char>();
-    // //to send buffer
-    // tsBuffer = new std::vector<char>();
-    // // keystate buffer
-    // keystates = new std::vector<Uint8*>();
-    // Pack Client into void pointer for thread
-    
-    std::cout << "Client init()" << std::endl;
-    void* clientInfo = (void *) malloc(sizeof(Client));
-    clientInfo = (void*) this;
-    gameOn = true;
-    rcThread = SDL_CreateThread(clientThread, "myThread", (void*) clientInfo);
-    return true;
-}
-
-// Client Client::initClient(Client c) {}

@@ -113,8 +113,12 @@ class Packet {
             return headers;
         }
 
-        std::vector<char>* getData() {
+        std::vector<char>* getDatas() {
             return new std::vector<char>(datas);
+        }
+
+        std::string getDatasString() {
+            return std::string(datas.data(), datas.size());
         }
 
         int getType() {
