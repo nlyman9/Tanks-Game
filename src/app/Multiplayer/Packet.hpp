@@ -46,6 +46,11 @@ class Packet {
             std::cout << "Initialized packet with  " << headers.size() << " headers - Data: " << this->data() << std::endl;
         }
 
+        Packet(Header size, Header type) {
+            headers.push_back(size);
+            headers.push_back(type);
+        }
+
         Packet(Header size, Header type, const char* data, int data_size) {
             headers.push_back(size);
             headers.push_back(type);

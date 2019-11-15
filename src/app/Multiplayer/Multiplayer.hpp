@@ -172,32 +172,44 @@ class ClientConnection {
             }
             // else 
 
-            // Two ways of creating header from data
-            // Casting works as so
-            // Header head = (Header) rawbuffer; 
-            // Or using constructor
+            // Grab the first two headers 
+            //   - There should always be a SIZE and TYPE header in that order
             Header size_header = Header(headBuffer); 
-
             std::cout << "THE HEADER IS " << size_header.data() << std::endl;
-            std::cout << "THE TYPE IS " << size_header.getValue() << std::endl;
-            std::cout << "THE SIZE IS " << size_header.size() << std::endl;
+            std::cout << "THE PACKET SIZE IS " << size_header.getValue() << std::endl;
+            std::cout << "THE HEADER SIZE IS " << size_header.size() << std::endl;
             fflush(stdout);
 
             Header type_header = Header(&headBuffer[size_header.size()+1]);
-            std::cout << "HOLY SHIT THE HEADER IS " << type_header.data() << std::endl;
-            std::cout << "HOLY SHIT THE TYPE IS " << type_header.getValue() << std::endl;
+            std::cout << "THE HEADER IS " << type_header.data() << std::endl;
+            std::cout << "THE VALUE IS " << type_header.getValue() << std::endl;
+            
+            // Check to see if there is more data left
+            int packet_size_left = std::stoi(size_header.getValue()) - HEAD.size();
+            std::cout << "Packet size remaining is " << packet_size_left << std::endl;
 
-            // Create packet and add to recvBuffer
-            int packet_size = std::stoi(size_header.getValue()) - HEAD.size();
-            std::cout << "Packet size remaining is " << packet_size << std::endl;
+            // Check packet size is normal
+            if (packet_size_left < 0) {
+                std::cerr << "RECEIVE ERROR: Packet size remaining is negative" << std::endl;
+                return;
+            }
 
-            char dataBuffer[packet_size];
+            // Check if there is no remaining data in packet
+            if (packet_size_left == 0) {
+                // Packet is just headers
+                Packet mail = Packet(size_header, type_header);
+                recvBuffer.push_back(mail);
+                return;
+            }
+
+            // Get the rest of the data from the packet.
+            char dataBuffer[packet_size_left];
             num_bytes = 0;
-            if (packet_size > 0) {
+            if (packet_size_left > 0) {
                 // Receive rest of data
                 if (server == server_tcp) {
                     // Use tcp
-                    num_bytes = recv(server->fd(), dataBuffer, packet_size, 0);
+                    num_bytes = recv(server->fd(), dataBuffer, packet_size_left, 0);
                     if (num_bytes == -1) {
                         std::cerr << "CLIENT: read packet error: " << strerror(errno) <<  std::endl;
                     }
@@ -208,7 +220,7 @@ class ClientConnection {
 
             std::cout << "Bytes received  " << num_bytes << std::endl;
             // This buffer should just be the data segments of the packet
-            Packet mail = Packet(size_header, type_header, dataBuffer, packet_size);
+            Packet mail = Packet(size_header, type_header, dataBuffer, packet_size_left);
             recvBuffer.push_back(mail);
         }
 
@@ -234,8 +246,6 @@ class ClientConnection {
             // Send first packet in vector to server
             auto mail = sendBuffer.at(0);
             sendBuffer.erase(sendBuffer.begin());
-
-
 
             return true;
         }
