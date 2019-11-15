@@ -46,6 +46,11 @@ class Server {
             }
         }
 
+        Packet* receiveFrom(int id) {
+            host->receiveFrom(id);
+            return host->getPacket();
+        }
+
         int addPacket(Packet *p) {
             return host->addPacket(p);
         }

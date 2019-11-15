@@ -61,8 +61,11 @@ class ServerConnection {
 
         // TODO get client ID from packet
         Packet* getPacket() {
-            Packet *mail = sendBuffer.at(0);
-            sendBuffer.erase(sendBuffer.begin());
+            if (recvBuffer.size() == 0) 
+                return nullptr;
+
+            Packet *mail = recvBuffer.at(0);
+            sendBuffer.erase(recvBuffer.begin());
 
             return mail;
         }
@@ -75,9 +78,14 @@ class ServerConnection {
 
         // TODO Find a way to identify the client
         void receiveFrom(int id) {
+            assert(listener->isOnline());
             assert(id < clients.size());
+
             // Recieve data from a client
             Packet *mail = clients.at(id)->receive();
+
+            if (mail != nullptr)
+                recvBuffer.push_back(mail);
         }
 
         bool sendTo(int id) {

@@ -148,7 +148,7 @@ int serverProcess() {
 
 
     // First wait for 2 clients
-    while (server->numClients() < 2) {
+    while (server->numClients() < 1) {
         if (server->accept()) {
             std::cout << "Server: New client connection accepted" << std::endl;
         }
@@ -162,8 +162,24 @@ int serverProcess() {
     Packet *mapPacket = new Packet(PackType::MAP);
     std::cout << "Map size is " << packedMap.size() << std::endl;
     mapPacket->appendData(packedMap);
-
     server->broadcast(mapPacket);
+
+    server->gameOn = true;
+
+    // Game Loop
+    while (server->gameOn) {
+        std::cout << "SERVER: GAME" << std::endl;
+        fflush(stdout);
+        // Get data from client
+        Packet *mail = server->receiveFrom(0);
+
+        if (mail != nullptr) {
+            std::cout << "SERVER: You got mail!" << std::endl;
+        } else {
+            std::cout << "SERVER: No mail :(" << std::endl;
+        }
+        sleep(0.05);
+    }
 }
 
 std::vector<int>* serverMapGen(){

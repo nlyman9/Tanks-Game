@@ -128,7 +128,7 @@ int GameLoop::networkRun() {
 	shell->init();
 
 	SDL_Texture* cursor = loadImage("src/res/images/cursor.png", render->getRenderer());
-	
+	int temp = 0;
 	//wait for both players to connect
 	while(!client->startGame) {
 		sleep(0.1); 
@@ -155,10 +155,16 @@ int GameLoop::networkRun() {
 
 		int i = 0;
 		for(auto player : players) {
-			// std::cout << "i is : " << i << std::endl;
-			fflush(stdout);
-			player->getEvent(elapsed_time, &e);
-			
+			// Send same keystate to player object and to the client to send
+			// Lets just support 10 keys at the same time
+			const Uint8 *keystate = SDL_GetKeyboardState(nullptr);
+			player->getEvent(elapsed_time, &e, keystate);
+			temp += 1;
+			if (temp > 1000) {
+				client->addKeyFrame(keystate);
+				temp = 0;
+			}
+
 			// std::cout << "check fire " << player->getFire() << std::endl;
 
 			//network version of player firing bullet
@@ -408,8 +414,8 @@ int GameLoop::runSinglePlayer()
 
 		checkEscape();
 		for(auto player : players) {
-			
-			player->getEvent(elapsed_time, &e);
+			const Uint8 *keystate = SDL_GetKeyboardState(nullptr);
+			player->getEvent(elapsed_time, &e, keystate);
 
 			//The player fired a bullet
 			if (player->getFire() == true) {

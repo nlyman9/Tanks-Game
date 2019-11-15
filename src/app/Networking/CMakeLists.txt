@@ -23,6 +23,7 @@ target_link_libraries(Networking
   PRIVATE
   MapGenerator
   Multiplayer
+  SDL2
 )
 endif()
 

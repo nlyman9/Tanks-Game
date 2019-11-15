@@ -19,6 +19,7 @@
 #include "Network.hpp"
 #include <SDL2/SDL_thread.h>
 #include "Multiplayer.hpp"
+#include <SDL2/SDL.h>
 
 static bool gameBufferReady = false; 
 //buffer received
@@ -28,9 +29,13 @@ static bool gameBufferReady = false;
 // //buffer to fill in
 // static std::vector<char>* fBuffer;
 //keystate double buffer
-static std::vector<Uint8*>* keystates;
+// static std::vector<Uint8*>* keystates;
 
 class Client {
+  private:
+    std::vector<Uint8> keysToCheck =  { SDL_SCANCODE_W, SDL_SCANCODE_A, 
+                                        SDL_SCANCODE_S, SDL_SCANCODE_D,
+                                        (Uint8) SDL_MOUSEBUTTONDOWN }; 
   public:
     // Network
     ClientConnection *server;
@@ -67,6 +72,21 @@ class Client {
     Packet* receive() {
       server->receive();
       return server->getPacket();
+    }
+
+    void addKeyFrame(const Uint8 *keystates) {
+      Packet *mail = new Packet(PackType::KEYSTATE);
+      std::vector<char> charKeyStates;
+
+      for (auto key : keysToCheck) {
+        charKeyStates.push_back((char)keystates[key]);
+      }
+
+      mail->appendData(charKeyStates);
+      std::cout << "Sending keystate - ";
+      mail->printData();
+      
+      server->addPacket(mail);
     }
 
     bool pollMap() {

@@ -87,20 +87,16 @@ class Packet {
 
         void setPacketSize() {
             Header& packet_size = headers.at(0);
-            std::cout << "Who is this pakcet ??" << packet_size.getHead() << std::endl;
-            fflush(stdout);
+
             // Make sure the header is the size header
             assert(packet_size.getHead().compare("SIZE") == 0);
 
+            // Assert that the size of the packet fits into 8 bits long 
             std::string temp_size = std::to_string(this->size());
-            std::cout << "Size is = " << temp_size << std::endl;
-
-            // The size of a packet may only be of size 
             assert(temp_size.size() <= 8);
 
-            // Pad with leading zeroes 
+            // Pad the size with leading zeroes 
             std::string size_str = std::string(8 - temp_size.size(), '0').append(temp_size);
-
 
             packet_size.setValue(size_str);
             std::cout << "Set size of packet to " << size_str << std::endl;
@@ -141,6 +137,17 @@ class Packet {
             raw_data->append(std::string(datas.data(), datas.size()));
 
             return raw_data->data();
+        }
+
+        /**
+         * @brief Prints all the values in the char vector datas
+         *    Useful for debugging 
+         */
+        void printData() {
+            for (auto d : datas) {
+                printf(" %d ", d);
+            }
+            printf("\n");
         }
 
         size_t size() {

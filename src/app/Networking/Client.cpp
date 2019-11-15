@@ -75,6 +75,11 @@ int Client::clientThread(void* data) {
 
     while (true) {
         std::cout << "Client-Network: Loop" << std::endl;
+        // Check if we have anything to send
+        
+
+
+        // Check if there is anything to recieve
         Packet *mail = client->receive();
         if (mail != nullptr) {
         }

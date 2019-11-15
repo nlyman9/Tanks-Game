@@ -8,6 +8,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <assert.h> 
+#include <fcntl.h>
 
 #include <string>
 #include <iostream>
@@ -108,7 +109,6 @@ class Socket {
                 std::cerr << "ERROR: failed to listen: " << errno << std::endl;
                 return false;
             }
-
             isListening = true;
             return true;
         }
@@ -136,6 +136,8 @@ class Socket {
 
             Socket *client = new Socket(Protocol::TCP, std::string(clientIP), std::atoi(remoteIP.data()));
             client->socket_fd = clientFD;
+
+            isConnected = true;
 
             return client;
         }
@@ -166,6 +168,10 @@ class Socket {
             // Create socket with remote destination
             socket_fd = socket(serverInfo->ai_family, serverInfo->ai_socktype, serverInfo->ai_protocol);
 
+            // Set socket to non-blocking
+            // int flags = fcntl(socket_fd, F_GETFL);
+            // fcntl(socket_fd, F_SETFL, flags | O_NONBLOCK);
+
             // Connect to remote destination
             if (connect(socket_fd, serverInfo->ai_addr, serverInfo->ai_addrlen) < 0) {
                 std::cout << "Socket: Waiting for connection..." << std::endl;
@@ -176,7 +182,7 @@ class Socket {
             freeaddrinfo(serverInfo);
 
             // Connected!
-            isConnected = true;
+            this->isConnected = true;
             return true;
         }
 
@@ -188,8 +194,6 @@ class Socket {
         }
 
         Packet* receive() {
-            assert(isConnected);
-
             // Recieve HEAD from connection, add to buffer.
             char headBuffer[HEAD.size()];
             int num_bytes;
@@ -199,7 +203,7 @@ class Socket {
                 // Use tcp
                 num_bytes = recv(socket_fd, headBuffer, HEAD.size(), 0);
                 if (num_bytes == -1) {
-                    std::cerr << "CLIENT: read header error: " << strerror(errno) <<  std::endl;
+                    std::cerr << "SOCKET: read header error: " << strerror(errno) <<  std::endl;
                 }
             } else {
                 // Use udp
