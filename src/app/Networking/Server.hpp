@@ -85,7 +85,6 @@ fd_set client_fds;
 int fdmax;          // maximum file descriptor number
 int nbytes;
 socklen_t addr_len;
-
 bool gameOn;
 //server buffers
 // //buffer received

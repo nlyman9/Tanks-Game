@@ -57,7 +57,6 @@ void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
 
     // SDL_Rect pos = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
     // SDL_RenderCopy(gRenderer, getSprite()->getTexture(), NULL, &pos);
-    
     SDL_Rect* dst = get_box();
     SDL_Rect* turret_dst = get_box();
 
@@ -81,12 +80,13 @@ void Player::update() {
     float delta_x = mouseX - (getX() + TANK_WIDTH / 2);
     float delta_y = mouseY - (getY() + TANK_HEIGHT / 2);
     float theta_radians = atan2(delta_y, delta_x);
-    mouseTheta = (int)(theta_radians * 180 / M_PI); 
+    mouseTheta = (int)(theta_radians * 180 / M_PI);
+    mouseTheta = (int)(theta_radians * 180 / M_PI);
     turretTheta = mouseTheta;
 
     // Move player
     // Rotate player
-    rotatePlayer(theta_v);
+    rotate(theta_v);
 
     float updateStep = MS_PER_UPDATE / 1000;
 
@@ -178,41 +178,9 @@ bool Player::place(float x, float y) {
 
 /* Player Specific Functions */
 
-bool Player::getFire() {
-    return shotsFired;
-}
-
-bool Player::setFire(bool fire) {
-    this->shotsFired = fire;
-    return true;
-}
-
-bool Player::rotatePlayer(float t) {
-    theta += t;
-
-    if(theta < 0) {
-        theta = 360 + theta;
-    }
-    theta %= 360;
-    return true;
-}
-
-bool Player::rotateTurret(float theta) {
-    return false;
-}
-
-int Player::getTheta() {
-    return theta;
-}
-
-int Player::getTurretTheta() {
-    return turretTheta;
-}
-
 void Player::setClient(Client* cl) {
     client = cl;
 }
-
 void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, SDL_Event* e) {
 
     delta_velocity = 0;
@@ -249,7 +217,8 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, S
         theta_v += PHI;
     }
 
-    //std::cout << "finish keystate" << std::endl;
+    //std::cout << "Theta: " << theta << std::endl;
+
     if(e->type == SDL_MOUSEBUTTONDOWN) {
   		Uint32 current_time = SDL_GetTicks();
 
@@ -339,12 +308,12 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, S
 
 /**
  * @brief Get the bounding box of the player's tank
- * 
+ *
  * The bounding box is based off 4 points: backLeft, backRight, frontLeft, frontRight;
  *  - The front of the tank is the direction the tank is pointing. The back is the opposit.
  *  - The left side is the lefthand side of the direction the the tank is facing. The right is the right hand side.
- * 
- * @return BoundingBox* 
+ *
+ * @return BoundingBox*
  */
 BoundingBox* Player::getBoundingBox() {
     BoundingBox *box = new BoundingBox();

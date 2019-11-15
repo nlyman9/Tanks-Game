@@ -125,8 +125,11 @@ int GameLoop::networkRun() {
 	shell->init();
 
 	SDL_Texture* cursor = loadImage("src/res/images/cursor.png", render->getRenderer());
-
-
+	//wait for both players to connect
+	while(!client->startGame) {
+		sleep(0.1); 
+	} 
+	
 	while (client->gameOn)
 	{
 		current_time = std::chrono::system_clock::now();
@@ -147,10 +150,13 @@ int GameLoop::networkRun() {
 		}
 
 		std::cout << "Player len: " << players.size() << std::endl;
+		int i = 0;
 		for(auto player : players) {
+			std::cout << "i is : " << i << std::endl;
+			fflush(stdout);
 			player->getEvent(elapsed_time, &e);
-
-			//std::cout << "check fire " << player->getFire() << std::endl;
+			
+			std::cout << "check fire " << player->getFire() << std::endl;
 
 			//network version of player firing bullet
 			if (player->getFire() == true) {
@@ -167,8 +173,9 @@ int GameLoop::networkRun() {
 				player->setFire(false);
 			}
 			fflush(stdout);
-			//std::cout << "finish player check fire" << std::endl;
+			std::cout << "finish player check fire" << std::endl;
 			fflush(stdout);
+			i++;
 		}
 
 		std::cout << "update" << std::endl;
@@ -254,8 +261,15 @@ void GameLoop::initMapSinglePlayer() {
 	for (int x = BORDER_GAP + TILE_SIZE, i = 0; x < SCREEN_WIDTH - BORDER_GAP - TILE_SIZE; x+=TILE_SIZE, i++) {
 		for (int y = TILE_SIZE, j = 0; y < SCREEN_HEIGHT - TILE_SIZE; y+=TILE_SIZE, j++) {
 			SDL_Rect cur_out = { x, y, TILE_SIZE, TILE_SIZE};
+			SDL_Rect hole_tile = { x+5, y+5, TILE_SIZE-5, TILE_SIZE-5 }; //does not work, enemy AI needs update
 			if(mapVectors[i][j] == 2){
 				tileArray.push_back(cur_out);
+				enemyTileArray.push_back(cur_out);
+				projectileObstacles.push_back(cur_out);
+			}
+			else if(mapVectors[i][j] == 1){
+				tileArray.push_back(hole_tile);
+				enemyTileArray.push_back(cur_out);
 			}
 		}
 	}
@@ -264,7 +278,9 @@ void GameLoop::initMapSinglePlayer() {
 		player->setObstacleLocations(&tileArray);
 	}
 
-	enemies.push_back(new Enemy( SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, players.at(0))); // single player means player vector is size 1
+	std::vector<int> enemySpawn = GameLoop::spawnEnemies(map, 1);
+	enemies.push_back(new Enemy( enemySpawn.at(0), enemySpawn.at(1), players.at(0))); // single player means player vector is size 1
+
 	render->setEnemies(enemies);
 	Sprite *enemy_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
 	enemy_tank->init();
@@ -286,12 +302,75 @@ void GameLoop::initMapSinglePlayer() {
 }
 
 /**
+ * @brief Create an unoccupied spawn location for enemy tanks
+ * @param map   Vector representing current map state
+ * @param count Total number of enemies spawnpoints to generate
+ * @return      Vector of ints with enemy spawnpoints as pixel coordinates, (0=x1, 1=y1, etc)
+ * TODO:        Allow to be used for multiple tanks
+ */
+std::vector<int> GameLoop::spawnEnemies(std::vector<std::vector<int>> *map, int count)
+{
+	std::vector<std::vector<int>> tileMap = *map;
+	std::vector<int> coords;
+	int enemy_x, enemy_y;
+	int i = 0;
+
+	while(true)
+	{
+		enemy_x = (rand() % 16) + 4;
+		enemy_y = (rand() % 3) + 10;
+
+		if(tileMap[enemy_y][enemy_x] == 0)
+		{
+			if(i < count)
+			{
+				i++;
+			}
+			else
+			{	
+				break;
+			}
+		}
+	}
+
+	coords.push_back(enemy_x * 48 + 100);
+	coords.push_back(enemy_y * 48 + 48);
+
+	return coords;
+}
+
+// Returns a vector with two int values, x at 0 and y at 1
+// Values represent pixel coordinates of enemy spawn point
+std::vector<int> GameLoop::spawnEnemy(std::vector<std::vector<int>> *map)
+{
+	std::vector<std::vector<int>> tileMap = *map;
+	std::vector<int> coords;
+	int enemy_x, enemy_y;
+
+	while(true)
+	{
+		enemy_x = (rand() % 16) + 4;
+		enemy_y = (rand() % 4) + 9;
+
+		if(tileMap[enemy_y][enemy_x] == 0)
+		{
+			break;
+		}
+	}
+
+	coords.push_back(enemy_x * 48 + 100);
+	coords.push_back(enemy_y * 48 + 48);
+
+	return coords;
+}
+
+/**
  * @brief The actual GameLoop
  *
  */
 int GameLoop::runSinglePlayer()
 {
-	std::cout << "single player" << std::endl;
+	std::cout << "Running single player..." << std::endl;
 	// Init single player only settngs
 	fflush(stdout);
 	render->setPlayer(players);
@@ -326,23 +405,36 @@ int GameLoop::runSinglePlayer()
 			}
 		}
 
-		//checkEscape();
+		checkEscape();
 		for(auto player : players) {
-
+			
 			player->getEvent(elapsed_time, &e);
 
 			//The player fired a bullet
 			if (player->getFire() == true) {
 
-				projectiles.push_back(new Projectile(player->getX(), player->getY(), player->getTurretTheta()));
+				projectiles.push_back(new Projectile(player->getX() + TANK_WIDTH/4, player->getY() + TANK_HEIGHT/4, player->getTurretTheta()));
 
 				std::cout << projectiles.back()->getX() << ", " << projectiles.back()->getY() << "; " << projectiles.back()->getTheta() << std::endl;
 
-				render->gProjectiles.push_back(projectiles.back());
+				// render->gProjectiles.push_back(projectiles.back());
+				render->setProjectiles(projectiles);
 				projectiles.back()->setSprite(shell);
 				//newlyFired->setSprite(bullet);
-				projectiles.back()->setObstacleLocations(&tileArray);
+				projectiles.back()->setObstacleLocations(&projectileObstacles);
 				player->setFire(false);
+			}
+		}
+
+		for(auto enemy : enemies) {
+			if(enemy->getFire() == true){
+				projectiles.push_back(new Projectile(enemy->getX() + TANK_WIDTH/4, enemy->getY() + TANK_HEIGHT/4, enemy->getTurretTheta()));
+
+				// render->gProjectiles.push_back(projectiles.back());
+				render->setProjectiles(projectiles);
+				projectiles.back()->setSprite(shell);
+				projectiles.back()->setObstacleLocations(&projectileObstacles);
+				enemy->setFire(false);
 			}
 		}
 

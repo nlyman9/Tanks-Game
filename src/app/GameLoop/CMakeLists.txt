@@ -8,9 +8,8 @@ target_link_libraries(GameLoop
   PUBLIC
   Render
   Object
-  Player
+  Tank
   Constants
-  Enemy
   Sprite
   MapGenerator
   Projectile

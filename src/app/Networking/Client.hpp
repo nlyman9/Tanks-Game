@@ -35,13 +35,14 @@ class Client {
     // Network
     ClientConnection *server;
 
-    // Game 
-    bool gameOn;
-
     // Game map
     std::vector<int> gameMap;
     bool mapReceived;
 
+    // Game 
+    bool gameOn;
+    bool startGame;
+    
     SDL_Thread* rcThread;
 
     Client(std::string ip, int port) {

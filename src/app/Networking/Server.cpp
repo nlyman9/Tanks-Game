@@ -32,6 +32,8 @@
 #include "Network.hpp"
 
 #define R_BUFFER_SIZE 152
+
+#define NUM_PLAYERS 2
 //bools for receive
 bool receiveReady = true;
 bool receivedData = false;
@@ -39,7 +41,7 @@ bool receivedData = false;
 //bools for send
 bool sendReady = false;
 bool sendData = false;
-
+int connections = 0;
 //receive lock
 SDL_SpinLock rlock = 0;
 //send lock
