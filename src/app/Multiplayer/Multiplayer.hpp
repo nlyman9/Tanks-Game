@@ -3,6 +3,8 @@
 
 #include <SDL2/SDL_thread.h>
 #include <assert.h> 
+#include <unistd.h>
+#include <signal.h>
 
 #include "Header.hpp"
 #include "Packet.hpp"
@@ -15,6 +17,21 @@ class ServerConnection {
         std::vector<std::vector<Packet *> *> recvBuffer;
         std::vector<Packet*> sendBuffer;
         const int MAX_PLAYERS = 10;
+
+        // Select FDs
+        fd_set client_fds;
+        int fdmax;
+
+        // Timeout / Rate the server will run at
+        const int TICKS_PER_SECOND = 1;
+        const long NANO_PER_SECOND = 1e+9;
+
+        // Set timeout based on constants
+        // Nanoseconds per tick = NANO_PER_SECOND / TICKS_PER_SECOND
+        const struct timespec poll_timeout {
+            0,                                 // tv_sec
+            NANO_PER_SECOND / TICKS_PER_SECOND // tv_nsec 
+        };
     
     public:
         ServerConnection(std::string ip, int port) {
@@ -23,6 +40,7 @@ class ServerConnection {
             listener_udp = new Socket(Protocol::UDP, ip, port+1);
             // Set base socket to tcp socket
             listener = listener_tcp;
+            fdmax = -1;
         }
 
         bool bind() {
@@ -58,8 +76,59 @@ class ServerConnection {
                 
                 // Add a recvBuffer for client
                 recvBuffer.push_back(new std::vector<Packet *>);
+
+                // Add client's File descriptor to set
+                FD_SET(client->fd(), &client_fds);
+                if (client->fd() > fdmax) {
+                    std::cout << "New fdmax!!! " << fdmax << " -> " << client->fd() << std::endl;
+                    fdmax = client->fd();
+                }
+
                 std::cout << "New client: " << client->ip() << " on port " << client->port() << std::endl;
                 return true;
+            }
+        }
+
+        std::vector<int>* pollClients() {
+            // Create a temp fd_set
+            fd_set read_fds = client_fds;
+
+            std::cout << "Polling clients... -- ";
+            for (auto client : clients) {
+                if (FD_ISSET(client->fd(), &read_fds))
+                    std::cout << client->fd() << " ";
+            }
+            std::cout << "Out of clients: ";
+            for (auto client : clients) {
+                std::cout << client->fd() << " ";
+            }
+            std::cout << std::endl;
+            fflush(stdout);
+
+
+            // wait for their info with the defined timeout (for now 1/30th of a second)
+            int numberOfPendingClients = select(fdmax+1, &read_fds, nullptr, nullptr, nullptr);//&poll_timeout, nullptr);
+            if (numberOfPendingClients == EBADF) {
+                std::cout << "SELECT ERROR: BAD FD -- " << std::endl;
+                fflush(stdout);
+                return nullptr;
+            }
+
+            std::cout << "Number of clients from pselect -- " << numberOfPendingClients << std::endl;
+            fflush(stdout);
+
+            // fd_set's will be modified with the clients that have pending messages, return that list
+            if (numberOfPendingClients == 0) {
+                return nullptr;
+            } else {
+                std::vector<int> *pendingClients = new std::vector<int>(clients.size());
+                for (int i = 0; i < clients.size(); i++) {
+                    if (FD_ISSET(clients.at(i)->fd(), &read_fds)) {
+                        pendingClients->push_back(i);
+                    }
+                }
+
+                return pendingClients;
             }
         }
 
@@ -81,9 +150,8 @@ class ServerConnection {
             sendBuffer.push_back(p);
             return index;
         }
-
-        // TODO Find a way to identify the client
-        void receiveFrom(int id) {
+        
+        void receiveFromID(int id) {
             assert(listener->isOnline());
             assert(id < numClients());
 
@@ -135,10 +203,26 @@ class ServerConnection {
             std::cout << "Broadcasted to clients!" << std::endl;
 
             // Free packet we are done with it!
-            free(mail);
+            delete mail;
             return true;
         }
 
+        int getClientsFD(int id) {
+            assert(id < clients.size());
+            return clients.at(id)->fd();
+        }
+
+        int getClientsID(int fd) {
+            assert(fd < clients.size());
+
+            for (int i = 0; i < clients.size(); i++) {
+                if (clients.at(i)->fd() == fd) {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
         int numClients() {
             return clients.size();
         }
@@ -223,7 +307,7 @@ class ClientConnection {
             sendBuffer.erase(sendBuffer.begin());
             server->sendSocket(mail);
 
-            free(mail);
+            delete mail;
             return true;
         }
 

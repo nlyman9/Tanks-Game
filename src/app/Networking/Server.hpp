@@ -46,8 +46,27 @@ class Server {
             }
         }
 
-        Packet* receiveFrom(int id) {
-            host->receiveFrom(id);
+        int pollClients() {
+            // Poll clients for messages
+            std::vector<int> *pendingClients = host->pollClients();
+
+            if (pendingClients == nullptr) {
+                return 0;
+            }
+
+            // if there are clients pending, get their data
+            int numberOfPendingClients = pendingClients->size();
+            for (auto client_id : *pendingClients) {
+                host->receiveFromID(client_id);
+            }
+
+            delete pendingClients;
+
+            return numberOfPendingClients;
+        }
+
+        Packet* receiveFromID(int id) {
+            host->receiveFromID(id);
             return host->getPacket(id);
         }
 
