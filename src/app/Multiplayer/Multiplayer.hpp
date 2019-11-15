@@ -15,7 +15,6 @@ class ServerConnection {
         std::vector<Packet> recvBuffer;
         std::vector<Packet> sendBuffer;
         const int MAX_PLAYERS = 10;
-        Packet HEAD = Packet(PackType::INIT);
     
     public:
         ServerConnection(std::string ip, int port) {
@@ -110,11 +109,11 @@ class ClientConnection {
     private:
         Socket *server, *server_tcp, *server_udp;
 
-        std::vector<Packet> recvBuffer;
-        std::vector<Packet> sendBuffer;
+        std::vector<Packet*> recvBuffer;
+        std::vector<Packet*> sendBuffer;
         
         struct timeval* timeout;
-        Packet HEAD = Packet(PackType::INIT);
+        // Packet HEAD = Packet(PackType::INIT);
     public:
         ClientConnection(std::string ip, int port) {
             // Create tcp socket
@@ -150,77 +149,7 @@ class ClientConnection {
         }
 
         void receive() {
-            assert(server->isOnline());
-
-            // Recieve from connection, add to buffer.
-            char headBuffer[HEAD.size()];
-            int num_bytes;
-
-            // Recieve initial header
-            if (server == server_tcp) {
-                // Use tcp
-                num_bytes = recv(server->fd(), headBuffer, HEAD.size(), 0);
-                if (num_bytes == -1) {
-                    std::cerr << "CLIENT: read header error: " << strerror(errno) <<  std::endl;
-                }
-            } else {
-                // Use udp
-            }
-
-            if (num_bytes == 0) {
-                return;
-            }
-            // else 
-
-            // Grab the first two headers 
-            //   - There should always be a SIZE and TYPE header in that order
-            Header size_header = Header(headBuffer); 
-            std::cout << "THE HEADER IS " << size_header.data() << std::endl;
-            std::cout << "THE PACKET SIZE IS " << size_header.getValue() << std::endl;
-            std::cout << "THE HEADER SIZE IS " << size_header.size() << std::endl;
-            fflush(stdout);
-
-            Header type_header = Header(&headBuffer[size_header.size()+1]);
-            std::cout << "THE HEADER IS " << type_header.data() << std::endl;
-            std::cout << "THE VALUE IS " << type_header.getValue() << std::endl;
-            
-            // Check to see if there is more data left
-            int packet_size_left = std::stoi(size_header.getValue()) - HEAD.size();
-            std::cout << "Packet size remaining is " << packet_size_left << std::endl;
-
-            // Check packet size is normal
-            if (packet_size_left < 0) {
-                std::cerr << "RECEIVE ERROR: Packet size remaining is negative" << std::endl;
-                return;
-            }
-
-            // Check if there is no remaining data in packet
-            if (packet_size_left == 0) {
-                // Packet is just headers
-                Packet mail = Packet(size_header, type_header);
-                recvBuffer.push_back(mail);
-                return;
-            }
-
-            // Get the rest of the data from the packet.
-            char dataBuffer[packet_size_left];
-            num_bytes = 0;
-            if (packet_size_left > 0) {
-                // Receive rest of data
-                if (server == server_tcp) {
-                    // Use tcp
-                    num_bytes = recv(server->fd(), dataBuffer, packet_size_left, 0);
-                    if (num_bytes == -1) {
-                        std::cerr << "CLIENT: read packet error: " << strerror(errno) <<  std::endl;
-                    }
-                } else {
-                    // Use udp
-                }
-            }
-
-            std::cout << "Bytes received  " << num_bytes << std::endl;
-            // This buffer should just be the data segments of the packet
-            Packet mail = Packet(size_header, type_header, dataBuffer, packet_size_left);
+            Packet *mail = server->receive();
             recvBuffer.push_back(mail);
         }
 
@@ -228,7 +157,7 @@ class ClientConnection {
             if (recvBuffer.size() == 0) {
                 return nullptr;
             } else {
-                Packet *p = new Packet(recvBuffer.at(0));
+                Packet *p = recvBuffer.at(0);
                 recvBuffer.erase(recvBuffer.begin());
                 return p;
             }
@@ -250,7 +179,7 @@ class ClientConnection {
             return true;
         }
 
-        void addPacketToSend(Packet p) {
+        void addPacketToSend(Packet *p) {
             sendBuffer.push_back(p);
         }
 

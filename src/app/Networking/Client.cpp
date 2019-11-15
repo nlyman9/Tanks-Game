@@ -20,7 +20,6 @@ bool Client::init() {
     std::cout << "Client init()" << std::endl;
     void* clientInfo = (void *) malloc(sizeof(Client));
     clientInfo = (void*) this;
-    gameOn = true;
     rcThread = SDL_CreateThread(this->clientThread, "myThread", (void*) clientInfo);
     return true;
 }
@@ -62,6 +61,9 @@ int Client::clientThread(void* data) {
 
                 std::cout << "Client: Loaded map!" << std::endl;
                 fflush(stdout);
+
+                client->gameOn = true;
+                client->startGame = true;
 
                 break;
             }

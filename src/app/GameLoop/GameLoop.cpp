@@ -49,10 +49,10 @@ bool GameLoop::networkInit(Args *options) {
 	}
 
 	// Player* player2 = new Player(SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, false);
-	Sprite* player_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
-	Sprite* player_turrent = new Sprite(render->getRenderer(), "src/res/images/red_turret.png");
-	player_tank->init();
-	player_turrent->init();
+	// Sprite* player_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
+	// Sprite* player_turrent = new Sprite(render->getRenderer(), "src/res/images/red_turret.png");
+	// player_tank->init();
+	// player_turrent->init();
 	// player2->setSprite(player_tank);
 	// player2->setTurretSprite(player_turrent);
 	// players.push_back(player2);
@@ -110,6 +110,9 @@ void GameLoop::initMapMultiPlayer() {
 		enemy->setObstacleLocations(&tileArray);
 		enemy->setTileMap(&map2D);
 	}
+
+	std::cout << "GAME: Set Player Obstacles" << std::endl;
+	fflush(stdout);
 }
 
 int GameLoop::networkRun() {
@@ -125,13 +128,16 @@ int GameLoop::networkRun() {
 	shell->init();
 
 	SDL_Texture* cursor = loadImage("src/res/images/cursor.png", render->getRenderer());
+	
 	//wait for both players to connect
 	while(!client->startGame) {
 		sleep(0.1); 
 	} 
-	
+
 	while (client->gameOn)
 	{
+		std::cout << "GAME LOOP " << std::endl;
+		fflush(stdout);
 		current_time = std::chrono::system_clock::now();
 		elapsed_time = current_time - previous_time;
 		previous_time = current_time;
@@ -150,13 +156,14 @@ int GameLoop::networkRun() {
 		}
 
 		std::cout << "Player len: " << players.size() << std::endl;
+		fflush(stdout);
 		int i = 0;
 		for(auto player : players) {
-			std::cout << "i is : " << i << std::endl;
+			// std::cout << "i is : " << i << std::endl;
 			fflush(stdout);
 			player->getEvent(elapsed_time, &e);
 			
-			std::cout << "check fire " << player->getFire() << std::endl;
+			// std::cout << "check fire " << player->getFire() << std::endl;
 
 			//network version of player firing bullet
 			if (player->getFire() == true) {
@@ -173,12 +180,12 @@ int GameLoop::networkRun() {
 				player->setFire(false);
 			}
 			fflush(stdout);
-			std::cout << "finish player check fire" << std::endl;
+			// std::cout << "finish player check fire" << std::endl;
 			fflush(stdout);
 			i++;
 		}
 
-		std::cout << "update" << std::endl;
+		// std::cout << "update" << std::endl;
 		// 2. Update
 		// Update if time since last update is >= MS_PER_UPDATE
 		while(lag_time >= MS_PER_UPDATE) {
@@ -195,7 +202,7 @@ int GameLoop::networkRun() {
 			lag_time -= MS_PER_UPDATE;
 		}
 
-		std::cout << "cursor" << std::endl;
+		// std::cout << "cursor" << std::endl;
 		// quick and dirty ;)
 		int cursorX = 0, cursorY = 0;
 
@@ -205,7 +212,7 @@ int GameLoop::networkRun() {
 
 		SDL_Rect cursorRect = {cursorX, cursorY, CROSSHAIR_SIZE, CROSSHAIR_SIZE};
 
-		std::cout << "render" << std::endl;
+		// std::cout << "render" << std::endl;
 		// 3. Render
 		// Render everything
 		render->draw(lag_time / MS_PER_UPDATE);

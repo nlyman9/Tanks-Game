@@ -32,6 +32,9 @@ class Socket {
         bool isConnected;
         bool isListening;
 
+        // 
+        Packet HEAD = Packet(PackType::INIT);
+
     public:
         Socket(Protocol prot, std::string ip, int port) {
             type = prot;
@@ -173,6 +176,80 @@ class Socket {
             // Connected!
             isConnected = true;
             return true;
+        }
+
+        Packet* receive() {
+            assert(isConnected);
+
+            // Recieve from connection, add to buffer.
+            char headBuffer[HEAD.size()];
+            int num_bytes;
+
+            // Recieve initial header
+            if (type == Protocol::TCP) {
+                // Use tcp
+                num_bytes = recv(socket_fd, headBuffer, HEAD.size(), 0);
+                if (num_bytes == -1) {
+                    std::cerr << "CLIENT: read header error: " << strerror(errno) <<  std::endl;
+                }
+            } else {
+                // Use udp
+            }
+
+            if (num_bytes == 0) {
+                return nullptr;
+            }
+            // else 
+
+            // Grab the first two headers 
+            //   - There should always be a SIZE and TYPE header in that order
+            Header size_header = Header(headBuffer); 
+            std::cout << "THE HEADER IS " << size_header.data() << std::endl;
+            std::cout << "THE PACKET SIZE IS " << size_header.getValue() << std::endl;
+            std::cout << "THE HEADER SIZE IS " << size_header.size() << std::endl;
+            fflush(stdout);
+
+            Header type_header = Header(&headBuffer[size_header.size()+1]);
+            std::cout << "THE HEADER IS " << type_header.data() << std::endl;
+            std::cout << "THE VALUE IS " << type_header.getValue() << std::endl;
+            std::cout << "THE HEADER SIZE IS " << size_header.size() << std::endl;
+            
+            // Check to see if there is more data left
+            int packet_size_left = std::stoi(size_header.getValue()) - HEAD.size();
+            std::cout << "Packet size remaining is " << packet_size_left << std::endl;
+
+            // Check packet size is normal
+            if (packet_size_left < 0) {
+                std::cerr << "RECEIVE ERROR: Packet size remaining is negative" << std::endl;
+                return nullptr;
+            }
+
+            // Check if there is no remaining data in packet
+            if (packet_size_left == 0) {
+                // Packet is just headers
+                return new Packet(size_header, type_header);
+            }
+
+            // Get the rest of the data from the packet.
+            char dataBuffer[packet_size_left];
+            num_bytes = 0;
+            if (packet_size_left > 0) {
+                // Receive rest of data
+                if (type == Protocol::TCP) {
+                    // Use tcp
+                    num_bytes = recv(socket_fd, dataBuffer, packet_size_left, 0);
+                    if (num_bytes == -1) {
+                        std::cerr << "CLIENT: read packet error: " << strerror(errno) <<  std::endl;
+                    }
+                } else {
+                    // Use udp
+                }
+            }
+
+            std::cout << "Bytes received  " << num_bytes << std::endl;
+            // This buffer should just be the data segments of the packet
+            return new Packet(size_header, type_header, dataBuffer, packet_size_left);
+            
         }
         
         int fd() {

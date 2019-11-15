@@ -22,6 +22,7 @@ std::vector<char> packedMap;
 class Server {
     public:
         ServerConnection *host;
+        bool gameOn;
 
         Server(std::string ip, int port) {
             host = new ServerConnection(ip, port);
@@ -85,7 +86,6 @@ fd_set client_fds;
 int fdmax;          // maximum file descriptor number
 int nbytes;
 socklen_t addr_len;
-bool gameOn;
 //server buffers
 // //buffer received
 // static std::vector<char>* rBuffer;
