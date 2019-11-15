@@ -162,7 +162,7 @@ int GameLoop::networkRun() {
 			const Uint8 *keystate = SDL_GetKeyboardState(nullptr);
 			player->getEvent(elapsed_time, &e, keystate);
 			temp += 1;
-			if (temp > 1000) {
+			if (temp > 100) {
 				client->addKeyFrame(keystate);
 				temp = 0;
 			}

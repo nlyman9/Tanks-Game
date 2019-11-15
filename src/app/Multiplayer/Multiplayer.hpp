@@ -12,7 +12,7 @@ class ServerConnection {
     private:
         Socket *listener, *listener_tcp, *listener_udp;
         std::vector<Socket*> clients;
-        std::vector<Packet*> recvBuffer;
+        std::vector<std::vector<Packet *> *> recvBuffer;
         std::vector<Packet*> sendBuffer;
         const int MAX_PLAYERS = 10;
     
@@ -53,19 +53,25 @@ class ServerConnection {
                 std::cerr << "Failed to accept client connection" << std::endl;
                 return false;
             } else {
+                // Add client
                 clients.push_back(client);
+                
+                // Add a recvBuffer for client
+                recvBuffer.push_back(new std::vector<Packet *>);
                 std::cout << "New client: " << client->ip() << " on port " << client->port() << std::endl;
                 return true;
             }
         }
 
         // TODO get client ID from packet
-        Packet* getPacket() {
-            if (recvBuffer.size() == 0) 
+        Packet* getPacket(int id) {
+            assert(id <  numClients());
+
+            if (recvBuffer.at(id)->size() == 0) 
                 return nullptr;
 
-            Packet *mail = recvBuffer.at(0);
-            recvBuffer.erase(recvBuffer.begin());
+            Packet *mail = recvBuffer.at(id)->at(0);
+            recvBuffer.at(id)->erase(recvBuffer.at(0)->begin());
 
             return mail;
         }
@@ -79,7 +85,7 @@ class ServerConnection {
         // TODO Find a way to identify the client
         void receiveFrom(int id) {
             assert(listener->isOnline());
-            assert(id < clients.size());
+            assert(id < numClients());
 
             // Recieve data from a client
             Packet *mail = clients.at(id)->receive();
@@ -89,7 +95,7 @@ class ServerConnection {
             fflush(stdout);
 
             if (mail != nullptr) {
-                recvBuffer.push_back(mail);
+                recvBuffer.at(id)->push_back(mail);
             }
             else {
                 std::cout << "SERVER: NO VALID DATA" << std::endl;
