@@ -89,6 +89,10 @@ class Client {
       server->addPacket(mail);
     }
 
+    bool send() {
+      return server->sendPacket();
+    }
+
     bool pollMap() {
       return mapReceived;
     }

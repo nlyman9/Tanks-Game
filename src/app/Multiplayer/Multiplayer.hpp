@@ -81,11 +81,20 @@ class ServerConnection {
             assert(listener->isOnline());
             assert(id < clients.size());
 
+            std::cout << "SERVER: Receiving data...." << std::endl;
+            fflush(stdout);
+
             // Recieve data from a client
             Packet *mail = clients.at(id)->receive();
 
+            std::cout << "SERVER: RECEIVED DATA" << std::endl;
+            fflush(stdout);
+
             if (mail != nullptr)
                 recvBuffer.push_back(mail);
+            else {
+                std::cout << "SERVER: NO VALID DATA" << std::endl;
+            }
         }
 
         bool sendTo(int id) {
@@ -195,18 +204,21 @@ class ClientConnection {
             recvBuffer.push_back(mail);
         }
 
-        bool send() {
+        bool sendPacket() {
             assert(server->isOnline());
 
             // Check if we have something to send.
             if (sendBuffer.size() == 0) {
+                std::cout << "NO DATA?? " << std::endl;
                 return false; // NO DATA TO SEND!?
             }
-
+            
             // Send first packet in vector to server
             auto mail = sendBuffer.at(0);
             sendBuffer.erase(sendBuffer.begin());
+            server->sendSocket(mail);
 
+            free(mail);
             return true;
         }
 

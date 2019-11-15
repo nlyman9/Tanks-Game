@@ -58,7 +58,8 @@ class Packet {
             for (int i = 0; i < data_size; i++) {
                 datas.push_back((char) data[i]);
             }
-            std::cout << "Appended data = " << std::string(datas.data(), datas.size()) << std::endl;
+            std::cout << "Appended data = " << std::endl;
+            this->printData();
             
         }
 

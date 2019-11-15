@@ -168,7 +168,7 @@ int serverProcess() {
 
     // Game Loop
     while (server->gameOn) {
-        std::cout << "SERVER: GAME" << std::endl;
+        std::cout << "SERVER: GAME - " << server->numClients() << std::endl;
         fflush(stdout);
         // Get data from client
         Packet *mail = server->receiveFrom(0);

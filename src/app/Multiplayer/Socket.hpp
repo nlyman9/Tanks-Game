@@ -135,7 +135,7 @@ class Socket {
             inet_ntop(incomingConnection.ss_family, Socket::get_in_addr((struct sockaddr *)&incomingConnection), clientIP, sizeof(clientIP));
 
             Socket *client = new Socket(Protocol::TCP, std::string(clientIP), std::atoi(remoteIP.data()));
-            client->socket_fd = clientFD;
+            client->setFD(clientFD);
 
             isConnected = true;
 
@@ -198,6 +198,9 @@ class Socket {
             char headBuffer[HEAD.size()];
             int num_bytes;
 
+            std::cout << "Receiving from " << socket_fd << std::endl;
+            fflush(stdout);
+
             // Recieve initial header
             if (type == Protocol::TCP) {
                 // Use tcp
@@ -254,6 +257,11 @@ class Socket {
             // This buffer should just be the data segments of the packet
             return new Packet(size_header, type_header, dataBuffer, packet_size_left);
             
+        }
+
+        void setFD(int fd) {
+            this->socket_fd = fd;
+            std::cout << "client fd = " << this->socket_fd << std::endl;
         }
         
         int fd() {
