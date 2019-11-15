@@ -148,7 +148,7 @@ int serverProcess() {
 
 
     // First wait for 2 clients
-    while (server->numClients() < 1) {
+    while (server->numClients() < 2) {
         if (server->accept()) {
             std::cout << "Server: New client connection accepted" << std::endl;
         }
@@ -160,7 +160,7 @@ int serverProcess() {
     // Send map! 
     std::cout << "Server: Preparing to send map!" << std::endl;
     Packet *mapPacket = new Packet(PackType::MAP);
-    std::cout << "MAp size is " << packedMap.size() << std::endl;
+    std::cout << "Map size is " << packedMap.size() << std::endl;
     mapPacket->appendData(packedMap);
 
     server->broadcast(mapPacket);

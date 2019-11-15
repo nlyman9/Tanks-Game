@@ -59,8 +59,12 @@ class ServerConnection {
             }
         }
 
-        void recv() {
-            // Recieve data from a client
+        // TODO get client ID from packet
+        Packet* getPacket() {
+            Packet *mail = sendBuffer.at(0);
+            sendBuffer.erase(sendBuffer.begin());
+
+            return mail;
         }
 
         int addPacket(Packet *p) {
@@ -69,7 +73,14 @@ class ServerConnection {
             return index;
         }
 
-        bool sendTo(int index) {
+        // TODO Find a way to identify the client
+        void receiveFrom(int id) {
+            assert(id < clients.size());
+            // Recieve data from a client
+            Packet *mail = clients.at(id)->receive();
+        }
+
+        bool sendTo(int id) {
             // Send to specific client
             size_t num_bytes_sent;
 
@@ -79,13 +90,17 @@ class ServerConnection {
                 Packet *mail = sendBuffer.at(0);
                 sendBuffer.erase(sendBuffer.begin());
                 
-                num_bytes_sent = clients.at(index)->sendSocket(mail);
+                num_bytes_sent = clients.at(id)->sendSocket(mail);
             }
         }
 
-        void broadcast() {
+        bool broadcast() {
             // Send to all clients 
             std::cout << "Broadcasting to clients..." << std::endl;
+
+            if (sendBuffer.size() == 0) {
+                return false;
+            }
 
             size_t num_bytes_sent;
             Packet *mail = sendBuffer.at(0);
@@ -97,6 +112,9 @@ class ServerConnection {
 
             std::cout << "Broadcasted to clients!" << std::endl;
 
+            // Free packet we are done with it!
+            free(mail);
+            return true;
         }
 
         int numClients() {
@@ -150,11 +168,6 @@ class ClientConnection {
             }
         }
 
-        bool receive() {
-            Packet *mail = server->receive();
-            recvBuffer.push_back(mail);
-        }
-
         Packet* getPacket() {
             if (recvBuffer.size() == 0) {
                 return nullptr;
@@ -165,7 +178,15 @@ class ClientConnection {
             }
         }
 
-        
+        void addPacket(Packet *p) {
+            sendBuffer.push_back(p);
+        }
+
+        void receive() {
+            Packet *mail = server->receive();
+            recvBuffer.push_back(mail);
+        }
+
         bool send() {
             assert(server->isOnline());
 
@@ -179,10 +200,6 @@ class ClientConnection {
             sendBuffer.erase(sendBuffer.begin());
 
             return true;
-        }
-
-        void addPacketToSend(Packet *p) {
-            sendBuffer.push_back(p);
         }
 
         bool isConnected() {

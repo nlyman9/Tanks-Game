@@ -26,7 +26,6 @@ class Header {
         Header(std::string head, std::string val) {
             header = head;
             value = val;
-            std::cout << "HEADER: " << header << " VALUE " << value << std::endl;
         };
 
         Header(std::string header) {

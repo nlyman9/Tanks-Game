@@ -25,6 +25,7 @@ enum class PackType {
     NUM_TYPES   // 5
 };
 
+// TODO we need a way to identify users on UDP connection
 class Packet {
     private:
         std::vector<Header> headers;

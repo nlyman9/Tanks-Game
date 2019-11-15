@@ -183,7 +183,6 @@ class Socket {
         int sendSocket(Packet *p) {
             int num_bytes_sent = send(socket_fd, p->data(), p->size(), 0);
             std::cout << "Sent packet of size: " << p->size() << std::endl;
-            free(p);
     
             return num_bytes_sent;
         }
