@@ -303,7 +303,6 @@ class ClientConnection {
 
             // Check if we have something to send.
             if (sendBuffer.size() == 0) {
-                std::cout << "NO DATA?? " << std::endl;
                 return false; // NO DATA TO SEND!?
             }
 

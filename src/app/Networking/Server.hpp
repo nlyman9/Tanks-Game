@@ -46,7 +46,7 @@ class Server {
             }
         }
 
-        int pollClients() {
+        int pollClientsAndReceive() {
             // Poll clients for messages
             std::vector<int> *pendingClients = host->pollClients();
 

@@ -72,12 +72,13 @@ int Client::clientThread(void* data) {
 
         sleep(1);
     }
-
+    const struct timespec timeout = {0, ((long) 1e+9 / 30)};
     while (true) {
-        std::cout << "Client-Network: Loop" << std::endl;
+        // std::cout << "Client-Network: Loop" << std::endl;
         // Check if we have anything to send
         if (client->send()) {
             std::cout << "CLIENT-NET: Sent packet!"<< std::endl;
+            fflush(stdout);
         }
 
         // NON BLOCKING RECEIVE?
@@ -87,7 +88,8 @@ int Client::clientThread(void* data) {
 
         // }
 
-        sleep(1);
+        
+        nanosleep(&timeout, NULL);
     }
 
     return -1;

@@ -172,7 +172,8 @@ int serverProcess() {
         fflush(stdout);
 
         // Poll clients for pending messages 
-        int pendingClients = server->pollClients();
+        // This function calls receive! Do not call again unless you have a specific reason
+        int pendingClients = server->pollClientsAndReceive();
 
         //Get packages from clients
         Packet *mail;

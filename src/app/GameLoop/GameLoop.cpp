@@ -131,7 +131,7 @@ int GameLoop::networkRun() {
 	int temp = 0;
 	//wait for both players to connect
 	while(!client->startGame) {
-		sleep(0.1); 
+		sleep(1); 
 	} 
 
 	const Uint8 *keystate;
