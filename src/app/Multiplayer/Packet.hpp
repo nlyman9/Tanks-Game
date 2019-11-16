@@ -39,13 +39,16 @@ class Packet {
          * @brief Construct a new Packet object
          *  - Each packet requires two heades, 
          *      1. A size header (which should always be first)
-         *      2. A type header (which should always be seconn)
+         *          + The size header only supports 8 digits (characters), so the size of the packet must fit in 8 digits.
+         *          + Thats like 100 MB? 
+         *      2. A type header (which should always be seconn)   
+         *          + It is based off the enum PackType, so parse with PackType
          * 
          * @param type - The type of packet defined by the PackType enum
          */
         Packet(PackType type)
         {   
-            // The header for size is the first header.
+            // The header for size is the first header. The size must fit in 8 digits long
             Header packet_size = Header("SIZE", "00000000");
             headers.push_back(packet_size);
 
@@ -132,7 +135,7 @@ class Packet {
             // Make sure the header is the size header
             assert(packet_size.getType().compare("SIZE") == 0);
 
-            // Assert that the size of the packet fits into 8 bits long 
+            // Assert that the size of the packet fits into 8 digits (characters) long 
             std::string temp_size = std::to_string(this->size());
             assert(temp_size.size() <= 8);
 
@@ -177,7 +180,9 @@ class Packet {
         /**
          * @brief Get the the type of the packet
          *  - Returns the 2nd header in the packet.
-         * @return int 
+         *  @see the constructor to see how Packets should be formatted 
+         * 
+         * @return int - The type of the packet -> Parse using PackType
          */
         int getType() {
             return atoi(headers.at(1).getValue().c_str());
