@@ -403,29 +403,44 @@ int GameLoop::runSinglePlayer()
 			player->getEvent(elapsed_time, &e);
 
 			//The player fired a bullet
-			if (player->getFire() == true) {
+			if(player->getFire() == true) {
 
 				projectiles.push_back(new Projectile(player->getX() + TANK_WIDTH/4, player->getY() + TANK_HEIGHT/4, player->getTurretTheta()));
-
 				std::cout << projectiles.back()->getX() << ", " << projectiles.back()->getY() << "; " << projectiles.back()->getTheta() << std::endl;
 
+				projectiles.back()->setFriendly(true);
 				// render->gProjectiles.push_back(projectiles.back());
 				render->setProjectiles(projectiles);
-				projectiles.back()->setSprite(shell);
+				projectiles.back()->setSprite(bullet);
 				//newlyFired->setSprite(bullet);
 				projectiles.back()->setObstacleLocations(&projectileObstacles);
+				
+				for(auto enemy : enemies) {
+					projectiles.back()->addTargetLocation(enemy->get_box());
+				}
+				
 				player->setFire(false);
+				
+				 std::vector<SDL_Rect> targets = projectiles.back()->targets;
+				for(auto target : targets){
+						std::cout << target.x << ":" << target.y << "\n";
+				}
 			}
 		}
 
 		for(auto enemy : enemies) {
 			if(enemy->getFire() == true){
 				projectiles.push_back(new Projectile(enemy->getX() + TANK_WIDTH/4, enemy->getY() + TANK_HEIGHT/4, enemy->getTurretTheta()));
-
+				projectiles.back()->setFriendly(false);
 				// render->gProjectiles.push_back(projectiles.back());
 				render->setProjectiles(projectiles);
 				projectiles.back()->setSprite(shell);
 				projectiles.back()->setObstacleLocations(&projectileObstacles);
+				
+				for(auto player : players) {
+					projectiles.back()->addTargetLocation(player->get_box());
+				}
+				
 				enemy->setFire(false);
 			}
 		}
@@ -433,15 +448,31 @@ int GameLoop::runSinglePlayer()
  		// 2. Update
 		// Update if time since last update is >= MS_PER_UPDATE
 		while(lag_time >= MS_PER_UPDATE) {
+			//update players
 			for(auto player : players) {
 				player->update();
 			}
 
-			for (auto enemy: enemies) {
+			//update enemies
+			for (auto enemy : enemies) {
 				enemy->update();
 			}
 
+			//update projectiles
 			for (int i = 0; i < projectiles.size(); i++) {
+				//reset projectile targets
+				projectiles.at(i)->clearTargets();
+				if(projectiles.at(i)->getFriendly() == true) {
+					for(auto enemy : enemies) {
+						projectiles.at(i)->addTargetLocation(enemy->get_box());
+					}
+				}
+				else {
+					for(auto player : players) {
+						projectiles.at(i)->addTargetLocation(player->get_box());
+					}
+				}
+				
 				//update projectile
 				projectiles.at(i)->update();
 				//check if the projectile needs to be deleted

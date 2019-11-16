@@ -1,8 +1,6 @@
 #include <chrono>
 #include "Projectile.hpp"
-//#include "Enemy.hpp"
 #include "Constants.hpp"
-
 
 Projectile::Projectile(Sprite *sprite, float x, float y) {
     setSprite(sprite);
@@ -101,9 +99,14 @@ void Projectile::update() {
 		SDL_Rect* overlap;
 		SDL_Rect currentPos = {(int)getX(),(int) getY(), PROJECTILE_WIDTH, PROJECTILE_HEIGHT};
 
+		for(auto target : targets) {
+			overlap = check_collision(&currentPos, &target);
+			if (overlap != nullptr) {
+				exploding = true;
+			}
+		}
 	
 		for(auto obstacle : obstacles) {
-
 			overlap = check_collision(&currentPos, &obstacle);
 			if(overlap != nullptr) {
 
@@ -243,6 +246,23 @@ int Projectile::getTheta() {
 	return theta;
 }
 
+bool Projectile::getFriendly() {
+	return friendly;
+}
+
+bool Projectile::setFriendly(bool a) {
+	friendly = a;
+	return friendly;
+}
+
+void Projectile::clearTargets() {
+	targets.clear();
+}
+
 BoundingBox* Projectile::getBoundingBox() {
 	return new BoundingBox();
+}
+
+void Projectile::addTargetLocation(SDL_Rect* targetLoc) {
+	targets.push_back(*targetLoc);
 }

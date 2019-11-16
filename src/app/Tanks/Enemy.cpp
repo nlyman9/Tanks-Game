@@ -17,7 +17,8 @@ Enemy::Enemy(Sprite* sprite, Sprite* turret, int x, int y, Player* player){
   * @brief smaller constructor for making an enemY
   */
 Enemy::Enemy(float x, float y, Player* player) : x_enemy_pos{x}, y_enemy_pos{y} {
-  gPlayer = player;
+	setPos(x, y);
+	gPlayer = player;
 }
 
 Enemy::~Enemy() {}
