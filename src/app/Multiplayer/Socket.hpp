@@ -22,6 +22,17 @@ enum class Protocol {
     TCP
 };
 
+/**
+ * @brief This is an abstraction of the TCP and UDP connections for client-server connectionns
+ * Each socket has to have a type, a remoteIP and Port.
+ * - Then they should have a filedescriptor added later to be useable
+ * 
+ * @see the HEAD Packet below, the Socket assumes this is hwo the data will be formatted for receiving
+ * 
+ * @see Multiplayer.hpp::ServerConnection
+ *  Sockets are also used to keep track of the current client connections
+ * 
+ */
 class Socket {
     private:
         Protocol type;
@@ -29,14 +40,28 @@ class Socket {
         std::string remotePort;
         int socket_fd;
 
+        // Used for assertions to prevent doing sends annd receive on a improperly set sockets
         // True after connecSocket() or bind()
         bool isConnected;
         bool isListening;
+        bool isReceiving;
 
-        // Every packet should follow the structure of the HEAD packet
+        /**
+         * @brief Every packet should have this basic underlying structure.
+         *  - Two headers:  A size-header and a type-header (in that order)
+         * 
+         * @see constructor of Packet
+         */
         Packet HEAD = Packet(PackType::INIT);
 
     public:
+        /**
+         * @brief Construct a new Socket
+         * 
+         * @param prot  - The protocol type you want to use for the socket (UDP/TCP)
+         * @param ip    - The IP you want to connnect to 
+         * @param port  - The port you want to use to connect
+         */
         Socket(Protocol prot, std::string ip, int port) {
             type = prot;
             remoteIP = ip;
@@ -102,10 +127,17 @@ class Socket {
             return true;
         }
 
-        bool listenSocket(int size) {
+        /**
+         * @brief - Sets the socket to start listening
+         * 
+         * @param queue_size - The max number of waiting connections that can wait in the listen queue
+         * @return true - We CAN listen on the socket
+         * @return false - We CANNOT listen on the socket 
+         */
+        bool listenSocket(int queue_size) {
             assert(type == Protocol::TCP);
 
-            if (listen(socket_fd, size) == -1) {
+            if (listen(socket_fd, queue_size) == -1) {
                 std::cerr << "ERROR: failed to listen: " << errno << std::endl;
                 return false;
             }
@@ -113,6 +145,11 @@ class Socket {
             return true;
         }
 
+        /**
+         * @brief Accept a connection from another socket
+         * 
+         * @return Socket* returns a socket object of the incoming connection if all goes well
+         */
         Socket* acceptSocket() {
             assert(type == Protocol::TCP);
             assert(isListening);
@@ -120,11 +157,13 @@ class Socket {
             struct sockaddr_storage incomingConnection;
             socklen_t incomingSize = sizeof(incomingConnection);
 
-            // Accept connection
+            // Wait to accept a incoming connection
+            //   Its okay to wait since we do this before the game starts
             std::cout << "Accepting... "<< std::endl;
             fflush(stdout);
             int clientFD = accept(socket_fd, (struct sockaddr *)&incomingConnection, &incomingSize);
 
+            // Check for invalid fd
             if (clientFD < 0) {
                 std::cerr << "ERROR: Unable to accept connection!" << std::endl;
                 return nullptr;
@@ -134,14 +173,24 @@ class Socket {
             char clientIP[INET_ADDRSTRLEN];
             inet_ntop(incomingConnection.ss_family, Socket::get_in_addr((struct sockaddr *)&incomingConnection), clientIP, sizeof(clientIP));
 
+            // Create socket connection of the accepted connection
             Socket *client = new Socket(Protocol::TCP, std::string(clientIP), std::atoi(remoteIP.data()));
             client->setFD(clientFD);
-
-            isConnected = true;
+            client->setReceiving(true);
 
             return client;
         }
 
+        void setReceiving(bool b) {
+            this->isReceiving = b;
+        }
+
+        /**
+         * @brief Connect to the remote destination defined in the socket
+         * 
+         * @return true - We connected Successfully
+         * @return false - We failed to connnect
+         */
         bool connectSocket() {
             // We should only connect each socket once.
             assert(!isConnected);
@@ -167,18 +216,17 @@ class Socket {
 
             // Create socket with remote destination
             socket_fd = socket(serverInfo->ai_family, serverInfo->ai_socktype, serverInfo->ai_protocol);
-
+            
+            // TODO figure out if we need blocking or not
             // Set socket to non-blocking
             // int flags = fcntl(socket_fd, F_GETFL);
             // fcntl(socket_fd, F_SETFL, flags | O_NONBLOCK);
 
             // Connect to remote destination
             if (connect(socket_fd, serverInfo->ai_addr, serverInfo->ai_addrlen) < 0) {
-                std::cout << "Socket: Waiting for connection..." << std::endl;
+                std::cout << "Socket: Failed to connect." << std::endl;
                 return false;
             }
-            std::cout << "CLIENT Socket: Connected ip: " << remoteIP << " Port: " << remotePort << std::endl;
-
             freeaddrinfo(serverInfo);
 
             // Connected!
@@ -186,14 +234,33 @@ class Socket {
             return true;
         }
 
+        /**
+         * @brief Send a packet through the socket connection
+         * 
+         * @param p - The packet of data we want to send
+         * @return int - the nmber of bytes we sent
+         */
+        // TODO Change so this function handles if we sent all of the data or not
         int sendSocket(Packet *p) {
+            assert(isConnected | isReceiving);
+
             int num_bytes_sent = send(socket_fd, p->data(), p->size(), 0);
             std::cout << "Sent packet of size: " << p->size() << std::endl;
     
             return num_bytes_sent;
         }
 
+        /**
+         * @brief Receives a packet from the socket connection
+         *  - It receives the raw data and then formats it into a packet
+         * 
+         * @see Packet constructor so see the expected setup for a packet
+         * 
+         * @return Packet* - The data we received 
+         */
         Packet* receive() {
+            assert(isReceiving);
+
             // Recieve HEAD from connection, add to buffer.
             char headBuffer[HEAD.size()];
             int num_bytes;
@@ -246,38 +313,71 @@ class Socket {
                         std::cerr << "CLIENT: read packet error: " << strerror(errno) <<  std::endl;
                     }
                 } else {
-                    // Use udp
+                    // TODO Use udp
                 }
             }
 
+            // For debugging
             std::cout << "Bytes received  " << num_bytes << std::endl;
+
             // This buffer should just be the data segments of the packet
             return new Packet(size_header, type_header, dataBuffer, packet_size_left);
-            
         }
 
+        /**
+         * @brief Set the filedescriptor of the socket connection
+         * 
+         * @param fd 
+         */
         void setFD(int fd) {
             this->socket_fd = fd;
             std::cout << "client fd = " << this->socket_fd << std::endl;
         }
         
+        /**
+         * @brief Get the filedescriptor of the socket 
+         * 
+         * @return int - the filedescriptor
+         */
         int fd() {
             return socket_fd;
         }
 
+        /**
+         * @brief Get the IP of the socket connection
+         * 
+         * @return std::string - the remoteIP
+         */
         std::string ip() {
             return remoteIP;
         }
 
+        /**
+         * @brief Get the port of the socket
+         * 
+         * @return std::string - the port
+         */
         std::string port() {
             return remotePort;
         }
 
+        /**
+         * @brief Return if the socket has succesfully binded/connected or not
+         * 
+         * @return true 
+         * @return false 
+         */
         bool isOnline() {
             return isConnected;
         }
 
-        // get sockaddr, IPv4 or IPv6:
+        /**
+         * @brief Gets the sockaddr struct in IPv4 or IPv6 
+         *  The game only assumes IPv4
+         * 
+         * @param sa 
+         * @return void* - the sockaddr
+         */
         void *get_in_addr(struct sockaddr *sa)
         {
             if (sa->sa_family == AF_INET) {
