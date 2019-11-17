@@ -38,7 +38,7 @@ int Client::clientThread(void* data) {
     // Wait for map
     while(true) {
         std::cout << "Client-Network: Waiting for map" << std::endl;
-        Packet *mail = client->receive();
+        Packet *mail = client->receiveAndGet();
         if (mail != nullptr) {
             if (mail->getType() == PackType::MAP) {
                 std::cout << "Client: Loading map... " << mail->data() << std::endl;
@@ -78,7 +78,7 @@ int Client::clientThread(void* data) {
         }
 
         // Receive data from server 
-        Packet *mail = client->receive();
+        Packet *mail = client->receiveAndGet();
         if (mail != nullptr) {
             std::cout << "CLIENT-NET: Received packet type " << (int)mail->getType() << " -> ";
             mail->printData();

@@ -44,6 +44,10 @@ class Client {
     std::vector<int> gameMap;
     bool mapReceived;
 
+    // Game Player
+    std::vector<Uint8 *> playerKeystates;
+    // Game state vector?
+
     // Game 
     bool gameOn;
     bool startGame;
@@ -73,12 +77,16 @@ class Client {
       return server->setSocketTimeout(tickrate);
     }
 
-    Packet* receive() {
+    Packet* receiveAndGet() {
       server->receive();
       return server->getPacket();
     }
 
-    void addKeyFrame(const Uint8 *keystates) {
+    const Uint8* getKeyState(int id) {
+      return (const Uint8*) playerKeystates[id];
+    }
+
+    void addKeyState(const Uint8 *keystates) {
       Packet *mail = new Packet(PackType::KEYSTATE);
       std::vector<char> charKeyStates;
 

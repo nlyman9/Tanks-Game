@@ -218,7 +218,7 @@ int GameLoop::networkRun() {
 			// Basically add a keyframe every ~60 updates
 			temp += 1;
 			if (temp > 60 && keystate != nullptr) {
-				client->addKeyFrame(keystate);
+				client->addKeyState(keystate);
 				keystate = nullptr; //only need to send one per update loop
 				temp = 0;
 			}
