@@ -65,7 +65,8 @@ int Client::clientThread(void* data) {
     }
 
     // const struct timespec timeout = {1, 0};//((long) 1e+9 / 30)};
-    client->setSocketTickrate(10);
+    // TODO Consolidate tickrates
+    client->setSocketTickrate(30);
     while (true) {
         // std::cout << "Client-Network: Loop" << std::endl;
         // Check if we have anything to send

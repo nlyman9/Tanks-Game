@@ -220,9 +220,10 @@ int GameLoop::networkRun() {
 				player->update();
 			}
 
-			// Basically add a keyframe every ~60 updates
+			// Basically add a keyframe every ~2 updates -> 30 times a second
 			temp += 1;
-			if (temp > 60 && keystate != nullptr) {
+			// TODO Consolidate tickrates
+			if (temp > 2 && keystate != nullptr) {
 				printf("Keystate of w = %d \n", keyStatePacket[SDL_SCANCODE_W]);
 				fflush(stdout);
 				client->addLocalKeyState(keystate);

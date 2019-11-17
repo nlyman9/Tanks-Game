@@ -121,12 +121,14 @@ class ServerController {
         // Timeout / Rate the server will run at
         const int TICKS_PER_SECOND = 30;
         const long NANO_PER_SECOND = 1e+9;
+        const long MICRO_PER_SECOND = 1e+6;
 
         // Set timeout based on constants
         // Nanoseconds per tick = NANO_PER_SECOND / TICKS_PER_SECOND
+        // TODO Consolidate tickrates
         const struct timespec poll_timeout {
-            1,                                 // tv_sec
-            0//NANO_PER_SECOND / TICKS_PER_SECOND // tv_nsec 
+            0,                                 // tv_sec
+            MICRO_PER_SECOND / TICKS_PER_SECOND // tv_nsec 
         };
     
     public:
