@@ -69,6 +69,10 @@ class Client {
       return server->isConnected();
     }
 
+    void setSocketTimeout(int tickrate) { 
+      return server->setSocketTimeout(tickrate);
+    }
+
     Packet* receive() {
       server->receive();
       return server->getPacket();

@@ -65,22 +65,29 @@ int Client::clientThread(void* data) {
     }
 
     const struct timespec timeout = {1, 0};//((long) 1e+9 / 30)};
+    client->setSocketTimeout(10);
     while (true) {
         // std::cout << "Client-Network: Loop" << std::endl;
         // Check if we have anything to send
         if (client->send()) {
-            std::cout << "CLIENT-NET: Sent packet!"<< std::endl;
-            fflush(stdout);
+            // std::cout << "CLIENT-NET: Sent packet!"<< std::endl;
+            // fflush(stdout);
         } else {
-            std::cout << "CLIENT-NET: Nothing to send!" << std::endl;
-            fflush(stdout);
+            // std::cout << "CLIENT-NET: Nothing to send!" << std::endl;
+            // fflush(stdout);
         }
 
-        
-        if (nanosleep(&timeout, NULL) != 0) {
-            std::cerr << "Error sleeping " << errno << std::endl;
-            fflush(stdout);
+        // Receive data from server 
+        Packet *mail = client->receive();
+        if (mail != nullptr) {
+            std::cout << "CLIENT-NET: Received packet type " << (int)mail->getType() << " -> ";
+            mail->printData();
         }
+
+        // if (nanosleep(&timeout, NULL) != 0) {
+        //     std::cerr << "Error sleeping " << errno << std::endl;
+        //     fflush(stdout);
+        // }
 
     }
 
