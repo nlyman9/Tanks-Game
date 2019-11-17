@@ -85,6 +85,7 @@ class Client {
       mail->appendData(charKeyStates);
       std::cout << "Sending keystate - ";
       mail->printData();
+      fflush(stdout);
       
       server->addPacket(mail);
     }
@@ -98,10 +99,6 @@ class Client {
     }
 
     static int clientThread(void *data);
-    // void getGameBufferReady(bool flag);
-
-    // std::vector<char>* getFillBuffer();
-    // Uint8* pollKeystate();
 
   private:
 };
