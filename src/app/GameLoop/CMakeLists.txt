@@ -1,7 +1,9 @@
 add_library(GameLoop
   STATIC
-  GameLoop.hpp
-  GameLoop.cpp
+  LocalGameLoop.hpp
+  LocalGameLoop.cpp
+  OnlineGameLoop.hpp
+  OnlineGameLoop.cpp
 )
 
 target_link_libraries(GameLoop
@@ -15,6 +17,7 @@ target_link_libraries(GameLoop
   Projectile
   Networking
   Multiplayer
+  Args
 )
 
 target_include_directories(GameLoop
