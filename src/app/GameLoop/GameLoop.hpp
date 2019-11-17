@@ -36,6 +36,7 @@ class GameLoop {
     Render *render;
     std::vector<Enemy *> enemies;
     std::vector<Player *> players;
+    std::vector<Player *> playerEnemies;
 		std::vector<Projectile *> projectiles;
     bool isGameOn;
     Client* client;

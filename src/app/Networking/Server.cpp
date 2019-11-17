@@ -148,7 +148,7 @@ int serverProcess() {
 
 
     // First wait for 2 clients
-    while (server->numClients() < 2) {
+    while (server->numClients() < 1) {
         if (server->accept()) {
             std::cout << "Server: New client connection accepted" << std::endl;
         }
@@ -207,7 +207,7 @@ int serverProcess() {
 
         // Share data with clients - send data from buffer
         for (auto client : server->clients()) {
-            std::cout << "SERVER: ";
+            std::cout << "SERVER: TO " << client->id() << ": ";
             client->sendFromBuffer();
         }
 

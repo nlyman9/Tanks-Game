@@ -6,6 +6,7 @@
 #include <iostream>
 #include <SDL2/SDL_thread.h>
 #include <signal.h>
+#include <assert.h>
 
 #include "GameLoop.hpp"
 #include "Constants.hpp"
@@ -47,16 +48,18 @@ bool GameLoop::networkInit(Args *options) {
 			std::cout << "Created server process " << server_pid << std::endl;
 		}
 	}
-
+	
+	// Assuming there are two players, create a second player 
 	// Player* player2 = new Player(SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, false);
 	// Sprite* player_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
-	// Sprite* player_turrent = new Sprite(render->getRenderer(), "src/res/images/red_turret.png");
+	// Sprite* player_turret = new Sprite(render->getRenderer(), "src/res/images/red_turret.png");
 	// player_tank->init();
-	// player_turrent->init();
+	// player_turret->init();
 	// player2->setSprite(player_tank);
-	// player2->setTurretSprite(player_turrent);
-	// players.push_back(player2);
+	// player2->setTurretSprite(player_turret);
+	// playerEnemies.push_back(player2);
 	render->setPlayer(players);
+	// render->setPlayerEnemies(playerEnemies);
 	// Create client process
 	client = new Client(options->ip, options->port);
 	// Init
@@ -155,7 +158,7 @@ int GameLoop::networkRun() {
 			}
 		}
 
-		int i = 0;
+		assert(players.size() == 1);
 		for(auto player : players) {
 			// Send same keystate to player object and to the client to send
 			// Lets just support 10 keys at the same time
@@ -164,7 +167,7 @@ int GameLoop::networkRun() {
 			keystate = SDL_GetKeyboardState(nullptr);
 			player->getEvent(elapsed_time, &e, keystate);
 
-			// std::cout << "check fire " << player->getFire() << std::endl;
+			std::cout << "check fire " << player->getFire() << std::endl;
 
 			//network version of player firing bullet
 			if (player->getFire() == true) {
@@ -181,9 +184,16 @@ int GameLoop::networkRun() {
 				player->setFire(false);
 			}
 			fflush(stdout);
-			i++;
 		}
 
+		// Set inputs of enemy players over network
+		for(auto playerEnemy : playerEnemies) {
+			// Get the keystates from network
+			const Uint8 *KeyStatePacket = keystate;
+
+			// Apply keysates to the network player
+			playerEnemy->getEvent(elapsed_time, &e, KeyStatePacket);
+		}
 		// std::cout << "update" << std::endl;
 		// 2. Update
 		// Update if time since last update is >= MS_PER_UPDATE
@@ -200,9 +210,13 @@ int GameLoop::networkRun() {
 				temp = 0;
 			}
 
-			for (auto enemy: enemies) {
-				enemy->update();
+			for (auto playerEnemy : playerEnemies) {
+				playerEnemy->update();
 			}
+
+			// for (auto enemy: enemies) {
+			// 	enemy->update();
+			// }
 			for (auto projectile: projectiles) {
 				projectile->update();
 			}
@@ -219,7 +233,6 @@ int GameLoop::networkRun() {
 
 		SDL_Rect cursorRect = {cursorX, cursorY, CROSSHAIR_SIZE, CROSSHAIR_SIZE};
 
-		// std::cout << "render" << std::endl;
 		// 3. Render
 		// Render everything
 		render->draw(lag_time / MS_PER_UPDATE);

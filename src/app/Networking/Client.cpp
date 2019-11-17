@@ -64,7 +64,7 @@ int Client::clientThread(void* data) {
         sleep(1);
     }
 
-    const struct timespec timeout = {1, 0};//((long) 1e+9 / 30)};
+    // const struct timespec timeout = {1, 0};//((long) 1e+9 / 30)};
     client->setSocketTimeout(10);
     while (true) {
         // std::cout << "Client-Network: Loop" << std::endl;
