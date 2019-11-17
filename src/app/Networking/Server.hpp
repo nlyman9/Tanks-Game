@@ -21,11 +21,11 @@
 std::vector<char> packedMap;
 class Server {
     public:
-        ServerConnection *host;
+        ServerController *host;
         bool gameOn;
 
         Server(std::string ip, int port) {
-            host = new ServerConnection(ip, port);
+            host = new ServerController(ip, port);
             std::cout << " Created Server Object " << std::endl;
         }
 

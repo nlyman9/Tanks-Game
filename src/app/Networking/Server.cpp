@@ -199,6 +199,7 @@ int serverProcess() {
                     std::cout << "SERVER: No mail :(" << std::endl;
                     fflush(stdout);
                 }
+            }
         }
 
         // Share data with clients - send data 

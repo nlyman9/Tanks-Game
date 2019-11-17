@@ -38,7 +38,7 @@ class Client {
                                         (Uint8) SDL_MOUSEBUTTONDOWN }; 
   public:
     // Network
-    ClientConnection *server;
+    ClientController *server;
 
     // Game map
     std::vector<int> gameMap;
@@ -51,7 +51,7 @@ class Client {
     SDL_Thread* rcThread;
 
     Client(std::string ip, int port) {
-      server = new ClientConnection(ip, port);
+      server = new ClientController(ip, port);
     };
 
     ~Client() {

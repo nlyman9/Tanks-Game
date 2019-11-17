@@ -11,7 +11,15 @@
 #include "Packet.hpp"
 #include "Socket.hpp"
 
-class ServerConnection {
+class ClientCon {
+    Socket* clientSocket;
+    std::list<Packet *> recvBuffer;
+    std::list<Packet *> sendBuffer;
+
+
+};
+
+class ServerController {
     private:
         Socket *listener, *listener_tcp, *listener_udp;
         std::vector<Socket*> clients;
@@ -35,7 +43,7 @@ class ServerConnection {
         };
     
     public:
-        ServerConnection(std::string ip, int port) {
+        ServerController(std::string ip, int port) {
             // Create tcp socket
             listener_tcp = new Socket(Protocol::TCP, ip, port);
             listener_udp = new Socket(Protocol::UDP, ip, port+1);
@@ -77,8 +85,9 @@ class ServerConnection {
 
                 client->setID(clients.size()-1); // Set id to the index in the vector
                 
-                // Add a recvBuffer for client
+                // Add a recvBuffer and sendBuffer for client
                 recvBuffer.push_back(new std::list<Packet *>);
+                // sendBuffer.push_back(new std::list<Packet *>);
 
                 // Add client's File descriptor to set
                 FD_SET(client->fd(), &client_fds);
@@ -237,7 +246,7 @@ class ServerConnection {
 
 
 
-class ClientConnection {
+class ClientController {
     private:
         Socket *server, *server_tcp, *server_udp;
 
@@ -246,7 +255,7 @@ class ClientConnection {
         
         struct timeval* timeout;
     public:
-        ClientConnection(std::string ip, int port) {
+        ClientController(std::string ip, int port) {
             // Create tcp socket
             server_tcp = new Socket(Protocol::TCP, ip, port);
             server_udp = new Socket(Protocol::UDP, ip, port+1);
