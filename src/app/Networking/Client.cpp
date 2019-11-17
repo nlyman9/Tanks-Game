@@ -44,7 +44,7 @@ int Client::clientThread(void* data) {
                 std::cout << "Client: Loading map... " << mail->data() << std::endl;
                 
                 std::vector<int>* map = new std::vector<int>();
-                map = unpack(mail->getDatas(), map, 3);
+                map = unpack(mail->getBody(), map, 3);
 
                 for (int i = 0; i < map->size();i++){
                     client->gameMap.push_back(map->at(i));                 
@@ -65,7 +65,7 @@ int Client::clientThread(void* data) {
     }
 
     // const struct timespec timeout = {1, 0};//((long) 1e+9 / 30)};
-    client->setSocketTimeout(10);
+    client->setSocketTickrate(10);
     while (true) {
         // std::cout << "Client-Network: Loop" << std::endl;
         // Check if we have anything to send
@@ -82,6 +82,13 @@ int Client::clientThread(void* data) {
         if (mail != nullptr) {
             std::cout << "CLIENT-NET: Received packet type " << (int)mail->getType() << " -> ";
             mail->printData();
+            fflush(stdout);
+
+            // If keystate, unpack a load into formable keystate
+            // TODO not hardcode id to 0 
+            if (mail->getType() == PackType::KEYSTATE) {
+                client->addNetworkKeyState(0, mail->getBody());
+            }
         }
 
         // if (nanosleep(&timeout, NULL) != 0) {

@@ -148,7 +148,7 @@ int serverProcess() {
 
 
     // First wait for 2 clients
-    while (server->numClients() < 1) {
+    while (server->numClients() < 2) {
         if (server->accept()) {
             std::cout << "Server: New client connection accepted" << std::endl;
         }

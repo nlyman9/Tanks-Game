@@ -45,7 +45,7 @@ class Client {
     bool mapReceived;
 
     // Game Player
-    std::vector<Uint8 *> playerKeystates;
+    std::vector<Uint8*> playerKeystates;
     // Game state vector?
 
     // Game 
@@ -56,6 +56,9 @@ class Client {
 
     Client(std::string ip, int port) {
       server = new ClientController(ip, port);
+
+      Uint8 *player2Keystats = (Uint8 *) calloc(27, sizeof(Uint8));
+      playerKeystates.push_back(player2Keystats);
     };
 
     ~Client() {
@@ -73,7 +76,7 @@ class Client {
       return server->isConnected();
     }
 
-    void setSocketTimeout(int tickrate) { 
+    void setSocketTickrate(int tickrate) { 
       return server->setSocketTimeout(tickrate);
     }
 
@@ -83,10 +86,46 @@ class Client {
     }
 
     const Uint8* getKeyState(int id) {
-      return (const Uint8*) playerKeystates[id];
+      assert(id < playerKeystates.size());
+      if (playerKeystates.at(id) == nullptr) {
+        // No update from server 
+        std::cerr << "CLIENT-NET: No keystate for player " << id << "!!" << std::endl;
+        fflush(stdout);
+        return nullptr;
+      }
+      // std::cout << "Returning player " << id  << "'s keystates... " << std::endl;
+      return (const Uint8*) playerKeystates.at(id);
     }
 
-    void addKeyState(const Uint8 *keystates) {
+    void addNetworkKeyState(int id, std::vector<char> *charKeyStates) {
+      assert(id < playerKeystates.size());
+
+      std::cout << "Adding keystate from network (client " << id << ") - ";
+      fflush(stdout);
+
+      // This is a little hacky, but I am trying simulate SDL_getKeyboardState
+      Uint8 *keystate = playerKeystates.at(id);
+      // 27 is the max sdl scan code value we care about
+
+      printf("Keys : ");
+      for (int i = 0; i < keysToCheck.size() - 1; i++) {
+        printf(" %c ", charKeyStates->at(i));
+      }
+      printf("\n");
+      fflush(stdout);
+
+      for (int i = 0; i < keysToCheck.size() - 1; i++) {
+        keystate[keysToCheck[i]] = (Uint8) charKeyStates->at(i); 
+      }
+
+      printf("Keystate[W] = %d \n", keystate[SDL_SCANCODE_W]);
+			fflush(stdout);
+
+      
+      // playerKeystates.at(id) = keystate; should be using the same values
+    }
+
+    void addLocalKeyState(const Uint8 *keystates) {
       Packet *mail = new Packet(PackType::KEYSTATE);
       std::vector<char> charKeyStates;
 

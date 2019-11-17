@@ -152,6 +152,7 @@ int GameLoop::networkRun() {
 	} 
 
 	const Uint8 *keystate;
+	const Uint8 *keyStatePacket;
 	int temp = 0;
 	while (client->gameOn)
 	{
@@ -176,12 +177,9 @@ int GameLoop::networkRun() {
 		for(auto player : players) {
 			// Send same keystate to player object and to the client to send
 			// Lets just support 10 keys at the same time
-			// TODO Move scraping of player info to the update loop so it is deterministic
 			// TODO find a good rate to send player keystates
 			keystate = SDL_GetKeyboardState(nullptr);
 			player->getEvent(elapsed_time, &e, keystate);
-
-			std::cout << "check fire " << player->getFire() << std::endl;
 
 			//network version of player firing bullet
 			if (player->getFire() == true) {
@@ -202,10 +200,17 @@ int GameLoop::networkRun() {
 		// Set inputs of enemy players over network
 		for(auto playerEnemy : playerEnemies) {
 			// Get the keystates from network
-			const Uint8 *KeyStatePacket = keystate;
+			// std::cout << "Getting network player's keystates... " << std::endl;
+			// fflush(stdout);
+			keyStatePacket = client->getKeyState(0);
+
+			// std::cout << "Applying keystates from player..." << std::endl;
+			// fflush(stdout);
+
+			// std::cout << "Keystate " << keyStatePacket << std::endl;
 
 			// Apply keysates to the network player
-			playerEnemy->getEvent(elapsed_time, &e, KeyStatePacket);
+			playerEnemy->getEvent(elapsed_time, &e, keyStatePacket);
 		}
 		// std::cout << "update" << std::endl;
 		// 2. Update
@@ -218,7 +223,9 @@ int GameLoop::networkRun() {
 			// Basically add a keyframe every ~60 updates
 			temp += 1;
 			if (temp > 60 && keystate != nullptr) {
-				client->addKeyState(keystate);
+				printf("Keystate of w = %d \n", keyStatePacket[SDL_SCANCODE_W]);
+				fflush(stdout);
+				client->addLocalKeyState(keystate);
 				keystate = nullptr; //only need to send one per update loop
 				temp = 0;
 			}
