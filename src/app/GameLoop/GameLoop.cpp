@@ -50,15 +50,21 @@ bool GameLoop::networkInit(Args *options) {
 	}
 	
 	// Assuming there are two players, create a second player 
-	// Player* player2 = new Player(SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, false);
-	// Sprite* player_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
-	// Sprite* player_turret = new Sprite(render->getRenderer(), "src/res/images/red_turret.png");
-	// player_tank->init();
-	// player_turret->init();
-	// player2->setSprite(player_tank);
-	// player2->setTurretSprite(player_turret);
-	// playerEnemies.push_back(player2);
+	Player* player2 = new Player(SCREEN_WIDTH/2 + 100, 400, false);
+	playerEnemies.push_back(player2);
+
+	Sprite *player_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
+	player_tank->init();
+	player_tank->sheetSetup(30, 30, 3);
+	
+	Sprite *player_turret = new Sprite(render->getRenderer(), "src/res/images/blue_turret.png");
+	player_turret->init();
+	
+	player2->setSprite(player_tank);
+	player2->setTurretSprite(player_turret);
+
 	render->setPlayer(players);
+	render->setPlayerEnemies(playerEnemies);
 	// render->setPlayerEnemies(playerEnemies);
 	// Create client process
 	client = new Client(options->ip, options->port);
@@ -110,10 +116,10 @@ void GameLoop::initMapMultiPlayer() {
 		player->setObstacleLocations(&tileArray);
 	}
 
-	for (auto enemy : enemies) {
-		enemy->setObstacleLocations(&tileArray);
-		enemy->setTileMap(&map2D);
-	}
+	// for (auto enemy : enemies) {
+	// 	enemy->setObstacleLocations(&tileArray);
+	// 	enemy->setTileMap(&map2D);
+	// }
 
 	std::cout << "GAME: Set Player Obstacles" << std::endl;
 	fflush(stdout);
