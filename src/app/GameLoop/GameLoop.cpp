@@ -123,22 +123,29 @@ int GameLoop::networkRun() {
 	previous_time = std::chrono::system_clock::now(); // get current time of system
 	lag_time = 0.0;	// Set duration of time to 0
 
-	//Create bullet sprite
+	// Create bullet sprite
 	Sprite *bullet = new Sprite(render->getRenderer(), "src/res/images/bullet.png");
 	bullet->init();
-	//Create shell sprite
+
+	// Create shell sprite
 	Sprite *shell = new Sprite(render->getRenderer(), "src/res/images/shell.png");
 	shell->init();
-
+	
+	// Initialize cursor sprite
 	SDL_Texture* cursor = loadImage("src/res/images/cursor.png", render->getRenderer());
-	int temp = 0;
+	
+	// Setup bullet explosion animation
+	Sprite *pinksplosion =  new Sprite(render->getRenderer(), "src/res/images/pinksplosion.png");
+	pinksplosion->init();
+	pinksplosion->sheetSetup(42, 42, 6);
+
 	//wait for both players to connect
 	while(!client->startGame) {
 		sleep(1); 
 	} 
 
 	const Uint8 *keystate;
-
+	int temp = 0;
 	while (client->gameOn)
 	{
 		current_time = std::chrono::system_clock::now();
@@ -173,14 +180,15 @@ int GameLoop::networkRun() {
 			if (player->getFire() == true) {
 				//Projectile *newlyFired = new Projectile(player->getX(), player->getY());
 				//projectiles.push_back(newlyFired);
-				projectiles.push_back(new Projectile(player->getX(), player->getY(), player->getTurretTheta()));
+				projectiles.push_back(new Projectile(player->getX() + TANK_WIDTH/4, player->getY() + TANK_HEIGHT/4, player->getTurretTheta()));
 
 				std::cout << projectiles.back()->getX() << ", " << projectiles.back()->getY() << "; " << projectiles.back()->getTheta() << std::endl;
 
-				render->gProjectiles.push_back(projectiles.back());
+				// render->gProjectiles.push_back(projectiles.back());
+				render->setProjectiles(projectiles);
 				projectiles.back()->setSprite(shell);
 				//newlyFired->setSprite(bullet);
-				projectiles.back()->setObstacleLocations(&tileArray);
+				projectiles.back()->setObstacleLocations(&projectileObstacles);
 				player->setFire(false);
 			}
 			fflush(stdout);
@@ -217,8 +225,23 @@ int GameLoop::networkRun() {
 			// for (auto enemy: enemies) {
 			// 	enemy->update();
 			// }
-			for (auto projectile: projectiles) {
-				projectile->update();
+			for (int i = 0; i < projectiles.size(); i++) {
+				//update projectile
+				projectiles.at(i)->update();
+				//check if the projectile needs to be deleted
+				if(projectiles.at(i)->isExploding()){
+					//replace the projectile's image with the explosion
+					projectiles.at(i)->setSprite(pinksplosion);
+				}
+				else if(projectiles.at(i)->isFinished()){
+					projectiles.at(i)->~Projectile();
+					//remove the projectile from the render array so the image does not stay
+					render->gProjectiles.erase(render->gProjectiles.begin()+i);
+
+					//remove projectile from projectiles array
+					projectiles.erase(projectiles.begin()+i);
+					i--; //since we removed an element, the next increment will skip an element so decrement
+				}
 			}
 			lag_time -= MS_PER_UPDATE;
 		}
