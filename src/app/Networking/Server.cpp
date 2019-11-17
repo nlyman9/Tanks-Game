@@ -169,7 +169,7 @@ int serverProcess() {
     // Game Loop
     std::vector<Socket*> *pendingClients;
     while (server->gameOn) {
-        std::cout << "\n\nSERVER: GAME - " << server->numClients() << std::endl;
+        std::cout << "\n\nSERVER: GAME - # Clients = " << server->numClients() << std::endl;
         fflush(stdout);
 
         // Poll clients for pending messages 
@@ -177,26 +177,35 @@ int serverProcess() {
         // The polling (select function) currently waits for a specified timeout value 
         //      @see ServerConnection for timeout value
         while ( (pendingClients = server->pollClientsAndReceive()) == nullptr) {
-            // Just go back and poll
+            // Just go back and pollClientsAndReceive()
         }
         std::cout << "SERVER: Going to check mailbox!!!" << std::endl;
         fflush(stdout);
 
-        //Get packages from clients
+        // Get packages from pending clients
+        // pendingClients can be null IF:
+        //      + we havent received data but we need to send a keyframe
         Packet *mail;
-        for (auto client : *pendingClients) {
-            std::cout << "SERVER: Getting packet from client " << client->id() << std::endl;
-            fflush(stdout);
-            mail = server->getPacket(client->id());
-            if (mail != nullptr) {
-                std::cout << "SERVER: You got mail!" << std::endl;
-                mail->printData();
+        if (pendingClients != nullptr) {
+            for (auto client : *pendingClients) {
+                std::cout << "SERVER: Getting packet from client " << client->id() << std::endl;
                 fflush(stdout);
-            } else {
-                std::cout << "SERVER: No mail :(" << std::endl;
-                fflush(stdout);
-            }
+                mail = server->getPacket(client->id());
+                if (mail != nullptr) {
+                    std::cout << "SERVER: You got mail!" << std::endl;
+                    mail->printData();
+                    fflush(stdout);
+                } else {
+                    std::cout << "SERVER: No mail :(" << std::endl;
+                    fflush(stdout);
+                }
         }
+
+        // Share data with clients - send data 
+        // Keystates
+
+
+        // Game states -> slower rate 
     }
 }
 

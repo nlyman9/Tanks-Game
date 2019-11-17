@@ -138,7 +138,7 @@ class ServerConnection {
 
             Packet *mail = recvBuffer.at(id)->front();
             recvBuffer.at(id)->pop_front();
-            std::cout << "Size of recv buffer is === " << recvBuffer.at(id)->size();
+            std::cout << "Size of recv buffer is === " << recvBuffer.at(id)->size() << std::endl;
 
             return mail;
         }
