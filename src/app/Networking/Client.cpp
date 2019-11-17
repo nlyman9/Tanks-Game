@@ -40,27 +40,18 @@ int Client::clientThread(void* data) {
         std::cout << "Client-Network: Waiting for map" << std::endl;
         Packet *mail = client->receive();
         if (mail != nullptr) {
-            // Do stuff 
-            std::cout << "You got mail!" << std::endl;
-            std::cout << "Mail: " << mail->data() << std::endl;
-
             if (mail->getType() == (int)PackType::MAP) {
                 std::cout << "Client: Loading map... " << mail->data() << std::endl;
-                std::cout << mail->getDatasString() << std::endl;
+                
                 std::vector<int>* map = new std::vector<int>();
-
                 map = unpack(mail->getDatas(), map, 3);
-                std::cout << "Client: Unpacked map! size = "<< map->size() << std::endl;
-                fflush(stdout);
+
                 for (int i = 0; i < map->size();i++){
                     client->gameMap.push_back(map->at(i));                 
                 }
 
                 client->mapReceived = true;
                 delete map;
-
-                std::cout << "Client: Loaded map!" << std::endl;
-                fflush(stdout);
 
                 client->gameOn = true;
                 client->startGame = true;
@@ -72,24 +63,25 @@ int Client::clientThread(void* data) {
 
         sleep(1);
     }
-    const struct timespec timeout = {0, ((long) 1e+9 / 30)};
+
+    const struct timespec timeout = {1, 0};//((long) 1e+9 / 30)};
     while (true) {
         // std::cout << "Client-Network: Loop" << std::endl;
         // Check if we have anything to send
         if (client->send()) {
             std::cout << "CLIENT-NET: Sent packet!"<< std::endl;
             fflush(stdout);
+        } else {
+            std::cout << "CLIENT-NET: Nothing to send!" << std::endl;
+            fflush(stdout);
         }
 
-        // NON BLOCKING RECEIVE?
-        // Check if there is anything to recieve
-        // Packet *mail = client->receive();
-        // if (mail != nullptr) {
-
-        // }
-
         
-        nanosleep(&timeout, NULL);
+        if (nanosleep(&timeout, NULL) != 0) {
+            std::cout << "Error sleeping " << errno << std::endl;
+            fflush(stdout);
+        }
+
     }
 
     return -1;
