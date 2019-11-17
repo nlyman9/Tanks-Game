@@ -191,10 +191,10 @@ int GameLoop::networkRun() {
 			for(auto player : players) {
 				player->update();
 			}
-
 			temp += 1;
-			if (temp > 100) {
+			if (temp > 60 && keystate != nullptr) {
 				client->addKeyFrame(keystate);
+				keystate = nullptr; //only need to send one per update loop
 				temp = 0;
 			}
 

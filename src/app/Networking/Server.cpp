@@ -173,12 +173,16 @@ int serverProcess() {
 
         // Poll clients for pending messages 
         // This function calls receive! Do not call again unless you have a specific reason
-        int pendingClients = server->pollClientsAndReceive();
+        std::vector<Socket*> *pendingClients = server->pollClientsAndReceive();
+        std::cout << "SERVER: Going to check mailbox!!!" << std::endl;
+        fflush(stdout);
 
         //Get packages from clients
         Packet *mail;
-        for (int c_id = 0; c_id < server->numClients(); c_id++) {
-            mail = server->getPacket(c_id);
+        for (auto client : server->clients()) {
+            std::cout << "SERVER: Getting packet from client " << client->id() << std::endl;
+            fflush(stdout);
+            mail = server->getPacket(client->id());
             if (mail != nullptr) {
                 std::cout << "SERVER: You got mail!" << std::endl;
                 mail->printData();
@@ -187,7 +191,6 @@ int serverProcess() {
                 std::cout << "SERVER: No mail :(" << std::endl;
                 fflush(stdout);
             }
-
         }
     }
 }

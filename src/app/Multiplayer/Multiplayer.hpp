@@ -30,8 +30,8 @@ class ServerConnection {
         // Set timeout based on constants
         // Nanoseconds per tick = NANO_PER_SECOND / TICKS_PER_SECOND
         const struct timespec poll_timeout {
-            0,                                 // tv_sec
-            NANO_PER_SECOND / TICKS_PER_SECOND // tv_nsec 
+            1,                                 // tv_sec
+            0//NANO_PER_SECOND / TICKS_PER_SECOND // tv_nsec 
         };
     
     public:
@@ -74,6 +74,8 @@ class ServerConnection {
             } else {
                 // Add client
                 clients.push_back(client);
+
+                client->setID(clients.size()-1); // Set id to the index in the vector
                 
                 // Add a recvBuffer for client
                 recvBuffer.push_back(new std::list<Packet *>);
@@ -90,25 +92,17 @@ class ServerConnection {
             }
         }
 
-        std::vector<int>* pollClients() {
+        std::vector<Socket*>* pollClients() {
             // Create a temp fd_set
             fd_set read_fds = client_fds;
 
-            std::cout << "Polling clients... -- ";
-            for (auto client : clients) {
-                if (FD_ISSET(client->fd(), &read_fds))
-                    std::cout << client->fd() << " ";
-            }
-            std::cout << "Out of clients: ";
-            for (auto client : clients) {
-                std::cout << client->fd() << " ";
-            }
-            std::cout << std::endl;
-            fflush(stdout);
-
-
             // wait for their info with the defined timeout (for now 1/30th of a second)
             int numberOfPendingClients = pselect(fdmax+1, &read_fds, nullptr, nullptr, &poll_timeout, nullptr);//&poll_timeout, nullptr);
+            if (numberOfPendingClients < 0) {
+                std::cout << "SELECT ERROR: " << std::endl;
+                perror("Error: ");
+            }
+            
             if (numberOfPendingClients == EBADF) {
                 std::cout << "SELECT ERROR: BAD FD " << std::endl;
                 fflush(stdout);
@@ -122,10 +116,10 @@ class ServerConnection {
             if (numberOfPendingClients == 0) {
                 return nullptr;
             } else {
-                std::vector<int> *pendingClients = new std::vector<int>(clients.size());
-                for (int i = 0; i < clients.size(); i++) {
-                    if (FD_ISSET(clients.at(i)->fd(), &read_fds)) {
-                        pendingClients->push_back(i);
+                std::vector<Socket*> *pendingClients = new std::vector<Socket*>();
+                for (auto client : clients) {
+                    if (FD_ISSET(client->fd(), &read_fds)) {
+                        pendingClients->push_back(client);
                     }
                 }
 
@@ -137,8 +131,10 @@ class ServerConnection {
         Packet* getPacket(int id) {
             assert(id <  numClients());
 
-            if (recvBuffer.at(id)->size() == 0) 
+            if (recvBuffer.at(id)->size() == 0) {
+                std::cout << "Client " << id << " buffer is empty" << std::endl;
                 return nullptr;
+            }
 
             Packet *mail = recvBuffer.at(id)->front();
             recvBuffer.at(id)->pop_front();
@@ -160,12 +156,13 @@ class ServerConnection {
             // Recieve data from a client
             Packet *mail = clients.at(id)->receive();
 
-            std::cout << "SERVER: RECEIVED DATA" << mail << std::endl;
+            std::cout << "SERVER: RECEIVED DATA " << mail << std::endl;
             mail->printData();
             fflush(stdout);
 
             if (mail != nullptr) {
                 recvBuffer.at(id)->push_back(mail);
+                std::cout << "SERVER Buffer of client " << id << " = " << recvBuffer.at(id)->size() << std::endl;
             }
             else {
                 std::cout << "SERVER: NO VALID DATA" << std::endl;
@@ -212,6 +209,10 @@ class ServerConnection {
             return true;
         }
 
+        std::vector<Socket*> getClients() {
+            return clients;
+        }
+
         int getClientsFD(int id) {
             assert(id < clients.size());
             return clients.at(id)->fd();
@@ -244,7 +245,6 @@ class ClientConnection {
         std::list<Packet*> sendBuffer;
         
         struct timeval* timeout;
-        // Packet HEAD = Packet(PackType::INIT);
     public:
         ClientConnection(std::string ip, int port) {
             // Create tcp socket

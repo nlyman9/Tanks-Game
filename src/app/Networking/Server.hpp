@@ -45,24 +45,27 @@ class Server {
                 return false;
             }
         }
+        
 
-        int pollClientsAndReceive() {
+        std::vector<Socket*>* pollClientsAndReceive() {
             // Poll clients for messages
-            std::vector<int> *pendingClients = host->pollClients();
+            std::vector<Socket*> *pendingClients = host->pollClients();
 
             if (pendingClients == nullptr) {
-                return 0;
+                // No messages from clients!
+                std::cout << "SERVER: No pending clients" << std::endl;
+                fflush(stdout);
+                return nullptr;
             }
 
-            // if there are clients pending, get their data
-            int numberOfPendingClients = pendingClients->size();
-            for (auto client_id : *pendingClients) {
-                host->receiveFromID(client_id);
+            // // if there are clients pending, get their data
+            for (auto client : *pendingClients) {
+                std::cout << "SERVER: Going to receive from " << client->id() << std::endl;
+                fflush(stdout);
+                host->receiveFromID(client->id());
             }
 
-            delete pendingClients;
-
-            return numberOfPendingClients;
+            return pendingClients;
         }
 
         Packet* getPacket(int id) {
@@ -91,6 +94,10 @@ class Server {
             int index = host->addPacket(p);
             host->broadcast();
             return true;
+        }
+
+        std::vector<Socket*> clients() {
+            return host->getClients();
         }
 
         int numClients() {
