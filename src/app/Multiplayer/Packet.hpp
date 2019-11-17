@@ -182,10 +182,10 @@ class Packet {
          *  - Returns the 2nd header in the packet.
          *  @see the constructor to see how Packets should be formatted 
          * 
-         * @return int - The type of the packet -> Parse using PackType
+         * @return PackType - returns the type of packet
          */
-        int getType() {
-            return atoi(headers.at(1).getValue().c_str());
+        PackType getType() {
+            return PackType(atoi(headers.at(1).getValue().c_str()));
         }
 
         /**

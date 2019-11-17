@@ -194,6 +194,9 @@ int serverProcess() {
                 if (mail != nullptr) {
                     std::cout << "SERVER: You got mail!" << std::endl;
                     mail->printData();
+                    if (mail->getType() == PackType::KEYSTATE) {
+                        server->addPacketFromClientToClients(client->id(), mail);
+                    }
                     fflush(stdout);
                 } else {
                     std::cout << "SERVER: No mail :(" << std::endl;
@@ -202,11 +205,15 @@ int serverProcess() {
             }
         }
 
-        // Share data with clients - send data 
-        // Keystates
+        // Share data with clients - send data from buffer
+        for (auto client : server->clients()) {
+            std::cout << "SERVER: ";
+            client->sendFromBuffer();
+        }
 
 
         // Game states -> slower rate 
+        // server->broadcast(GAMESTATE?);
     }
 }
 

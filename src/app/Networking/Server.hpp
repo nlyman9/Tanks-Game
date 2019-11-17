@@ -81,6 +81,18 @@ class Server {
             return host->addPacketToBroadcast(mail);
         }
 
+        void addPacketFromClientToClients(int fromClientID, Packet *mail) {
+            for (auto client : host->getClients()) {
+                if (client->id() != fromClientID) { // Dont send client packet to itself
+                    client->addPacketToSend(mail);
+                }
+            }
+        }
+
+        void addPacketToClient(int id, Packet *mail) {
+            int index = host->addPacketToSend(id, mail);
+        }
+
         bool sendPacketToClient(int id, Packet *mail) {
             int index = host->addPacketToSend(id, mail);
             host->sendTo(id);

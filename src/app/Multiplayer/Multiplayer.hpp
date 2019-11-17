@@ -62,7 +62,7 @@ class ClientConnection {
                 Packet *mail = sendBuffer.front();
                 sendBuffer.pop_front();
 
-                clientSocket->sendSocket(mail);
+                clientSocket->sendPacket(mail);
 
                 delete mail;
                 return true;
@@ -81,7 +81,7 @@ class ClientConnection {
          */
         void sendPacket(Packet *mail) {
             assert(mail != nullptr);
-            clientSocket->sendSocket(mail);
+            clientSocket->sendPacket(mail);
         }
 
 
@@ -370,7 +370,7 @@ class ClientController {
             // Send first packet in vector to server
             auto mail = sendBuffer.front();
             sendBuffer.pop_front();
-            server->sendSocket(mail);
+            server->sendPacket(mail);
 
             delete mail;
             return true;

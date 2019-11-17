@@ -242,7 +242,7 @@ class Socket {
          * @return int - the nmber of bytes we sent
          */
         // TODO Change so this function handles if we sent all of the data or not
-        int sendSocket(Packet *p) {
+        int sendPacket(Packet *p) {
             assert(isConnected | isReceiving);
 
             int num_bytes_sent = send(socket_fd, p->data(), p->size(), 0);

@@ -40,7 +40,7 @@ int Client::clientThread(void* data) {
         std::cout << "Client-Network: Waiting for map" << std::endl;
         Packet *mail = client->receive();
         if (mail != nullptr) {
-            if (mail->getType() == (int)PackType::MAP) {
+            if (mail->getType() == PackType::MAP) {
                 std::cout << "Client: Loading map... " << mail->data() << std::endl;
                 
                 std::vector<int>* map = new std::vector<int>();
