@@ -164,8 +164,8 @@ class Packet {
          * 
          * @return std::vector<char>* 
          */
-        std::vector<char>* getDatas() {
-            return new std::vector<char>(this->body);
+        std::vector<char>* getBody() {
+            return &body;
         }
 
         /**
@@ -173,7 +173,7 @@ class Packet {
          * 
          * @return std::string 
          */
-        std::string getDatasString() {
+        std::string getBodyString() {
             return std::string(body.data(), body.size());
         }
 
