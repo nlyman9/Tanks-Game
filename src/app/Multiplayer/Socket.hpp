@@ -39,7 +39,6 @@ class Socket {
         std::string remoteIP;
         std::string remotePort;
         int socket_fd;
-        int socket_id; // Index in the server's vector of clients 
 
         // Used for assertions to prevent doing sends annd receive on a improperly set sockets
         // True after connecSocket() or bind()
@@ -255,7 +254,7 @@ class Socket {
         /**
          * @brief Receives a packet from the socket connection
          *  - It receives the raw data and then formats it into a packet
-         * 
+         * @warning - Blocking function
          * @see Packet constructor so see the expected setup for a packet
          * 
          * @return Packet* - The data we received 
@@ -336,10 +335,6 @@ class Socket {
             std::cout << "client fd = " << this->socket_fd << std::endl;
         }
 
-        void setID(int id) {
-            this->socket_id = id;
-        }
-        
         /**
          * @brief Get the filedescriptor of the socket 
          * 
@@ -347,10 +342,6 @@ class Socket {
          */
         int fd() {
             return socket_fd;
-        }
-
-        int id() {
-            return socket_id;
         }
 
         /**

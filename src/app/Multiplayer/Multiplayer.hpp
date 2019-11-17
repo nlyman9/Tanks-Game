@@ -11,20 +11,107 @@
 #include "Packet.hpp"
 #include "Socket.hpp"
 
-class ClientCon {
-    Socket* clientSocket;
-    std::list<Packet *> recvBuffer;
-    std::list<Packet *> sendBuffer;
+class ClientConnection {
+    private:
+        Socket* clientSocket;
+        std::list<Packet *> recvBuffer;
+        std::list<Packet *> sendBuffer;
+        int clientID; // Index in the server's vector of clients 
+    public:
+        ClientConnection(Socket * sock, int id) {
+            clientSocket = sock;
+            clientID = id;
+        }
+
+        void receive() {
+            Packet *mail = clientSocket->receive();
+
+            if (mail != nullptr) {
+                recvBuffer.push_back(mail);
+            } else {
+                // Packet was probably invalid
+                std::cerr << "SERVER: Packet from client was invalid!" << std::endl;
+            }
+        }
+
+        Packet* getPacket() {
+            if (recvBuffer.size() == 0) {
+                return nullptr;
+            }
+
+            Packet *mail = recvBuffer.front();
+            recvBuffer.pop_front();
+            
+            std::cout << "Size of recv buffer is === " << recvBuffer.size() << std::endl;
+
+            return mail;
+        }
+
+        int addPacketToSend(Packet* mail) {
+            assert(mail != nullptr);
+
+            sendBuffer.push_back(mail);
+            return sendBuffer.size();
+        }
+
+        bool sendFromBuffer() {
+            if (sendBuffer.size() == 0) {
+                // Nothing to send
+                return false;
+            } else {
+                Packet *mail = sendBuffer.front();
+                sendBuffer.pop_front();
+
+                clientSocket->sendSocket(mail);
+
+                delete mail;
+                return true;
+            }
+        }
 
 
+        /**
+         * @brief Sends the given packet 
+         *   - Usually used when the server needs to broadcast keyframes
+         * 
+         * @warning - This overrides/skips the send buffer
+         * @warning - Does not delete/free the packet after sending
+         * 
+         * @param mail - The packet want to send 
+         */
+        void sendPacket(Packet *mail) {
+            assert(mail != nullptr);
+            clientSocket->sendSocket(mail);
+        }
+
+
+        void setID(int id) {
+            this->clientID = id;
+        }
+
+        int id() {
+            return clientID;
+        }
+
+        /**
+         * @brief Get the file descriptor of the socket 
+         * 
+         * @return int - the file descriptor
+         */
+        int fd() {
+            return clientSocket->fd();
+        }
 };
 
+// TODO - Properly handle when a client disconnects
+//          + Poll for client, if number of bytes from receive == 0, remove client.
 class ServerController {
     private:
         Socket *listener, *listener_tcp, *listener_udp;
-        std::vector<Socket*> clients;
-        std::vector<std::list<Packet *> *> recvBuffer;
-        std::list<Packet*> sendBuffer;
+        std::vector<ClientConnection *> clients;
+        std::list<Packet *> broadcastBuffer;
+
+
         const int MAX_PLAYERS = 10;
 
         // Select FDs
@@ -81,13 +168,7 @@ class ServerController {
                 return false;
             } else {
                 // Add client
-                clients.push_back(client);
-
-                client->setID(clients.size()-1); // Set id to the index in the vector
-                
-                // Add a recvBuffer and sendBuffer for client
-                recvBuffer.push_back(new std::list<Packet *>);
-                // sendBuffer.push_back(new std::list<Packet *>);
+                clients.push_back(new ClientConnection(client, clients.size()));
 
                 // Add client's File descriptor to set
                 FD_SET(client->fd(), &client_fds);
@@ -100,18 +181,17 @@ class ServerController {
                 return true;
             }
         }
-
-        std::vector<Socket*>* pollClients() {
+    
+        std::vector<ClientConnection*>* pollClients() {
             // Create a temp fd_set
             fd_set read_fds = client_fds;
 
             // wait for their info with the defined timeout (for now 1/30th of a second)
-            int numberOfPendingClients = pselect(fdmax+1, &read_fds, nullptr, nullptr, &poll_timeout, nullptr);//&poll_timeout, nullptr);
+            int numberOfPendingClients = pselect(fdmax+1, &read_fds, nullptr, nullptr, &poll_timeout, nullptr);
             if (numberOfPendingClients < 0) {
                 std::cout << "SELECT ERROR: " << std::endl;
                 perror("Error: ");
             }
-            
             if (numberOfPendingClients == EBADF) {
                 std::cout << "SELECT ERROR: BAD FD " << std::endl;
                 fflush(stdout);
@@ -125,7 +205,7 @@ class ServerController {
             if (numberOfPendingClients == 0) {
                 return nullptr;
             } else {
-                std::vector<Socket*> *pendingClients = new std::vector<Socket*>();
+                std::vector<ClientConnection*> *pendingClients = new std::vector<ClientConnection*>();
                 for (auto client : clients) {
                     if (FD_ISSET(client->fd(), &read_fds)) {
                         pendingClients->push_back(client);
@@ -136,79 +216,51 @@ class ServerController {
             }
         }
 
-        // TODO get client ID from packet
         Packet* getPacket(int id) {
             assert(id <  numClients());
 
-            if (recvBuffer.at(id)->size() == 0) {
-                std::cout << "Client " << id << " buffer is empty" << std::endl;
-                return nullptr;
-            }
-
-            Packet *mail = recvBuffer.at(id)->front();
-            recvBuffer.at(id)->pop_front();
-            std::cout << "Size of recv buffer is === " << recvBuffer.at(id)->size() << std::endl;
+            Packet* mail = clients[id]->getPacket();
 
             return mail;
         }
 
-        int addPacket(Packet *p) {
-            int index = sendBuffer.size();
-            sendBuffer.push_back(p);
-            return index;
+        int addPacketToBroadcast(Packet *p) {
+            broadcastBuffer.push_back(p);
+            return broadcastBuffer.size();
+        }
+
+        int addPacketToSend(int id, Packet *mail) {
+            assert(id < numClients());
+            clients[id]->addPacketToSend(mail);
         }
         
-        void receiveFromID(int id) {
+        void receiveFromClient(int id) {
             assert(listener->isOnline());
             assert(id < numClients());
 
             // Recieve data from a client
-            Packet *mail = clients.at(id)->receive();
-
-            std::cout << "SERVER: RECEIVED DATA " << mail << std::endl;
-            mail->printData();
-            fflush(stdout);
-
-            if (mail != nullptr) {
-                recvBuffer.at(id)->push_back(mail);
-                std::cout << "SERVER Buffer of client " << id << " = " << recvBuffer.at(id)->size() << std::endl;
-            }
-            else {
-                std::cout << "SERVER: NO VALID DATA" << std::endl;
-            }
+            clients[id]->receive();
         }
 
         bool sendTo(int id) {
+            assert(id < numClients());
             // Send to specific client
-            size_t num_bytes_sent;
-
-            if (sendBuffer.size() == 0) {
-                return false;
-            } else {
-                Packet *mail = sendBuffer.front();
-                sendBuffer.pop_front();
-                
-                num_bytes_sent = clients.at(id)->sendSocket(mail);
-
-                delete mail;
-                return true;
-            }
+            clients[id]->sendFromBuffer();
         }
 
         bool broadcast() {
-            // Send to all clients 
-            std::cout << "Broadcasting to clients..." << std::endl;
-
-            if (sendBuffer.size() == 0) {
+            if (broadcastBuffer.size() == 0) {
+                // Nothing to broadcast
                 return false;
             }
 
-            size_t num_bytes_sent;
-            Packet *mail =  sendBuffer.front();
-            sendBuffer.pop_front();
+            // Send to all clients 
+            std::cout << "Broadcasting to clients..." << std::endl;
+            Packet *mail =  broadcastBuffer.front();
+            broadcastBuffer.pop_front();
 
             for (auto client : clients) {
-                num_bytes_sent = client->sendSocket(mail);
+                client->sendPacket(mail);
             }
 
             std::cout << "Broadcasted to clients!" << std::endl;
@@ -218,7 +270,7 @@ class ServerController {
             return true;
         }
 
-        std::vector<Socket*> getClients() {
+        std::vector<ClientConnection*> getClients() {
             return clients;
         }
 

@@ -47,9 +47,9 @@ class Server {
         }
         
 
-        std::vector<Socket*>* pollClientsAndReceive() {
+        std::vector<ClientConnection*>* pollClientsAndReceive() {
             // Poll clients for messages
-            std::vector<Socket*> *pendingClients = host->pollClients();
+            std::vector<ClientConnection*> *pendingClients = host->pollClients();
 
             if (pendingClients == nullptr) {
                 // No messages from clients!
@@ -58,11 +58,11 @@ class Server {
                 return nullptr;
             }
 
-            // // if there are clients pending, get their data
+            // if there are clients pending, get their data
             for (auto client : *pendingClients) {
                 std::cout << "SERVER: Going to receive from " << client->id() << std::endl;
                 fflush(stdout);
-                host->receiveFromID(client->id());
+                host->receiveFromClient(client->id());
             }
 
             return pendingClients;
@@ -73,30 +73,37 @@ class Server {
         }
 
         Packet* receiveFromID(int id) {
-            host->receiveFromID(id);
+            host->receiveFromClient(id);
             return host->getPacket(id);
         }
 
-        int addPacket(Packet *p) {
-            return host->addPacket(p);
+        int addPacketToBroadcast(Packet *mail) {
+            return host->addPacketToBroadcast(mail);
         }
 
-        bool sendTo(int client, Packet *p) {
-            int index = host->addPacket(p);
-            host->sendTo(client);
-            if (index > 0) {
+        bool sendPacketToClient(int id, Packet *mail) {
+            int index = host->addPacketToSend(id, mail);
+            host->sendTo(id);
+
+            // Did we send that packet or was buffer already filled?
+            if (index != 1) {
                 return false;
             }
             return true;
         }
 
-        bool broadcast(Packet *p) {
-            int index = host->addPacket(p);
+        bool broadcast(Packet *mail) {
+            int index = host->addPacketToBroadcast(mail);
             host->broadcast();
+
+            // Did we send that packet or was buffer already filled?
+            if (index != 1) {
+                return false;
+            }
             return true;
         }
 
-        std::vector<Socket*> clients() {
+        std::vector<ClientConnection*> clients() {
             return host->getClients();
         }
 

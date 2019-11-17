@@ -167,7 +167,7 @@ int serverProcess() {
     server->gameOn = true;
 
     // Game Loop
-    std::vector<Socket*> *pendingClients;
+    std::vector<ClientConnection*> *pendingClients;
     while (server->gameOn) {
         std::cout << "\n\nSERVER: GAME - # Clients = " << server->numClients() << std::endl;
         fflush(stdout);
