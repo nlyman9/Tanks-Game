@@ -175,7 +175,7 @@ int LocalGameLoop::run() {
             } 
 		}
 
-        player->getEvent(elapsed_time, &e);
+        player->getEvent(elapsed_time, &e, SDL_GetKeyboardState(nullptr));
 
         //The player fired a bullet
         if (player->getFire() == true) {
