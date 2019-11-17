@@ -1,14 +1,8 @@
 #ifndef STARTUPMENU_HPP
 #define STARTUPMENU_HPP
 
-#include <SDL2/SDL.h>
-#include "GameLoop.hpp"
+#include "Args.hpp"
 
-class StartUpMenu {
-  public:
-    void launch(Args *options);
-  private:
-    Render* renderer;
-};
+void launch(Args *options);
 
 #endif

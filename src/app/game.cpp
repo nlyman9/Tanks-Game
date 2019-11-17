@@ -1,5 +1,6 @@
 #include "StartUpMenu.hpp"
-#include "GameLoop.hpp"
+#include "LocalGameLoop.hpp"
+#include "Args.hpp"
 #include <string>
 #include <iostream>
 
@@ -44,8 +45,6 @@ int main(int argc, char* argv[]) {
 		options->isOnline = false;
 	}
 
-
-	StartUpMenu startUpMenu;
-	startUpMenu.launch(options);
+	launch(options);
 	return 0;
 }
