@@ -340,6 +340,11 @@ class ClientController {
             }
         }
 
+        void setSocketTimeout(int tickrate) {
+            server_tcp->setTimeout(tickrate);
+            server_udp->setTimeout(tickrate);
+        }
+
         Packet* getPacket() {
             if (recvBuffer.size() == 0) {
                 return nullptr;
@@ -356,7 +361,9 @@ class ClientController {
 
         void receive() {
             Packet *mail = server->receive();
-            recvBuffer.push_back(mail);
+
+            if (mail != nullptr)
+                recvBuffer.push_back(mail);
         }
 
         bool sendPacket() {

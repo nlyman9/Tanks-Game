@@ -217,11 +217,6 @@ class Socket {
 
             // Create socket with remote destination
             socket_fd = socket(serverInfo->ai_family, serverInfo->ai_socktype, serverInfo->ai_protocol);
-            
-            // TODO figure out if we need blocking or not
-            // Set socket to non-blocking
-            // int flags = fcntl(socket_fd, F_GETFL);
-            // fcntl(socket_fd, F_SETFL, flags | O_NONBLOCK);
 
             // Connect to remote destination
             if (connect(socket_fd, serverInfo->ai_addr, serverInfo->ai_addrlen) < 0) {
@@ -233,6 +228,16 @@ class Socket {
             // Connected!
             this->isConnected = true;
             return true;
+        }
+        
+        // As far as a I know this works on linux even after sockets are binded/connected
+        void setTimeout(int tickrate) {
+            int micro_seconds = 1e+6;
+            struct timeval tv;
+            tv.tv_sec = 0;
+            tv.tv_usec = micro_seconds / tickrate;
+
+            setsockopt(fd(), SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof(tv));
         }
 
         /**
@@ -272,6 +277,11 @@ class Socket {
                 num_bytes = recv(socket_fd, headBuffer, HEAD.size(), 0);
                 if (num_bytes == -1) {
                     std::cerr << "SOCKET: read header error: " << strerror(errno) <<  std::endl;
+                    return nullptr;
+                }
+                if (num_bytes == EWOULDBLOCK) {
+                    std::cout << "SOCKET: Receive timed out" << std::endl;
+                    return nullptr;
                 }
             } else {
                 // Use udp
