@@ -78,7 +78,7 @@ int Client::clientThread(void* data) {
 
         
         if (nanosleep(&timeout, NULL) != 0) {
-            std::cout << "Error sleeping " << errno << std::endl;
+            std::cerr << "Error sleeping " << errno << std::endl;
             fflush(stdout);
         }
 

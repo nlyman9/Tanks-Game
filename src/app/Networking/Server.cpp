@@ -148,7 +148,7 @@ int serverProcess() {
 
 
     // First wait for 2 clients
-    while (server->numClients() < 1) {
+    while (server->numClients() < 2) {
         if (server->accept()) {
             std::cout << "Server: New client connection accepted" << std::endl;
         }
@@ -167,19 +167,24 @@ int serverProcess() {
     server->gameOn = true;
 
     // Game Loop
+    std::vector<Socket*> *pendingClients;
     while (server->gameOn) {
         std::cout << "\n\nSERVER: GAME - " << server->numClients() << std::endl;
         fflush(stdout);
 
         // Poll clients for pending messages 
         // This function calls receive! Do not call again unless you have a specific reason
-        std::vector<Socket*> *pendingClients = server->pollClientsAndReceive();
+        // The polling (select function) currently waits for a specified timeout value 
+        //      @see ServerConnection for timeout value
+        while ( (pendingClients = server->pollClientsAndReceive()) == nullptr) {
+            // Just go back and poll
+        }
         std::cout << "SERVER: Going to check mailbox!!!" << std::endl;
         fflush(stdout);
 
         //Get packages from clients
         Packet *mail;
-        for (auto client : server->clients()) {
+        for (auto client : *pendingClients) {
             std::cout << "SERVER: Getting packet from client " << client->id() << std::endl;
             fflush(stdout);
             mail = server->getPacket(client->id());
