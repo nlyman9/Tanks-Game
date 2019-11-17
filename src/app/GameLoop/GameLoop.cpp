@@ -96,6 +96,7 @@ void GameLoop::initMapMultiPlayer() {
 			SDL_Rect cur_out = { x, y, TILE_SIZE, TILE_SIZE};
 			if(map2D[i][j] == 2){
 				tileArray.push_back(cur_out);
+				projectileObstacles.push_back(cur_out);
 			}
 		}
 	}
@@ -184,10 +185,8 @@ int GameLoop::networkRun() {
 
 				std::cout << projectiles.back()->getX() << ", " << projectiles.back()->getY() << "; " << projectiles.back()->getTheta() << std::endl;
 
-				// render->gProjectiles.push_back(projectiles.back());
 				render->setProjectiles(projectiles);
 				projectiles.back()->setSprite(shell);
-				//newlyFired->setSprite(bullet);
 				projectiles.back()->setObstacleLocations(&projectileObstacles);
 				player->setFire(false);
 			}
