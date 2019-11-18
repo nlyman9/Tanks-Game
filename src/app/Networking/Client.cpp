@@ -135,6 +135,7 @@ int Client::clientProcess(void* data) {
             }
             
             if(recvedInit && recvedMap) {
+                client->initDataReceived = true;
                 client->gameOn = true;
                 client->startGame = true;
                 break;
