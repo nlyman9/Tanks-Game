@@ -181,22 +181,16 @@ bool Player::place(float x, float y) {
 void Player::setClient(Client* cl) {
     client = cl;
 }
-void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, SDL_Event* e) {
+
+void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, 
+                      SDL_Event* e, 
+                      const Uint8 *keystate) {
 
     delta_velocity = 0;
     x_deltav = 0;
     y_deltav = 0;
     theta_v = 0;
     shotsFired = false;
-
-    //std::cout << "get Event" << std::endl;
-
-    const Uint8* keystate; 
-    if(localPlayer) {
-        keystate = SDL_GetKeyboardState(nullptr);
-    } else {
-        keystate = client->pollKeystate();
-    }
 
     //std::cout << "access keystate" << std::endl;
     if (keystate[SDL_SCANCODE_W]) {
@@ -297,12 +291,6 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, S
         SDL_GetMouseState(&mouseX, &mouseY);
     }
     //std::cout << "finish mouse" << std::endl;
-    if(localPlayer && client != nullptr) {
-        std::vector<char>* fBuffer = client->getFillBuffer();
-        fBuffer->push_back((char)(*keystate));
-        appendHeader(fBuffer, (char) 1); // append keystate header
-    }
-    //std::cout << "finish fill buffer" << std::endl;
 }
 
 /**

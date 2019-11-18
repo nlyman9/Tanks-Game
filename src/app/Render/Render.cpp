@@ -246,6 +246,10 @@ void Render::setPlayer(std::vector<Player *> players) {
 	gPlayers = players;
 }
 
+void Render::setPlayerEnemies(std::vector<Player *> players) {
+	gPlayers.insert(gPlayers.end(), players.begin(), players.end());
+}
+
 void Render::setEnemies(std::vector<Enemy *> enemies) {
 	gEnemies = enemies;
 }

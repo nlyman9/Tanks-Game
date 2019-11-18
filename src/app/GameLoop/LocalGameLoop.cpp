@@ -6,6 +6,12 @@
 LocalGameLoop::LocalGameLoop(Render* renderer) : render{renderer} {}
 
 bool LocalGameLoop::init() {
+
+	// Solve left over bullet on new game issue
+	if(render->gProjectiles.size() > 0) {
+		render->gProjectiles.clear();
+	}
+
     // Set up player
     player = new Player(SCREEN_WIDTH/2 + 100, 50, true);
     Sprite *player_tank = new Sprite(render->getRenderer(), "src/res/images/red_tank.png");
@@ -175,7 +181,7 @@ int LocalGameLoop::run() {
             } 
 		}
 
-        player->getEvent(elapsed_time, &e);
+        player->getEvent(elapsed_time, &e, SDL_GetKeyboardState(nullptr));
 
         //The player fired a bullet
         if (player->getFire() == true) {

@@ -12,6 +12,7 @@ class OnlineGameLoop {
     private:
         // Member Variables 
         std::vector<Player *> players;
+        std::vector<Player *> playerEnemies;
     	std::vector<Projectile *> projectiles;
 
         Sprite* pinksplosion = nullptr;
@@ -28,6 +29,8 @@ class OnlineGameLoop {
 
         // Map Building Variables
         std::vector<SDL_Rect> tileArray;    
+        // Projectiles don't see holes as obstacles, keep separate array
+        std::vector<SDL_Rect> projectileObstacles;
 
         Render* render = nullptr;
         bool isGameOn = false;

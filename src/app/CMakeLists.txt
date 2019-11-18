@@ -1,6 +1,7 @@
 add_subdirectory(Credits)
 add_subdirectory(GameLoop)
 add_subdirectory(Object)
+add_subdirectory(Multiplayer)
 add_subdirectory(Networking)
 add_subdirectory(Sprite)
 add_subdirectory(Projectile)
@@ -36,6 +37,7 @@ target_link_libraries(Game
   ${SDL2_LIBRARY}
   ${SDL2_IMAGE_LIBRARIES}
   ${SDL2_TTF_LIBRARIES}
+  Multiplayer
 )
 
 target_link_libraries(ServerProcess
@@ -45,11 +47,13 @@ target_link_libraries(ServerProcess
   ${SDL2_LIBRARY}
   ${SDL2_IMAGE_LIBRARIES}
   ${SDL2_TTF_LIBRARIES}
+  Multiplayer
 )
 else()
 target_link_libraries(Game
   PRIVATE
   StartUpMenu
+  Multiplayer
   Args
 )
 target_link_libraries(ServerProcess

@@ -16,6 +16,7 @@ target_link_libraries(Tank
   Sprite
   ${SDL2_LIBRARY}
   Networking
+  Multiplayer
 )
 else()
 target_link_libraries(Tank
@@ -24,6 +25,7 @@ target_link_libraries(Tank
   Constants
   Sprite
   Networking
+  Multiplayer
 )
 endif()
 

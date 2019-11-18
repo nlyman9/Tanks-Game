@@ -12,31 +12,33 @@ bool OnlineGameLoop::init(Args* options) {
 	red_player_tank->init();
 	red_player_tank->sheetSetup(30, 30, 3);
 
-    Sprite *player1_turrent = new Sprite(render->getRenderer(), "src/res/images/red_turret.png");
-	player1_turrent->init();
+    Sprite *player1_turret = new Sprite(render->getRenderer(), "src/res/images/red_turret.png");
+	player1_turret->init();
 	player->setSprite(red_player_tank);
-	player->setTurretSprite(player1_turrent);
+	player->setTurretSprite(player1_turret);
 
     // Set up player 2
-    Player* player2 = new Player(SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - TANK_HEIGHT/2 - 60, false);
+    Player* player2 = new Player(SCREEN_WIDTH/2 + 100, 400, false);
 	Sprite* blue_player_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
 	blue_player_tank->init();
     blue_player_tank->sheetSetup(30, 30, 3);
-    Sprite *player2_turrent = new Sprite(render->getRenderer(), "src/res/images/red_turret.png");
+
+    Sprite *player2_turrent = new Sprite(render->getRenderer(), "src/res/images/blue_turret.png");
 	player2_turrent->init();
+
 	player2->setSprite(blue_player_tank);
 	player2->setTurretSprite(player2_turrent);
 
-	// Create client
+	// Create client and initialize
 	client = new Client(options->ip, options->port);
-	// Init
 	client->init();
-	player2->setClient(client);
 
-    // Add player to render in vector format
+    // Add player and network players to render in vector format
     players.push_back(player);
-	players.push_back(player2);
+	playerEnemies.push_back(player2);
+
 	render->setPlayer(players);
+	render->setPlayerEnemies(playerEnemies);
 
     // Set up bullet
     bullet = new Sprite(render->getRenderer(), "src/res/images/bullet.png");
@@ -61,7 +63,7 @@ bool OnlineGameLoop::init(Args* options) {
 
 	isGameOn = true;
 
-    // Network initialization
+    // Host-Network initialization
     std::cout << options->isHost << std::endl;
 	if(options->isHost == true){
 		int pid = fork();
@@ -99,13 +101,12 @@ bool OnlineGameLoop::init(Args* options) {
 void OnlineGameLoop::buildMap() {
     while(!client->pollMap()) {}
 
-    std::vector<int> tile_map = *client->gameMap;
 	std::vector<std::vector<int>> map2D;
 	// init the first row
 	map2D.push_back(std::vector<int>((SCREEN_WIDTH - BORDER_GAP - TILE_SIZE) / TILE_SIZE - 1));
 	int row = 0;
 	int col = 0;
-	for (auto tile : tile_map) {
+	for (auto tile : client->gameMap) {
 		if(col == (SCREEN_HEIGHT - TILE_SIZE) / TILE_SIZE - 1) {
 			row++;
 			col = 0;
@@ -121,6 +122,7 @@ void OnlineGameLoop::buildMap() {
 			SDL_Rect cur_out = { x, y, TILE_SIZE, TILE_SIZE};
 			if(map2D[i][j] == 2){
 				tileArray.push_back(cur_out);
+				projectileObstacles.push_back(cur_out);
 			}
 		}
 	}
@@ -130,6 +132,8 @@ void OnlineGameLoop::buildMap() {
 	for (auto player : players) {
 		player->setObstacleLocations(&tileArray);
 	}
+
+	// TODO add obstacles for network players
 }
 
 int OnlineGameLoop::run() {
@@ -146,7 +150,10 @@ int OnlineGameLoop::run() {
             screenCounter = 0;
         }
     }
-
+	
+	const Uint8 *keystate;
+	const Uint8 *keyStatePacket;
+	int temp = 0; // For calculating tickrate TODO change later
     // Main game loop
     while (client->gameOn)
 	{
@@ -172,9 +179,13 @@ int OnlineGameLoop::run() {
             } 
 		}
 
-		int i = 0;
+		assert(players.size() == 1);
 		for(auto player : players) {
-			player->getEvent(elapsed_time, &e);
+			// Send same keystate to player object and to the client to send
+			// Lets just support 10 keys at the same time
+			// TODO find a good rate to send player keystates
+			keystate = SDL_GetKeyboardState(nullptr);
+			player->getEvent(elapsed_time, &e, keystate);
 			
 			//network version of player firing bullet
 			if (player->getFire() == true) {
@@ -187,11 +198,34 @@ int OnlineGameLoop::run() {
 			}
 		}
 
+		// Set inputs of enemy players over network
+		for(auto playerEnemy : playerEnemies) {
+			// Get the keystates from network
+			keyStatePacket = client->getKeyState(0);
+
+			// Apply keysates to the network player
+			playerEnemy->getEvent(elapsed_time, &e, keyStatePacket);
+		}
+
 		// 2. Update
 		// Update if time since last update is >= MS_PER_UPDATE
 		while(lag_time >= MS_PER_UPDATE) {
 			for(auto player : players) {
 				player->update();
+			}
+
+			// Basically add a keyframe every ~2 updates -> 30 times a second
+			temp += 1;
+			// TODO Consolidate tickrates
+			if (temp > 2 && keystate != nullptr) {
+				// Add keystate from local player to send
+				client->addLocalKeyState(keystate);
+				keystate = nullptr; //only need to send one per update loop
+				temp = 0;
+			}
+
+			for (auto playerEnemy : playerEnemies) {
+				playerEnemy->update();
 			}
 
 			int count = 0;
@@ -220,7 +254,6 @@ int OnlineGameLoop::run() {
 		// Render everything
 		render->draw(lag_time / MS_PER_UPDATE);
 		SDL_RenderCopy(render->getRenderer(), cursor, NULL, &cursorRect);
-		client->getGameBufferReady(true);
 	}
 
 	// Exit normally
