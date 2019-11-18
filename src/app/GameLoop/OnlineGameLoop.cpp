@@ -91,7 +91,16 @@ bool OnlineGameLoop::init(Args* options) {
 	}
 
 	// Get initial position of the players from the server
-	while(!client->pollInitData()) {}
+	std::cout << "Waiting on init" << std::endl;
+	int screenCounter = 0;
+	while(!client->pollInitData()) {
+		displayLoadingScreen(screenCounter);
+        screenCounter++;
+        if(screenCounter == 7) {
+            screenCounter = 0;
+        }
+
+	}
 	auto initData = client->initData;
 	player->setId(initData[0]);
 	player->setX(initData[1]);
@@ -106,6 +115,8 @@ bool OnlineGameLoop::init(Args* options) {
 }
 
 void OnlineGameLoop::buildMap() {
+	//wait for both players to connect (Map data arrives when both connect)
+    int screenCounter = 0;
     while(!client->pollMap()) {}
 
 	std::vector<std::vector<int>> map2D;
@@ -147,16 +158,6 @@ int OnlineGameLoop::run() {
     SDL_Event e;
 	previous_time = std::chrono::system_clock::now(); // get current time of system
 	lag_time = 0.0;	// Set duration of time to 0
-
-    //wait for both players to connect
-    int screenCounter = 0;
-	while(!client->startGame){
-	    displayLoadingScreen(screenCounter);
-        screenCounter++;
-        if(screenCounter == 7) {
-            screenCounter = 0;
-        }
-    }
 	
 	const Uint8 *keystate;
 	const Uint8 *keyStatePacket;
@@ -268,9 +269,10 @@ int OnlineGameLoop::run() {
 }
 
 void OnlineGameLoop::displayLoadingScreen(int screenCounter) {
-    SDL_Rect loadingScreenRect = {0, 0, SCREEN_HEIGHT, SCREEN_WIDTH};
+    SDL_Rect loadingScreenRect = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
     switch(screenCounter) {
         case 0:
+			std::cout << "display load 1" << std::endl;
             SDL_RenderCopy(render->getRenderer(), loadingScreen1, NULL, &loadingScreenRect);
             break;
         case 1:
@@ -295,5 +297,6 @@ void OnlineGameLoop::displayLoadingScreen(int screenCounter) {
             SDL_RenderCopy(render->getRenderer(), loadingScreen1, NULL, &loadingScreenRect);
             break;
     }
+	SDL_RenderPresent(render->getRenderer());
     sleep(1);
 }

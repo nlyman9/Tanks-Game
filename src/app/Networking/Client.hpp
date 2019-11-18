@@ -39,16 +39,16 @@ class Client {
     // Game map
     std::vector<int> gameMap;
     std::vector<int> initData;
-    bool initDataReceived;
-    bool mapReceived;
+    bool initDataReceived = false;
+    bool mapReceived = false;
 
     // Game Player
     std::vector<Uint8*> playerKeystates;
     // Game state vector?
 
     // Game 
-    bool gameOn;
-    bool startGame;
+    bool gameOn = false;
+    bool startGame = false;
 
     SDL_Thread* rcThread;
 
