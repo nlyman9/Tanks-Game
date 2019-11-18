@@ -37,6 +37,7 @@ class Player : public Object, public Tank {
         float delta_velocity = 0;
         bool localPlayer;
         bool connected;
+        int id;
         Uint32 anim_last_time = 0;
 
     public:
@@ -52,6 +53,9 @@ class Player : public Object, public Tank {
         bool isConnected(); //check if the player has entered the game
 
         void getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, SDL_Event* e, const Uint8 *keystate);
+        void setId(int i) { 
+            id = i; 
+        }
 
         BoundingBox* getBoundingBox() override;
 
