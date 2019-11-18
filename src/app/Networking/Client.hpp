@@ -38,6 +38,8 @@ class Client {
 
     // Game map
     std::vector<int> gameMap;
+    std::vector<int> initData;
+    bool initDataReceived;
     bool mapReceived;
 
     // Game Player
@@ -203,6 +205,17 @@ class Client {
     bool pollMap() {
       return mapReceived;
     }
+
+    /**
+     * @brief Poll if we have received the initalization data
+     * 
+     * @return true - We have!
+     * @return false - We havent :(
+     */
+    bool pollInitData() {
+      return initDataReceived;
+    }
+
 
     /**
      * @brief The client network process 

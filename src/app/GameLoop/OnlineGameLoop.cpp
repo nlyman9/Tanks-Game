@@ -7,7 +7,7 @@ OnlineGameLoop::OnlineGameLoop(Render* renderer) : render{renderer} {}
 
 bool OnlineGameLoop::init(Args* options) {
     // Set up player 1
-    Player* player = new Player(SCREEN_WIDTH/2 + 100, 50, true);
+    Player* player = new Player(0, 0, true); // Position set from server
     Sprite *red_player_tank = new Sprite(render->getRenderer(), "src/res/images/red_tank.png");
 	red_player_tank->init();
 	red_player_tank->sheetSetup(30, 30, 3);
@@ -18,7 +18,7 @@ bool OnlineGameLoop::init(Args* options) {
 	player->setTurretSprite(player1_turret);
 
     // Set up player 2
-    Player* player2 = new Player(SCREEN_WIDTH/2 + 100, 400, false);
+    Player* player2 = new Player(0, 0, false); // Position set from server
 	Sprite* blue_player_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
 	blue_player_tank->init();
     blue_player_tank->sheetSetup(30, 30, 3);
@@ -61,8 +61,6 @@ bool OnlineGameLoop::init(Args* options) {
     // Set up cursor
     cursor = loadImage("src/res/images/cursor.png", render->getRenderer());
 
-	isGameOn = true;
-
     // Host-Network initialization
     std::cout << options->isHost << std::endl;
 	if(options->isHost == true){
@@ -91,6 +89,15 @@ bool OnlineGameLoop::init(Args* options) {
 			std::cout << "Created server process " << server_pid << std::endl;
 		}
 	}
+
+	// Get initial position of the players from the server
+	while(!client->pollInitData()) {}
+	auto initData = client->initData;
+	player->setId(initData[0]);
+	player->setX(initData[1]);
+	player->setY(initData[2]);
+	player2->setX(initData[3]);
+	player2->setY(initData[4]);
 
     buildMap();
 
