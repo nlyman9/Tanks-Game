@@ -177,11 +177,6 @@ bool Player::place(float x, float y) {
 }
 
 /* Player Specific Functions */
-
-void Player::setClient(Client* cl) {
-    client = cl;
-}
-
 void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, 
                       SDL_Event* e, 
                       const Uint8 *keystate) {

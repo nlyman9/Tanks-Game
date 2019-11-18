@@ -3,6 +3,7 @@
 
 #include "Render.hpp"
 #include "Args.hpp"
+#include "Client.hpp"
 
 class OnlineGameLoop {
     public:
