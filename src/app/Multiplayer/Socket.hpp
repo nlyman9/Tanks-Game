@@ -17,6 +17,10 @@
 #include <tuple>
 #include <unistd.h>
 
+/**
+ * @brief Define a socket with these two types of protocols
+ * 
+ */
 enum class Protocol {
     UDP,
     TCP
@@ -182,6 +186,11 @@ class Socket {
             return client;
         }
 
+        /**
+         * @brief Set that this function is ready to receive
+         * 
+         * @param b - The boolean state
+         */
         void setReceiving(bool b) {
             this->isReceiving = b;
         }
@@ -229,8 +238,14 @@ class Socket {
             this->isConnected = true;
             return true;
         }
-        
-        // As far as a I know this works on linux even after sockets are binded/connected
+
+        /**
+         * @brief Set the tickrate (timeout) of the socket 
+         * @warning - This might need to be called before connection is established.
+         *          + As far as a I know this works on linux even after sockets are binded/connected
+         * 
+         * @param tickrate - The rate in seconds the socket should timeout. Higher tickrate = Higher refresh rate
+         */
         void setTimeout(int tickrate) {
             int micro_seconds = 1e+6;
             struct timeval tv;

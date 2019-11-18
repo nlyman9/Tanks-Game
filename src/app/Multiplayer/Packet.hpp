@@ -76,7 +76,7 @@ class Packet {
          * 
          * @param size - The size of the packet
          * @param type - The type of the packet
-         * @param datas - The data char 
+         * @param datas - The body data of the packet 
          * @param data_size - The size of the data so null terminators don't truncate the rest of the data
          */
         Packet(Header size, Header type, const char* data, int data_size) {
@@ -90,7 +90,7 @@ class Packet {
         }
 
         /**
-         * @brief Appends a string of data 
+         * @brief Appends a string of data to the body of the packet
          * 
          * @param str - the string of data to append 
          */
@@ -102,7 +102,7 @@ class Packet {
         }
 
         /**
-         * @brief Appends a vector of integers 
+         * @brief Appends a vector of integers to the body of the pakcet
          * 
          * @param nums - the numbers to append
          */
@@ -114,7 +114,7 @@ class Packet {
             setPacketSize();
         }
         /**
-         * @brief Appnd chars to the data 
+         * @brief Appnd chars to the body of the packet 
          * 
          * @param chars - the chars to append
          */
@@ -149,9 +149,10 @@ class Packet {
 
         // Getters 
         /**
-         * @brief Get the Headers object
+         * @brief Get the Headers of the packet 
          * @warning Using a for-each loop may cause segfaults, 
          *     use a normal for loop to iterate, or an iterator.
+         *   ^^^ May not be the case anymore, have not tested
          * 
          * @return std::vector<Header> 
          */
@@ -160,7 +161,7 @@ class Packet {
         }
 
         /**
-         * @brief Get the Datas object
+         * @brief Get the body of the packet
          * 
          * @return std::vector<char>* 
          */
@@ -180,7 +181,8 @@ class Packet {
         /**
          * @brief Get the the type of the packet
          *  - Returns the 2nd header in the packet.
-         *  @see the constructor to see how Packets should be formatted 
+         * 
+         * @see the constructor to see how Packets should be formatted 
          * 
          * @return PackType - returns the type of packet
          */
