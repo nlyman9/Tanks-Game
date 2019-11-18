@@ -52,5 +52,6 @@
         "numeric": "cpp",
         "random": "cpp",
         "ratio": "cpp"
-    }
+    },
+    "cquery.cacheDirectory": "${workspaceFolder}/.vscode/cquery_cached_index/"
 }
