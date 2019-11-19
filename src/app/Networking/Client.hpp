@@ -30,8 +30,7 @@ class Client {
   private:
     // The keys we want to check for when we add a keystate packet
     std::vector<Uint8> keysToCheck =  { SDL_SCANCODE_W, SDL_SCANCODE_A, 
-                                        SDL_SCANCODE_S, SDL_SCANCODE_D,
-                                        (Uint8) SDL_MOUSEBUTTONDOWN }; 
+                                        SDL_SCANCODE_S, SDL_SCANCODE_D}; 
   public:
     // Network
     ClientController *server;
@@ -44,6 +43,8 @@ class Client {
 
     // Game Player
     std::vector<Uint8*> playerKeystates;
+    std::vector<int> playerTurretThetas;
+    std::vector<bool> playerMouseClicked;
     // Game state vector?
 
     // Game 
@@ -65,6 +66,8 @@ class Client {
       // It works thus far
       Uint8 *player2Keystats = (Uint8 *) calloc(27, sizeof(Uint8));
       playerKeystates.push_back(player2Keystats);
+      playerTurretThetas.push_back(0);
+      playerMouseClicked.push_back(false);
     };
 
     ~Client() {
@@ -141,14 +144,21 @@ class Client {
       return (const Uint8*) playerKeystates.at(id);
     }
 
+    int getTurretTheta(int id) {
+      assert(id < playerTurretThetas.size());
+
+      return playerTurretThetas.at(id);
+    }
+
     /**
      * @brief Add a keystate received from the server to keystates vector 
      * 
      * @param id - The ID of the client it was from
      * @param charKeyStates - The keystates 
      */
-    void addNetworkKeyState(int id, std::vector<char> *charKeyStates) {
+    void addNetworkKeyState(int id, std::vector<char> *charKeyStates, int turretTheta) {
       assert(id < playerKeystates.size());
+      assert(id < playerTurretThetas.size());
 
       std::cout << "Adding keystate from network (client " << id << ") - ";
       fflush(stdout);
@@ -156,11 +166,14 @@ class Client {
       // This is a little hacky, but I am trying simulate SDL_getKeyboardState
       Uint8 *keystate = playerKeystates.at(id);
 
-      for (int i = 0; i < keysToCheck.size() - 1; i++) {
+      for (int i = 0; i < keysToCheck.size(); i++) {
         keystate[keysToCheck[i]] = (Uint8) charKeyStates->at(i); 
       }
 
-      printf("Keystate[W] = %d \n", keystate[SDL_SCANCODE_W]);
+      playerTurretThetas[id] = turretTheta;
+
+      printf("Keystate[W] = %d  -- ", keystate[SDL_SCANCODE_W]);
+      printf("Turret = %d\n", playerTurretThetas.at(id));
 			fflush(stdout);
     }
 
@@ -170,15 +183,17 @@ class Client {
      * 
      * @param keystates - Keystates from the local client
      */
-    void addLocalKeyState(const Uint8 *keystates) {
+    void addLocalKeyState(const Uint8 *keystates, int turretTheta) {
       Packet *mail = new Packet(PackType::KEYSTATE);
       std::vector<char> charKeyStates;
 
       for (auto key : keysToCheck) {
         charKeyStates.push_back((char)keystates[key]);
       }
-
+      charKeyStates.push_back(' '); // use space to mark end of keystates
       mail->appendData(charKeyStates);
+      mail->appendData(turretTheta);
+
       std::cout << "Sending keystate - ";
       mail->printData();
       fflush(stdout);

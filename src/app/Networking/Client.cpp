@@ -168,7 +168,8 @@ int Client::clientProcess(void* data) {
             // If keystate, unpack a load into formable keystate
             // TODO not hardcode id to 0 
             if (mail->getType() == PackType::KEYSTATE) {
-                client->addNetworkKeyState(0, mail->getBody());
+                int turret_theta = mail->getInt(5);
+                client->addNetworkKeyState(0, mail->getBody(), turret_theta);
             }
         }
 
