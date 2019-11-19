@@ -208,8 +208,10 @@ int LocalGameLoop::run() {
         // 2. Update
 		// Update if time since last update is >= MS_PER_UPDATE
 		while(lag_time >= MS_PER_UPDATE) {
-            
+			
+            player->setTurretTheta();
             player->update();
+
 			for (auto enemy: enemies) {
 				enemy->update();
 			}

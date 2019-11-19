@@ -70,20 +70,33 @@ void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
 }
 
 /**
- * @brief update the player object
- *  Overrides base class Object
- *
+ * @brief Set turret theta using the current position of the mouse
+ * 
  */
-void Player::update() {
+void Player::setTurretTheta() {
     // Move the turret
     // Center the delta x and y by the center of the tank
     float delta_x = mouseX - (getX() + TANK_WIDTH / 2);
     float delta_y = mouseY - (getY() + TANK_HEIGHT / 2);
     float theta_radians = atan2(delta_y, delta_x);
-    mouseTheta = (int)(theta_radians * 180 / M_PI);
-    mouseTheta = (int)(theta_radians * 180 / M_PI);
-    turretTheta = mouseTheta;
+    turretTheta = (int)(theta_radians * 180 / M_PI);;
+}
 
+/**
+ * @brief Set the turret theta with a given value 
+ * 
+ * @param theta - The theta value you want to set it to
+ */
+void Player::setTurretTheta(int theta) {
+    turretTheta = theta;
+}
+
+/**
+ * @brief update the player object
+ *  Overrides base class Object
+ *
+ */
+void Player::update() {
     // Move player
     // Rotate player
     rotate(theta_v);
@@ -177,11 +190,6 @@ bool Player::place(float x, float y) {
 }
 
 /* Player Specific Functions */
-
-void Player::setClient(Client* cl) {
-    client = cl;
-}
-
 void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, 
                       SDL_Event* e, 
                       const Uint8 *keystate) {
