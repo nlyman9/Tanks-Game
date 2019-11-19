@@ -37,9 +37,8 @@ int Credits::playCredits() {
 	creditsImages.push_back(loadImage("src/res/images/Njl26 Credits Picture.bmp", render->getRenderer()));	// index 2
 	creditsImages.push_back(loadImage("src/res/images/AlexClewell_cs1666.bmp", render->getRenderer()));
 	creditsImages.push_back(loadImage("src/res/images/brendanmarani_picture.bmp", render->getRenderer()));
-	creditsImages.push_back(loadImage("src/res/images/CS1666_BenKurzyna.bmp", render->getRenderer()));
 	creditsImages.push_back(loadImage("src/res/images/danny_credit.bmp", render->getRenderer()));
-	creditsImages.push_back(loadImage("src/res/images/dtm32.bmp", render->getRenderer()));
+	// creditsImages.push_back(loadImage("src/res/images/dtm32.bmp", render->getRenderer()));
 	creditsImages.push_back(loadImage("src/res/images/ecm53.bmp", render->getRenderer()));
 
 	for(auto image : creditsImages) {
