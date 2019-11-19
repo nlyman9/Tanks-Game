@@ -377,9 +377,18 @@ int GameLoop::runSinglePlayer()
 	Sprite *shell = new Sprite(render->getRenderer(), "src/res/images/shell.png");
 	shell->init();
 	SDL_Texture* cursor = loadImage("src/res/images/cursor.png", render->getRenderer());
+	//Create pink explosion sprite for projectiles
 	Sprite *pinksplosion =  new Sprite(render->getRenderer(), "src/res/images/pinksplosion.png");
 	pinksplosion->init();
-	pinksplosion->sheetSetup(42, 42, 6);
+	pinksplosion->sheetSetup(48, 48, 6);
+	//Create red explosion sprite for player tanks
+	Sprite *redsplosion =  new Sprite(render->getRenderer(), "src/res/images/redsplosion.png");
+	redsplosion->init();
+	redsplosion->sheetSetup(48, 48, 6);
+	//Create blue explosion sprite for enemy tanks
+	Sprite *bluesplosion =  new Sprite(render->getRenderer(), "src/res/images/bluesplosion.png");
+	bluesplosion->init();
+	bluesplosion->sheetSetup(48, 48, 6);
 	
 	while (isGameOn)
 	{
@@ -420,11 +429,6 @@ int GameLoop::runSinglePlayer()
 				}
 				
 				player->setFire(false);
-				
-				 std::vector<SDL_Rect> targets = projectiles.back()->targets;
-				for(auto target : targets){
-						std::cout << target.x << ":" << target.y << "\n";
-				}
 			}
 		}
 
@@ -449,13 +453,28 @@ int GameLoop::runSinglePlayer()
 		// Update if time since last update is >= MS_PER_UPDATE
 		while(lag_time >= MS_PER_UPDATE) {
 			//update players
-			for(auto player : players) {
-				player->update();
+			for (int i = 0; i < players.size(); i++) {
+				players.at(i)->update();
+				
+				if(players.at(i)->isDestroyed()) {
+					//deletes enemy from gameloop
+					players.erase(players.begin()+i);
+					//deletes enemy from render
+					render->gPlayers.erase(render->gPlayers.begin()+i);
+				}
 			}
 
 			//update enemies
-			for (auto enemy : enemies) {
-				enemy->update();
+			for (int i = 0; i < enemies.size(); i++) {
+				enemies.at(i)->update();
+				
+				if(enemies.at(i)->isDestroyed()) {
+					//deletes enemy from gameloop
+					enemies.erase(enemies.begin()+i);
+					//deletes enemy from render
+					render->gEnemies.erase(render->gEnemies.begin()+i);
+				}
+				
 			}
 
 			//update projectiles
@@ -475,13 +494,48 @@ int GameLoop::runSinglePlayer()
 				
 				//update projectile
 				projectiles.at(i)->update();
+				//check if a target was hit by a projectile
+				if(projectiles.at(i)->isHit()){
+					//find which target matches the one hit
+					SDL_Rect* hitObject = projectiles.at(i)->getTarget();
+					//std::cout << "hit coord: " << hitObject->x << ", " << hitObject->y << "\n";
+					//SDL_Rect* overlap;
+					
+					for(auto player : players) {
+						//overlap = check_collision(&hitObject, &player->get_box());
+						SDL_Rect* playerRect = player->get_box();
+						//std::cout << "player: " << player->getX() << ", " << player->getY() << "\n";
+						if(playerRect->x == hitObject->x && playerRect->y == hitObject->y && !player->isHit()) {
+						//if(overlap != nullptr) {
+							//std::cout << "The player was hit!\n";
+							player->setHit(true);
+							player->setSprite(redsplosion);
+							player->resetFrame();
+							//render->g
+							break;
+						}
+					}
+					
+					for(auto enemy: enemies) {
+						//overlap = check_collision(&hitObject, &enemy->get_box());
+						SDL_Rect* enemyRect = enemy->get_box();
+						//if(enemy->getX() == hitObject->x && enemy->getY() == hitObject->y) {
+						if(enemyRect->x == hitObject->x && enemyRect->y == hitObject->y && !enemy->isHit()) {
+							enemy->setHit(true);
+							enemy->setSprite(bluesplosion);
+							enemy->resetFrame();
+							break;
+						}
+					}
+				}
+				
 				//check if the projectile needs to be deleted
 				if(projectiles.at(i)->isExploding()){
 					//replace the projectile's image with the explosion
 					projectiles.at(i)->setSprite(pinksplosion);
 				}
 				else if(projectiles.at(i)->isFinished()){
-					projectiles.at(i)->~Projectile();
+					projectiles.erase(projectiles.begin()+i);
 					//remove the projectile from the render array so the image does not stay
 					render->gProjectiles.erase(render->gProjectiles.begin()+i);
 

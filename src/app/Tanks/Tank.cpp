@@ -26,8 +26,25 @@ bool Tank::rotate(float t){
     return true;
 }
 
-bool Tank::rotateTurret(float t){
+void Tank::rotateTurret(float t){
     turretTheta = t;
+}
+
+void Tank::setHit(bool val) {
+	hit = val;
+}
+
+void Tank::resetFrame() {
+	std::cout << "frame = 0\n";
+	frame = 0;
+}
+
+bool Tank::isHit() {
+    return hit;
+}
+
+bool Tank::isDestroyed() {
+    return destroyed;
 }
 
 void Tank::setTurretSprite(Sprite *new_sprite) 
