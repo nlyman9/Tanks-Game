@@ -59,6 +59,7 @@ class Object
 {
 private:
     Sprite sprite;
+    Sprite turretSprite;
     float x;
     float y;
     SDL_Rect box;
