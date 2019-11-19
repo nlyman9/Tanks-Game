@@ -128,7 +128,7 @@ void Player::setTurretTheta(int theta) {
 void Player::update() {
     // Move player
     // Rotate player
-    rotate(theta_v);
+    rotatePlayer(theta_v);
 
     float updateStep = MS_PER_UPDATE / 1000;
 
