@@ -26,6 +26,12 @@ bool Render::init()
 		return false;
 	}
 
+	if(TTF_Init()==-1) 
+	{
+    	printf("TTF_Init: %s\n", TTF_GetError());
+    	exit(2);
+	}
+
 	if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1"))
 	{
 		std::cout << "Warning: Linear texture filtering not enabled!" << std::endl;
@@ -59,6 +65,9 @@ bool Render::init()
 			gTileRects[i].w = TILE_SIZE;
 			gTileRects[i].h = TILE_SIZE;
 	}
+	// Set initalization for text
+	font = TTF_OpenFont("../../res/fonts/SansUndertale.ttf", 24);
+	white = {255, 255, 255};
 
 	return true;
 }
@@ -217,6 +226,15 @@ int Render::draw(double update_lag) {
 		c += TILE_SIZE;
 	}
 
+	//Render timer
+	surfaceMessage = TTF_RenderText_Solid(font, (std::to_string(timer)).c_str(), white);
+	timer_display = SDL_CreateTextureFromSurface(gRenderer, surfaceMessage);
+	timer_box.x = 0;
+	timer_box.y = 0;
+	timer_box.w = 100;
+	timer_box.h = 100;
+	SDL_RenderCopy(gRenderer, timer_display, NULL, &timer_box);
+
 	// Render player
 	for (auto player : gPlayers) {
 		player->draw(gRenderer, update_lag);
@@ -256,4 +274,8 @@ void Render::setEnemies(std::vector<Enemy *> enemies) {
 
 void Render::setProjectiles(std::vector<Projectile *> projectiles) {
 	gProjectiles = projectiles;
+}
+
+void Render::setTimer(unsigned int passed_timer) {
+	timer = passed_timer;
 }
