@@ -30,6 +30,7 @@
 #include "Server.hpp"
 #include "MapGenerator.hpp"
 #include "Network.hpp"
+#include "Constants.hpp"
 
 #define R_BUFFER_SIZE 152
 
@@ -91,12 +92,6 @@ int serverProcess() {
     timeout->tv_sec = 0;
     timeout->tv_usec = 0;
 
-    // Generate map
-    auto map = serverMapGen();
-    std::cout << "Map size is " << map->size() << std::endl;
-    pack(map, &packedMap, 3); //pack map into 3 bits
-
-
     // First wait for 2 clients
     while (server->numClients() < 2) {
         if (server->accept()) {
@@ -106,6 +101,63 @@ int serverProcess() {
         std::cout << "Server: Looping - numClients = " << server->numClients() << std::endl;
         sleep(1);
     }
+    
+    // Set player starting positions
+    //              { Player 1 , Player 2 }
+    int x_pos[2] = {100, SCREEN_WIDTH - 100};
+    int y_pos[2] = {50, SCREEN_HEIGHT - 50};
+    
+    // Initialize Player Data
+    for (int i = 0; i < server->numClients(); i++) {
+        // Packet playerID, inital position
+        std::vector<char> data;
+        // Add Player's ID
+        data.push_back(std::to_string(i)[0]); 
+        data.push_back(' ');
+
+        // Tell client where player 1 starts
+        data.push_back(std::to_string(0)[0]); 
+        data.push_back(' ');
+
+        std::string xP1 = std::to_string(x_pos[0]); 
+        for (auto x_character : xP1) {
+            data.push_back(x_character); // Player 1 x
+        }
+        data.push_back(' ');
+
+        std::string yP1 = std::to_string(y_pos[0]); 
+        for (auto y_character : yP1) {
+            data.push_back(y_character); // Player 1 y
+        }
+        data.push_back(' ');
+
+        // Tell client where player 2 starts
+        data.push_back(std::to_string(1)[0]); 
+        data.push_back(' ');
+
+        std::string xP2 = std::to_string(x_pos[1]); 
+        for (auto x_character : xP2) {
+            data.push_back(x_character); // Player 2 x
+        }
+        data.push_back(' ');
+
+        std::string yP2 = std::to_string(y_pos[1]); 
+        for (auto y_character : yP2) {
+            data.push_back(y_character); // Player 2 y
+        }
+        data.push_back(' ');
+
+        std::cout << "Server: Preparing to send init data to player " << i << "!" << std::endl;
+        Packet *initPacket = new Packet(PackType::INIT);
+        std::cout << "Init packet size is " << data.size() << std::endl;
+        initPacket->appendData(data);
+        server->sendPacketToClient(i ,initPacket);
+    }
+
+    // Generate map
+    auto map = serverMapGen();
+    std::cout << "Map size is " << map->size() << std::endl;
+    pack(map, &packedMap, 3); //pack map into 3 bits
 
     // Send map to the clients!
     std::cout << "Server: Preparing to send map!" << std::endl;

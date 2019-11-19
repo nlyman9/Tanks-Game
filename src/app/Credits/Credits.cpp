@@ -1,9 +1,8 @@
 #include <iostream>
-#include <vector>
 #include <string>
-
-#include "Credits.hpp"
 #include <vector>
+#include "Credits.hpp"
+#include "ImageLoader.hpp"
 
 #ifdef __APPLE__ 
 #include <SDL2/SDL.h>
@@ -14,42 +13,6 @@
 #include <SDL2/SDL_ttf.h>
 
 #endif // __APPLE__
-
-SDL_Texture* Credits::loadImage(std::string fname) {
-	SDL_Texture* newText = nullptr;
-
-	SDL_Surface* startSurf = IMG_Load(fname.c_str());
-	if (startSurf == nullptr) {
-		std::cout << "Unable to load image " << fname << "! SDL Error: " << SDL_GetError() << std::endl;
-		return nullptr;
-	}
-
-	newText = SDL_CreateTextureFromSurface(gRenderer, startSurf);
-	if (newText == nullptr) {
-		std::cout << "Unable to create texture from " << fname << "! SDL Error: " << SDL_GetError() << std::endl;
-	}
-
-	SDL_FreeSurface(startSurf);
-
-	return newText;
-}
-
-void Credits::close() {
-	for (auto i : gTex) {
-		SDL_DestroyTexture(i);
-		i = nullptr;
-	}
-
-
-	SDL_DestroyRenderer(gRenderer);
-	SDL_DestroyWindow(gWindow);
-	gWindow = nullptr;
-	gRenderer = nullptr;
-
-	// Quit SDL subsystems
-	IMG_Quit();
-	SDL_Quit();
-}
 
 int Credits::playCredits() {
 
@@ -67,29 +30,26 @@ int Credits::playCredits() {
 	}  
 	#endif // __APPLE__
 
+	std::vector<SDL_Texture*> creditsImages;
 	// Load media
-	gTex.push_back(loadImage("src/res/images/cs1666_adamibrahim.bmp"));	// index 0
-	gTex.push_back(loadImage("src/res/images/Alec_Img.bmp"));	// index 1
-	gTex.push_back(loadImage("src/res/images/Njl26 Credits Picture.bmp"));	// index 2
-	gTex.push_back(loadImage("src/res/images/AlexClewell_cs1666.bmp"));
-	gTex.push_back(loadImage("src/res/images/brendanmarani_picture.bmp"));
-	gTex.push_back(loadImage("src/res/images/CS1666_BenKurzyna.bmp"));
-	gTex.push_back(loadImage("src/res/images/danny_credit.bmp"));
-	gTex.push_back(loadImage("src/res/images/dtm32.bmp"));
-	gTex.push_back(loadImage("src/res/images/ecm53.bmp"));
+	creditsImages.push_back(loadImage("src/res/images/cs1666_adamibrahim.bmp", render->getRenderer()));	// index 0
+	creditsImages.push_back(loadImage("src/res/images/Alec_Img.bmp", render->getRenderer()));	// index 1
+	creditsImages.push_back(loadImage("src/res/images/Njl26 Credits Picture.bmp", render->getRenderer()));	// index 2
+	creditsImages.push_back(loadImage("src/res/images/AlexClewell_cs1666.bmp", render->getRenderer()));
+	creditsImages.push_back(loadImage("src/res/images/brendanmarani_picture.bmp", render->getRenderer()));
+	creditsImages.push_back(loadImage("src/res/images/danny_credit.bmp", render->getRenderer()));
+	// creditsImages.push_back(loadImage("src/res/images/dtm32.bmp", render->getRenderer()));
+	creditsImages.push_back(loadImage("src/res/images/ecm53.bmp", render->getRenderer()));
 
-	for(auto image : gTex) {
-		SDL_RenderClear(gRenderer);
-		SDL_RenderCopy(gRenderer, image, NULL, NULL);
-		SDL_RenderPresent(gRenderer);
+	for(auto image : creditsImages) {
+		SDL_RenderClear(render->getRenderer());
+		SDL_RenderCopy(render->getRenderer(), image, NULL, NULL);
+		SDL_RenderPresent(render->getRenderer());
 		SDL_Delay(3000);
 	}
 
-	jakobCredits(loadImage("src/res/images/jakob_img.png"), loadImage("src/res/images/jakob_hitmarker.png"));
+	jakobCredits(loadImage("src/res/images/jakob_img.png", render->getRenderer()), loadImage("src/res/images/jakob_hitmarker.png", render->getRenderer()));
 
-	/* END Jakob's Credit Scene */
-
-	close();
 }
 
 void Credits::jakobCredits(SDL_Texture*  picture, SDL_Texture* hitmarker) {
@@ -104,19 +64,19 @@ void Credits::jakobCredits(SDL_Texture*  picture, SDL_Texture* hitmarker) {
 
 	/* CODE */
 	// Render jakob.bmp first
-	SDL_RenderClear(gRenderer);
-	SDL_RenderCopy(gRenderer, picture, NULL, NULL);
-	SDL_RenderPresent(gRenderer);
+	SDL_RenderClear(render->getRenderer());
+	SDL_RenderCopy(render->getRenderer(), picture, NULL, NULL);
+	SDL_RenderPresent(render->getRenderer());
 
 	SDL_Delay(2500);
 
 	// Create texture of jakob.bmp so I can write other things on it
-	SDL_Texture* back = SDL_CreateTexture(gRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, SCREEN_WIDTH, SCREEN_HEIGHT);
+	SDL_Texture* back = SDL_CreateTexture(render->getRenderer(), SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, SCREEN_WIDTH, SCREEN_HEIGHT);
 	for (int i = 0; i < 6; i++) {
 		// Set target to sdl texture back
-		SDL_SetRenderTarget(gRenderer, back);
+		SDL_SetRenderTarget(render->getRenderer(), back);
 		// Redraw the first image first.
-		SDL_RenderCopy(gRenderer, picture, NULL, NULL);
+		SDL_RenderCopy(render->getRenderer(), picture, NULL, NULL);
 		
 		// Wait 0.5 seconds
 		if (i < 5) 
@@ -125,12 +85,12 @@ void Credits::jakobCredits(SDL_Texture*  picture, SDL_Texture* hitmarker) {
 			SDL_Delay(750);
 
 		// Render hit marker on background
-		SDL_RenderCopy(gRenderer, hitmarker, NULL, &(pos[i]));
+		SDL_RenderCopy(render->getRenderer(), hitmarker, NULL, &(pos[i]));
 
 		// Render edited texture 'back' to screen.
-		SDL_SetRenderTarget(gRenderer, NULL);
-		SDL_RenderCopy(gRenderer, back, NULL, NULL);
-		SDL_RenderPresent(gRenderer);
+		SDL_SetRenderTarget(render->getRenderer(), NULL);
+		SDL_RenderCopy(render->getRenderer(), back, NULL, NULL);
+		SDL_RenderPresent(render->getRenderer());
 	}
 	SDL_Delay(1500);    
 
