@@ -90,10 +90,18 @@ Sprite* Object::getSprite(){
     return &sprite;
 }
 
+Sprite* Object::getTurretSprite(){
+    return &turretSprite;
+}
 
 void Object::setSprite(Sprite *new_sprite)
 {
     sprite = *new_sprite;
+}
+
+void Object::setTurretSprite(Sprite *new_sprite) 
+{
+    turretSprite = *new_sprite;
 }
 
 void Object::setPos(float newx, float newy)

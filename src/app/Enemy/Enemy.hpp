@@ -24,11 +24,12 @@ struct coordinate {
 	int weight;
 };
 
-class Enemy : public Object, public Tank {
+class Enemy : public Object {
     private:
         /* data */
         Player* gPlayer;
         bool left = true;
+		int frame = 0;
 		bool anim_last_time = 0;
         std::vector<coordinate> enemyPath;
 				std::vector<Projectile *> enemyProjectiles;
@@ -48,17 +49,20 @@ class Enemy : public Object, public Tank {
 		int bulletXblock, bulletYblock, bulletTheta;
 		int enemyType;
 
-		Uint32 last_state_change = 0;
-		Uint32 turret_mode_change = 0;
+
+				Uint32 fire_last_time = 0;
+				Uint32 last_state_change = 0;
+				Uint32 turret_mode_change = 0;
+				bool shotsFired = false;
 
         bool checkPos(float playX, float playY, float enemX, float enemY);
         bool checkWall(float x, float y);
 		//	just wondering if we want to put some kind of custom acceleration on enemies?
 		//	this is just a note for the future since the online pitt library won't let me open the book I found
 		//	but maybe we'll eventually have a setting for the ai's current state (searching, pathing, running away, etc)
-		void findEndValues(float angle);
-		void setFalse();	//reset direction booleans to false
-		int xArrPosL(float pos);
+				void findEndValues(float angle);
+				void setFalse();	//reset direction booleans to false
+				int xArrPosL(float pos);
         int xArrPosR(float pos);
         int yArrPos(float pos);
         int findXBlock(float pos);
