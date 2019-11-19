@@ -17,29 +17,33 @@
 #include <SDL2/SDL.h>
 #include "Object.hpp"
 #include "Client.hpp"
-#include "Tank.hpp"
 
 const int THETA_WINDOW = 5;
 
-class Player : public Object, public Tank {
+class Player : public Object {
     private:
         /* data */
         Sprite *turret = nullptr;
         Client *client = nullptr;
         float x_vel, y_vel; // x and y velocity
         int lives; //health points left
+        int theta = 0;
         int theta_v = 0;
         int mouseTheta = 0;
         int mouseX = 0;
         int mouseY = 0;
+        float turretTheta = 0;
         int turretTheta_v = 0;
         float x_deltav = 0;
         float y_deltav = 0;
         float velocity = 0;
         float delta_velocity = 0;
+        bool shotsFired = false;
+        Uint32 fire_last_time = 0;
         bool localPlayer;
         bool connected;
         Uint32 anim_last_time = 0;
+        int frame = 0;
 
     public:
         
@@ -51,8 +55,14 @@ class Player : public Object, public Tank {
         bool move(float x, float y) override; //move x offset from current x and y offset from current y
         bool place(float x, float y) override; //place/teleport to an x and y
 
+        bool getFire();	// returns bool fire value
+        bool setFire(bool fire);	// sets fire value
+        bool rotatePlayer(float theta); //rotate the object
+        bool rotateTurret(float theta); //rotate the turret
         bool isConnected(); //check if the player has entered the game
 
+        int getTheta();
+        int getTurretTheta();
         void getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, SDL_Event* e);
         void setClient(Client* client);
 

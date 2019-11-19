@@ -9,9 +9,10 @@ target_link_libraries(Render
   ${SDL2_LIBRARY}
   ${SDL2_IMAGE_LIBRARIES}
   Constants
-  Tank
+  Player
   Object
   Sprite
+  Enemy
   Projectile
   MapGenerator
   ImageLoader
@@ -22,9 +23,10 @@ target_link_libraries(Render
   PRIVATE
   SDL2
   Constants
-  Tank
+  Player
   Object
   Sprite
+  Enemy
   Projectile
   ImageLoader
   Networking

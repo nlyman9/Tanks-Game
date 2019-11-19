@@ -86,7 +86,7 @@ void Player::update() {
 
     // Move player
     // Rotate player
-    rotate(theta_v);
+    rotatePlayer(theta_v);
 
     float updateStep = MS_PER_UPDATE / 1000;
 
@@ -177,6 +177,37 @@ bool Player::place(float x, float y) {
 }
 
 /* Player Specific Functions */
+
+bool Player::getFire() {
+    return shotsFired;
+}
+
+bool Player::setFire(bool fire) {
+    this->shotsFired = fire;
+    return true;
+}
+
+bool Player::rotatePlayer(float t) {
+    theta += t;
+
+    if(theta < 0) {
+        theta = 360 + theta;
+    }
+    theta %= 360;
+    return true;
+}
+
+bool Player::rotateTurret(float theta) {
+    return false;
+}
+
+int Player::getTheta() {
+    return theta;
+}
+
+int Player::getTurretTheta() {
+    return turretTheta;
+}
 
 void Player::setClient(Client* cl) {
     client = cl;
