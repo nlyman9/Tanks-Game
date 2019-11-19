@@ -252,6 +252,7 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time,
 
     if(e->type == SDL_MOUSEBUTTONDOWN) {
   		Uint32 current_time = SDL_GetTicks();
+
   		if (current_time > fire_last_time + 3000) {
   			setFire(true);
   			fire_last_time = current_time;

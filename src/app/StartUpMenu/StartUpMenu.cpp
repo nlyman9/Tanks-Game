@@ -4,15 +4,13 @@
 #include "OnlineGameLoop.hpp"
 #include "Credits.hpp"
 
-void launch(Args *options) 
+void StartUpMenu::launch(Args *options)
 {
-	Render* renderer = new Render();
-  	renderer->init();
+  renderer = new Render();
+  renderer->init();
 
-	int ret = 0;
-	while(ret == 0) {
-		// Draw the menu
-		int gameMode = renderer->drawMenu();
+  GameLoop gLoop;
+  gLoop.init(renderer);
 
 		// Select game mode
 		if(gameMode == MENU_SINGLE) {
