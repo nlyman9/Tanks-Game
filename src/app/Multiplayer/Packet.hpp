@@ -104,10 +104,20 @@ class Packet {
          /**
          * @brief Appends a char to the body of the packet
          * 
-         * @param char - The character to appen
+         * @param char - The character to append
          */
         void appendData(char c) {
             this->body.push_back(c);
+            setPacketSize(); // Recalculates the size of the packet after the append
+        }
+
+        /**
+         * @brief Appends a bool to the body of the packet
+         * 
+         * @param bool - The boolean to append
+         */
+        void appendData(bool b) {
+            this->body.push_back(b);
             setPacketSize(); // Recalculates the size of the packet after the append
         }
 
