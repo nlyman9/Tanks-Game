@@ -46,7 +46,7 @@ std::vector<std::vector<int>> MapGenerator::generateLineMap()
 
 	srand(time(NULL));
 
-	int tile_randomizer = rand() % 2 + 1;
+	int tile_randomonizer = rand() % 2 + 1;
 
 	for(int i = 0; i < Y_HIGH; i++) {
 		random_index = rand() % X_WIDE;
@@ -69,7 +69,7 @@ std::vector<std::vector<int>> MapGenerator::generateLineMap()
 				if(j == random_index || j == random_index_bonus)
 					room[j][i] = 0;
 				else
-					room[j][i] = 1;
+					room[j][i] = tile_randomonizer;
 			}
 			else {
 				room[j][i] = 0;
@@ -158,14 +158,12 @@ std::vector<std::vector<int>> MapGenerator::presetCenterCubes()
 {
     std::vector<std::vector<int>> array = generateEmptyMap();
 
-	int tile_randomizer = rand() % 2 + 1;
-
 	for(int i = 6; i < 18; i++) {
 		for(int j = 3; j < 10; j++) {
 			if(i == 11 || i == 12 || j == 6) {
 				continue;
 			}
-			array[i][j] = tile_randomizer;
+			array[i][j] = 2;
 		}
 	}
 
@@ -207,15 +205,13 @@ std::vector<std::vector<int>> MapGenerator::presetCheckerMap()
     std::vector<std::vector<int>> room = generateEmptyMap();
     int pre_array[5] = {2, 6, 11, 16, 20};
 
-	int tile_randomizer = rand() % 2 + 1;
-
 	for(int j = 2; j < Y_HIGH; j+=4) {
 		if(j == 2 || j == 10) {
 			for(int i = 1; i < X_WIDE; i+=4) {
-				room[i][j] = tile_randomizer;
+				room[i][j] = 2;
 			}
 			for(int i = 2; i < X_WIDE; i+=4) {
-				room[i][j] = tile_randomizer;
+				room[i][j] = 2;
 			}
 		}
 		else if(j == 6) {
@@ -224,11 +220,11 @@ std::vector<std::vector<int>> MapGenerator::presetCheckerMap()
 
 				}
 				else {
-					room[i][j] = tile_randomizer;
+					room[i][j] = 2;
 				}
 			}
 			for(int i = 4; i < X_WIDE; i+=4) {
-				room[i][j] = tile_randomizer;
+				room[i][j] = 2;
 			}
 		}
 	}
@@ -284,8 +280,8 @@ std::vector<std::vector<int>>* MapGenerator::generateMap()
 			switch(rand() % NUM_PRE)
 			{
 				case 0:
-					// tile_map = generateEmptyMap();
-					// break;
+					tile_map = generateEmptyMap();
+					break;
 				case 1:
 					tile_map = presetCenterCubes();
 					break;
