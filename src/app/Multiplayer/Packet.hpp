@@ -101,8 +101,18 @@ class Packet {
             setPacketSize(); // Recalculates the size of the packet after the append
         }
 
+         /**
+         * @brief Appends a char to the body of the packet
+         * 
+         * @param char - The character to appen
+         */
+        void appendData(char c) {
+            this->body.push_back(c);
+            setPacketSize(); // Recalculates the size of the packet after the append
+        }
+
         /**
-         * @brief Appends an integer value
+         * @brief Appends an integer value to the body of the packet
          * + Has to split the integer into 4 seperate chars
          * 
          * @param int - The integer to append
