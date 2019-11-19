@@ -1,9 +1,7 @@
 add_library(GameLoop
   STATIC
-  LocalGameLoop.hpp
-  LocalGameLoop.cpp
-  OnlineGameLoop.hpp
-  OnlineGameLoop.cpp
+  GameLoop.hpp
+  GameLoop.cpp
 )
 
 if(${APPLE})

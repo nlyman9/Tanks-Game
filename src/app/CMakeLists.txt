@@ -16,7 +16,7 @@ add_subdirectory(Args)
 add_subdirectory(Bomb)
 add_subdirectory(Box)
 
-if(${APPLE}) 
+if(${APPLE})
 find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
 find_package(SDL2_ttf REQUIRED)
@@ -36,7 +36,6 @@ if(${APPLE})
 target_link_libraries(Game
   PRIVATE
   StartUpMenu
-  Args
   ${SDL2_LIBRARY}
   ${SDL2_IMAGE_LIBRARIES}
   ${SDL2_TTF_LIBRARIES}
@@ -61,7 +60,6 @@ target_link_libraries(Game
 )
 target_link_libraries(ServerProcess
   PRIVATE
-  Args
   StartUpMenu
 )
 endif()

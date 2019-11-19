@@ -12,7 +12,7 @@ int main(int argc, char* argv[]) {
 		if (type.compare("host") == 0) {
 			options->isOnline = true;
 			options->isHost = true;
-			// Set host's ip to 0.0.0.0 by default 
+			// Set host's ip to 0.0.0.0 by default
 			options->ip = "0.0.0.0";
 
 			if (argc >= 3) {
@@ -44,6 +44,8 @@ int main(int argc, char* argv[]) {
 		options->isOnline = false;
 	}
 
-	launch(options);
+
+	StartUpMenu startUpMenu;
+	startUpMenu.launch(options);
 	return 0;
 }
