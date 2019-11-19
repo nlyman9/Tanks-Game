@@ -193,7 +193,6 @@ int OnlineGameLoop::run() {
 		assert(players.size() == 1);
 		for(auto player : players) {
 			// Send same keystate to player object and to the client to send
-			// Lets just support 10 keys at the same time
 			// TODO find a good rate to send player keystates
 			keystate = SDL_GetKeyboardState(nullptr);
 			player->getEvent(elapsed_time, &e, keystate);

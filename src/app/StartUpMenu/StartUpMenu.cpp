@@ -28,6 +28,7 @@ void launch(Args *options)
 			credits.playCredits();
 		} else {
 			renderer->close();
+			exit(0);
 		}
 	}
 }
