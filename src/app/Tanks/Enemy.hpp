@@ -26,7 +26,6 @@ struct coordinate {
 class Enemy : public Object, public Tank {
     private:
         /* data */
-        float x_enemy_pos, y_enemy_pos;
         Player* gPlayer;
         bool left = true;
 		bool anim_last_time = 0;
@@ -81,8 +80,6 @@ class Enemy : public Object, public Tank {
         bool move(float x, float y) override;	//	move x offset from current x and y offset from current y
         bool place(float x, float y) override;	//	place/teleport to an x and y
 
-        float getX();
-        float getY();
         void updatePos();
 
         BoundingBox* getBoundingBox() override;

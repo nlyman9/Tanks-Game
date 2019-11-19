@@ -47,7 +47,13 @@ bool OnlineGameLoop::init(Args* options) {
 	shell->init();
 	pinksplosion = new Sprite(render->getRenderer(), "src/res/images/pinksplosion.png");
     pinksplosion->init();
-    pinksplosion->sheetSetup(42, 42, 6);
+    pinksplosion->sheetSetup(48, 48, 6);
+	redsplosion =  new Sprite(render->getRenderer(), "src/res/images/redsplosion.png");
+	redsplosion->init();
+	redsplosion->sheetSetup(48, 48, 6);
+	bluesplosion =  new Sprite(render->getRenderer(), "src/res/images/bluesplosion.png");
+	bluesplosion->init();
+	bluesplosion->sheetSetup(48, 48, 6);
 
     // Set up loading screens
     loadingScreen1 = loadImage("src/res/images/loadingScreen1.png", render->getRenderer());
