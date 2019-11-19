@@ -44,7 +44,7 @@ bool Render::init()
 		printf( "SDL_ttf could not initialize! SDL_ttf Error: %s\n", TTF_GetError() );
 		return false;
 	}
-	
+
 	fontRoboto = TTF_OpenFont("src/res/fonts/Roboto.ttf", 24);
 	if (fontRoboto == NULL) {
         fprintf(stderr, "error: Roboto not found\n");
@@ -126,7 +126,7 @@ int Render::drawMenu() {
 					case SDLK_RETURN:
 						return menuOption;
 						break;
-				} 
+				}
 			} else if(e.type == SDL_MOUSEBUTTONDOWN) {
 				int x, y;
 				SDL_GetMouseState(&x, &y);
@@ -156,13 +156,13 @@ int Render::drawMenu() {
 
 		SDL_Rect fullscreen = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
 		if(menuOption == MENU_SINGLE) {
-			SDL_RenderCopy(gRenderer, menuSinglePlayer, NULL, &fullscreen); 
+			SDL_RenderCopy(gRenderer, menuSinglePlayer, NULL, &fullscreen);
 		} else if(menuOption == MENU_MULTI) {
-			SDL_RenderCopy(gRenderer, menuMultiPlayer, NULL, &fullscreen); 
+			SDL_RenderCopy(gRenderer, menuMultiPlayer, NULL, &fullscreen);
 		} else if(menuOption == MENU_CREDITS) {
-			SDL_RenderCopy(gRenderer, menuCredits, NULL, &fullscreen); 
+			SDL_RenderCopy(gRenderer, menuCredits, NULL, &fullscreen);
 		} else {
-			SDL_RenderCopy(gRenderer, menuNone, NULL, &fullscreen); 
+			SDL_RenderCopy(gRenderer, menuNone, NULL, &fullscreen);
 		}
 
 		int cursorX = 0, cursorY = 0;

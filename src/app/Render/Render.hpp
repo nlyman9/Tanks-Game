@@ -44,7 +44,7 @@ class Render {
 		std::vector<Enemy *> gEnemies;
         std::vector<Projectile *> gProjectiles;
         std::vector<Bomb *> gBombs;
-        int cursorX; 
+        int cursorX;
         int cursorY;
 
         SDL_Renderer* getRenderer();
@@ -57,7 +57,7 @@ class Render {
         void setEnemies(std::vector<Enemy *> enemies);
         void setProjectiles(std::vector<Projectile *> projectiles);
         void setBombs(std::vector<Bomb *> bombs);
-        void setTimer(unsigned int passed_timer); 
+        void setTimer(unsigned int passed_timer);
 
         void clear();
 
