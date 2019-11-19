@@ -102,13 +102,30 @@ class Packet {
         }
 
         /**
+         * @brief Appends an integer value
+         * + Has to split the integer into 4 seperate chars
+         * 
+         * @param int - The integer to append
+         */
+        void appendData(int integer) {
+            this->body.push_back((integer>>24) & 0xFF);
+            this->body.push_back((integer>>16) & 0xFF);
+            this->body.push_back((integer>>8) & 0xFF);
+            this->body.push_back(integer & 0xFF);
+            setPacketSize(); // Recalculates the size of the packet after the append
+        }
+
+        /**
          * @brief Appends a vector of integers to the body of the pakcet
          * 
          * @param nums - the numbers to append
          */
         void appendData(std::vector<int> nums) {
             for (int val : nums) {
-                this->body.push_back(val);
+                this->body.push_back((val>>24) & 0xFF);
+                this->body.push_back((val>>16) & 0xFF);
+                this->body.push_back((val>>8) & 0xFF);
+                this->body.push_back(val & 0xFF);
             }
             std::cout << "Appended data = " << std::string(body.data(), body.size()) << std::endl;
             setPacketSize();
@@ -190,6 +207,24 @@ class Packet {
             return PackType(atoi(headers.at(1).getValue().c_str()));
         }
 
+        int getInt(int startingIndex) {
+            assert(startingIndex < body.size() - 3);
+            int value;
+            int charValue = body.at(startingIndex);
+            value = value | (charValue<<24);
+
+            charValue = body.at(startingIndex+1);
+            value = value | (charValue<<16);
+
+            charValue = body.at(startingIndex+2);
+            value = value | (charValue<<8);
+
+            charValue = body.at(startingIndex+3);
+            value = value | (charValue);
+
+            return value;
+        }
+
         /**
          * @brief Gets the data for the packet to send over network
          * 
@@ -214,6 +249,17 @@ class Packet {
         void printData() {
             for (auto d : this->body) {
                 printf(" %d ", d);
+            }
+            printf("\n");
+        }
+
+        /**
+         * @brief Prints all the values in the char vector in Hexadecimal
+         *    Useful for debugging 
+         */
+        void printDataHex() {
+            for (char d : this->body) {
+                printf(" %x ", d);
             }
             printf("\n");
         }
