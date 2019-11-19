@@ -45,7 +45,6 @@ class Render {
 
         void setPlayer(std::vector<Player*> players);
         void setEnemies(std::vector<Enemy *> enemies);
-        void setProjectiles(std::vector<Projectile *> projectiles);
     private:
 
         std::vector<SDL_Texture*> gTex;

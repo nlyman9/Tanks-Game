@@ -249,7 +249,3 @@ void Render::setPlayer(std::vector<Player *> players) {
 void Render::setEnemies(std::vector<Enemy *> enemies) {
 	gEnemies = enemies;
 }
-
-void Render::setProjectiles(std::vector<Projectile *> projectiles) {
-	gProjectiles = projectiles;
-}
