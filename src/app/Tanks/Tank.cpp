@@ -35,7 +35,6 @@ void Tank::setHit(bool val) {
 }
 
 void Tank::resetFrame() {
-	std::cout << "frame = 0\n";
 	frame = 0;
 }
 
