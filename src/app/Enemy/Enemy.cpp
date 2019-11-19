@@ -598,6 +598,32 @@ coordinate Enemy::randGhostPos(int eX, int eY){
 
 }
 
+coordinate Enemy::randGhostPos(int eX, int eY){
+  int randX = rand() % 3;
+  int randY = rand() % 3;
+  coordinate newPos = {eY, eX, 0};
+
+  if(randX == 0){
+    newPos.row -= 1;
+  }
+  else if(randX == 1){
+    newPos.row += 1;
+  }
+
+  if(randY == 0){
+    newPos.col -= 1;
+  }
+  else if(randY == 1){
+    newPos.col += 1;
+  }
+
+  if(!isValidBlock(newPos.row, newPos.col)){
+    newPos = findClosestOpenBlock(newPos);
+  }
+  return newPos;
+
+}
+
 coordinate Enemy::newGhostPos(int gX, int gY, int eX, int eY){
   coordinate newPos = {eY, eX, 0};
   if(gX == eX && gY == eY){
