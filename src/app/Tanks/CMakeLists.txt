@@ -15,7 +15,6 @@ target_link_libraries(Tank
   Constants
   Sprite
   ${SDL2_LIBRARY}
-  Networking
 )
 else()
 target_link_libraries(Tank
@@ -23,7 +22,6 @@ target_link_libraries(Tank
   Object
   Constants
   Sprite
-  Networking
 )
 endif()
 

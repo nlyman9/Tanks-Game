@@ -22,7 +22,7 @@ class Tank {
 
         // Member Variable
         int theta = 0;
-        float turretTheta = 0;
+        int turretTheta = 0;
         bool shotsFired = false;
         Uint32 fire_last_time = 0;
         int frame = 0;

@@ -45,6 +45,7 @@ class Render {
         void addProjectile(Projectile* newProjectile);
 
         void setPlayer(std::vector<Player*> players);
+        void setPlayerEnemies(std::vector<Player*> players);
         void setEnemies(std::vector<Enemy *> enemies);
         void setProjectiles(std::vector<Projectile *> projectiles);
     private:
