@@ -208,19 +208,22 @@ class Packet {
         }
 
         int getInt(int startingIndex) {
-            assert(startingIndex < body.size() - 3);
-            int value;
-            int charValue = body.at(startingIndex);
-            value = value | (charValue<<24);
+            assert(startingIndex <= body.size() - 4);
+            int value = 0;
+            char charValue = body.at(startingIndex);
+            value = value | (charValue & 0xFF);
+            value = value<<8;
 
             charValue = body.at(startingIndex+1);
-            value = value | (charValue<<16);
+            value = value | (charValue & 0xFF);
+            value = value<<8;
 
             charValue = body.at(startingIndex+2);
-            value = value | (charValue<<8);
+            value = value | (charValue & 0xFF);
+            value = value<<8;
 
             charValue = body.at(startingIndex+3);
-            value = value | (charValue);
+            value = value | (charValue & 0xFF);
 
             return value;
         }
