@@ -15,6 +15,7 @@
 #include "Enemy.hpp"
 #include "Projectile.hpp"
 #include "ImageLoader.hpp"
+#include "Box.hpp"
 
 enum {
     MENU_SINGLE,
@@ -35,6 +36,7 @@ class Render {
 
         int draw(double update_lag);
         int drawMenu();
+        int drawMultiplayerMenu(char keypress, int selectedBox);
         bool init();
         void close();
 
@@ -47,7 +49,11 @@ class Render {
         void setPlayerEnemies(std::vector<Player*> players);
         void setEnemies(std::vector<Enemy *> enemies);
         void setProjectiles(std::vector<Projectile *> projectiles);
+        int drawBox(Box toDraw);
+        
     private:
+        int drawButton(Box toDraw);
+        int drawTextField(Box toDraw);
 
         std::vector<SDL_Texture*> gTex;
         SDL_Window* gWindow;
@@ -60,5 +66,10 @@ class Render {
         SDL_Rect gTileRects[3];
 
        std::vector<std::vector<int>> tile_map;
+
+        //The font that's going to be used
+        TTF_Font *font = NULL;
+        //The color of the font
+        SDL_Color textColor = { 255, 255, 255 };
 };
 #endif

@@ -1,0 +1,121 @@
+#include "MultiplayerMenu.hpp"
+
+Args* MultiplayerMenu(Render* renderer) 
+{
+    int crBox, currMenu, portLength, ipLength = 0;
+    int screen = 0;
+    int prevScreen = 0;
+    Menu* menu = new Menu();
+    Args* options = new Args();
+    while(true){
+        SDL_Event e;
+        int keyPress = 0;
+        //check for key presses and mouse presses, relay that information to the renderer, 
+        while(SDL_PollEvent(&e)) {
+            if(e.type == SDL_QUIT || (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_CLOSE)) {
+                return nullptr;
+            }
+            else if(e.type == SDL_KEYDOWN){
+                //get the int of the keypress
+                //with this we will use it later to check if we render a character to the screen or not
+                keyPress = e.key.keysym.sym; 
+                std::cout << "key press is : " << keyPress << std::endl;
+            }
+            else if(e.type == SDL_MOUSEBUTTONDOWN) {
+				int x, y;
+				SDL_GetMouseState(&x, &y);
+				SDL_Rect clickBox = {x, y, 1, 1};
+				SDL_Rect intersection;
+				for(int i = 0; i < NUM_BOXES; i++){
+                    Box currBox = menu->getBox(i);
+                    if(currBox.isVisible()){
+                        SDL_Rect temp = *(currBox.getPosition());
+                        if(SDL_IntersectRect(&clickBox, &temp, &intersection)){
+                            if(screen != currBox.getScreen())
+                                screen = currBox.getScreen();
+                            crBox = i;
+                            break;
+                        }
+                    }
+                }
+			}
+        }
+        if(prevScreen != screen){
+            prevScreen = screen;
+            crBox = 0;
+            //we've changed screens clear ip and port
+            menu->clearIP();
+            menu->clearPort();
+            menu->setInvisible();
+            switch(screen){
+                //set buttons visible based on screen
+                case -1:
+                    //exit
+                    delete menu;
+                    return options;
+                case 0:
+                    //default screen
+                    /*
+                        visible boxes
+                        SAVED, HOST, CONNECT, EXIT
+                    */
+                    menu->setVisible(SAVED);
+                    menu->setVisible(HOST);
+                    menu->setVisible(CONNECT);
+                    menu->setVisible(EXIT);
+                    break;
+                case 1:
+                    //connect screen
+                    /*
+                        visible boxes
+                        SAVE, HOST, IPBOX, PORTBOXC CONNECT, OKAY, CANCEL, EXIT
+                    */
+                    menu->setVisible(HOST);
+                    menu->setVisible(CONNECT);
+                    menu->setVisible(EXIT);
+                    menu->setVisible(IPBOX);
+                    menu->setVisible(PORTBOXC);
+                    menu->setVisible(OKAY);
+                    menu->setVisible(CANCEL);
+                    break;
+                case 2:
+                    //host screen
+                    /*
+                        visible boxes
+                        HOST, CONNECT, EXIT, PORTBOXH
+                    */
+                    menu->setVisible(HOST);
+                    menu->setVisible(CONNECT);
+                    menu->setVisible(EXIT);
+                    menu->setVisible(PORTBOXH);
+                    break;
+                case 3:
+                    //we clicked ok so check to see if ip and port are set and create the args array   
+                default:
+                    break;    
+            }
+        }
+        //draw box
+        for(int i = 0; i < NUM_BOXES; i++){
+            Box currBox = menu->getBox(i);
+            if(currBox.isVisible())
+                renderer->drawBox(menu->getBox(i));
+        }
+        //make sure keyboard has an int and write it to a box
+        /*if(keyPress is digit)
+            switch(currBox){
+                case IPBOX:
+                    //write to IPBOX and ip array
+                    break;
+                case PORTBOXC:
+                    //write to port box connect and port array
+                    break;
+                case PORTBOXH:
+                    //write to port box host and port array
+                    break;
+                default:
+                    break;
+            }
+        */
+    }
+}

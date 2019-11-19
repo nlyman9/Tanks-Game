@@ -13,7 +13,6 @@
 #include <time.h>
 
 #include "Render.hpp"
-
 Render::~Render() {
   close();
 }
@@ -168,7 +167,21 @@ int Render::drawMenu() {
 
 	return menuOption;
 }
-
+int Render::drawBox(Box toDraw){
+	switch(toDraw.getType()){
+		case BUTTON:
+			drawButton(toDraw);
+		case TEXT:
+			drawTextField(toDraw);
+	}
+	return -1;
+}
+int Render::drawButton(Box toDraw){
+	return 0;
+}
+int Render::drawTextField(Box toDraw){
+	return 0;
+}
 void Render::setTileMap(std::vector<std::vector<int>>* tileMap) {
 	tile_map = *tileMap;
 }

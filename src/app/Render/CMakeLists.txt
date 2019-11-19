@@ -17,6 +17,7 @@ target_link_libraries(Render
   ImageLoader
   Networking
   Multiplayer
+  Box
 )
 else()
 target_link_libraries(Render
@@ -30,6 +31,7 @@ target_link_libraries(Render
   ImageLoader
   Networking
   Multiplayer
+  Box
 )
 endif()
 

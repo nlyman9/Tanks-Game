@@ -1,0 +1,29 @@
+add_library(MultiplayerMenu
+  STATIC
+  MultiplayerMenu.cpp
+  MultiplayerMenu.hpp
+)
+if(${APPLE})
+target_link_libraries(MultiplayerMenu
+  PUBLIC
+  GameLoop
+  ${SDL2_LIBRARY}
+  Render
+  Args
+  Box
+)
+else()
+target_link_libraries(MultiplayerMenu
+  PUBLIC
+  GameLoop
+  SDL2
+  Render
+  Args
+  Box
+)
+endif()
+
+target_include_directories(MultiplayerMenu
+  PUBLIC
+  .
+)
