@@ -101,9 +101,12 @@ int serverProcess() {
         std::cout << "Server: Looping - numClients = " << server->numClients() << std::endl;
         sleep(1);
     }
-
-    int x_pos[2] = {SCREEN_WIDTH/2 - 100, SCREEN_WIDTH/2 + 100};
-    int y_pos[2] = {50, 400};
+    
+    // Set player starting positions
+    //              { Player 1 , Player 2 }
+    int x_pos[2] = {100, SCREEN_WIDTH - 100};
+    int y_pos[2] = {50, SCREEN_HEIGHT - 50};
+    
     // Initialize Player Data
     for (int i = 0; i < server->numClients(); i++) {
         // Packet playerID, inital position
