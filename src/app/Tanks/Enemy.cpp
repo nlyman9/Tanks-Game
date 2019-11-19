@@ -1,3 +1,4 @@
+
 #include "Constants.hpp"
 #include "Enemy.hpp"
 #include <math.h>
@@ -586,6 +587,8 @@ void Enemy::setPathway(std::vector<std::vector<int>> move_map, Player player, En
       enemyPath = generatePath(move_map, *ghost, enemy);
     }
   }
+  return newPos;
+
 }
 
 /**

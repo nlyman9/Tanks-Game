@@ -42,6 +42,7 @@ class Projectile : public Object {
         bool move(float x, float y) override; //move x offset from current x and y offset from current y
         bool place(float x, float y) override; //place/teleport to an x and y
 
+
 		int getTheta();
 		bool rotateProjectile(float theta);	// rotates the projectile
 		bool bouncePriority(SDL_Rect* A, SDL_Rect *B); // checks the side of the tile that the projectile is colliding with

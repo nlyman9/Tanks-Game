@@ -41,7 +41,7 @@ class Player : public Object, public Tank {
         Uint32 anim_last_time = 0;
 
     public:
-        
+
         Player(Sprite *sprite, Sprite *turret, float x, float y, bool local); //constructor, initialize the x, y, and sprite
         Player(float x, float y, bool local); //constructor, initialize the x, snd y
 
@@ -53,10 +53,10 @@ class Player : public Object, public Tank {
         bool isConnected(); //check if the player has entered the game
 
         void getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time,
-                      SDL_Event* e, 
+                      SDL_Event* e,
                       const Uint8 *keystate);
-        void setId(int i) { 
-            id = i; 
+        void setId(int i) {
+            id = i;
         }
         void setTurretTheta();
         void setTurretTheta(int theta);

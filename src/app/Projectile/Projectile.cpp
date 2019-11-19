@@ -77,10 +77,6 @@ void Projectile::draw(SDL_Renderer *gRenderer, double update_lag) {
 	}
 }
 
-bool Projectile::isHit(){
-	return this->hit;
-}
-
 bool Projectile::isExploding(){
 	return this->exploding;
 }
@@ -121,6 +117,7 @@ void Projectile::update() {
 		}
 
 		for(auto obstacle : obstacles) {
+
 			overlap = check_collision(&currentPos, &obstacle);
 			if(overlap != nullptr) {
 
