@@ -69,21 +69,25 @@ void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
     SDL_RenderCopyEx(gRenderer, getTurretSprite()->getTexture(), NULL, turret_dst, turretTheta, NULL, SDL_FLIP_NONE);
 }
 
+void Player::setTurretTheta() {
+    // Move the turret
+    // Center the delta x and y by the center of the tank
+    float delta_x = mouseX - (getX() + TANK_WIDTH / 2);
+    float delta_y = mouseY - (getY() + TANK_HEIGHT / 2);
+    float theta_radians = atan2(delta_y, delta_x);
+    turretTheta = (int)(theta_radians * 180 / M_PI);;
+}
+
+void Player::setTurretTheta(int theta) {
+    turretTheta = (theta * 180 / M_PI);
+}
+
 /**
  * @brief update the player object
  *  Overrides base class Object
  *
  */
 void Player::update() {
-    // Move the turret
-    // Center the delta x and y by the center of the tank
-    float delta_x = mouseX - (getX() + TANK_WIDTH / 2);
-    float delta_y = mouseY - (getY() + TANK_HEIGHT / 2);
-    float theta_radians = atan2(delta_y, delta_x);
-    mouseTheta = (int)(theta_radians * 180 / M_PI);
-    mouseTheta = (int)(theta_radians * 180 / M_PI);
-    turretTheta = mouseTheta;
-
     // Move player
     // Rotate player
     rotate(theta_v);
