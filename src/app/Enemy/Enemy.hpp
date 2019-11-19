@@ -15,6 +15,7 @@
 #include <vector>
 #include "Object.hpp"
 #include "Player.hpp"
+#include "Projectile.hpp"
 
 struct coordinate {
 	int row;
@@ -30,7 +31,10 @@ class Enemy : public Object {
         float x_enemy_pos, y_enemy_pos;
         Player* gPlayer;
         bool left = true;
+		int frame = 0;
+		bool anim_last_time = 0;
         std::vector<coordinate> enemyPath;
+				std::vector<Projectile *> enemyProjectiles;
 
 				float line1X, line1Y, line2X, line2Y;
 				int theta = 0;
@@ -45,8 +49,12 @@ class Enemy : public Object {
 				bool moveRight = false;
 				bool rightLeft = false;
 				bool upDown = false;
+				bool wander = false;
+
 
 				Uint32 fire_last_time = 0;
+				Uint32 last_state_change = 0;
+				Uint32 turret_mode_change = 0;
 				bool shotsFired = false;
 
         bool checkPos(float playX, float playY, float enemX, float enemY);
@@ -66,9 +74,12 @@ class Enemy : public Object {
 				bool isValidBlock(int x, int y);
 				coordinate findClosestOpenBlock(coordinate start);
 				coordinate newGhostPos(int gX, int gY, int eX, int eY);
+				coordinate randGhostPos(int eX, int eY);
         std::vector<coordinate> generatePath(std::vector<std::vector<int>> move_map, Player player, Enemy enemy);
 				bool validMove(coordinate moveTo, coordinate currentlyAt);
         std::vector<std::vector<int>> tile_map;
+
+
     public:
 				Enemy(Sprite* sprite, Sprite* turret, int x, int y, Player* player); //constructor, initialize the x, y, and sprite
         Enemy(float x, float y, Player* player); //constructor, initialize the x, y, and sprite
@@ -89,6 +100,7 @@ class Enemy : public Object {
         float getY();
 				float getTurretTheta();
         void updatePos();
+				void setProjectiles(std::vector<Projectile *> projectiles); 							//update the projectile vector so enemy can avoid them
 
         BoundingBox* getBoundingBox() override;
 

@@ -1,3 +1,4 @@
+
 #include "Constants.hpp"
 #include "Enemy.hpp"
 #include <math.h>
@@ -34,12 +35,20 @@ Enemy::~Enemy() {}
 
    // Render enemy
    // SDL_Rect src = {0, 0, 48, 48};
-   SDL_Rect dst = {x_enemy_pos, y_enemy_pos, TANK_WIDTH, TANK_HEIGHT};
+   SDL_Rect dst = {(int)x_enemy_pos, (int)y_enemy_pos, TANK_WIDTH, TANK_HEIGHT};
    // SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), &src, &dst, 0, NULL, SDL_FLIP_NONE);
    //SDL_Rect pos = {(int)x_enemy_pos, (int)y_enemy_pos, TANK_WIDTH, TANK_HEIGHT};
    //SDL_Rect* dst = get_box();
    //SDL_Rect* turret_dst = get_box();
-   SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), NULL, &dst, theta, NULL, SDL_FLIP_NONE);
+
+
+   if (/*x_vel != 0 || y_vel != 0 && */SDL_GetTicks() - anim_last_time > 100) {
+		frame = (frame + 1) % 3;
+		anim_last_time = SDL_GetTicks();
+	}
+
+
+   SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), getSprite()->getFrame(frame), &dst, theta, NULL, SDL_FLIP_NONE);
    SDL_RenderCopyEx(gRenderer, getTurretSprite()->getTexture(), NULL, &dst, turretTheta, NULL, SDL_FLIP_NONE);
 
    findEndValues(turretTheta);
@@ -196,23 +205,23 @@ void Enemy::setFire(bool fire){
 
 void Enemy::updatePos() {
   //printf("%d\t", isInRange(x_enemy_pos + TANK_WIDTH/2, y_enemy_pos + TANK_HEIGHT/2, line1X, line1Y, line2X, line2Y, gPlayer->getX() + TANK_WIDTH/2, gPlayer->getY() + TANK_HEIGHT/2));
+  Uint32 current_time = SDL_GetTicks();
 
   if(isInRange(x_enemy_pos + TANK_WIDTH/2, y_enemy_pos + TANK_HEIGHT/2, line1X, line1Y, line2X, line2Y, gPlayer->getX() + TANK_WIDTH/2, gPlayer->getY() + TANK_HEIGHT/2)){
-    Uint32 current_time = SDL_GetTicks();
     if(current_time > fire_last_time + 3000){
       setFire(true);
       fire_last_time = current_time;
     }
   }
 
-  if(updateCalls == 300){
+  if(current_time > turret_mode_change + 3000){
     if(rand() % 2 == 0){
       trackOrMonitor = true;
     }
     else{
       trackOrMonitor = false;
     }
-    updateCalls = 0;
+    turret_mode_change = current_time;
   }
   if(trackOrMonitor){
     //hi frems
@@ -240,9 +249,17 @@ void Enemy::updatePos() {
       }
     }
   }
-  //printf("turret theta: %f\n", turretTheta);
-  updateCalls++;
 
+  if(current_time > last_state_change + 5000){
+    if(rand() % 3 == 0){
+      wander = true;
+    }
+    else{
+      wander = false;
+    }
+    enemyPath.clear();
+    last_state_change = current_time;
+  }
 
   if(enemyPath.size() < randCut){
     setPathway(this->tile_map, *this->gPlayer, *this);
@@ -436,18 +453,21 @@ void Enemy::updatePos() {
     }
 	}
 
-
-  if(x_enemy_pos > SCREEN_WIDTH - 2*TANK_WIDTH) {
-    x_enemy_pos = SCREEN_WIDTH - 2*TANK_WIDTH;
+  if (x_enemy_pos + TANK_WIDTH > SCREEN_WIDTH - TILE_SIZE - 16)
+  {
+      x_enemy_pos = SCREEN_WIDTH - TILE_SIZE - 16 - TANK_WIDTH;
   }
-  if(x_enemy_pos < TILE_SIZE){
-    x_enemy_pos = TILE_SIZE;
+  if (x_enemy_pos < TILE_SIZE + 16)
+  {
+      x_enemy_pos = TILE_SIZE + 16;
   }
-  if(y_enemy_pos < TILE_SIZE){
-    y_enemy_pos = TILE_SIZE;
+  if (y_enemy_pos < TILE_SIZE)
+  {
+      y_enemy_pos = TILE_SIZE;
   }
-  if(y_enemy_pos > SCREEN_HEIGHT - 2*TANK_HEIGHT) {
-    y_enemy_pos = SCREEN_HEIGHT - 2*TANK_HEIGHT;
+  if (y_enemy_pos + TANK_HEIGHT > SCREEN_HEIGHT - TILE_SIZE)
+  {
+      y_enemy_pos = SCREEN_HEIGHT - TILE_SIZE - TANK_HEIGHT;
   }
 }
 
@@ -531,16 +551,51 @@ void Enemy::setPathway(std::vector<std::vector<int>> move_map, Player player, En
   int ghostYblock = findYBlock(player.getY());
   int enemyXblock = findXBlock(enemy.getX());
   int enemyYblock = findYBlock(enemy.getY());
-  if(abs(ghostXblock - enemyXblock) < 2 && abs(ghostYblock - enemyYblock) < 2){
+  if(abs(ghostXblock - enemyXblock) < 2 && abs(ghostYblock - enemyYblock) < 2 && !wander){
     enemyPath = generatePath(move_map, player, enemy);
   }
   else{
-    coordinate newGhostPos = Enemy::newGhostPos(ghostXblock, ghostYblock, enemyXblock, enemyYblock);
-    int ghostX = newGhostPos.col * TILE_SIZE + TILE_SIZE + BORDER_GAP;
-    int ghostY = newGhostPos.row * TILE_SIZE + TILE_SIZE;
-    Player* ghost = new Player(ghostX, ghostY, true);
-    enemyPath = generatePath(move_map, *ghost, enemy);
+    if(wander){
+      coordinate randGhostPos = Enemy::randGhostPos(enemyXblock, enemyYblock);
+      int randGhostX = randGhostPos.col * TILE_SIZE + TILE_SIZE + BORDER_GAP;
+      int randGhostY = randGhostPos.row * TILE_SIZE + TILE_SIZE;
+      Player* randGhost = new Player(randGhostX, randGhostY, true);
+      enemyPath = generatePath(move_map, *randGhost, enemy);
+    }
+    else{
+      coordinate newGhostPos = Enemy::newGhostPos(ghostXblock, ghostYblock, enemyXblock, enemyYblock);
+      int ghostX = newGhostPos.col * TILE_SIZE + TILE_SIZE + BORDER_GAP;
+      int ghostY = newGhostPos.row * TILE_SIZE + TILE_SIZE;
+      Player* ghost = new Player(ghostX, ghostY, true);
+      enemyPath = generatePath(move_map, *ghost, enemy);
+    }
   }
+}
+
+coordinate Enemy::randGhostPos(int eX, int eY){
+  int randX = rand() % 3;
+  int randY = rand() % 3;
+  coordinate newPos = {eY, eX, 0};
+
+  if(randX == 0){
+    newPos.row -= 1;
+  }
+  else if(randX == 1){
+    newPos.row += 1;
+  }
+
+  if(randY == 0){
+    newPos.col -= 1;
+  }
+  else if(randY == 1){
+    newPos.col += 1;
+  }
+
+  if(!isValidBlock(newPos.row, newPos.col)){
+    newPos = findClosestOpenBlock(newPos);
+  }
+  return newPos;
+
 }
 
 coordinate Enemy::newGhostPos(int gX, int gY, int eX, int eY){
@@ -740,7 +795,7 @@ std::vector<coordinate> Enemy::generatePath(std::vector<std::vector<int>> move_m
 			if(coordList[i].weight == count){
 				coordinate left = {coordList[i].row, coordList[i].col - 1, coordList[i].weight + 1};
 				//check isnt a wall
-				if(!(left.row < 0 || left.row > 12 || left.col < 0 || left.col > 23) && (move_map[left.col][left.row] != 2)){
+				if(!(left.row < 0 || left.row > 12 || left.col < 0 || left.col > 23) && (move_map[left.col][left.row] == 0)){
 					//check isnt already in list
 					for(int j = 0; j < coordListLength; j++){
 						if(left.row == coordList[j].row && left.col == coordList[j].col){
@@ -758,7 +813,7 @@ std::vector<coordinate> Enemy::generatePath(std::vector<std::vector<int>> move_m
 					inList = false;
 				}
 				coordinate right = {coordList[i].row, coordList[i].col + 1, coordList[i].weight + 1};
-				if(!(right.row < 0 || right.row > 12 || right.col < 0 || right.col > 23) && (move_map[right.col][right.row] != 2)){
+				if(!(right.row < 0 || right.row > 12 || right.col < 0 || right.col > 23) && (move_map[right.col][right.row] == 0)){
 					for(int j = 0; j < coordListLength; j++){
 						if(right.row == coordList[j].row && right.col == coordList[j].col){
 							inList = true;
@@ -775,7 +830,7 @@ std::vector<coordinate> Enemy::generatePath(std::vector<std::vector<int>> move_m
 					inList = false;
 				}
 				coordinate up = {coordList[i].row - 1, coordList[i].col, coordList[i].weight + 1};
-				if(!(up.row < 0 || up.row > 12 || up.col < 0 || up.col > 23) && (move_map[up.col][up.row] != 2)){
+				if(!(up.row < 0 || up.row > 12 || up.col < 0 || up.col > 23) && (move_map[up.col][up.row] == 0)){
 					for(int j = 0; j < coordListLength; j++){
 						if(up.row == coordList[j].row && up.col == coordList[j].col){
 							inList = true;
@@ -792,7 +847,7 @@ std::vector<coordinate> Enemy::generatePath(std::vector<std::vector<int>> move_m
 					inList = false;
 				}
 				coordinate down = {coordList[i].row + 1, coordList[i].col, coordList[i].weight + 1};
-				if(!(down.row < 0 || down.row > 12 || down.col < 0 || down.col > 23) && (move_map[down.col][down.row] != 2)){
+				if(!(down.row < 0 || down.row > 12 || down.col < 0 || down.col > 23) && (move_map[down.col][down.row] == 0)){
 					for(int j = 0; j < coordListLength; j++){
 						if(down.row == coordList[j].row && down.col == coordList[j].col){
 							inList = true;
@@ -839,7 +894,7 @@ std::vector<coordinate> Enemy::generatePath(std::vector<std::vector<int>> move_m
 	}
 
 	printf("\n");
-  */
+*/
 	return finalPath;
 }
 
@@ -864,4 +919,11 @@ void Enemy::setFalse() {
   moveRight = false;
   rightLeft = false;
   upDown = false;
+}
+
+//Receive the updated projectiles array from Game.cpp. Use the vector to avoid all of the projectiles
+//@param the projectiles vector from game.cpp containing all of the bullets
+void Enemy::setProjectiles(std::vector<Projectile *> projectiles) {
+  enemyProjectiles.clear();
+  enemyProjectiles = projectiles;
 }

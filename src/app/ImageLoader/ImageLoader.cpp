@@ -1,6 +1,6 @@
 #include "ImageLoader.hpp"
 
-SDL_Texture* ImageLoader::loadImage(std::string filename, SDL_Renderer* gRenderer) {
+SDL_Texture* loadImage(std::string filename, SDL_Renderer* gRenderer) {
     SDL_Surface* startSurf = IMG_Load(filename.c_str());
 	if (startSurf == nullptr) {
         std::cout << "Unable to load image " << filename << "! SDL Error: " << SDL_GetError() << std::endl;

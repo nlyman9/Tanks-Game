@@ -41,6 +41,7 @@ class Client {
     std::string server_ip;
     std::string server_port;
     bool gameOn;
+    bool startGame;
     SDL_Thread* rcThread;
     std::vector<int>* gameMap;
     bool pollMap();
@@ -48,7 +49,6 @@ class Client {
 
     std::vector<char>* getFillBuffer();
     Uint8* pollKeystate();
-
   private:
 };
 #endif
