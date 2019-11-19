@@ -18,6 +18,7 @@ target_link_libraries(GameLoop
   Networking
   Multiplayer
   Args
+  SDL2_ttf
 )
 
 target_include_directories(GameLoop

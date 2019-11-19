@@ -187,13 +187,14 @@ int LocalGameLoop::run() {
     SDL_Event e;
 	previous_time = std::chrono::system_clock::now(); // get current time of system
 	lag_time = 0.0;	// Set duration of time to 0
-
+	timer = 180;
+	begin_timer = SDL_GetTicks();
 
     while(isGameOn) {
         current_time = std::chrono::system_clock::now();
 		elapsed_time = current_time - previous_time;
 		previous_time = current_time;
-		lag_time += elapsed_time.count();
+		lag_time += elapsed_time.count(); 
 
         // 1. Process input
 		while (SDL_PollEvent(&e))
@@ -263,6 +264,12 @@ int LocalGameLoop::run() {
 		if(e.type == SDL_MOUSEMOTION || e.type == SDL_MOUSEBUTTONDOWN) {
 			SDL_GetMouseState(&cursorX, &cursorY);
 		}
+
+		//Update current timer
+		current_timer = SDL_GetTicks();
+		timer = 180 - ((current_timer - begin_timer) / 1000);
+		render->setTimer(timer);
+		//std::cout << "timer : " << timer;
 
 		SDL_Rect cursorRect = {cursorX, cursorY, CROSSHAIR_SIZE, CROSSHAIR_SIZE};
 
