@@ -1,9 +1,7 @@
 add_library(GameLoop
   STATIC
-  LocalGameLoop.hpp
-  LocalGameLoop.cpp
-  OnlineGameLoop.hpp
-  OnlineGameLoop.cpp
+  GameLoop.hpp
+  GameLoop.cpp
 )
 
 target_link_libraries(GameLoop
@@ -16,7 +14,6 @@ target_link_libraries(GameLoop
   MapGenerator
   Projectile
   Networking
-  Args
 )
 
 target_include_directories(GameLoop

@@ -9,7 +9,7 @@ target_link_libraries(StartUpMenu
   GameLoop
   ${SDL2_LIBRARY}
   Render
-  Args
+  Projectile
 )
 else()
 target_link_libraries(StartUpMenu
@@ -17,7 +17,6 @@ target_link_libraries(StartUpMenu
   GameLoop
   SDL2
   Render
-  Args
 )
 endif()
 
