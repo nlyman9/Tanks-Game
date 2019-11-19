@@ -239,11 +239,12 @@ std::vector<std::vector<int>> MapGenerator::generateOpenLineMap()
 {
 	std::vector<std::vector<int>> room = generateEmptyMap();
 	int random_index;
-	std::vector<int> pre_array = {2, 6, 11, 16, 20};
+	std::vector<int> pre_array{2, 6, 11, 16, 20};
 	srand(time(NULL));
 
-	for(auto val : pre_array) {
-		random_index = rand() % (Y_HIGH - 2);
+	for(int i = 0; i < pre_array.size(); i++) {
+		random_index = rand() % (Y_HIGH - 2) + 1;
+
 		for(int j = 0; j < Y_HIGH; j++) {
 			if(random_index == j || random_index == j + 1) {
 				room[val][j] = 0;
