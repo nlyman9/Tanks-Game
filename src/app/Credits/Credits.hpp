@@ -2,6 +2,7 @@
 #define CREDITS_HPP  
 
 #include <vector>
+#include "Render.hpp"
 
 #ifdef __APPLE__ 
 #include <SDL2/SDL.h>
@@ -15,19 +16,13 @@
 
 class Credits {
   public:
-    Credits(SDL_Window* window, SDL_Renderer* renderer, std::vector<SDL_Texture*> tex) : gWindow{window}, gRenderer{renderer}, gTex{tex} {};
+    Credits(Render* renderer) : render{renderer} {};
     int playCredits();
 
   private:
     // Function declarations
-    void close();
-
-    // Globals
-    SDL_Window* gWindow;
-    SDL_Renderer* gRenderer;
-    std::vector<SDL_Texture*> gTex;
+    Render* render;
     
-    SDL_Texture* loadImage(std::string fname);
     void jakobCredits(SDL_Texture* picture, SDL_Texture* hitmarker);
 
     const int SCREEN_WIDTH = 1280;
