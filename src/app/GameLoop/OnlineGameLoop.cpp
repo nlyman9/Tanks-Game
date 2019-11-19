@@ -151,7 +151,10 @@ void OnlineGameLoop::buildMap() {
 		player->setObstacleLocations(&tileArray);
 	}
 
-	// TODO add obstacles for network players
+	// Set collision for network players 
+	for (auto enemy : playerEnemies) {
+		enemy->setObstacleLocations(&tileArray);
+	}
 }
 
 int OnlineGameLoop::run() {
