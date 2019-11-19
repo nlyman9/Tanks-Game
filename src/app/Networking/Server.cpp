@@ -4,20 +4,21 @@
     test to create a map on a server then send it over as bit data
     and render on client
 */
-// #if __APPLE__
-// #include <SDL2/SDL.h>
-// #include <SDL2_image/SDL_image.h>
-// #include <SDL2_ttf/SDL_ttf.h>
-// #else
-// #include <SDL2/SDL.h>
-// #include <SDL2/SDL_image.h>
-// #include <SDL2/SDL_ttf.h>
-//#include <SDL2/SDL_thread.h>
-// #endif
+#if __APPLE__
+#include <SDL2/SDL.h>
+#include <SDL2_image/SDL_image.h>
+#include <SDL2_ttf/SDL_ttf.h>
+#else
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_thread.h>
+#endif
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <fcntl.h>
 #include <sys/time.h>
+#include <sys/select.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <stdlib.h>
@@ -29,21 +30,152 @@
 #include "Server.hpp"
 #include "MapGenerator.hpp"
 #include "Network.hpp"
-#include "GameLoop.hpp"
 
-bool readyToSend = false;
+#define R_BUFFER_SIZE 152
 
-// get sockaddr, IPv4 or IPv6:
-void *get_in_addr(struct sockaddr *sa)
+#define NUM_PLAYERS 2
+//bools for receive
+bool receiveReady = true;
+bool receivedData = false;
+
+//bools for send
+bool sendReady = false;
+bool sendData = false;
+int connections = 0;
+
+//receive lock
+SDL_SpinLock rlock = 0;
+//send lock
+SDL_SpinLock slock = 0;
+
+Server *server;
+
+/**
+ * @brief Main for Server process
+ * 
+ * @param argc - Number of arguments passed
+ * @param argv - Argument values
+ *     - Only one value should be passed. The option's arguments.
+ * @return int 
+ */
+int main(int argc, char* argv[])
 {
-    if (sa->sa_family == AF_INET)
-    {
-        return &(((struct sockaddr_in *)sa)->sin_addr);
-    }
+    // Get the server option's
+    std::cout << "IP " << argv[1] << std::endl;
+    std::cout << "PORT " << argv[2] << std::endl;
 
-    return &(((struct sockaddr_in6 *)sa)->sin6_addr);
+    std::string server_ip = std::string(argv[1]);
+    char *server_port = argv[2];
+
+    server = new Server(server_ip, std::atoi(server_port));
+
+    // Bind and start listening as server
+    server->bind();
+    server->listen();
+
+    // SDL_CreateThread(serverThread, "server thread", NULL);
+
+    serverProcess();
+    
 }
 
+/**
+ * @brief The server process - Basically main when a game is being prepared and running
+ * 
+ * @return int 
+ */
+int serverProcess() {
+    //timeval is passed into select and is used to say when select should timeout
+    //setting all the members to 0 tells select it should not block
+    struct timeval* timeout = (timeval*) calloc(1, sizeof(struct timeval));
+    timeout->tv_sec = 0;
+    timeout->tv_usec = 0;
+
+    // Generate map
+    auto map = serverMapGen();
+    std::cout << "Map size is " << map->size() << std::endl;
+    pack(map, &packedMap, 3); //pack map into 3 bits
+
+
+    // First wait for 2 clients
+    while (server->numClients() < 2) {
+        if (server->accept()) {
+            std::cout << "Server: New client connection accepted" << std::endl;
+        }
+
+        std::cout << "Server: Looping - numClients = " << server->numClients() << std::endl;
+        sleep(1);
+    }
+
+    // Send map to the clients!
+    std::cout << "Server: Preparing to send map!" << std::endl;
+    Packet *mapPacket = new Packet(PackType::MAP);
+    std::cout << "Map size is " << packedMap.size() << std::endl;
+    mapPacket->appendData(packedMap);
+    server->broadcast(mapPacket);
+
+    server->gameOn = true;
+
+    // Game Loop
+    // TODO simulate the game on server's side?
+    std::vector<ClientConnection*> *pendingClients;
+    while (server->gameOn) {
+        std::cout << "\n\nSERVER: GAME - # Clients = " << server->numClients() << std::endl;
+        fflush(stdout);
+
+        // Poll clients for pending messages 
+        // This function calls receive! Do not call again unless you have a specific reason
+        // The polling (select function) currently waits for a specified timeout value 
+        //      @see ServerConnection for timeout value
+        while ( (pendingClients = server->pollClientsAndReceive()) == nullptr) {
+            // Just go back and pollClientsAndReceive()
+        }
+        std::cout << "SERVER: Going to check mailbox!!!" << std::endl;
+        fflush(stdout);
+
+        // Get packages from pending clients
+        // pendingClients can be null IF:
+        //      + we havent received data but we need to send a keyframe
+        Packet *mail;
+        if (pendingClients != nullptr) {
+            for (auto client : *pendingClients) {
+                std::cout << "SERVER: Getting packet from client " << client->id() << std::endl;
+                fflush(stdout);
+                mail = server->getPacket(client->id());
+                if (mail != nullptr) {
+                    std::cout << "SERVER: You got mail!" << std::endl;
+                    mail->printData();
+                    if (mail->getType() == PackType::KEYSTATE) {
+                        // If a keystate, Prepare to send that client's keystate to the other clients 
+                        server->addPacketFromClientToClients(client->id(), mail);
+                    }
+                    fflush(stdout);
+                } else {
+                    std::cout << "SERVER: No mail :(" << std::endl;
+                    fflush(stdout);
+                }
+            }
+        }
+
+        // Share data with clients - send data from buffer
+        for (auto client : server->clients()) {
+            std::cout << "SERVER: TO " << client->id() << ": ";
+            client->sendFromBuffer();
+        }
+
+        // TODO Send Game States
+        // Game states -> slower rate 
+        // server->broadcast(GAMESTATE?);
+    }
+
+    return 1;
+}
+
+/**
+ * @brief Generate a map on the server to sennd to clients
+ * 
+ * @return std::vector<int>* 
+ */
 std::vector<int>* serverMapGen(){
     // Randomly generate map
     std::vector<int>* map1D = new std::vector<int>();
@@ -57,211 +189,18 @@ std::vector<int>* serverMapGen(){
             map1D->push_back(val);
         }
     }
-
+    
     return map1D;
 }
 
-int serverThread(void* data){
-    int newfd;
-    int nbytes;
-    int i, j;
-    //timeval is passed into select and is used to say when select should timeout
-    //setting all the members to 0 tells select it should not block
-    struct timeval* timeout = (timeval*) calloc(1, sizeof(struct timeval));
-    timeout->tv_sec = 0;
-    timeout->tv_usec = 0;
-    // Loop of server
-    while (gameOn)
-    {
-        //std::cout << "server looping" << std::endl;
-        read_fds = master;
-        if (select(fdmax + 1, &read_fds, NULL, NULL, timeout) == -1)
-        {
-            std::cout << "Select error" << std::endl;
-            exit(4);
-        }
-        // Loop through our connections
-        for (i = 0; i <= fdmax; i++)
-        {
-            // Check if one of the connections is in the set read_fds
-            if (FD_ISSET(i, &read_fds))
-            {
-                // Check if it is a new connection
-                if (i == listenerfd)
-                { // if listenerfd is in set, we have a new connection
-                    addr_len = sizeof(remoteaddr);
-                    newfd = accept(listenerfd, (struct sockaddr *)&remoteaddr, &addr_len);      
-                    if (newfd == -1)
-                    {
-                        // Failed to accept
-                        perror("accept");
-                        continue;
-                    }
-                    else
-                    {
-                        // Successfully accepted connection
-                        FD_SET(newfd, &master); // Add new connection to master list
-                        if (newfd > fdmax)
-                        {
-                            fdmax = newfd; // Keep track of max
-                        }
-                        std::cout << "New connection from" << inet_ntop(remoteaddr.ss_family, &remoteaddr, remoteIP, INET_ADDRSTRLEN) << " on socket " << newfd << std::endl;
-                        //new connection so need to send map data here accepted so send data
-                        std::vector<char> toSend;
-                        for(int i = 0; i < packedMap.size(); i++){
-                            toSend.push_back(packedMap.at(i));
-                        }
-                        std::cout << "map = " << std::endl;
-                        for(int i = 0; i < toSend.size();i++){
-                            std::cout << " " << (int) toSend.at(i);
-                        }
-                        std::cout << std::endl;
-                        std::cout << " size of toSend" << toSend.size();
-                        std::cout << std::endl;
-                        send(newfd, toSend.data(), toSend.size(), 0);
-                    }
-                }
-                else
-                {
-                    // Handle data from clients
-                    if ((nbytes = (recv(i, recvBuffer, 100, 0))) <= 0)
-                    {
-                        // Either error or closed connection
-                        if (nbytes == 0)
-                        { // Connection closed
-                            std::cout << "Socket " << i <<" disconnected." << std::endl;
-                            // remember to close the fd
-                            close(i);
-                            FD_CLR(i, &master); // Remove from master set
-                        }
-                        else
-                        {
-                            //client disconnected... for testing purposes just closing the server
-                            //so we dont have to in task manager
-                            std::cout << "Recv error server server exiting" << std::endl;
-                            exit(0);
-                        }
-                        
-                    }
-                    else
-                    {
-                        // We have real data from client
-                        for (j = 0; j <= fdmax; j++)
-                        {
-
-                            // relay message to connections
-                            if (FD_ISSET(j, &master))
-                            {
-                                // except the listener and ourselves
-                                if (j != listenerfd && j != i)
-                                {
-
-                                    if (send(j, tsBuffer, nbytes, 0) == -1)
-                                    {
-                                       std::cout << "Send error" << std::endl;
-                                    }
-                                }
-                                else if (j == listenerfd)
-                                {
-                                    fflush(stdout);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    return 0;
-}
-
-/**
- * @brief Main for Server process
- * 
- * @param argc - Number of arguments passed
- * @param argv - Argument values
- *     - Only one value should be passed. The option's arguments.
- * @return int 
- */
-int main(int argc, char* argv[])
+// get sockaddr, IPv4 or IPv6: 
+//  Code from Beej's guide
+void *get_in_addr(struct sockaddr *sa)
 {
-    // Get the server option's
-    
-
-    std::cout << "IP " << argv[1] << std::endl;
-    std::cout << "PORT " << argv[2] << std::endl;
-
-    std::vector<int>* map = serverMapGen();
-
-    char *server_ip = argv[1];
-    char *server_port = argv[2];
-    
-    pack(map, &packedMap, 3); //pack map into 3 bits
-    
-    // Set structs and variables for the internet
-    addr_len = sizeof(struct sockaddr_storage);
-
-    char remoteIP[INET_ADDRSTRLEN];
-    char buf[152];
-
-    FD_ZERO(&master);
-    FD_ZERO(&read_fds);
-
-    int yes = 1;
-
-    // Set memory for hints
-    memset(&hints, 0, sizeof(hints));
-
-    hints.ai_family = AF_INET;       // Use IPv4 because im lazy
-    hints.ai_socktype = SOCK_STREAM; // Use TCP because it does work for me
-
-    // Set address info for listening address '0.0.0.0'
-    if ((status = getaddrinfo(server_ip, server_port, &hints, &serverInfo)) != 0)
+    if (sa->sa_family == AF_INET)
     {
-        std::cout << "Failed to get address info." << std::endl;
-        exit(3);
+        return &(((struct sockaddr_in *)sa)->sin_addr);
     }
 
-    for (p = serverInfo; p != NULL; p = p->ai_next)
-    {
-        listenerfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
-        //set the socket to non-blocking
-        //fcntl(listenerfd, F_SETFL, O_NONBLOCK);
-        if (listenerfd < 0)
-        {
-            continue;
-        }
-
-        // lose the pesky "address already in use" error message
-        setsockopt(listenerfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
-
-        if (bind(listenerfd, p->ai_addr, p->ai_addrlen) < 0)
-        {
-            close(listenerfd);
-            continue;
-        }
-
-        break;
-    }
-    
-    freeaddrinfo(serverInfo);
-
-    // Listen on the socket, and allow a max wait queue of size 20
-    listen(listenerfd, 20);
-
-    // Add listener to master set
-    FD_SET(listenerfd, &master);
-
-    fdmax = listenerfd;
-
-    char* tsBuffer = (char*) calloc(152, sizeof(char)); 
-    std::cout << "Creating server thread" << std::endl;
-    gameOn = true;
-    SDL_CreateThread(serverThread, "server thread", (void*) tsBuffer);
-
-    //Game stuff here
-    while(gameOn){
-        
-    }
+    return &(((struct sockaddr_in6 *)sa)->sin6_addr);
 }

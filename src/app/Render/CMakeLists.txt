@@ -9,27 +9,27 @@ target_link_libraries(Render
   ${SDL2_LIBRARY}
   ${SDL2_IMAGE_LIBRARIES}
   Constants
-  Player
+  Tank
   Object
   Sprite
-  Enemy
   Projectile
   MapGenerator
   ImageLoader
+  Networking
+  Multiplayer
 )
 else()
 target_link_libraries(Render
   PRIVATE
   SDL2
-  SDL2_image
   Constants
-  Player
+  Tank
   Object
   Sprite
-  Enemy
   Projectile
-  MapGenerator
   ImageLoader
+  Networking
+  Multiplayer
 )
 endif()
 

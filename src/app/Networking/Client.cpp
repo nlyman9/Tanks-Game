@@ -8,118 +8,90 @@
 #include <SDL2/SDL_thread.h>
 #include <SDL2/SDL.h>
 
-bool mapReceived = false;
+#define R_BUFFER_SIZE 152
 
-int receiveThread(void* data) {
-    // Unpack data in the Client object
-    Client* crClient = (Client*) data;
-    std::cout << "Client thread created!" << std::endl;
+//receive lock
+SDL_SpinLock rlock = 0;
+//send lock
+SDL_SpinLock slock = 0;
 
-    int status;
-    struct addrinfo hints;
-    struct addrinfo *serverInfo;
-    int sockfd;
-    fd_set master;      // Master of file descriptors
-    fd_set read_fds;    // Read fd's returned from select
-    int fdmax;          // maximym file descriptor number
-    int nbytes;
-    // Innitialize sets to zero
-    FD_ZERO(&master);
-    FD_ZERO(&read_fds);
-
-    memset(&hints, 0, sizeof(hints));
-
-    struct timeval* timeout = (timeval*) calloc(1, sizeof(struct timeval));
-    timeout->tv_sec = 0;
-    timeout->tv_usec = 0;
-
-    hints.ai_family = AF_INET;          // IPv4
-    hints.ai_socktype = SOCK_STREAM;    // TCP
-    // Get address info of server
-    std::cout << "Connecting to " << crClient->server_ip << " on port " << crClient->server_port << std::endl;
-    if ((status = getaddrinfo(crClient->server_ip.c_str(), crClient->server_port.c_str(), &hints, &serverInfo)) != 0) {
-        std::cout << "Failed to get address info" << std::endl;
-        exit(4);
-    }
-    // Create a socket based on server info 
-    sockfd = socket(serverInfo->ai_family, serverInfo->ai_socktype, serverInfo->ai_protocol);
-    sleep(2);
-    // Connect to server
-    while (connect(sockfd, serverInfo->ai_addr, serverInfo->ai_addrlen) < 0) {
-        std::cout << "Waiting for connection..." << std::endl;
-        sleep(1);
-    }
-    std::cout << "Connected ip:" << crClient->server_ip << " Port: " << crClient->server_port << std::endl;
-    //set the socket to non-blocking
-    fcntl(sockfd, F_SETFL, O_NONBLOCK);
-    // Add server fd to master
-    FD_SET(sockfd, &master);
-    // Add stdin fd to master
-    FD_SET(STDIN_FILENO, &master);
-
-    fdmax = sockfd;
-
-    std::cout << "Receive thread created!" << std::endl;
-
-    // Game loop
-    while(crClient->gameOn) {
-        read_fds = master;
-        // Check for any response from serrver
-        if (select(fdmax+1, &read_fds, NULL, NULL, timeout) == -1) {
-            std::cout << "Select error" << std::endl;
-            continue;
-        }
-        // If from server
-        if (FD_ISSET(sockfd, &read_fds)) {
-            nbytes = recv(sockfd, rcBuffer->data(), rcBuffer->size(), 0);
-            if (nbytes < 0) {
-                fprintf(stderr, "recv: %s (%d)\n", strerror(errno), errno);
-                std::cout << "Connection closing" << std::endl;
-                close(sockfd);
-                exit(10);
-            } else if(nbytes >= 0){
-                //recieved data
-                std::cout << "receiving map data..." << std::endl;
-                std::cout << std::endl;
-                for(int i = 0; i < rcBuffer->size(); i++){
-                    std::cout << (int) rcBuffer->at(i);
-                }
-                std::cout << std::endl;
-                std::vector<int>* map = new std::vector<int>();
-                if(!mapReceived){
-                   unpack(rcBuffer, map, 3);
-                   for(int i = 0; i < map->size();i++){
-                       std::cout << "pushing" << std::endl;
-                       crClient->gameMap->push_back(map->at(i));                 
-                    }
-                   mapReceived = true;
-                }
-                std::cout << "map data received!" << std::endl;
-            }
-        }
-    }
-}
-
-bool Client::pollMap() {
-    return mapReceived;
-}
 
 bool Client::init() {
-    gameMap = new std::vector<int>();
-    //initialize all buffers
-    //receive buffer
-    rcBuffer = new std::vector<char>(152);
-    //to send buffer
-    //buffer to fill in
-    fBuffer = new std::vector<char>();
-    //to send buffer
-    tsBuffer = new std::vector<char>();;
-    // Pack Client into void pointer for thread
-    void* clientInfo = malloc(sizeof(long));
+    std::cout << "Client init()" << std::endl;
+    void* clientInfo = (void *) malloc(sizeof(Client));
     clientInfo = (void*) this;
-    gameOn = true;
-    rcThread = SDL_CreateThread(receiveThread, "myThread", (void*) clientInfo);
+    rcThread = SDL_CreateThread(this->clientProcess, "myThread", (void*) clientInfo);
     return true;
 }
 
-Client Client::initClient(Client c) {}
+int Client::clientProcess(void* data) {
+    // Unpack data in the Client object
+    Client *client = (Client*) data;
+    std::cout << "Client thread created!" << std::endl;
+
+    // Try to connect to server... Usually only loops is the server is offline.
+    while (!client->isConnected() && !client->connect()) {
+            std::cout << "Client-Network: trying to connect to server..." << std::endl;
+            sleep(1);
+    }
+
+    // Wait for map
+    while(true) {
+        std::cout << "Client-Network: Waiting for map" << std::endl;
+        Packet *mail = client->receiveAndGet();
+        if (mail != nullptr) {
+            if (mail->getType() == PackType::MAP) {
+                std::cout << "Client: Loading map... " << mail->data() << std::endl;
+                
+                std::vector<int>* map = new std::vector<int>();
+                map = unpack(mail->getBody(), map, 3);
+
+                for (int i = 0; i < map->size();i++){
+                    client->gameMap.push_back(map->at(i));                 
+                }
+
+                client->mapReceived = true;
+                delete map;
+
+                client->gameOn = true;
+                client->startGame = true;
+
+                break;
+            }
+        }
+        //else just sleep
+
+        sleep(1);
+    }
+
+    // TODO Consolidate tickrates
+    client->setSocketTickrate(30);
+    while (true) {
+        // Check if we have anything to send
+        if (client->send()) {
+            // std::cout << "CLIENT-NET: Sent packet!"<< std::endl;
+            // fflush(stdout);
+        } else {
+            // std::cout << "CLIENT-NET: Nothing to send!" << std::endl;
+            // fflush(stdout);
+        }
+
+        // Receive data from server 
+        Packet *mail = client->receiveAndGet();
+        if (mail != nullptr) {
+            std::cout << "CLIENT-NET: Received packet type " << (int)mail->getType() << " -> ";
+            mail->printData();
+            fflush(stdout);
+
+            // If keystate, unpack a load into formable keystate
+            // TODO not hardcode id to 0 
+            if (mail->getType() == PackType::KEYSTATE) {
+                client->addNetworkKeyState(0, mail->getBody());
+            }
+        }
+
+        // TODO wait if we finish early?
+    }
+
+    return -1;
+}

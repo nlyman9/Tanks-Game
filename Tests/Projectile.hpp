@@ -9,7 +9,7 @@
 
 #include "Object.hpp"
 
-class Enemy : public OBJECT {
+class Enemy : public Object {
     private:
         /* data */
         Sprite missile;

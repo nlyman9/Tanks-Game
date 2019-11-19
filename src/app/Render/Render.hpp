@@ -14,13 +14,14 @@
 #include "Player.hpp"
 #include "Enemy.hpp"
 #include "Projectile.hpp"
-#include "MapGenerator.hpp"
 #include "ImageLoader.hpp"
 
 enum {
     MENU_SINGLE,
     MENU_MULTI,
-    MENU_CREDITS
+    MENU_CREDITS,
+    DEFAULT,
+    MENU_NONE
 };
 
 class Render {
@@ -29,7 +30,7 @@ class Render {
         std::vector<Projectile *> gProjectiles;
 
         Render() {}
-        Render(Player* player, std::vector<Enemy*> enemies): gPlayer{player}, gEnemies{enemies} {}
+        Render(std::vector<Player*> players, std::vector<Enemy*> enemies): gPlayers{players}, gEnemies{enemies} {}
         ~Render();
 
         int draw(double update_lag);
@@ -42,8 +43,10 @@ class Render {
         void setTileMap(std::vector<std::vector<int>>* tileMap);
         void addProjectile(Projectile* newProjectile);
 
-        void setPlayer(Player* player);
+        void setPlayer(std::vector<Player*> players);
+        void setPlayerEnemies(std::vector<Player*> players);
         void setEnemies(std::vector<Enemy *> enemies);
+        void setProjectiles(std::vector<Projectile *> projectiles);
     private:
 
         std::vector<SDL_Texture*> gTex;
@@ -51,7 +54,7 @@ class Render {
         SDL_Renderer* gRenderer;
         SDL_Surface* gScreenSurface;
 
-        Player* gPlayer;
+        std::vector<Player*> gPlayers;
 
         SDL_Texture* gTileSheet;
         SDL_Rect gTileRects[3];

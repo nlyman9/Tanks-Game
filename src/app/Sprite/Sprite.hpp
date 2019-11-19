@@ -32,6 +32,10 @@ class Sprite {
         std::string gFname;
         // TODO?
         // png size
+		
+		//animation
+		SDL_Rect* textRect;
+		
     public:
         Sprite(){};
         Sprite(SDL_Renderer *gRenderer, std::string fname);
@@ -51,6 +55,10 @@ class Sprite {
          */
         void setTexture(SDL_Texture *new_texture);
 
-        ~Sprite(){}; //destructor
+        ~Sprite(); //destructor
+		
+		void sheetSetup(int width, int length, int height);
+		
+		SDL_Rect* getFrame(int frame);
 };
 #endif

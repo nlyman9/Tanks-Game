@@ -1,7 +1,7 @@
 /**
- * @file object.hpp
+ * @file Object.hpp
  * @author Networking Team (Adam Alec Jakob)
- * @brief Header for abstract object class for general entities in the game
+ * @brief Header for abstract Object class for general entities in the game
  * @version 0.1
  * @date 2019-09-29
  * 
@@ -10,7 +10,7 @@
  */
 
 /**
- * @brief UNDEFINED means the object/type has not been defined/implemented yet
+ * @brief UNDEFINED means the Object/type has not been defined/implemented yet
  * 
  * UNDEFINED = bool -> Essentially should be void but it doesn't work.
  */
@@ -55,18 +55,19 @@ inline std::ostream& operator<<(std::ostream& out, const BoundingBox &box) {
 }
 
 
-class OBJECT
+class Object
 {
 private:
     Sprite sprite;
+    Sprite turretSprite;
     float x;
     float y;
     SDL_Rect box;
 
 
 public:
-    OBJECT() {};
-    SDL_Rect* check_collision(OBJECT *B);
+    Object() {};
+    SDL_Rect* check_collision(Object *B);
     SDL_Rect* check_collision(SDL_Rect *B);
     SDL_Rect* check_collision(SDL_Rect* A, SDL_Rect *B);
     SDL_Rect *get_box();
@@ -86,14 +87,14 @@ public:
     std::vector<SDL_Rect> obstacles;
     Sprite* getSprite();
     /**
-         * @brief Updates the object at a fixed timestep;
+         * @brief Updates the Object at a fixed timestep;
          * 
          * Fixed timesteps allow for updates to be deterministic.
          */
     virtual void update() = 0;
 
     /**
-         * @brief draw the object to the screen; uses float parameter for extrapolation.
+         * @brief draw the Object to the screen; uses float parameter for extrapolation.
          * 
          * @param update_lag (float) {Jakob -> "We can change the name, I can't think of a good one."}
          *  The value used to exptrapolate; should be in range of [0.0, 1.0)
@@ -105,18 +106,18 @@ public:
     // virtual struct pos* getPos() = 0;
 
     /**
-         * @brief move the object an offset from its current x-y position
+         * @brief move the Object an offset from its current x-y position
          * 
-         * @param x - how much to move object's current x position by
-         * @param y - how much to move object's current y position by
+         * @param x - how much to move Object's current x position by
+         * @param y - how much to move Object's current y position by
          * 
-         * @return true  - moved object succesfully 
-         * @return false - failed to move object 
+         * @return true  - moved Object succesfully 
+         * @return false - failed to move Object 
          */
     virtual bool move(float x, float y) = 0;
 
     /**
-         * @brief place/teleport an object to a 2D location
+         * @brief place/teleport an Object to a 2D location
          * 
          * @param x - set x position
          * @param y - set y position
@@ -125,7 +126,7 @@ public:
          * @return false - failed to place player 
          */
     virtual bool place(float x, float y) = 0;
-    ~OBJECT(); //destructor
+    ~Object(); //destructor
 };
 
 #endif
