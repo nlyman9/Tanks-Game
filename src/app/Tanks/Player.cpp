@@ -69,6 +69,10 @@ void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
     SDL_RenderCopyEx(gRenderer, getTurretSprite()->getTexture(), NULL, turret_dst, turretTheta, NULL, SDL_FLIP_NONE);
 }
 
+/**
+ * @brief Set turret theta using the current position of the mouse
+ * 
+ */
 void Player::setTurretTheta() {
     // Move the turret
     // Center the delta x and y by the center of the tank
@@ -78,8 +82,13 @@ void Player::setTurretTheta() {
     turretTheta = (int)(theta_radians * 180 / M_PI);;
 }
 
+/**
+ * @brief Set the turret theta with a given value 
+ * 
+ * @param theta - The theta value you want to set it to
+ */
 void Player::setTurretTheta(int theta) {
-    turretTheta = (theta * 180 / M_PI);
+    turretTheta = ((float)theta * 180 / M_PI);
 }
 
 /**

@@ -220,21 +220,26 @@ int OnlineGameLoop::run() {
 		// 2. Update
 		// Update if time since last update is >= MS_PER_UPDATE
 		while(lag_time >= MS_PER_UPDATE) {
-			for(auto player : players) {
-				player->update();
-			}
+			// Local player
+			// TODO change player from vector to single class - localPlayer
+			players.at(0)->setTurretTheta();
+			players.at(0)->update();
 
 			// Basically add a keyframe every ~2 updates -> 30 times a second
 			temp += 1;
 			// TODO Consolidate tickrates
 			if (temp > 2 && keystate != nullptr) {
 				// Add keystate from local player to send
-				client->addLocalKeyState(keystate);
+				client->addLocalKeyState(keystate, players.at(0)->turretTheta);
 				keystate = nullptr; //only need to send one per update loop
 				temp = 0;
 			}
 
 			for (auto playerEnemy : playerEnemies) {
+				int theta = client->getTurretTheta(0);
+				std::cout << "CLIENT: Network player theta is " << theta << std::endl;
+				fflush(stdout);
+				playerEnemy->setTurretTheta(theta);
 				playerEnemy->update();
 			}
 
