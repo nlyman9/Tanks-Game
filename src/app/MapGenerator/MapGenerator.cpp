@@ -242,15 +242,15 @@ std::vector<std::vector<int>> MapGenerator::generateOpenLineMap()
 	std::vector<int> pre_array = {2, 6, 11, 16, 20};
 	srand(time(NULL));
 
-	for(int i = 0; i < pre_array.size(); i++) {
+	for(auto val : pre_array) {
 		random_index = rand() % (Y_HIGH - 2);
 		for(int j = 0; j < Y_HIGH; j++) {
 			if(random_index == j || random_index == j + 1) {
-				room[i][j] = 0;
-				room[i + 1][j] = 0;
+				room[val][j] = 0;
+				room[val + 1][j] = 0;
 			} else {
-				room[i][j] = 2;
-				room[i + 1][j] = 2;
+				room[val][j] = 2;
+				room[val + 1][j] = 2;
 			}
 		}
 	}
@@ -284,8 +284,8 @@ std::vector<std::vector<int>>* MapGenerator::generateMap()
 			switch(rand() % NUM_PRE)
 			{
 				case 0:
-					// tile_map = generateEmptyMap();
-					// break;
+					tile_map = generateEmptyMap();
+					break;
 				case 1:
 					tile_map = presetCenterCubes();
 					break;
