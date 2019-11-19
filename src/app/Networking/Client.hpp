@@ -44,7 +44,7 @@ class Client {
     // Game Player
     std::vector<Uint8*> playerKeystates;
     std::vector<int> playerTurretThetas;
-    std::vector<bool> playerMouseClicked;
+    std::vector<bool> playerShot;
     // Game state vector?
 
     // Game 
@@ -67,7 +67,7 @@ class Client {
       Uint8 *player2Keystats = (Uint8 *) calloc(27, sizeof(Uint8));
       playerKeystates.push_back(player2Keystats);
       playerTurretThetas.push_back(0);
-      playerMouseClicked.push_back(false);
+      playerShot.push_back(false);
     };
 
     ~Client() {
@@ -144,6 +144,12 @@ class Client {
       return (const Uint8*) playerKeystates.at(id);
     }
 
+    /**
+     * @brief Get the Turret angle of the networked player
+     * 
+     * @param id - Which online player
+     * @return int - Their turret's angle
+     */
     int getTurretTheta(int id) {
       assert(id < playerTurretThetas.size());
 
@@ -151,12 +157,27 @@ class Client {
     }
 
     /**
+     * @brief Get the boolean if the networked player shot
+     * 
+     * @param id - Which network player
+     * @return true - They shot
+     * @return false - They didn't shoot
+     */
+    bool getPlayerShot(int id) {
+      assert(id < playerTurretThetas.size());
+
+      return playerShot.at(id);
+    }
+
+    /**
      * @brief Add a keystate received from the server to keystates vector 
      * 
      * @param id - The ID of the client it was from
      * @param charKeyStates - The keystates 
+     * @param turretTheta - The player's turret angle from the packet
+     * @param hasShot - the boolean if the player shot or not
      */
-    void addNetworkKeyState(int id, std::vector<char> *charKeyStates, int turretTheta) {
+    void addNetworkKeyState(int id, std::vector<char> *charKeyStates, int turretTheta, bool hasShot) {
       assert(id < playerKeystates.size());
       assert(id < playerTurretThetas.size());
 
@@ -171,6 +192,7 @@ class Client {
       }
 
       playerTurretThetas[id] = turretTheta;
+      playerShot[id] = hasShot;
 
       printf("Keystate[W] = %d  -- ", keystate[SDL_SCANCODE_W]);
       printf("Turret = %d\n", playerTurretThetas.at(id));
@@ -183,7 +205,7 @@ class Client {
      * 
      * @param keystates - Keystates from the local client
      */
-    void addLocalKeyState(const Uint8 *keystates, int turretTheta) {
+    void addLocalKeyState(const Uint8 *keystates, int turretTheta, bool hasShot) {
       Packet *mail = new Packet(PackType::KEYSTATE);
       std::vector<char> charKeyStates;
 
@@ -193,6 +215,8 @@ class Client {
       charKeyStates.push_back(' '); // use space to mark end of keystates
       mail->appendData(charKeyStates);
       mail->appendData(turretTheta);
+      mail->appendData(' ');
+      mail->appendData(hasShot);
 
       std::cout << "Sending keystate - ";
       mail->printData();
