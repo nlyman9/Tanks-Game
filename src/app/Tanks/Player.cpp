@@ -88,7 +88,7 @@ void Player::setTurretTheta() {
  * @param theta - The theta value you want to set it to
  */
 void Player::setTurretTheta(int theta) {
-    turretTheta = ((float)theta * 180 / M_PI);
+    turretTheta = theta;
 }
 
 /**
