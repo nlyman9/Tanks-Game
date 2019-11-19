@@ -16,7 +16,6 @@
 #include <cmath>
 #include <SDL2/SDL.h>
 #include "Object.hpp"
-#include "Client.hpp"
 #include "Tank.hpp"
 
 const int THETA_WINDOW = 5;
@@ -25,7 +24,6 @@ class Player : public Object, public Tank {
     private:
         /* data */
         Sprite *turret = nullptr;
-        Client *client = nullptr;
         float x_vel, y_vel; // x and y velocity
         int lives; //health points left
         int theta_v = 0;
@@ -39,6 +37,7 @@ class Player : public Object, public Tank {
         float delta_velocity = 0;
         bool localPlayer;
         bool connected;
+        int id;
         Uint32 anim_last_time = 0;
 
     public:
@@ -53,8 +52,14 @@ class Player : public Object, public Tank {
 
         bool isConnected(); //check if the player has entered the game
 
-        void getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, SDL_Event* e, const Uint8 *keystate);
-        void setClient(Client* client);
+        void getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time,
+                      SDL_Event* e, 
+                      const Uint8 *keystate);
+        void setId(int i) { 
+            id = i; 
+        }
+        void setTurretTheta();
+        void setTurretTheta(int theta);
 
         BoundingBox* getBoundingBox() override;
 

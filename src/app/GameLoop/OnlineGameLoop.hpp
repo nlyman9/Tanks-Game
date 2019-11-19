@@ -3,6 +3,7 @@
 
 #include "Render.hpp"
 #include "Args.hpp"
+#include "Client.hpp"
 
 class OnlineGameLoop {
     public:
@@ -33,7 +34,6 @@ class OnlineGameLoop {
         std::vector<SDL_Rect> projectileObstacles;
 
         Render* render = nullptr;
-        bool isGameOn = false;
 
         // Run variables
         std::chrono::duration<double, std::ratio<1, 1000>> elapsed_time;

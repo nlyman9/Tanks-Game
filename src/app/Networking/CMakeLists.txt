@@ -46,11 +46,13 @@ target_link_libraries(Server
   ${SDL2_LIBRARY}
   ${SDL2_IMAGE_LIBRARIES}
   Multiplayer
+  Constants
 )
 else()
 target_link_libraries(Server
   PRIVATE
   MapGenerator
   Multiplayer
+  Constants
 )
 endif()

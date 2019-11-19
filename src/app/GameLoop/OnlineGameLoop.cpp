@@ -7,7 +7,7 @@ OnlineGameLoop::OnlineGameLoop(Render* renderer) : render{renderer} {}
 
 bool OnlineGameLoop::init(Args* options) {
     // Set up player 1
-    Player* player = new Player(SCREEN_WIDTH/2 + 100, 50, true);
+    Player* player = new Player(0, 0, true); // Position set from server
     Sprite *red_player_tank = new Sprite(render->getRenderer(), "src/res/images/red_tank.png");
 	red_player_tank->init();
 	red_player_tank->sheetSetup(30, 30, 3);
@@ -18,7 +18,7 @@ bool OnlineGameLoop::init(Args* options) {
 	player->setTurretSprite(player1_turret);
 
     // Set up player 2
-    Player* player2 = new Player(SCREEN_WIDTH/2 + 100, 400, false);
+    Player* player2 = new Player(0, 0, false); // Position set from server
 	Sprite* blue_player_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
 	blue_player_tank->init();
     blue_player_tank->sheetSetup(30, 30, 3);
@@ -61,8 +61,6 @@ bool OnlineGameLoop::init(Args* options) {
     // Set up cursor
     cursor = loadImage("src/res/images/cursor.png", render->getRenderer());
 
-	isGameOn = true;
-
     // Host-Network initialization
     std::cout << options->isHost << std::endl;
 	if(options->isHost == true){
@@ -92,6 +90,24 @@ bool OnlineGameLoop::init(Args* options) {
 		}
 	}
 
+	// Get initial position of the players from the server
+	std::cout << "Waiting on init" << std::endl;
+	int screenCounter = 0;
+	while(!client->pollInitData()) {
+		displayLoadingScreen(screenCounter);
+        screenCounter++;
+        if(screenCounter == 7) {
+            screenCounter = 0;
+        }
+
+	}
+	auto initData = client->initData;
+	player->setId(initData[0]);
+	player->setX(initData[1]);
+	player->setY(initData[2]);
+	player2->setX(initData[3]);
+	player2->setY(initData[4]);
+
     buildMap();
 
 	// Initialized successfully
@@ -99,6 +115,8 @@ bool OnlineGameLoop::init(Args* options) {
 }
 
 void OnlineGameLoop::buildMap() {
+	//wait for both players to connect (Map data arrives when both connect)
+    int screenCounter = 0;
     while(!client->pollMap()) {}
 
 	std::vector<std::vector<int>> map2D;
@@ -133,23 +151,16 @@ void OnlineGameLoop::buildMap() {
 		player->setObstacleLocations(&tileArray);
 	}
 
-	// TODO add obstacles for network players
+	// Set collision for network players 
+	for (auto enemy : playerEnemies) {
+		enemy->setObstacleLocations(&tileArray);
+	}
 }
 
 int OnlineGameLoop::run() {
     SDL_Event e;
 	previous_time = std::chrono::system_clock::now(); // get current time of system
 	lag_time = 0.0;	// Set duration of time to 0
-
-    //wait for both players to connect
-    int screenCounter = 0;
-	while(!client->startGame){
-	    displayLoadingScreen(screenCounter);
-        screenCounter++;
-        if(screenCounter == 7) {
-            screenCounter = 0;
-        }
-    }
 	
 	const Uint8 *keystate;
 	const Uint8 *keyStatePacket;
@@ -182,20 +193,9 @@ int OnlineGameLoop::run() {
 		assert(players.size() == 1);
 		for(auto player : players) {
 			// Send same keystate to player object and to the client to send
-			// Lets just support 10 keys at the same time
 			// TODO find a good rate to send player keystates
 			keystate = SDL_GetKeyboardState(nullptr);
 			player->getEvent(elapsed_time, &e, keystate);
-			
-			//network version of player firing bullet
-			if (player->getFire() == true) {
-                Projectile *newBullet = new Projectile(player->getX() + TANK_WIDTH/4, player->getY() + TANK_HEIGHT/4, player->getTurretTheta());
-                newBullet->setSprite(shell);
-                newBullet->setObstacleLocations(&tileArray);
-                projectiles.push_back(newBullet);
-                render->setProjectiles(projectiles);
-                player->setFire(false);
-			}
 		}
 
 		// Set inputs of enemy players over network
@@ -205,27 +205,51 @@ int OnlineGameLoop::run() {
 
 			// Apply keysates to the network player
 			playerEnemy->getEvent(elapsed_time, &e, keyStatePacket);
+			
 		}
 
 		// 2. Update
 		// Update if time since last update is >= MS_PER_UPDATE
 		while(lag_time >= MS_PER_UPDATE) {
-			for(auto player : players) {
-				player->update();
-			}
+			// Local player
+			// TODO change player from vector to single class - localPlayer
+			players.at(0)->setTurretTheta();
+			players.at(0)->update();
 
 			// Basically add a keyframe every ~2 updates -> 30 times a second
 			temp += 1;
 			// TODO Consolidate tickrates
 			if (temp > 2 && keystate != nullptr) {
 				// Add keystate from local player to send
-				client->addLocalKeyState(keystate);
+				client->addLocalKeyState(keystate, players.at(0)->turretTheta, players.at(0)->getFire());
 				keystate = nullptr; //only need to send one per update loop
 				temp = 0;
+
+				//network version of player firing bullet
+				// TODO NOT DO THIS - not have this nested inside the tickrate - this is hacky
+				if (players.at(0)->getFire() == true) {
+					Projectile *newBullet = new Projectile(players.at(0)->getX() + TANK_WIDTH/4, players.at(0)->getY() + TANK_HEIGHT/4, players.at(0)->getTurretTheta());
+					newBullet->setSprite(shell);
+					newBullet->setObstacleLocations(&tileArray);
+					projectiles.push_back(newBullet);
+					render->setProjectiles(projectiles);
+					players.at(0)->setFire(false);
+				}
 			}
 
 			for (auto playerEnemy : playerEnemies) {
+				playerEnemy->setTurretTheta(client->getTurretTheta(0));
+				playerEnemy->setFire(client->getPlayerShot(0));
 				playerEnemy->update();
+
+				if (playerEnemy->getFire() == true) {
+					Projectile *newBullet = new Projectile(playerEnemy->getX() + TANK_WIDTH/4, playerEnemy->getY() + TANK_HEIGHT/4, playerEnemy->getTurretTheta());
+					newBullet->setSprite(shell);
+					newBullet->setObstacleLocations(&tileArray);
+					projectiles.push_back(newBullet);
+					render->setProjectiles(projectiles);
+					playerEnemy->setFire(false);
+				}
 			}
 
 			int count = 0;
@@ -261,9 +285,10 @@ int OnlineGameLoop::run() {
 }
 
 void OnlineGameLoop::displayLoadingScreen(int screenCounter) {
-    SDL_Rect loadingScreenRect = {0, 0, SCREEN_HEIGHT, SCREEN_WIDTH};
+    SDL_Rect loadingScreenRect = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
     switch(screenCounter) {
         case 0:
+			std::cout << "display load 1" << std::endl;
             SDL_RenderCopy(render->getRenderer(), loadingScreen1, NULL, &loadingScreenRect);
             break;
         case 1:
@@ -288,5 +313,6 @@ void OnlineGameLoop::displayLoadingScreen(int screenCounter) {
             SDL_RenderCopy(render->getRenderer(), loadingScreen1, NULL, &loadingScreenRect);
             break;
     }
+	SDL_RenderPresent(render->getRenderer());
     sleep(1);
 }
