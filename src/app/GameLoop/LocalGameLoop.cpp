@@ -101,6 +101,30 @@ void LocalGameLoop::generateMap() {
  */
 std::vector<int> LocalGameLoop::spawnEnemies(std::vector<std::vector<int>> *map, int count)
 {
+	// SET TO TRUE TO DEBUG
+	std::vector<std::vector<int>> transpose;
+	if(false)
+	{
+		std::cout << "LocalGameLoop::spawnEnemies()" << std::endl;
+
+		for(int i = 0; i < Y_HIGH; i++)
+		{
+			transpose.push_back(std::vector<int>(X_WIDE));
+			for(int j = 0; j < X_WIDE; j++)
+			{
+				transpose[i][j] = (*map)[j][i];
+			}
+		}
+
+		for( auto i : transpose )
+		{
+			for( auto j : i )
+				std::cout << j;
+			std::cout << std::endl;
+		}
+		std::cout << std::endl;
+	}
+
 	std::vector<std::vector<int>> tileMap = *map;
 	std::vector<int> coords;
 	int enemy_x, enemy_y;
@@ -111,7 +135,7 @@ std::vector<int> LocalGameLoop::spawnEnemies(std::vector<std::vector<int>> *map,
 		enemy_x = (rand() % 16) + 4;
 		enemy_y = (rand() % 3) + 10;
 
-		if(tileMap[enemy_y][enemy_x] == 0)
+		if(transpose[enemy_y][enemy_x] == 0)
 		{
 			if(i < count)
 			{
@@ -124,8 +148,11 @@ std::vector<int> LocalGameLoop::spawnEnemies(std::vector<std::vector<int>> *map,
 		}
 	}
 
-	coords.push_back(enemy_x * 48 + 100);
+	coords.push_back(enemy_x * 48 + 64);
 	coords.push_back(enemy_y * 48 + 48);
+
+	// std::cout << "X" << enemy_x << ":Y" << enemy_y << std::endl;
+	// std::cout << "V" << transpose[enemy_y][enemy_x] << std::endl;
 
 	return coords;
 }
