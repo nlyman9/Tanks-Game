@@ -17,6 +17,8 @@ class OnlineGameLoop {
     	std::vector<Projectile *> projectiles;
 
         Sprite* pinksplosion = nullptr;
+		Sprite* redsplosion = nullptr;
+		Sprite* bluesplosion = nullptr;
         Sprite* bullet = nullptr;
         Sprite* shell = nullptr;
         SDL_Texture* cursor = nullptr;
