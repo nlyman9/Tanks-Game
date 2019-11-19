@@ -30,6 +30,7 @@ class Enemy : public Object, public Tank {
         bool left = true;
 		bool anim_last_time = 0;
         std::vector<coordinate> enemyPath;
+				std::vector<Projectile *> enemyProjectiles;
 
 		float line1X, line1Y, line2X, line2Y;
 		int randCut = 2;
@@ -68,8 +69,8 @@ class Enemy : public Object, public Tank {
         std::vector<coordinate> generatePath(std::vector<std::vector<int>> move_map, Player player, Enemy enemy);
 				bool validMove(coordinate moveTo, coordinate currentlyAt);
         std::vector<std::vector<int>> tile_map;
-		
-		
+
+
     public:
 		Enemy(Sprite* sprite, Sprite* turret, int x, int y, Player* player); //constructor, initialize the x, y, and sprite
         Enemy(float x, float y, Player* player); //constructor, initialize the x, y, and sprite
@@ -81,6 +82,7 @@ class Enemy : public Object, public Tank {
         bool place(float x, float y) override;	//	place/teleport to an x and y
 
         void updatePos();
+				void setProjectiles(std::vector<Projectile *> projectiles); 							//update the projectile vector so enemy can avoid them
 
         BoundingBox* getBoundingBox() override;
 
