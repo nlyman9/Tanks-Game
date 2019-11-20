@@ -103,7 +103,7 @@ std::vector<int> LocalGameLoop::spawnEnemies(std::vector<std::vector<int>> *map,
 {
 	// SET TO TRUE TO DEBUG
 	std::vector<std::vector<int>> transpose;
-	if(false)
+	if(true)
 	{
 		std::cout << "LocalGameLoop::spawnEnemies()" << std::endl;
 
