@@ -12,9 +12,13 @@ class Tank {
         bool getFire();
         bool setFire(bool fire);
         bool rotate(float theta);
-        bool rotateTurret(float theta);
+        void rotateTurret(float theta);
         void setTurretSprite(Sprite* new_sprite);
         Sprite* getTurretSprite();
+		bool isHit();
+		void setHit(bool val);
+		void resetFrame();
+		bool isDestroyed();
 
         // Member Variable
         int theta = 0;
@@ -23,6 +27,8 @@ class Tank {
         Uint32 fire_last_time = 0;
         int frame = 0;
         Sprite turretSprite;
+		bool hit = false;
+		bool destroyed = false;
 };
 
 #endif
