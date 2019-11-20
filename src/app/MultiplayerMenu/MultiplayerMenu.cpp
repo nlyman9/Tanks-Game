@@ -33,7 +33,7 @@ Args* MultiplayerMenu(Render* renderer)
 				for(int i = 0; i < NUM_BOXES; i++){
                     Box currBox = menu->getBox(i);
                     if(currBox.isVisible()){
-                        SDL_Rect temp = *(currBox.getPosition());
+                        SDL_Rect temp = *(currBox.getRectangle());
                         if(currBox.getType() == TEXT){
                             temp.w += currBox.TEXT_FIELD_OFFSET() + currBox.TEXT_FIELD_WIDTH();
                         }
@@ -78,12 +78,12 @@ Args* MultiplayerMenu(Render* renderer)
                         visible boxes
                         SAVE, HOST, IPBOX, PORTBOXC CONNECT, OKAY, CANCEL, EXIT
                     */
-                    std::cout << "CONNECT" << std::endl;
+                    std::cout << "HOST" << std::endl;
                     menu->setVisible(HOST);
                     menu->setVisible(CONNECT);
                     menu->setVisible(EXIT);
                     menu->setVisible(PORTBOXC);
-                    host = false;
+                    host = true;
                     //menu->setVisible(SAVE);
                     menu->setVisible(OKAY);
                     menu->setVisible(CANCEL);
@@ -94,8 +94,8 @@ Args* MultiplayerMenu(Render* renderer)
                         visible boxes
                         HOST, CONNECT, EXIT, PORTBOXH
                     */
-                    std::cout << "HOST" << std::endl;
-                    host = true;
+                    std::cout << "CONNECT" << std::endl;
+                    host = false;
                     menu->setVisible(HOST);
                     menu->setVisible(CONNECT);
                     menu->setVisible(EXIT);
@@ -110,6 +110,7 @@ Args* MultiplayerMenu(Render* renderer)
                         std::cout << "Not enough digits in ip, setting to local area connection" << std::endl;
                         options->ip = "0.0.0.0";
                     }else if(host){
+                        std::cout << "we are host dun dun dun dun dun" << std::endl;
                         options->ip = "0.0.0.0";
                     }
                     else{
@@ -199,18 +200,18 @@ Args* MultiplayerMenu(Render* renderer)
                     case IPBOX:
                         string = new std::string("Ip Box");
                         textField = menu->getIPwithPeriods();
-                        renderer->drawText(&currBox, textField, currBox.getPosition()->w + currBox.TEXT_FIELD_OFFSET() + 5, 0, menu->intSize * (menu->ipDigits() + menu->numPeriods()), currBox.getPosition()->h);
+                        renderer->drawText(&currBox, textField, currBox.getRectangle()->w + currBox.TEXT_FIELD_OFFSET() + 5, 0, menu->intSize * (menu->ipDigits() + menu->numPeriods()), currBox.getRectangle()->h);
                         delete textField;
                         break;
                     case PORTBOXC:
                         string = new std::string("Port box");
                         textField = menu->getPort();
-                        renderer->drawText(&currBox, textField, currBox.getPosition()->w + currBox.TEXT_FIELD_OFFSET() + 5, 0, menu->intSize * menu->portDigits(), currBox.getPosition()->h);
+                        renderer->drawText(&currBox, textField, currBox.getRectangle()->w + currBox.TEXT_FIELD_OFFSET() + 5, 0, menu->intSize * menu->portDigits(), currBox.getRectangle()->h);
                         break;
                     case PORTBOXH:
                         string = new std::string("Port box");
                         textField = menu->getPort();
-                        renderer->drawText(&currBox, textField, currBox.getPosition()->w + currBox.TEXT_FIELD_OFFSET() + 5, 0, menu->intSize * menu->portDigits(), currBox.getPosition()->h);
+                        renderer->drawText(&currBox, textField, currBox.getRectangle()->w + currBox.TEXT_FIELD_OFFSET() + 5, 0, menu->intSize * menu->portDigits(), currBox.getRectangle()->h);
                         delete textField;
                         break;
                     case OKAY:
@@ -221,7 +222,7 @@ Args* MultiplayerMenu(Render* renderer)
                         break;
                 }
                 if(string != nullptr){
-                    renderer->drawText(&currBox, string, 0, 0, currBox.getPosition()->w, currBox.getPosition()->h);
+                    renderer->drawText(&currBox, string, 0, 0, currBox.getRectangle()->w, currBox.getRectangle()->h);
                     delete string;
                 }
             }

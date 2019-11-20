@@ -181,8 +181,8 @@ int Render::drawText(Box* box, const std::string* toDraw, int XOFFSET, int YOFFS
 	SDL_Surface* surfaceMessage = TTF_RenderText_Solid(font, toDraw->c_str(), textColor);
 	Message = SDL_CreateTextureFromSurface(gRenderer, surfaceMessage);
 	SDL_Rect* rect = new SDL_Rect();
-	rect->x = box->getPosition()->x + XOFFSET;
-	rect->y = box->getPosition()->y + YOFFSET;
+	rect->x = box->getRectangle()->x + XOFFSET;
+	rect->y = box->getRectangle()->y + YOFFSET;
 	rect->w = WIDTH;
 	rect->h = HEIGHT;
 	SDL_RenderCopy(gRenderer, Message, NULL, rect);
@@ -201,18 +201,28 @@ int Render::drawBox(Box toDraw){
 	return 0;
 }
 int Render::drawButton(Box toDraw){
-	SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF); //black boxes
-	SDL_RenderFillRect(gRenderer, toDraw.getPosition());
+	if(toDraw.getIMGPath() == ""){ //if src is empty
+		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF); //black boxes
+		SDL_RenderFillRect(gRenderer, toDraw.getRectangle());
+	}else{
+		SDL_Texture* button = loadImage(toDraw.getIMGPath(), gRenderer);
+		SDL_RenderCopy(gRenderer, button, NULL, toDraw.getRectangle());
+	}
 	return 0;
 }
 int Render::drawTextField(Box toDraw){
-	SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF); //black boxes
-	SDL_RenderFillRect(gRenderer, toDraw.getPosition());
+	if(toDraw.getIMGPath() == ""){ //if src is empty
+		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF); //black boxes
+		SDL_RenderFillRect(gRenderer, toDraw.getRectangle());
+	}else{
+		SDL_Texture* button = loadImage(toDraw.getIMGPath(), gRenderer);
+		SDL_RenderCopy(gRenderer, button, NULL, toDraw.getRectangle());
+	}
 	SDL_Rect* TextField = new SDL_Rect();
-	TextField->x = toDraw.getPosition()->x + toDraw.getPosition()->w + toDraw.TEXT_FIELD_OFFSET();
-	TextField->y = toDraw.getPosition()->y;
+	TextField->x = toDraw.getRectangle()->x + toDraw.getRectangle()->w + toDraw.TEXT_FIELD_OFFSET();
+	TextField->y = toDraw.getRectangle()->y;
 	TextField->w = toDraw.TEXT_FIELD_WIDTH();
-	TextField->h = toDraw.getPosition()->h;
+	TextField->h = toDraw.getRectangle()->h;
 	SDL_RenderFillRect(gRenderer, TextField);
 	delete TextField;
 	return 0;

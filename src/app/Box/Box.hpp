@@ -2,6 +2,7 @@
 #define BOX__H
 #include <SDL2/SDL.h>
 #include <vector>
+#include <string>
 
 enum boxtype {TEXT, BUTTON};
 class Box{
@@ -13,13 +14,21 @@ class Box{
         int type;
         int w;
         int o;
+        std::string src;
     public:
     Box(SDL_Rect* box, int id, int screen, int type){
         this->id = id;
         this->screen = screen;
         this->type = type;
         this->position = new SDL_Rect();
-        setPosition(box);
+        setRectangle(box);
+        src = "";
+    }
+    void setSRC(std::string newSRC){
+        src = newSRC;
+    }
+    std::string getIMGPath(){
+        return src;
     }
     int TEXT_FIELD_WIDTH(){
         return w;
@@ -39,13 +48,13 @@ class Box{
     bool isVisible(){
         return this->visible;
     }
-    void setPosition(SDL_Rect* newPosition){
+    void setRectangle(SDL_Rect* newPosition){
         this->position->x = newPosition->x;
         this->position->y = newPosition->y;
         this->position->w = newPosition->w;
         this->position->h = newPosition->h;
     }
-    SDL_Rect* getPosition(){
+    SDL_Rect* getRectangle(){
         return this->position;
     }
     int getScreen(){
