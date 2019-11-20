@@ -49,9 +49,18 @@ class Render {
         void setPlayerEnemies(std::vector<Player*> players);
         void setEnemies(std::vector<Enemy *> enemies);
         void setProjectiles(std::vector<Projectile *> projectiles);
+
+        //menu stuff
+        //draw a box
         int drawBox(Box toDraw);
-        
+        //clear the background
+        int drawBackground();
+        //present the renderer
+        int present();
+        //draw text
+        int drawText(Box* box, const std::string* toDraw);
     private:
+        //for later to draw buttons differently from text fields
         int drawButton(Box toDraw);
         int drawTextField(Box toDraw);
 
@@ -65,11 +74,13 @@ class Render {
         SDL_Texture* gTileSheet;
         SDL_Rect gTileRects[3];
 
-       std::vector<std::vector<int>> tile_map;
+        std::vector<std::vector<int>> tile_map;
 
         //The font that's going to be used
-        TTF_Font *font = NULL;
+        TTF_Font *font;
+        //the texture to copy to the renderer
+        SDL_Texture* Message;
         //The color of the font
-        SDL_Color textColor = { 255, 255, 255 };
+        SDL_Color textColor = { 200, 200, 200 };
 };
 #endif

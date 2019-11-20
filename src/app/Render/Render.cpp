@@ -1,13 +1,3 @@
-#if __APPLE__
-#include <SDL2/SDL.h>
-#include <SDL2_image/SDL_image.h>
-#include <SDL2_ttf/SDL_ttf.h>
-#else
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_ttf.h>
-#endif
-
 #include <vector>
 #include <string>
 #include <time.h>
@@ -48,6 +38,17 @@ bool Render::init()
 		std::cout << "Renderer could not be created! SDL_Error: " << SDL_GetError() << std::endl;
 		return false;
 	}
+
+	if( TTF_Init() == -1 )
+	{
+		printf( "SDL_ttf could not initialize! SDL_ttf Error: %s\n", TTF_GetError() );
+		return false;
+	}
+	font = TTF_OpenFont("src/res/font/Roboto.ttf", 24);
+	if (font == NULL) {
+        fprintf(stderr, "error: font not found\n");
+        exit(EXIT_FAILURE);
+    }
 
 	// Set renderer draw/clear color
 	SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
@@ -167,14 +168,33 @@ int Render::drawMenu() {
 
 	return menuOption;
 }
+int Render::present(){
+	SDL_RenderPresent( gRenderer );
+}
+int Render::drawBackground(){
+	SDL_RenderClear( gRenderer );
+	SDL_SetRenderDrawColor(gRenderer, 0x66, 0x00, 0x66, 0xFF); //purple background!?
+	SDL_Rect fullscreen = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+	SDL_RenderFillRect(gRenderer, &fullscreen);
+}
+int Render::drawText(Box* box, const std::string* toDraw){
+	SDL_Surface* surfaceMessage = TTF_RenderText_Solid(font, toDraw->c_str(), textColor);
+	Message = SDL_CreateTextureFromSurface(gRenderer, surfaceMessage);
+	SDL_RenderCopy(gRenderer, Message, NULL, box->getPosition());
+	SDL_FreeSurface(surfaceMessage);
+	SDL_DestroyTexture(Message);
+
+}
 int Render::drawBox(Box toDraw){
-	switch(toDraw.getType()){
+	SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF); //black boxes
+	SDL_RenderFillRect(gRenderer, toDraw.getPosition());
+	/*switch(toDraw.getType()){
 		case BUTTON:
-			drawButton(toDraw);
+			return drawButton(toDraw);
 		case TEXT:
-			drawTextField(toDraw);
-	}
-	return -1;
+			return drawTextField(toDraw);
+	}*/
+	return 0;
 }
 int Render::drawButton(Box toDraw){
 	return 0;

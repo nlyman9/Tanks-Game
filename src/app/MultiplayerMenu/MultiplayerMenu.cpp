@@ -2,11 +2,14 @@
 
 Args* MultiplayerMenu(Render* renderer) 
 {
-    int crBox, currMenu, portLength, ipLength = 0;
+    int crBox, currMenu;
     int screen = 0;
     int prevScreen = 0;
+    std::cout << "creating menu" << std::endl;
     Menu* menu = new Menu();
+    std::cout << "menu created" << std::endl;
     Args* options = new Args();
+    std::cout << "In menu" << std::endl;
     while(true){
         SDL_Event e;
         int keyPress = 0;
@@ -42,7 +45,6 @@ Args* MultiplayerMenu(Render* renderer)
         }
         if(prevScreen != screen){
             prevScreen = screen;
-            crBox = 0;
             //we've changed screens clear ip and port
             menu->clearIP();
             menu->clearPort();
@@ -52,20 +54,22 @@ Args* MultiplayerMenu(Render* renderer)
                 case -1:
                     //exit
                     delete menu;
-                    return options;
+                    delete options;
+                    return nullptr;
                 case 0:
                     //default screen
                     /*
                         visible boxes
                         SAVED, HOST, CONNECT, EXIT
                     */
-                    menu->setVisible(SAVED);
+                    //menu->setVisible(SAVED);
                     menu->setVisible(HOST);
+                    std::cout << "HOST" << std::endl;
                     menu->setVisible(CONNECT);
                     menu->setVisible(EXIT);
                     break;
                 case 1:
-                    //connect screen
+                    //HOST screen
                     /*
                         visible boxes
                         SAVE, HOST, IPBOX, PORTBOXC CONNECT, OKAY, CANCEL, EXIT
@@ -73,8 +77,8 @@ Args* MultiplayerMenu(Render* renderer)
                     menu->setVisible(HOST);
                     menu->setVisible(CONNECT);
                     menu->setVisible(EXIT);
-                    menu->setVisible(IPBOX);
-                    menu->setVisible(PORTBOXC);
+                    menu->setVisible(PORTBOXH);
+                    //menu->setVisible(SAVE);
                     menu->setVisible(OKAY);
                     menu->setVisible(CANCEL);
                     break;
@@ -87,7 +91,10 @@ Args* MultiplayerMenu(Render* renderer)
                     menu->setVisible(HOST);
                     menu->setVisible(CONNECT);
                     menu->setVisible(EXIT);
-                    menu->setVisible(PORTBOXH);
+                    menu->setVisible(PORTBOXC);
+                    menu->setVisible(IPBOX);
+                    menu->setVisible(OKAY);
+                    menu->setVisible(CANCEL);
                     break;
                 case 3:
                     //we clicked ok so check to see if ip and port are set and create the args array   
@@ -95,15 +102,52 @@ Args* MultiplayerMenu(Render* renderer)
                     break;    
             }
         }
+        //draw background
+        renderer->drawBackground();
         //draw box
         for(int i = 0; i < NUM_BOXES; i++){
             Box currBox = menu->getBox(i);
-            if(currBox.isVisible())
-                renderer->drawBox(menu->getBox(i));
+            if(currBox.isVisible()){
+                renderer->drawBox(currBox);
+                std::string* string = nullptr;
+                switch(currBox.getID()){
+                    case HOST:
+                        string = new std::string("Host");
+                        break;
+                    case CONNECT:
+                        string = new std::string("Connect");
+                        break;
+                    case EXIT:
+                        string = new std::string("Main Menu");
+                        break;
+                    case IPBOX:
+                        string = new std::string("Ip Box");
+                        break;
+                    case PORTBOXC:
+                        string = new std::string("Port box");
+                        break;
+                    case PORTBOXH:
+                        string = new std::string("Port box");
+                        break;
+                    case OKAY:
+                        string = new std::string("Okay");
+                        break;
+                    case CANCEL:
+                        string = new std::string("Cancel");
+                        break;
+                }
+                if(string != nullptr){
+                    renderer->drawText(&currBox, string);
+                    delete string;
+                }
+            }
         }
+        renderer->present();
+        //std::cout << keyPress <<std::endl;
         //make sure keyboard has an int and write it to a box
-        /*if(keyPress is digit)
-            switch(currBox){
+        if(keyPress >= 48 && keyPress <= 57){
+            keyPress = keyPress - 48; //set it from 0 to 9
+            switch(crBox){
                 case IPBOX:
                     //write to IPBOX and ip array
                     break;
@@ -116,6 +160,6 @@ Args* MultiplayerMenu(Render* renderer)
                 default:
                     break;
             }
-        */
+        }
     }
 }

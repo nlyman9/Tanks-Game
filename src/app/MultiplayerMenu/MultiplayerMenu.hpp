@@ -7,70 +7,106 @@
 Args* MultiplayerMenu(Render* renderer);
 class Menu{
     private:
-        std::vector<Box*>* boxes;
-        int hostX;
-        int hostY;
-        int connectX;
-        int connectY;
-        int exitX;
-        int exitY;
-        int ipX;
-        int ipY;
-        int portHX;
-        int portHY;
-        int portCX;
-        int portCY;
-        int okayX;
-        int okayY;
-        int cancelX;
-        int cancelY;
-        int saveX;
-        int saveY;
-        int savedX;
-        int savedY;
-        int WIDTH;
-        int HEIGHT;
-        int port[5];
-        int ip[12];
-        int PORT_MAX = 5;
-        int IP_MAX = 12;
+        std::vector<Box>* boxes;
+        /*
+            x and y of every box
+
+        */
+        const int col[6] = {0, 100, 200, 300, 400, 500};
+        const int WIDTH = 50;
+        const int HEIGHT = 100;
+        const int row[3] = {600, 300, 100};
+        int port[6];
+        int ip[13];
+        const int PORT_MAX = 6;
+        const int IP_MAX = 13;
+        void initRect(SDL_Rect* box,int x,int y,int w,int h){
+            box->x = x;
+            box->y = y;
+            box->h = h;
+            box->w = w;
+        }
     public:
         Menu(){
-            boxes = new std::vector<Box*>();
-            //create all the menu structs
-            SDL_Rect hostBox = { hostX, hostY , WIDTH, HEIGHT};
-            boxes->push_back(new Box(hostBox, HOST, 1, BUTTON));
-            SDL_Rect connectBox = { connectX, connectY , WIDTH, HEIGHT};
-            boxes->push_back(new Box(connectBox, CONNECT, 2, BUTTON));
-            SDL_Rect exitBox = { exitX, exitY , WIDTH, HEIGHT};
-            boxes->push_back(new Box(exitBox, EXIT, -1, BUTTON));
-            SDL_Rect ipBox = { ipX, ipY , WIDTH, HEIGHT};
-            boxes->push_back(new Box(ipBox, IPBOX, 2, TEXT));
-            SDL_Rect portBoxH = { portHX, portHY , WIDTH, HEIGHT};
-            boxes->push_back(new Box(portBoxH , PORTBOXH, 2, TEXT));
-            SDL_Rect portBoxC = { portCX, portCY , WIDTH, HEIGHT};
-            boxes->push_back(new Box(portBoxC, PORTBOXC, 1, TEXT));
-            SDL_Rect okayBox = { okayX, okayY , WIDTH, HEIGHT};
-            boxes->push_back(new Box(okayBox, OKAY, 3, BUTTON));
-            SDL_Rect cancelBox = { cancelX, cancelY , WIDTH, HEIGHT};
-            boxes->push_back(new Box(cancelBox, CANCEL, 0, BUTTON));
-            SDL_Rect saveBox = { saveX, saveY , WIDTH, HEIGHT};
+            std::cout << "Creating boxes" << std::endl;
+            this->boxes = new std::vector<Box>();      
+            //for later?
+            /*
+            SDL_Rect saveBox = {col[ ], row[ ] , WIDTH, HEIGHT};
             boxes->push_back(new Box(saveBox, SAVE, 0, BUTTON));
-            SDL_Rect savedBox = { savedX, savedY , WIDTH, HEIGHT};
+            SDL_Rect savedBox = {col[ ], row[ ] , WIDTH, HEIGHT};
             boxes->push_back(new Box(savedBox, SAVED, 0, BUTTON));
+            */
+            std::cout << "Filling in boxes array" << std::endl;
+            initMultiplayerMenu();
+            std::cout << "Clearing ip and port" << std::endl;
             clearIP();
             clearPort();
         }
+        void initMultiplayerMenu(){
+            //create all the menu structs
+            std::cout << "bottom row" << std::endl;
+            //bottom row
+            SDL_Rect* rect = new SDL_Rect();
+            //HOST BOX
+            initRect(rect, col[0], row[0], WIDTH, HEIGHT);
+            Box* box = new Box(rect, HOST, 1, BUTTON); //scren 1
+            box->setVisible(true);
+            boxes->push_back(*box);
+            //CONNECT BOX
+            initRect(rect, col[1], row[0] , WIDTH, HEIGHT);
+            box = new Box(rect, CONNECT, 2, BUTTON); //screen 2
+            box->setVisible(true);
+            boxes->push_back(*box);
+            //EXIT BOX
+            initRect(rect, col[2], row[0] , WIDTH, HEIGHT);
+            box = new Box(rect, EXIT, -1, BUTTON);
+            box->setVisible(true);
+            boxes->push_back(*box);
+
+            std::cout << "Middle row" << std::endl;
+
+            //top row
+            initRect(rect, col[1], row[2] , WIDTH, HEIGHT);
+            box = new Box(rect, IPBOX, 2, TEXT);
+            box->setVisible(false);
+            boxes->push_back(*box);
+
+            initRect(rect, col[2], row[2] , WIDTH, HEIGHT);
+            box = new Box(rect, PORTBOXC, 1, TEXT);
+            box->setVisible(false);
+            boxes->push_back(*box);
+
+            initRect(rect, col[2], row[2] , WIDTH, HEIGHT);
+            box = new Box(rect, PORTBOXH, 2, TEXT);
+            box->setVisible(false);
+            boxes->push_back(*box);
+            
+            //middle row
+            initRect(rect, col[3], row[1] , WIDTH, HEIGHT);
+            box = new Box(rect, OKAY, 3, BUTTON);
+            box->setVisible(false);
+            boxes->push_back(*box);
+
+            initRect(rect, col[5], row[1] , WIDTH, HEIGHT);
+            box = new Box(rect, CANCEL, 0, BUTTON); //goes back to screen 0
+            box->setVisible(false);
+            boxes->push_back(*box);
+
+            std::cout << "Top Row" << std::endl;
+            
+        }
         Box getBox(int id){
-            return *boxes->at(id);
+            return (boxes->at(id));
         }
         void setInvisible(){
             for(int i = 0; i < NUM_BOXES; i++){
-                boxes->at(i)->setVisible(false);
+                boxes->at(i).setVisible(false);
             }
         }
         void setVisible(int id){
-            boxes->at(id)->setVisible(true);
+            std::cout << id << std::endl;
+            boxes->at(id).setVisible(true);
         }
         void clearIP(){
             for(int i = 0; i < IP_MAX; i++){

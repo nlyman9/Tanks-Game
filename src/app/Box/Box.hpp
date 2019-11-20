@@ -2,7 +2,8 @@
 #define BOX__H
 #include <SDL2/SDL.h>
 #include <vector>
-enum boxid {HOST, CONNECT, EXIT, IPBOX, PORTBOXC, PORTBOXH, OKAY, CANCEL, SAVE, SAVED, NUM_BOXES};
+//if doing saved box add SAVE, SAVED
+enum boxid {HOST, CONNECT, EXIT, IPBOX, PORTBOXC, PORTBOXH, OKAY, CANCEL, NUM_BOXES};
 enum boxtype {TEXT, BUTTON};
 class Box{
     private:
@@ -12,14 +13,12 @@ class Box{
         bool visible;
         int type;
     public:
-    Box(SDL_Rect box, int id, int screen, int type){
+    Box(SDL_Rect* box, int id, int screen, int type){
         this->id = id;
         this->screen = screen;
         this->type = type;
+        this->position = new SDL_Rect();
         setPosition(box);
-    }
-    ~Box(){
-        delete this->position;
     }
     void setVisible(bool visibility){
         this->visible = visibility;
@@ -27,11 +26,11 @@ class Box{
     bool isVisible(){
         return this->visible;
     }
-    void setPosition(SDL_Rect newPosition){
-        this->position->x = newPosition.x;
-        this->position->y = newPosition.y;
-        this->position->w = newPosition.w;
-        this->position->h = newPosition.h;
+    void setPosition(SDL_Rect* newPosition){
+        this->position->x = newPosition->x;
+        this->position->y = newPosition->y;
+        this->position->w = newPosition->w;
+        this->position->h = newPosition->h;
     }
     SDL_Rect* getPosition(){
         return this->position;

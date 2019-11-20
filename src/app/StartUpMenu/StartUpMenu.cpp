@@ -21,7 +21,8 @@ void launch(Args *options)
 			ret = localGameLoop.run();
 		} else if(gameMode == MENU_MULTI) {
 			OnlineGameLoop onlineGameLoop(renderer);
-			/*Args* multiPlayerOptions = MultiplayerMenu(renderer);
+			std::cout << "Going into menu" << std::endl;
+			Args* multiPlayerOptions = MultiplayerMenu(renderer);
 			if(multiPlayerOptions == nullptr){
 				//Player exited menu instead of starting a game
 				gameMode = 0;
@@ -29,7 +30,7 @@ void launch(Args *options)
 			}
 			onlineGameLoop.init(multiPlayerOptions);
 			delete multiPlayerOptions;
-			*/
+			
 			onlineGameLoop.init(options);
 			ret = onlineGameLoop.run();
 		} else if(gameMode == MENU_CREDITS) {

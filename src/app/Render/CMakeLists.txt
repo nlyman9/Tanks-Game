@@ -8,6 +8,7 @@ target_link_libraries(Render
   PRIVATE
   ${SDL2_LIBRARY}
   ${SDL2_IMAGE_LIBRARIES}
+  ${SDL2_TTF_LIBRARIES}
   Constants
   Tank
   Object
@@ -23,6 +24,7 @@ else()
 target_link_libraries(Render
   PRIVATE
   SDL2
+  SDL2_ttf
   Constants
   Tank
   Object
