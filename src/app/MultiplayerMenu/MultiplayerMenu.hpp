@@ -75,9 +75,7 @@ class Menu{
             */
             std::cout << "Filling in boxes array" << std::endl;
             initMultiplayerMenu();
-            std::cout << "Clearing ip and port" << std::endl;
-            clearIP();
-            clearPort();
+            
         }
         int ipDigits(){
             return (int) ip->at(IP_MAX);
@@ -152,6 +150,10 @@ class Menu{
             boxes->push_back(*box);
 
             std::cout << "Top Row" << std::endl;
+
+            std::cout << "Clearing ip and port" << std::endl;
+            clearIP();
+            clearPort();
             
         }
         std::string* getIP(){
