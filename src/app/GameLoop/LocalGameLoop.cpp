@@ -219,7 +219,6 @@ int LocalGameLoop::run() {
         // 2. Update
 		// Update if time since last update is >= MS_PER_UPDATE
 		while(lag_time >= MS_PER_UPDATE) {
-
             player->setTurretTheta();
             player->update();
 
@@ -248,7 +247,6 @@ int LocalGameLoop::run() {
 				else {
 					projectiles.at(i)->addTargetLocation(player->get_box());
 				}
-
 				projectiles.at(i)->update();
 				if(projectiles.at(i)->isHit()){
 					SDL_Rect* hitObject = projectiles.at(i)->getTarget();
@@ -258,7 +256,6 @@ int LocalGameLoop::run() {
 						player->setSprite(redsplosion);
 						player->resetFrame();
 					}
-
 					for(auto enemy: enemies) {
 						SDL_Rect* enemyRect = enemy->get_box();
 						if(enemyRect->x == hitObject->x && enemyRect->y == hitObject->y && !enemy->isHit()) {
@@ -269,12 +266,10 @@ int LocalGameLoop::run() {
 						}
 					}
 				}
-
 				if(projectiles.at(i)->isExploding()){
 					projectiles.at(i)->setSprite(pinksplosion);
 				}
 				else if(projectiles.at(i)->isFinished()){
-					//projectiles.erase(projectiles.begin()+i);
 					render->gProjectiles.erase(render->gProjectiles.begin()+i);
 					//erase the projectile object from the projectiles vector
 					projectiles.erase(projectiles.begin()+i);

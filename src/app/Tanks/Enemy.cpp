@@ -16,8 +16,9 @@ Enemy::Enemy(Sprite* sprite, Sprite* turret, int x, int y, Player* player){
 /**
   * @brief smaller constructor for making an enemY
   */
-Enemy::Enemy(float x, float y, Player* player) : x_enemy_pos{x}, y_enemy_pos{y} {
-  gPlayer = player;
+Enemy::Enemy(float x, float y, Player* player) {
+	setPos(x, y);
+	gPlayer = player;
 }
 
 Enemy::~Enemy() {}
@@ -32,23 +33,53 @@ Enemy::~Enemy() {}
  void Enemy::draw(SDL_Renderer *gRenderer, double update_lag) {
 
    // Create SDL_Rect with current x, y position
-   SDL_Rect dst = {(int)x_enemy_pos, (int)y_enemy_pos, TANK_WIDTH, TANK_HEIGHT};
+   //SDL_Rect dst = {(int)x_enemy_pos, (int)y_enemy_pos, TANK_WIDTH, TANK_HEIGHT};
+	SDL_Rect* dst = get_box();
+	
+	if(!hit) {
+		if (/*x_vel != 0 || y_vel != 0 && */SDL_GetTicks() - anim_last_time > 100) {
+			frame = (frame + 1) % 3;
+			anim_last_time = SDL_GetTicks();
+		}
 
-   if (/*x_vel != 0 || y_vel != 0 && */SDL_GetTicks() - anim_last_time > 100) {
-		frame = (frame + 1) % 3;
-		anim_last_time = SDL_GetTicks();
+		//draw the tank and turret and use the rect from above as parameters for both calls since turret is centered on tank
+		SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), getSprite()->getFrame(frame), dst, theta, NULL, SDL_FLIP_NONE);
+		SDL_RenderCopyEx(gRenderer, getTurretSprite()->getTexture(), NULL, dst, turretTheta, NULL, SDL_FLIP_NONE);
+
+		//lines coming out of turret "filed of view" have end points and this method finds them
+		findEndValues(turretTheta);
+
+		//draw the two lines with endpoints that were just calculated
+		SDL_RenderDrawLine(gRenderer, getX() + TANK_WIDTH/2, getY() + TANK_HEIGHT/2, line1X, line1Y);
+		SDL_RenderDrawLine(gRenderer, getX() + TANK_WIDTH/2, getY() + TANK_HEIGHT/2, line2X, line2Y);
 	}
-
-  //draw the tank and turret and use the rect from above as parameters for both calls since turret is centered on tank
-   SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), getSprite()->getFrame(frame), &dst, theta, NULL, SDL_FLIP_NONE);
-   SDL_RenderCopyEx(gRenderer, getTurretSprite()->getTexture(), NULL, &dst, turretTheta, NULL, SDL_FLIP_NONE);
-
-   //lines coming out of turret "filed of view" have end points and this method finds them
-   findEndValues(turretTheta);
-
-   //draw the two lines with endpoints that were just calculated
-   SDL_RenderDrawLine(gRenderer, x_enemy_pos + TANK_WIDTH/2, y_enemy_pos + TANK_HEIGHT/2, line1X, line1Y);
-   SDL_RenderDrawLine(gRenderer, x_enemy_pos + TANK_WIDTH/2, y_enemy_pos + TANK_HEIGHT/2, line2X, line2Y);
+	else {
+		//std::cout << "exploding";
+		
+		Uint32 current_time = SDL_GetTicks();
+		dst->w = EXPLOSION_WIDTH;
+		dst->h = EXPLOSION_HEIGHT;
+		
+		if(frame == 0 && anim_last_time == 0) {
+			//std::cout << "setting anim for first time\n";
+			anim_last_time = SDL_GetTicks();
+		}
+		
+		if(current_time > anim_last_time + 200) {
+			frame++;
+			anim_last_time = SDL_GetTicks();
+			//std::cout << "frame++\n";
+		}
+		
+		if(frame < 6) {
+			//std::cout << "rendering frame = " << frame << "\n";
+			SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), getSprite()->getFrame(frame), dst, theta, NULL, SDL_FLIP_NONE);
+		}
+		else {
+			//std::cout << "destroyed\n";
+			destroyed = true;
+		}
+	}
  }
 
 
@@ -82,7 +113,8 @@ Enemy::~Enemy() {}
  *
  */
 void Enemy::update() {
-  updatePos();
+	if(!hit)
+		updatePos();
 }
 
 /**
@@ -170,15 +202,6 @@ bool Enemy::checkPos(float playX, float playY, float enemX, float enemY) {
 	return false;
 }
 
-float Enemy::getX(){
-  return x_enemy_pos;
-}
-
-float Enemy::getY(){
-  return y_enemy_pos;
-}
-
-
 /**
   * @brief used to update the position of the enemy tank including x,y position and turretTheta
   * additionally checks for outer wall bounds collisions and corrects for those
@@ -189,7 +212,7 @@ void Enemy::updatePos() {
   Uint32 current_time = SDL_GetTicks();
 
   //checking if player tank is "in range" of enemy tanks field of view
-  if(isInRange(x_enemy_pos + TANK_WIDTH/2, y_enemy_pos + TANK_HEIGHT/2, line1X, line1Y, line2X, line2Y, gPlayer->getX() + TANK_WIDTH/2, gPlayer->getY() + TANK_HEIGHT/2)){
+  if(isInRange(getX() + TANK_WIDTH/2, getY() + TANK_HEIGHT/2, line1X, line1Y, line2X, line2Y, gPlayer->getX() + TANK_WIDTH/2, gPlayer->getY() + TANK_HEIGHT/2)){
     //only allowed to shoot every 3 seconds so current time must be greater than last fired time
     if(current_time > fire_last_time + 3000){
       setFire(true);
@@ -279,7 +302,6 @@ void Enemy::updatePos() {
       break;
     }
   }
-
   //the enemy path it is following will need to be updated frequently when the size of the vector is below a value
   //this value is global randCut variable that will randonly change what this cutoff is in the range 2-6
   //this is done so to give the enemy some sense of randomness as it will change how far it travels down its current path before updating
@@ -294,12 +316,10 @@ void Enemy::updatePos() {
   float x_pos = gPlayer->getX();
   float y_pos = gPlayer->getY();
   bool retreat;
-  retreat = checkPos(x_pos, y_pos, x_enemy_pos, y_enemy_pos);
+  retreat = checkPos(x_pos, y_pos, getX(), getY());
   //See if player and enemy are intersecting
-  SDL_Rect enemy_rect;
-  SDL_Rect player_rect;
-  enemy_rect = {(int)x_enemy_pos, (int)y_enemy_pos, TANK_WIDTH, TANK_HEIGHT};
-  player_rect = {(int)x_pos, (int)y_pos, TANK_WIDTH, TANK_HEIGHT};
+  SDL_Rect enemy_rect = {(int)getX(), (int)getY(), TANK_WIDTH, TANK_HEIGHT};
+  SDL_Rect player_rect = {(int)x_pos, (int)y_pos, TANK_WIDTH, TANK_HEIGHT};
   //std::cout << enemy_rect.w << ":" << enemy_rect.h << ":" << enemy_rect.x << ":" << enemy_rect.y << std::endl;
 
   SDL_Rect* overlap;
@@ -336,15 +356,17 @@ void Enemy::updatePos() {
     //move LEFT
     if(moveFrom.col > moveTo.col){
       if (moveLeft || rightLeft) {
-        x_enemy_pos -= MAX_VELOCITY;
-        y_enemy_pos += 0;
+        //x_enemy_pos -= MAX_VELOCITY;
+		setX(getX() - MAX_VELOCITY);
+        //y_enemy_pos += 0;
         //check that the tank position arrived in desired location
-        if(x_enemy_pos < (moveTo.col * TILE_SIZE + TILE_SIZE + 36)){
+        if(getX() < (moveTo.col * TILE_SIZE + TILE_SIZE + 36)){
           enemyPath.pop_back();
         }
         //check collision with player
         if (overlap != nullptr) {
-          x_enemy_pos += MAX_VELOCITY;
+          //x_enemy_pos += MAX_VELOCITY;
+		  setX(getX() + MAX_VELOCITY);
         }
       }
       else {
@@ -361,15 +383,17 @@ void Enemy::updatePos() {
     //move RIGHT
     if(moveFrom.col < moveTo.col){
       if (moveRight || rightLeft) {
-        x_enemy_pos += MAX_VELOCITY;
-        y_enemy_pos += 0;
+        //x_enemy_pos += MAX_VELOCITY;
+		setX(getX() + MAX_VELOCITY);
+        //y_enemy_pos += 0;
         //check that the tank position arrived in desired location
-        if(x_enemy_pos > (moveTo.col * TILE_SIZE + TILE_SIZE*2 - 20)){
+        if(getX() > (moveTo.col * TILE_SIZE + TILE_SIZE*2 - 20)){
           enemyPath.pop_back();
         }
         //check collision
         if (overlap != nullptr) {
-          x_enemy_pos -= MAX_VELOCITY;
+          //x_enemy_pos -= MAX_VELOCITY;
+		  setX(getX() - MAX_VELOCITY);
         }
       }
       else {
@@ -390,15 +414,17 @@ void Enemy::updatePos() {
     //move UP
     if(moveFrom.row > moveTo.row){
       if (moveUp || upDown) {
-        x_enemy_pos += 0;
-        y_enemy_pos -= MAX_VELOCITY;
+        //x_enemy_pos += 0;
+        //y_enemy_pos -= MAX_VELOCITY;
+		setY(getY() - MAX_VELOCITY);
         //check that the tank position arrived in desired location
-        if(y_enemy_pos < (moveTo.row * TILE_SIZE + TILE_SIZE + 20)){
+        if(getY() < (moveTo.row * TILE_SIZE + TILE_SIZE + 20)){
           enemyPath.pop_back();
         }
         //check collision
         if (overlap != nullptr) {
-          y_enemy_pos += MAX_VELOCITY;
+          //y_enemy_pos += MAX_VELOCITY;
+		  setY(getY() + MAX_VELOCITY);
         }
       }
       else {
@@ -415,15 +441,17 @@ void Enemy::updatePos() {
     //move DOWN
     if(moveFrom.row < moveTo.row){
       if (moveDown || upDown) {
-        x_enemy_pos += 0;
-        y_enemy_pos += MAX_VELOCITY;
+        //x_enemy_pos += 0;
+        //y_enemy_pos += MAX_VELOCITY;
+		setY(getY() + MAX_VELOCITY);
         //check that the tank position arrived in desired location
-        if(y_enemy_pos > (moveTo.row * TILE_SIZE + TILE_SIZE + 20)){
+        if(getY() > (moveTo.row * TILE_SIZE + TILE_SIZE + 20)){
           enemyPath.pop_back();
         }
         //check collision
         if (overlap != nullptr) {
-          y_enemy_pos -= MAX_VELOCITY;
+          //y_enemy_pos -= MAX_VELOCITY;
+		  setY(getY() - MAX_VELOCITY);
         }
       }
       else {
@@ -438,21 +466,25 @@ void Enemy::updatePos() {
     }
   }
   //run checks to see if enemy tank went outside bounds of play area
-  if (x_enemy_pos + TANK_WIDTH > SCREEN_WIDTH - TILE_SIZE - 16)
+  if (getX() + TANK_WIDTH > SCREEN_WIDTH - TILE_SIZE - 16)
   {
-      x_enemy_pos = SCREEN_WIDTH - TILE_SIZE - 16 - TANK_WIDTH;
+      //x_enemy_pos = SCREEN_WIDTH - TILE_SIZE - 16 - TANK_WIDTH;
+	  setX(SCREEN_WIDTH - TILE_SIZE - 16 - TANK_WIDTH);
   }
-  if (x_enemy_pos < TILE_SIZE + 16)
+  if (getX() < TILE_SIZE + 16)
   {
-      x_enemy_pos = TILE_SIZE + 16;
+      //x_enemy_pos = TILE_SIZE + 16;
+	  setX(TILE_SIZE + 16);
   }
-  if (y_enemy_pos < TILE_SIZE)
+  if (getY() < TILE_SIZE)
   {
-      y_enemy_pos = TILE_SIZE;
+      //y_enemy_pos = TILE_SIZE;
+	  setY(TILE_SIZE);
   }
-  if (y_enemy_pos + TANK_HEIGHT > SCREEN_HEIGHT - TILE_SIZE)
+  if (getY() + TANK_HEIGHT > SCREEN_HEIGHT - TILE_SIZE)
   {
-      y_enemy_pos = SCREEN_HEIGHT - TILE_SIZE - TANK_HEIGHT;
+      //y_enemy_pos = SCREEN_HEIGHT - TILE_SIZE - TANK_HEIGHT;
+	  setY(SCREEN_HEIGHT - TILE_SIZE - TANK_HEIGHT);
   }
 }
 
@@ -863,8 +895,8 @@ coordinate Enemy::findClosestOpenBlock(coordinate start){
   */
 bool Enemy::isValidBlock(int x, int y){
   //find curX and curY to be the block locations that the enemy tank is currently in
-  int curX = findXBlock(x_enemy_pos);
-  int curY = findYBlock(y_enemy_pos);
+  int curX = findXBlock(getX());
+  int curY = findYBlock(getY());
   //if location in question is outside the bounds of the map return false
   if(y < 0 || y > 23 || x < 0 || x > 12){
     return false;
