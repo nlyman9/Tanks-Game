@@ -59,7 +59,7 @@ class Render {
         //present the renderer
         int present();
         //draw text
-        int drawText(Box* box, const std::string* toDraw, int XOFFSET, int YOFFSET, int WIDTHEXT, int HEIGHTEXT);
+        int drawText(Box* box, const std::string* toDraw, int XOFFSET, int YOFFSET, int WIDTH, int HEIGHT);
     private:
         //for later to draw buttons differently from text fields
         int drawButton(Box toDraw);

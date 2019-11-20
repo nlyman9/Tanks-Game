@@ -177,14 +177,14 @@ int Render::drawBackground(){
 	SDL_Rect fullscreen = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
 	SDL_RenderFillRect(gRenderer, &fullscreen);
 }
-int Render::drawText(Box* box, const std::string* toDraw, int XOFFSET, int YOFFSET, int WIDTHEXT, int HEIGHTEXT){
+int Render::drawText(Box* box, const std::string* toDraw, int XOFFSET, int YOFFSET, int WIDTH, int HEIGHT){
 	SDL_Surface* surfaceMessage = TTF_RenderText_Solid(font, toDraw->c_str(), textColor);
 	Message = SDL_CreateTextureFromSurface(gRenderer, surfaceMessage);
 	SDL_Rect* rect = new SDL_Rect();
 	rect->x = box->getPosition()->x + XOFFSET;
 	rect->y = box->getPosition()->y + YOFFSET;
-	rect->w = box->getPosition()->w + WIDTHEXT;
-	rect->h = box->getPosition()->h + HEIGHTEXT;
+	rect->w = WIDTH;
+	rect->h = HEIGHT;
 	SDL_RenderCopy(gRenderer, Message, NULL, rect);
 	//clean up memory
 	SDL_FreeSurface(surfaceMessage);
@@ -209,9 +209,9 @@ int Render::drawTextField(Box toDraw){
 	SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF); //black boxes
 	SDL_RenderFillRect(gRenderer, toDraw.getPosition());
 	SDL_Rect* TextField = new SDL_Rect();
-	TextField->x = toDraw.getPosition()->x + toDraw.getPosition()->w + TEXT_FIELD_OFFSET;
+	TextField->x = toDraw.getPosition()->x + toDraw.getPosition()->w + toDraw.TEXT_FIELD_OFFSET();
 	TextField->y = toDraw.getPosition()->y;
-	TextField->w = TEXT_FIELD_WIDTH;
+	TextField->w = toDraw.TEXT_FIELD_WIDTH();
 	TextField->h = toDraw.getPosition()->h;
 	SDL_RenderFillRect(gRenderer, TextField);
 	delete TextField;

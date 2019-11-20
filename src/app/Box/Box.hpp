@@ -3,8 +3,6 @@
 #include <SDL2/SDL.h>
 #include <vector>
 
-const int TEXT_FIELD_OFFSET = 20;
-const int TEXT_FIELD_WIDTH = 200;
 enum boxtype {TEXT, BUTTON};
 class Box{
     private:
@@ -13,6 +11,8 @@ class Box{
         int screen;
         bool visible;
         int type;
+        int w;
+        int o;
     public:
     Box(SDL_Rect* box, int id, int screen, int type){
         this->id = id;
@@ -20,6 +20,18 @@ class Box{
         this->type = type;
         this->position = new SDL_Rect();
         setPosition(box);
+    }
+    int TEXT_FIELD_WIDTH(){
+        return w;
+    }
+    int TEXT_FIELD_OFFSET(){
+        return o;
+    }
+    void setText_Field_Width(int width){
+        w = width;
+    }
+    void setText_Field_Offset(int offset){
+        o = offset;
     }
     void setVisible(bool visibility){
         this->visible = visibility;

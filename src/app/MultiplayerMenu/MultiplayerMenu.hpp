@@ -21,8 +21,6 @@ class Menu{
         const int row[8] = {0, 100, 200, 300, 400, 500, 600, 700};
         std::vector<char>* port;
         std::vector<char>* ip;
-        const int PORT_MAX = 5;
-        const int IP_MAX = 12;
         void initRect(SDL_Rect* box,int x,int y,int w,int h){
             box->x = x;
             box->y = y;
@@ -30,6 +28,9 @@ class Menu{
             box->w = w;
         }
     public:
+        int intSize = 16;
+        const int PORT_MAX = 5;
+        const int IP_MAX = 12;
         void printEnum(int i){
             std::string s;
             switch(i){
@@ -78,6 +79,22 @@ class Menu{
             clearIP();
             clearPort();
         }
+        int ipDigits(){
+            return (int) ip->at(IP_MAX);
+        }
+        int numPeriods(){
+            int numPeriods = 0;
+            if(ipDigits() >= 3)
+                numPeriods++;
+            if(ipDigits() >= 6)
+                numPeriods++;
+            if(ipDigits() >= 9)
+                numPeriods++;
+            return numPeriods;
+        }
+        int portDigits(){
+            return (int) port->at(PORT_MAX);
+        }
         void initMultiplayerMenu(){
             //create all the menu structs
             std::cout << "bottom row" << std::endl;
@@ -105,16 +122,22 @@ class Menu{
             initRect(rect, col[1], row[1] , WIDTH, HEIGHT);
             box = new Box(rect, IPBOX, 2, TEXT);
             box->setVisible(false);
+            box->setText_Field_Offset(20);
+            box->setText_Field_Width(250);
             boxes->push_back(*box);
 
             initRect(rect, col[1], row[3] , WIDTH, HEIGHT);
             box = new Box(rect, PORTBOXC, 1, TEXT);
             box->setVisible(false);
+            box->setText_Field_Offset(20);
+            box->setText_Field_Width(100);
             boxes->push_back(*box);
 
             initRect(rect, col[1], row[3] , WIDTH, HEIGHT);
             box = new Box(rect, PORTBOXH, 2, TEXT);
             box->setVisible(false);
+            box->setText_Field_Offset(20);
+            box->setText_Field_Width(100);
             boxes->push_back(*box);
             
             //middle row
@@ -130,6 +153,22 @@ class Menu{
 
             std::cout << "Top Row" << std::endl;
             
+        }
+        std::string* getIP(){
+            return new std::string(ip->begin(), ip->end() - 1);
+        }
+        std::string* getIPwithPeriods(){
+            std::string * retVal = new std::string(ip->begin(), ip->end() - 1);
+            if(ipDigits() >= 3)
+                retVal->insert(3, 1, '.');
+            if(ipDigits() >= 6)
+                retVal->insert(7, 1, '.');
+            if(ipDigits() >= 9)
+                retVal->insert(11, 1, '.');
+            return retVal;
+        }
+        std::string* getPort(){
+            return new std::string(port->begin(), port->end() - 1);
         }
         Box getBox(int id){
             return (boxes->at(id));
