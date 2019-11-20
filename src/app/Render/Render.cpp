@@ -202,7 +202,7 @@ int Render::drawBox(Box toDraw){
 }
 int Render::drawButton(Box toDraw){
 	if(toDraw.getIMGPath() == ""){ //if src is empty
-		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x80, 0xFF); //default color
+		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF); //default color
 		SDL_RenderFillRect(gRenderer, toDraw.getRectangle());
 	}else{
 		SDL_Texture* button = loadImage(toDraw.getIMGPath(), gRenderer);
@@ -212,7 +212,7 @@ int Render::drawButton(Box toDraw){
 }
 int Render::drawTextField(Box toDraw){
 	if(toDraw.getIMGPath() == ""){ //if src is empty
-		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x80, 0xFF); //default color
+		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF); //default color
 		SDL_RenderFillRect(gRenderer, toDraw.getRectangle());
 	}else{
 		SDL_Texture* button = loadImage(toDraw.getIMGPath(), gRenderer);
@@ -223,6 +223,7 @@ int Render::drawTextField(Box toDraw){
 	TextField->y = toDraw.getRectangle()->y;
 	TextField->w = toDraw.TEXT_FIELD_WIDTH();
 	TextField->h = toDraw.getRectangle()->h;
+	SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x80, 0xFF); //default textfield color
 	SDL_RenderFillRect(gRenderer, TextField);
 	delete TextField;
 	return 0;
