@@ -66,8 +66,9 @@ bool Render::init()
     	exit(2);
 	}
 	// Set initalization for text
-	font = TTF_OpenFont("../../res/fonts/SansUndertale.ttf", 24);
-	white = {255, 255, 255};
+	//font = TTF_OpenFont("../../res/fonts/SansUndertale.ttf", 24);
+	font = TTF_OpenFont("SansUndertale.ttf", 24);
+	white = {255, 255, 255, 0};
 
 	return true;
 }
@@ -227,7 +228,10 @@ int Render::draw(double update_lag) {
 	}
 
 	//Render timer
-	surfaceMessage = TTF_RenderText_Solid(font, (std::to_string(timer)).c_str(), white);
+
+	std::cout << "timer is: " << timer << std::endl;
+	//surfaceMessage = TTF_RenderText_Solid(font, (std::to_string(timer)).c_str(), white);
+	std::cout << "timer2 is: " << std::to_string(timer) << std::endl;
 	timer_display = SDL_CreateTextureFromSurface(gRenderer, surfaceMessage);
 	timer_box.x = 0;
 	timer_box.y = 0;
