@@ -187,7 +187,6 @@ int LocalGameLoop::run() {
     SDL_Event e;
 	previous_time = std::chrono::system_clock::now(); // get current time of system
 	lag_time = 0.0;	// Set duration of time to 0
-	timer = 180;
 	begin_timer = SDL_GetTicks();
 
     while(isGameOn) {
@@ -267,7 +266,7 @@ int LocalGameLoop::run() {
 
 		//Update current timer
 		current_timer = SDL_GetTicks();
-		timer = 180 - ((current_timer - begin_timer) / 1000);
+		timer = TIMER_LENGTH - ((current_timer - begin_timer) / 1000);
 		render->setTimer(timer);
 		//std::cout << "timer : " << timer;
 
