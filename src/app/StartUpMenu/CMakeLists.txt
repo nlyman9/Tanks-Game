@@ -11,6 +11,7 @@ target_link_libraries(StartUpMenu
   Render
   Args
   MultiplayerMenu
+  Credits
 )
 else()
 target_link_libraries(StartUpMenu
@@ -20,6 +21,7 @@ target_link_libraries(StartUpMenu
   Render
   Args
   MultiplayerMenu
+  Credits
 )
 endif()
 

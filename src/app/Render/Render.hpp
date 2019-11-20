@@ -27,7 +27,8 @@ enum {
 
 class Render {
     public:
-        std::vector<Enemy *> gEnemies;
+        std::vector<Player*> gPlayers;
+		std::vector<Enemy *> gEnemies;
         std::vector<Projectile *> gProjectiles;
 
         Render() {}
@@ -69,7 +70,6 @@ class Render {
         SDL_Renderer* gRenderer;
         SDL_Surface* gScreenSurface;
 
-        std::vector<Player*> gPlayers;
 
         SDL_Texture* gTileSheet;
         SDL_Rect gTileRects[3];

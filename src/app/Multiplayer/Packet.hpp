@@ -101,6 +101,40 @@ class Packet {
             setPacketSize(); // Recalculates the size of the packet after the append
         }
 
+         /**
+         * @brief Appends a char to the body of the packet
+         * 
+         * @param char - The character to append
+         */
+        void appendData(char c) {
+            this->body.push_back(c);
+            setPacketSize(); // Recalculates the size of the packet after the append
+        }
+
+        /**
+         * @brief Appends a bool to the body of the packet
+         * 
+         * @param bool - The boolean to append
+         */
+        void appendData(bool b) {
+            this->body.push_back(b);
+            setPacketSize(); // Recalculates the size of the packet after the append
+        }
+
+        /**
+         * @brief Appends an integer value to the body of the packet
+         * + Has to split the integer into 4 seperate chars
+         * 
+         * @param int - The integer to append
+         */
+        void appendData(int integer) {
+            this->body.push_back((integer>>24) & 0xFF);
+            this->body.push_back((integer>>16) & 0xFF);
+            this->body.push_back((integer>>8) & 0xFF);
+            this->body.push_back(integer & 0xFF);
+            setPacketSize(); // Recalculates the size of the packet after the append
+        }
+
         /**
          * @brief Appends a vector of integers to the body of the pakcet
          * 
@@ -108,7 +142,10 @@ class Packet {
          */
         void appendData(std::vector<int> nums) {
             for (int val : nums) {
-                this->body.push_back(val);
+                this->body.push_back((val>>24) & 0xFF);
+                this->body.push_back((val>>16) & 0xFF);
+                this->body.push_back((val>>8) & 0xFF);
+                this->body.push_back(val & 0xFF);
             }
             std::cout << "Appended data = " << std::string(body.data(), body.size()) << std::endl;
             setPacketSize();
@@ -190,6 +227,27 @@ class Packet {
             return PackType(atoi(headers.at(1).getValue().c_str()));
         }
 
+        int getInt(int startingIndex) {
+            assert(startingIndex <= body.size() - 4);
+            int value = 0;
+            char charValue = body.at(startingIndex);
+            value = value | (charValue & 0xFF);
+            value = value<<8;
+
+            charValue = body.at(startingIndex+1);
+            value = value | (charValue & 0xFF);
+            value = value<<8;
+
+            charValue = body.at(startingIndex+2);
+            value = value | (charValue & 0xFF);
+            value = value<<8;
+
+            charValue = body.at(startingIndex+3);
+            value = value | (charValue & 0xFF);
+
+            return value;
+        }
+
         /**
          * @brief Gets the data for the packet to send over network
          * 
@@ -214,6 +272,17 @@ class Packet {
         void printData() {
             for (auto d : this->body) {
                 printf(" %d ", d);
+            }
+            printf("\n");
+        }
+
+        /**
+         * @brief Prints all the values in the char vector in Hexadecimal
+         *    Useful for debugging 
+         */
+        void printDataHex() {
+            for (char d : this->body) {
+                printf(" %x ", d);
             }
             printf("\n");
         }

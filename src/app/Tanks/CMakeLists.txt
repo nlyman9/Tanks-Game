@@ -14,6 +14,7 @@ target_link_libraries(Tank
   Object
   Constants
   Sprite
+  Projectile
   ${SDL2_LIBRARY}
 )
 else()
@@ -22,6 +23,7 @@ target_link_libraries(Tank
   Object
   Constants
   Sprite
+  Projectile
 )
 endif()
 
@@ -29,4 +31,3 @@ target_include_directories(Tank
   PUBLIC
   .
 )
-

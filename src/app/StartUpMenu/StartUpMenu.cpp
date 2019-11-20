@@ -3,6 +3,7 @@
 #include "LocalGameLoop.hpp"
 #include "OnlineGameLoop.hpp"
 #include "MultiplayerMenu.hpp"
+#include "Credits.hpp"
 
 void launch(Args *options) 
 {
@@ -34,9 +35,11 @@ void launch(Args *options)
 			onlineGameLoop.init(options);
 			ret = onlineGameLoop.run();
 		} else if(gameMode == MENU_CREDITS) {
-			std::cout << "ROLL CREDITS" << std::endl;
+			Credits credits(renderer);
+			credits.playCredits();
 		} else {
 			renderer->close();
+			exit(0);
 		}
 	}
 }

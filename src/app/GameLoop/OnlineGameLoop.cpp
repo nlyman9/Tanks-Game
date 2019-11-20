@@ -47,7 +47,13 @@ bool OnlineGameLoop::init(Args* options) {
 	shell->init();
 	pinksplosion = new Sprite(render->getRenderer(), "src/res/images/pinksplosion.png");
     pinksplosion->init();
-    pinksplosion->sheetSetup(42, 42, 6);
+    pinksplosion->sheetSetup(48, 48, 6);
+	redsplosion =  new Sprite(render->getRenderer(), "src/res/images/redsplosion.png");
+	redsplosion->init();
+	redsplosion->sheetSetup(48, 48, 6);
+	bluesplosion =  new Sprite(render->getRenderer(), "src/res/images/bluesplosion.png");
+	bluesplosion->init();
+	bluesplosion->sheetSetup(48, 48, 6);
 
     // Set up loading screens
     loadingScreen1 = loadImage("src/res/images/loadingScreen1.png", render->getRenderer());
@@ -151,7 +157,10 @@ void OnlineGameLoop::buildMap() {
 		player->setObstacleLocations(&tileArray);
 	}
 
-	// TODO add obstacles for network players
+	// Set collision for network players 
+	for (auto enemy : playerEnemies) {
+		enemy->setObstacleLocations(&tileArray);
+	}
 }
 
 int OnlineGameLoop::run() {
@@ -190,20 +199,9 @@ int OnlineGameLoop::run() {
 		assert(players.size() == 1);
 		for(auto player : players) {
 			// Send same keystate to player object and to the client to send
-			// Lets just support 10 keys at the same time
 			// TODO find a good rate to send player keystates
 			keystate = SDL_GetKeyboardState(nullptr);
 			player->getEvent(elapsed_time, &e, keystate);
-			
-			//network version of player firing bullet
-			if (player->getFire() == true) {
-                Projectile *newBullet = new Projectile(player->getX() + TANK_WIDTH/4, player->getY() + TANK_HEIGHT/4, player->getTurretTheta());
-                newBullet->setSprite(shell);
-                newBullet->setObstacleLocations(&tileArray);
-                projectiles.push_back(newBullet);
-                render->setProjectiles(projectiles);
-                player->setFire(false);
-			}
 		}
 
 		// Set inputs of enemy players over network
@@ -213,27 +211,51 @@ int OnlineGameLoop::run() {
 
 			// Apply keysates to the network player
 			playerEnemy->getEvent(elapsed_time, &e, keyStatePacket);
+			
 		}
 
 		// 2. Update
 		// Update if time since last update is >= MS_PER_UPDATE
 		while(lag_time >= MS_PER_UPDATE) {
-			for(auto player : players) {
-				player->update();
-			}
+			// Local player
+			// TODO change player from vector to single class - localPlayer
+			players.at(0)->setTurretTheta();
+			players.at(0)->update();
 
 			// Basically add a keyframe every ~2 updates -> 30 times a second
 			temp += 1;
 			// TODO Consolidate tickrates
 			if (temp > 2 && keystate != nullptr) {
 				// Add keystate from local player to send
-				client->addLocalKeyState(keystate);
+				client->addLocalKeyState(keystate, players.at(0)->turretTheta, players.at(0)->getFire());
 				keystate = nullptr; //only need to send one per update loop
 				temp = 0;
+
+				//network version of player firing bullet
+				// TODO NOT DO THIS - not have this nested inside the tickrate - this is hacky
+				if (players.at(0)->getFire() == true) {
+					Projectile *newBullet = new Projectile(players.at(0)->getX() + TANK_WIDTH/4, players.at(0)->getY() + TANK_HEIGHT/4, players.at(0)->getTurretTheta());
+					newBullet->setSprite(shell);
+					newBullet->setObstacleLocations(&tileArray);
+					projectiles.push_back(newBullet);
+					render->setProjectiles(projectiles);
+					players.at(0)->setFire(false);
+				}
 			}
 
 			for (auto playerEnemy : playerEnemies) {
+				playerEnemy->setTurretTheta(client->getTurretTheta(0));
+				playerEnemy->setFire(client->getPlayerShot(0));
 				playerEnemy->update();
+
+				if (playerEnemy->getFire() == true) {
+					Projectile *newBullet = new Projectile(playerEnemy->getX() + TANK_WIDTH/4, playerEnemy->getY() + TANK_HEIGHT/4, playerEnemy->getTurretTheta());
+					newBullet->setSprite(shell);
+					newBullet->setObstacleLocations(&tileArray);
+					projectiles.push_back(newBullet);
+					render->setProjectiles(projectiles);
+					playerEnemy->setFire(false);
+				}
 			}
 
 			int count = 0;

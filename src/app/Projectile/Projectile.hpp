@@ -25,6 +25,10 @@ class Projectile : public Object {
 		int frame = 0;
 		Uint32 anim_last_time = 0;
 		bool finished = false;
+		std::vector<SDL_Rect> targets;
+		int targetNum = 0;
+		bool hit = false;
+		SDL_Rect targetBox;
 
     public:
         Projectile(Sprite *missile, float x, float y); //constructor, initialize the x, y, and sprite
@@ -42,11 +46,21 @@ class Projectile : public Object {
 		bool rotateProjectile(float theta);	// rotates the projectile
 		bool bouncePriority(SDL_Rect* A, SDL_Rect *B); // checks the side of the tile that the projectile is colliding with
         bool wall();	//	return true if projectile hits a wall. X and Y projectile should change depending on orientation
-        bool isExploding();
+        
+		bool isHit();
+		bool isExploding();
 		bool isFinished();
 		
+		bool getFriendly(); // returns friendly
+		bool setFriendly(bool a); // modifies and returns the value of friendly
+		
+        void addTargetLocation(SDL_Rect* targetLoc); // adds a target to the vector of targets
+		void clearTargets(); // resets the vector list of targets
+		SDL_Rect* getTarget();
+		
+		
         BoundingBox* getBoundingBox() override;
-        
+		
         ~Projectile();
 };
 #endif

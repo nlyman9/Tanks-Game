@@ -1,8 +1,6 @@
 #include <chrono>
 #include "Projectile.hpp"
-//#include "Enemy.hpp"
 #include "Constants.hpp"
-
 
 Projectile::Projectile(Sprite *sprite, float x, float y) {
     setSprite(sprite);
@@ -23,28 +21,13 @@ Projectile::Projectile(float x, float y, int theta) {
 
 
 Projectile::~Projectile() {
-	delete &missile;
-	delete &x_vel;
-	delete &y_vel;
-	delete &bounces;
-	delete &theta;
-	delete &theta_v;
-	delete &x_deltav;
-	delete &y_deltav;
-	delete &velocity;
-	delete &delta_velocity;
-	delete &friendly;
-	delete &exploding;
-	delete &frame;
-	delete &anim_last_time;
-	delete &finished;
 }
 
 void Projectile::draw(SDL_Renderer *gRenderer, double update_lag) {
     int x_pos = getX() + x_vel * update_lag;
     int y_pos = getY() + y_vel * update_lag;
     SDL_Rect* dst = get_box();
-	
+
 	if(!exploding) {
 		dst->w = PROJECTILE_WIDTH;
 		dst->h = PROJECTILE_HEIGHT;
@@ -54,26 +37,31 @@ void Projectile::draw(SDL_Renderer *gRenderer, double update_lag) {
 		Uint32 current_time = SDL_GetTicks();
 		dst->w = EXPLOSION_WIDTH;
 		dst->h = EXPLOSION_HEIGHT;
-		
+
 		if(frame == 0 && anim_last_time == 0) {
 			anim_last_time = SDL_GetTicks();
 		}
-		
+
 		if(current_time > anim_last_time + 100) {
 			frame++;
 			anim_last_time = SDL_GetTicks();
 		}
-		
+
 		if(frame < 6)
 			SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), getSprite()->getFrame(frame), dst, theta, NULL, SDL_FLIP_NONE);
 		else {
 			finished = true;
+      exploding = false;
 		}
-		
+
 		//projectiles currently are not being deleted/removed correctly
 		//When std::cout is uncommented, projectiles will continue outputting to the console past exploding
 		//std::cout << frame << " ";
 	}
+}
+
+bool Projectile::isHit(){
+	return this->hit;
 }
 
 bool Projectile::isExploding(){
@@ -87,10 +75,13 @@ bool Projectile::isFinished() {
 void Projectile::update() {
 	if(theta < 0)
 		theta = theta + 360;
-	
+
 	int collisionTheta = theta;
-	
+
     //rotateProjectile(theta_v);
+
+	targetNum = 0;
+
 	if(!exploding) {
 		x_vel = 180 * cos((theta * M_PI) / 180);
 		y_vel = 180 * sin((theta * M_PI) / 180);
@@ -101,9 +92,18 @@ void Projectile::update() {
 		SDL_Rect* overlap;
 		SDL_Rect currentPos = {(int)getX(),(int) getY(), PROJECTILE_WIDTH, PROJECTILE_HEIGHT};
 
-	
-		for(auto obstacle : obstacles) {
+		for(auto target : targets) {
+			overlap = check_collision(&currentPos, &target);
+			if (overlap != nullptr) {
+				hit = true;
+				targetBox = target;
+				exploding = true;
+				break;
+			}
+			targetNum++;
+		}
 
+		for(auto obstacle : obstacles) {
 			overlap = check_collision(&currentPos, &obstacle);
 			if(overlap != nullptr) {
 
@@ -112,7 +112,7 @@ void Projectile::update() {
 				int x_dist = currentPos.x - obstacle.x;
 				int y_dist = currentPos.y - obstacle.y;
 				bool x_bounce = bouncePriority(&currentPos, &obstacle);
-				
+
 				//std::cout << "new\n";
 				//std::cout << "x_dist = " << x_dist << " ; y_dist = " << y_dist << std::endl;
 
@@ -136,19 +136,19 @@ void Projectile::update() {
 					//std::cout << "num = " << num << std::endl;
 					//std::cout << "theta = " << theta << std::endl << std::endl;
 				}
-				
+
 				//std::cout << "proj_x = " << currentPos.x << " ; proj_y = " << currentPos.y << std::endl;
 				//std::cout << "proj_x + width = " << currentPos.x + PROJECTILE_WIDTH << " ; proj_y + height = " << currentPos.y + PROJECTILE_HEIGHT << std::endl;
 				//std::cout << "ob.x = " << obstacle.x << " ; ob.y = " << obstacle.y << std::endl;
 				//std::cout << "ob.x + t.size = " << obstacle.x + TILE_SIZE << " ; ob.y + t.size = " << obstacle.y + TILE_SIZE << std::endl << std::endl << std::endl;
-				
+
 				setPos(getX() - (x_vel * updateStep), getY() - (y_vel * updateStep));
 				bounces++;
 
 				break;
 			}
 		}
-		
+
 		if (getX() + PROJECTILE_WIDTH > SCREEN_WIDTH - TILE_SIZE - BORDER_GAP)	// Right border
 		{
 			setX(SCREEN_WIDTH - TILE_SIZE - PROJECTILE_WIDTH - BORDER_GAP);
@@ -198,7 +198,7 @@ void Projectile::update() {
 	else {
 		x_vel = 0;
 		y_vel = 0;
-		
+
 		float updateStep = MS_PER_UPDATE/1000;
 		setPos(getX() + (x_vel * updateStep), getY() + (y_vel * updateStep));
 	}
@@ -209,12 +209,12 @@ bool Projectile::bouncePriority(SDL_Rect* proj, SDL_Rect* obst) {
 	int rightFacing = proj->x + PROJECTILE_WIDTH - obst->x;
 	int botFacing = proj->y + PROJECTILE_HEIGHT - obst->y;
 	int topFacing = obst->y + TILE_SIZE - proj->y;//abs(proj->y - (obst->y + TILE_SIZE));
-	
+
 	//std::cout << "left = " << leftFacing << " ; right = " << rightFacing << std::endl;
 	//std::cout << "bottom = " << botFacing << " ; top = " << topFacing << std::endl;
-	
+
 	int cnt = 0;
-	
+
 	while(cnt <= 48) {
 		if(leftFacing == cnt || rightFacing == cnt)
 			return true;
@@ -222,7 +222,7 @@ bool Projectile::bouncePriority(SDL_Rect* proj, SDL_Rect* obst) {
 			return false;
 		cnt++;
 	}
-	
+
 	return true;
 }
 
@@ -243,6 +243,27 @@ int Projectile::getTheta() {
 	return theta;
 }
 
+bool Projectile::getFriendly() {
+	return friendly;
+}
+
+bool Projectile::setFriendly(bool a) {
+	friendly = a;
+	return friendly;
+}
+
+void Projectile::clearTargets() {
+	targets.clear();
+}
+
 BoundingBox* Projectile::getBoundingBox() {
 	return new BoundingBox();
+}
+
+void Projectile::addTargetLocation(SDL_Rect* targetLoc) {
+	targets.push_back(*targetLoc);
+}
+
+SDL_Rect* Projectile::getTarget() {
+    return &targetBox;
 }

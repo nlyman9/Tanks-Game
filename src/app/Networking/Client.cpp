@@ -168,7 +168,9 @@ int Client::clientProcess(void* data) {
             // If keystate, unpack a load into formable keystate
             // TODO not hardcode id to 0 
             if (mail->getType() == PackType::KEYSTATE) {
-                client->addNetworkKeyState(0, mail->getBody());
+                int turret_theta = mail->getInt(5); // 5 is the starting index of the integer for the turret theta
+                bool hasShot = mail->getBody()->at(10); // 10 is the index of the boolean if the player has shot
+                client->addNetworkKeyState(0, mail->getBody(), turret_theta, hasShot);
             }
         }
 
