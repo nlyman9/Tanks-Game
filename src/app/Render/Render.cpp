@@ -173,9 +173,9 @@ int Render::present(){
 }
 int Render::drawBackground(){
 	SDL_RenderClear( gRenderer );
-	SDL_SetRenderDrawColor(gRenderer, 0x66, 0x00, 0x66, 0xFF); //purple background!?
 	SDL_Rect fullscreen = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
-	SDL_RenderFillRect(gRenderer, &fullscreen);
+	SDL_Texture* background = loadImage("src/res/images/MultiplayerScreen.png", gRenderer);
+	SDL_RenderCopy(gRenderer, background, NULL, &fullscreen);
 }
 int Render::drawText(Box* box, const std::string* toDraw, int XOFFSET, int YOFFSET, int WIDTH, int HEIGHT){
 	SDL_Surface* surfaceMessage = TTF_RenderText_Solid(font, toDraw->c_str(), textColor);
@@ -202,7 +202,7 @@ int Render::drawBox(Box toDraw){
 }
 int Render::drawButton(Box toDraw){
 	if(toDraw.getIMGPath() == ""){ //if src is empty
-		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF); //black boxes
+		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x80, 0xFF); //default color
 		SDL_RenderFillRect(gRenderer, toDraw.getRectangle());
 	}else{
 		SDL_Texture* button = loadImage(toDraw.getIMGPath(), gRenderer);
@@ -212,7 +212,7 @@ int Render::drawButton(Box toDraw){
 }
 int Render::drawTextField(Box toDraw){
 	if(toDraw.getIMGPath() == ""){ //if src is empty
-		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF); //black boxes
+		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x80, 0xFF); //default color
 		SDL_RenderFillRect(gRenderer, toDraw.getRectangle());
 	}else{
 		SDL_Texture* button = loadImage(toDraw.getIMGPath(), gRenderer);

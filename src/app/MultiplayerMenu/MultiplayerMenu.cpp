@@ -120,7 +120,11 @@ Args* MultiplayerMenu(Render* renderer)
                         std::cout << "Not enough digits in port, setting port to 7777" << std::endl;
                         options->port = 7777;
                     }else{
-                        options->port = stoi(*(menu->getPort()), nullptr, 10);
+                        if(stoi(*(menu->getPort()), nullptr, 10) > 65535){
+                            std::cout << "Port is above 65535 setting port to 7777" << std::endl;
+                            options->port = 7777;
+                        }else
+                            options->port = stoi(*(menu->getPort()), nullptr, 10);
                     }
                     options->isOnline = true;
                     options->isHost = host;
@@ -198,24 +202,24 @@ Args* MultiplayerMenu(Render* renderer)
                         string = new std::string("Main Menu");
                         break;
                     case IPBOX:
-                        string = new std::string("Ip Box");
+                        string = new std::string("Ip : ");
                         textField = menu->getIPwithPeriods();
                         renderer->drawText(&currBox, textField, currBox.getRectangle()->w + currBox.TEXT_FIELD_OFFSET() + 5, 0, menu->intSize * (menu->ipDigits() + menu->numPeriods()), currBox.getRectangle()->h);
                         delete textField;
                         break;
                     case PORTBOXC:
-                        string = new std::string("Port box");
+                        string = new std::string("Port : ");
                         textField = menu->getPort();
-                        renderer->drawText(&currBox, textField, currBox.getRectangle()->w + currBox.TEXT_FIELD_OFFSET() + 5, 0, menu->intSize * menu->portDigits(), currBox.getRectangle()->h);
+                        renderer->drawText(&currBox, textField, currBox.getRectangle()->w + currBox.TEXT_FIELD_OFFSET() + 10, 0, menu->intSize * menu->portDigits(), currBox.getRectangle()->h);
                         break;
                     case PORTBOXH:
-                        string = new std::string("Port box");
+                        string = new std::string("Port : ");
                         textField = menu->getPort();
-                        renderer->drawText(&currBox, textField, currBox.getRectangle()->w + currBox.TEXT_FIELD_OFFSET() + 5, 0, menu->intSize * menu->portDigits(), currBox.getRectangle()->h);
+                        renderer->drawText(&currBox, textField, currBox.getRectangle()->w + currBox.TEXT_FIELD_OFFSET() + 10, 0, menu->intSize * menu->portDigits(), currBox.getRectangle()->h);
                         delete textField;
                         break;
                     case OKAY:
-                        string = new std::string("Okay");
+                        string = new std::string("Continue");
                         break;
                     case CANCEL:
                         string = new std::string("Cancel");

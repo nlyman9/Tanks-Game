@@ -99,17 +99,17 @@ class Menu{
             //bottom row
             SDL_Rect* rect = new SDL_Rect();
             //HOST BOX
-            initRect(rect, col[0], row[6], WIDTH, HEIGHT);
+            initRect(rect, col[1] - 50, row[6] - 10, WIDTH + 10, HEIGHT);
             Box* box = new Box(rect, HOST, 1, BUTTON); //screen 1
             box->setVisible(true);
             boxes->push_back(*box);
             //CONNECT BOX
-            initRect(rect, col[4], row[6] , WIDTH, HEIGHT);
+            initRect(rect, col[4], row[6] - 10, WIDTH + 40, HEIGHT);
             box = new Box(rect, CONNECT, 2, BUTTON); //screen 2
             box->setVisible(true);
             boxes->push_back(*box);
             //EXIT BOX
-            initRect(rect, col[9], row[6] , WIDTH, HEIGHT);
+            initRect(rect, col[10] + 25, row[6] - 10, WIDTH + 100, HEIGHT);
             box = new Box(rect, EXIT, -1, BUTTON); //return to menu
             box->setVisible(true);
             boxes->push_back(*box);
@@ -117,34 +117,34 @@ class Menu{
             std::cout << "Middle row" << std::endl;
 
             //top row
-            initRect(rect, col[1], row[1] , WIDTH, HEIGHT);
+            initRect(rect, col[1], row[1] + 50, WIDTH - 30, HEIGHT - 10);
             box = new Box(rect, IPBOX, 2, TEXT);
             box->setVisible(false);
-            box->setText_Field_Offset(20);
+            box->setText_Field_Offset(70);
             box->setText_Field_Width(250);
             boxes->push_back(*box);
 
-            initRect(rect, col[1], row[3] , WIDTH, HEIGHT);
+            initRect(rect, col[1], row[3] , WIDTH, HEIGHT - 10);
             box = new Box(rect, PORTBOXC, 1, TEXT);
             box->setVisible(false);
-            box->setText_Field_Offset(20);
+            box->setText_Field_Offset(170);
             box->setText_Field_Width(100);
             boxes->push_back(*box);
 
-            initRect(rect, col[1], row[3] , WIDTH, HEIGHT);
+            initRect(rect, col[1], row[3] , WIDTH, HEIGHT - 10);
             box = new Box(rect, PORTBOXH, 2, TEXT);
             box->setVisible(false);
-            box->setText_Field_Offset(20);
+            box->setText_Field_Offset(170);
             box->setText_Field_Width(100);
             boxes->push_back(*box);
             
             //middle row
-            initRect(rect, col[2], row[4] , WIDTH, HEIGHT);
+            initRect(rect, col[2], row[4] , WIDTH + 50, HEIGHT);
             box = new Box(rect, OKAY, 3, BUTTON);
             box->setVisible(false);
             boxes->push_back(*box);
 
-            initRect(rect, col[4], row[4] , WIDTH, HEIGHT);
+            initRect(rect, col[4], row[4] , WIDTH + 10, HEIGHT);
             box = new Box(rect, CANCEL, 0, BUTTON); //goes back to screen 0
             box->setVisible(false);
             boxes->push_back(*box);
