@@ -2,8 +2,9 @@
 #define BOX__H
 #include <SDL2/SDL.h>
 #include <vector>
-//if doing saved box add SAVE, SAVED
-enum boxid {HOST, CONNECT, EXIT, IPBOX, PORTBOXC, PORTBOXH, OKAY, CANCEL, NUM_BOXES};
+
+const int TEXT_FIELD_OFFSET = 20;
+const int TEXT_FIELD_WIDTH = 200;
 enum boxtype {TEXT, BUTTON};
 class Box{
     private:

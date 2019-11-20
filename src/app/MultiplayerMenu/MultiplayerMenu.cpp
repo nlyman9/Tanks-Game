@@ -33,7 +33,12 @@ Args* MultiplayerMenu(Render* renderer)
                     Box currBox = menu->getBox(i);
                     if(currBox.isVisible()){
                         SDL_Rect temp = *(currBox.getPosition());
+                        if(currBox.getType() == TEXT){
+                            temp.w += TEXT_FIELD_OFFSET + TEXT_FIELD_WIDTH;
+                        }
                         if(SDL_IntersectRect(&clickBox, &temp, &intersection)){
+                            std::cout << "Current box is ";
+                            menu->printEnum(i);
                             if(screen != currBox.getScreen())
                                 screen = currBox.getScreen();
                             crBox = i;
@@ -63,8 +68,8 @@ Args* MultiplayerMenu(Render* renderer)
                         SAVED, HOST, CONNECT, EXIT
                     */
                     //menu->setVisible(SAVED);
+                    std::cout << "DEFAULT" << std::endl;
                     menu->setVisible(HOST);
-                    std::cout << "HOST" << std::endl;
                     menu->setVisible(CONNECT);
                     menu->setVisible(EXIT);
                     break;
@@ -74,10 +79,11 @@ Args* MultiplayerMenu(Render* renderer)
                         visible boxes
                         SAVE, HOST, IPBOX, PORTBOXC CONNECT, OKAY, CANCEL, EXIT
                     */
+                    std::cout << "CONNECT" << std::endl;
                     menu->setVisible(HOST);
                     menu->setVisible(CONNECT);
                     menu->setVisible(EXIT);
-                    menu->setVisible(PORTBOXH);
+                    menu->setVisible(PORTBOXC);
                     //menu->setVisible(SAVE);
                     menu->setVisible(OKAY);
                     menu->setVisible(CANCEL);
@@ -88,10 +94,11 @@ Args* MultiplayerMenu(Render* renderer)
                         visible boxes
                         HOST, CONNECT, EXIT, PORTBOXH
                     */
+                   std::cout << "HOST" << std::endl;
                     menu->setVisible(HOST);
                     menu->setVisible(CONNECT);
                     menu->setVisible(EXIT);
-                    menu->setVisible(PORTBOXC);
+                    menu->setVisible(PORTBOXH);
                     menu->setVisible(IPBOX);
                     menu->setVisible(OKAY);
                     menu->setVisible(CANCEL);
@@ -137,25 +144,47 @@ Args* MultiplayerMenu(Render* renderer)
                         break;
                 }
                 if(string != nullptr){
-                    renderer->drawText(&currBox, string);
+                    renderer->drawText(&currBox, string, 0, 0, 0, 0);
                     delete string;
                 }
             }
         }
         renderer->present();
-        //std::cout << keyPress <<std::endl;
+        //delete a character
+        if(keyPress == 8){
+            switch(crBox){
+                case IPBOX:
+                    //delete from ip
+                    menu->deleteCharacter(0);
+                    break;
+                case PORTBOXC:
+                    //delete from port
+                    menu->deleteCharacter(1);
+                    break;
+                case PORTBOXH:
+                    //delete from port
+                    menu->deleteCharacter(1);
+                    break;
+                default:
+                    break;
+            }
+        }
         //make sure keyboard has an int and write it to a box
         if(keyPress >= 48 && keyPress <= 57){
             keyPress = keyPress - 48; //set it from 0 to 9
+            std::string typed = std::to_string(keyPress);
+            std::cout << "Typed char = " << typed.at(0);
             switch(crBox){
                 case IPBOX:
-                    //write to IPBOX and ip array
+                    menu->typeCharacter(0, typed.at(0));
                     break;
                 case PORTBOXC:
                     //write to port box connect and port array
+                    menu->typeCharacter(1, typed.at(0));
                     break;
                 case PORTBOXH:
                     //write to port box host and port array
+                    menu->typeCharacter(1, typed.at(0));
                     break;
                 default:
                     break;

@@ -177,29 +177,44 @@ int Render::drawBackground(){
 	SDL_Rect fullscreen = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
 	SDL_RenderFillRect(gRenderer, &fullscreen);
 }
-int Render::drawText(Box* box, const std::string* toDraw){
+int Render::drawText(Box* box, const std::string* toDraw, int XOFFSET, int YOFFSET, int WIDTHEXT, int HEIGHTEXT){
 	SDL_Surface* surfaceMessage = TTF_RenderText_Solid(font, toDraw->c_str(), textColor);
 	Message = SDL_CreateTextureFromSurface(gRenderer, surfaceMessage);
-	SDL_RenderCopy(gRenderer, Message, NULL, box->getPosition());
+	SDL_Rect* rect = new SDL_Rect();
+	rect->x = box->getPosition()->x + XOFFSET;
+	rect->y = box->getPosition()->y + YOFFSET;
+	rect->w = box->getPosition()->w + WIDTHEXT;
+	rect->h = box->getPosition()->h + HEIGHTEXT;
+	SDL_RenderCopy(gRenderer, Message, NULL, rect);
+	//clean up memory
 	SDL_FreeSurface(surfaceMessage);
 	SDL_DestroyTexture(Message);
-
+	delete rect;
 }
 int Render::drawBox(Box toDraw){
-	SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF); //black boxes
-	SDL_RenderFillRect(gRenderer, toDraw.getPosition());
-	/*switch(toDraw.getType()){
+	switch(toDraw.getType()){
 		case BUTTON:
 			return drawButton(toDraw);
 		case TEXT:
 			return drawTextField(toDraw);
-	}*/
+	}
 	return 0;
 }
 int Render::drawButton(Box toDraw){
+	SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF); //black boxes
+	SDL_RenderFillRect(gRenderer, toDraw.getPosition());
 	return 0;
 }
 int Render::drawTextField(Box toDraw){
+	SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF); //black boxes
+	SDL_RenderFillRect(gRenderer, toDraw.getPosition());
+	SDL_Rect* TextField = new SDL_Rect();
+	TextField->x = toDraw.getPosition()->x + toDraw.getPosition()->w + TEXT_FIELD_OFFSET;
+	TextField->y = toDraw.getPosition()->y;
+	TextField->w = TEXT_FIELD_WIDTH;
+	TextField->h = toDraw.getPosition()->h;
+	SDL_RenderFillRect(gRenderer, TextField);
+	delete TextField;
 	return 0;
 }
 void Render::setTileMap(std::vector<std::vector<int>>* tileMap) {
