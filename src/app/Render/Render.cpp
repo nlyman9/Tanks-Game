@@ -26,12 +26,6 @@ bool Render::init()
 		return false;
 	}
 
-	if(TTF_Init()==-1) 
-	{
-    	printf("TTF_Init: %s\n", TTF_GetError());
-    	exit(2);
-	}
-
 	if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1"))
 	{
 		std::cout << "Warning: Linear texture filtering not enabled!" << std::endl;
@@ -64,6 +58,12 @@ bool Render::init()
 			gTileRects[i].y = 0;
 			gTileRects[i].w = TILE_SIZE;
 			gTileRects[i].h = TILE_SIZE;
+	}
+
+	if(TTF_Init()==-1) 
+	{
+    	printf("TTF_Init: %s\n", TTF_GetError());
+    	exit(2);
 	}
 	// Set initalization for text
 	font = TTF_OpenFont("../../res/fonts/SansUndertale.ttf", 24);

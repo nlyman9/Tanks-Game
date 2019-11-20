@@ -30,6 +30,7 @@ target_link_libraries(Render
   ImageLoader
   Networking
   Multiplayer
+  SDL2_ttf
 )
 endif()
 
