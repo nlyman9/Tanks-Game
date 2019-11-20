@@ -14,7 +14,6 @@ if(${APPLE})
 target_link_libraries(Networking
   PRIVATE
   MapGenerator
-  Multiplayer
   ${SDL2_LIBRARY}
   ${SDL2_IMAGE_LIBRARIES}
 )
@@ -22,8 +21,6 @@ else()
 target_link_libraries(Networking
   PRIVATE
   MapGenerator
-  Multiplayer
-  SDL2
 )
 endif()
 
@@ -45,14 +42,10 @@ target_link_libraries(Server
   MapGenerator
   ${SDL2_LIBRARY}
   ${SDL2_IMAGE_LIBRARIES}
-  Multiplayer
-  Constants
 )
 else()
 target_link_libraries(Server
   PRIVATE
   MapGenerator
-  Multiplayer
-  Constants
 )
 endif()

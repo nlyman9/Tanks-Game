@@ -45,79 +45,28 @@ Player::~Player() {}
  * @param update_lag - the value to extrapolate by
  */
 void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
-	if(!hit) {
-		// Extrapolate the x and y positions
-		// "Solves" stuck in the middle rendering.
-		int x_pos = getX() + x_vel * update_lag;
-		int y_pos = getY() + y_vel * update_lag;
+    // Extrapolate the x and y positions
+    // "Solves" stuck in the middle rendering.
+    int x_pos = getX() + x_vel * update_lag;
+    int y_pos = getY() + y_vel * update_lag;
 
-		// Render to screen (gRenderer)
-		// SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
-		// SDL_Rect fillRect = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
-		// SDL_RenderFillRect(gRenderer, &fillRect);
+    // Render to screen (gRenderer)
+    // SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
+	// SDL_Rect fillRect = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
+	// SDL_RenderFillRect(gRenderer, &fillRect);
 
-		// SDL_Rect pos = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
-		// SDL_RenderCopy(gRenderer, getSprite()->getTexture(), NULL, &pos);
-		SDL_Rect* dst = get_box();
-		SDL_Rect* turret_dst = get_box();
+    // SDL_Rect pos = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
+    // SDL_RenderCopy(gRenderer, getSprite()->getTexture(), NULL, &pos);
+    SDL_Rect* dst = get_box();
+    SDL_Rect* turret_dst = get_box();
 
-		// animation for the player: moving treads
-		if (x_vel != 0 || y_vel != 0 && SDL_GetTicks() - anim_last_time > 100) {
-			frame = (frame + 1) % 3;
-			anim_last_time = SDL_GetTicks();
-		}
-
-		SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), getSprite()->getFrame(frame), dst, theta, NULL, SDL_FLIP_NONE);
-		SDL_RenderCopyEx(gRenderer, getTurretSprite()->getTexture(), NULL, turret_dst, turretTheta, NULL, SDL_FLIP_NONE);
+	if (x_vel != 0 || y_vel != 0 && SDL_GetTicks() - anim_last_time > 100) {
+		frame = (frame + 1) % 3;
+		anim_last_time = SDL_GetTicks();
 	}
-	else {
-		Uint32 current_time = SDL_GetTicks();
-		SDL_Rect* dst = get_box();
-		dst->w = EXPLOSION_WIDTH;
-		dst->h = EXPLOSION_HEIGHT;
 
-		if(frame == 0 && anim_last_time == 0) {
-			//std::cout << "setting anim for first time\n";
-			anim_last_time = SDL_GetTicks();
-		}
-
-		if(current_time > anim_last_time + 200) {
-			frame++;
-			anim_last_time = SDL_GetTicks();
-			//std::cout << "frame++\n";
-		}
-
-		if(frame < 6) {
-			//std::cout << "rendering frame = " << frame << "\n";
-			SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), getSprite()->getFrame(frame), dst, theta, NULL, SDL_FLIP_NONE);
-		}
-		else {
-			//std::cout << "destroyed\n";
-			destroyed = true;
-		}
-	}
-}
-
-/**
- * @brief Set turret theta using the current position of the mouse
- *
- */
-void Player::setTurretTheta() {
-    // Move the turret
-    // Center the delta x and y by the center of the tank
-    float delta_x = mouseX - (getX() + TANK_WIDTH / 2);
-    float delta_y = mouseY - (getY() + TANK_HEIGHT / 2);
-    float theta_radians = atan2(delta_y, delta_x);
-    turretTheta = (int)(theta_radians * 180 / M_PI);;
-}
-
-/**
- * @brief Set the turret theta with a given value
- *
- * @param theta - The theta value you want to set it to
- */
-void Player::setTurretTheta(int theta) {
-    turretTheta = theta;
+    SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), getSprite()->getFrame(frame), dst, theta, NULL, SDL_FLIP_NONE);
+    SDL_RenderCopyEx(gRenderer, getTurretSprite()->getTexture(), NULL, turret_dst, turretTheta, NULL, SDL_FLIP_NONE);
 }
 
 /**
@@ -126,6 +75,15 @@ void Player::setTurretTheta(int theta) {
  *
  */
 void Player::update() {
+    // Move the turret
+    // Center the delta x and y by the center of the tank
+    float delta_x = mouseX - (getX() + TANK_WIDTH / 2);
+    float delta_y = mouseY - (getY() + TANK_HEIGHT / 2);
+    float theta_radians = atan2(delta_y, delta_x);
+    mouseTheta = (int)(theta_radians * 180 / M_PI);
+    mouseTheta = (int)(theta_radians * 180 / M_PI);
+    turretTheta = mouseTheta;
+
     // Move player
     // Rotate player
     rotatePlayer(theta_v);
@@ -219,15 +177,57 @@ bool Player::place(float x, float y) {
 }
 
 /* Player Specific Functions */
-void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time,
-                      SDL_Event* e,
-                      const Uint8 *keystate) {
+
+bool Player::getFire() {
+    return shotsFired;
+}
+
+bool Player::setFire(bool fire) {
+    this->shotsFired = fire;
+    return true;
+}
+
+bool Player::rotatePlayer(float t) {
+    theta += t;
+
+    if(theta < 0) {
+        theta = 360 + theta;
+    }
+    theta %= 360;
+    return true;
+}
+
+bool Player::rotateTurret(float theta) {
+    return false;
+}
+
+int Player::getTheta() {
+    return theta;
+}
+
+int Player::getTurretTheta() {
+    return turretTheta;
+}
+
+void Player::setClient(Client* cl) {
+    client = cl;
+}
+void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, SDL_Event* e) {
 
     delta_velocity = 0;
     x_deltav = 0;
     y_deltav = 0;
     theta_v = 0;
     shotsFired = false;
+
+    //std::cout << "get Event" << std::endl;
+
+    const Uint8* keystate; 
+    if(localPlayer) {
+        keystate = SDL_GetKeyboardState(nullptr);
+    } else {
+        keystate = client->pollKeystate();
+    }
 
     //std::cout << "access keystate" << std::endl;
     if (keystate[SDL_SCANCODE_W]) {
@@ -329,6 +329,12 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time,
         SDL_GetMouseState(&mouseX, &mouseY);
     }
     //std::cout << "finish mouse" << std::endl;
+    if(localPlayer && client != nullptr) {
+        std::vector<char>* fBuffer = client->getFillBuffer();
+        fBuffer->push_back((char)(*keystate));
+        appendHeader(fBuffer, (char) 1); // append keystate header
+    }
+    //std::cout << "finish fill buffer" << std::endl;
 }
 
 /**

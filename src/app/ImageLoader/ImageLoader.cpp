@@ -5,7 +5,6 @@ SDL_Texture* loadImage(std::string filename, SDL_Renderer* gRenderer) {
 	if (startSurf == nullptr) {
         std::cout << "Unable to load image " << filename << "! SDL Error: " << SDL_GetError() << std::endl;
 	}
-	
 	SDL_Texture* newText = SDL_CreateTextureFromSurface(gRenderer, startSurf);
 	if (newText == nullptr) {
         std::cout << "Unable to create texture from " << filename << "! SDL Error: " << SDL_GetError() << std::endl;

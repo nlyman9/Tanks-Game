@@ -1,3 +1,4 @@
+
 #include "Constants.hpp"
 #include "Enemy.hpp"
 #include <math.h>
@@ -39,14 +40,14 @@ Enemy::~Enemy() {}
    //SDL_Rect pos = {(int)x_enemy_pos, (int)y_enemy_pos, TANK_WIDTH, TANK_HEIGHT};
    //SDL_Rect* dst = get_box();
    //SDL_Rect* turret_dst = get_box();
-   
-   
+
+
    if (/*x_vel != 0 || y_vel != 0 && */SDL_GetTicks() - anim_last_time > 100) {
 		frame = (frame + 1) % 3;
 		anim_last_time = SDL_GetTicks();
 	}
-   
-   
+
+
    SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), getSprite()->getFrame(frame), &dst, theta, NULL, SDL_FLIP_NONE);
    SDL_RenderCopyEx(gRenderer, getTurretSprite()->getTexture(), NULL, &dst, turretTheta, NULL, SDL_FLIP_NONE);
 
@@ -918,4 +919,11 @@ void Enemy::setFalse() {
   moveRight = false;
   rightLeft = false;
   upDown = false;
+}
+
+//Receive the updated projectiles array from Game.cpp. Use the vector to avoid all of the projectiles
+//@param the projectiles vector from game.cpp containing all of the bullets
+void Enemy::setProjectiles(std::vector<Projectile *> projectiles) {
+  enemyProjectiles.clear();
+  enemyProjectiles = projectiles;
 }
