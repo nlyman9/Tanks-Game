@@ -179,7 +179,6 @@ int GameLoop::networkRun() {
 			}
 
 			for (auto enemy: enemies) {
-				enemy->setProjectiles(projectiles);
 				enemy->update();
 			}
 			for (auto projectile: projectiles) {
@@ -284,7 +283,7 @@ void GameLoop::initMapSinglePlayer() {
 		player->setObstacleLocations(&tileArray);
 	}
 
-	std::vector<int> enemySpawn = GameLoop::spawnEnemies(map, 1);
+	std::vector<int> enemySpawn = GameLoop::spawnEnemy(map);
 	enemies.push_back(new Enemy( enemySpawn.at(0), enemySpawn.at(1), players.at(0))); // single player means player vector is size 1
 
 	render->setEnemies(enemies);
@@ -351,7 +350,7 @@ std::vector<int> GameLoop::spawnEnemies(std::vector<std::vector<int>> *map, int 
  */
 int GameLoop::runSinglePlayer()
 {
-	std::cout << "Running single player..." << std::endl;
+	std::cout << "single player" << std::endl;
 	// Init single player only settngs
 	fflush(stdout);
 	render->setPlayer(players);
@@ -386,7 +385,7 @@ int GameLoop::runSinglePlayer()
 			}
 		}
 
-		checkEscape();
+		// checkEscape();
 		for(auto player : players) {
 
 			player->getEvent(elapsed_time, &e);
@@ -398,8 +397,7 @@ int GameLoop::runSinglePlayer()
 
 				std::cout << projectiles.back()->getX() << ", " << projectiles.back()->getY() << "; " << projectiles.back()->getTheta() << std::endl;
 
-				// render->gProjectiles.push_back(projectiles.back());
-				render->setProjectiles(projectiles);
+				render->gProjectiles.push_back(projectiles.back());
 				projectiles.back()->setSprite(shell);
 				//newlyFired->setSprite(bullet);
 				projectiles.back()->setObstacleLocations(&projectileObstacles);
@@ -411,10 +409,9 @@ int GameLoop::runSinglePlayer()
 			if(enemy->getFire() == true){
 				projectiles.push_back(new Projectile(enemy->getX() + TANK_WIDTH/4, enemy->getY() + TANK_HEIGHT/4, enemy->getTurretTheta()));
 
-				// render->gProjectiles.push_back(projectiles.back());
-				render->setProjectiles(projectiles);
+				render->gProjectiles.push_back(projectiles.back());
 				projectiles.back()->setSprite(shell);
-				projectiles.back()->setObstacleLocations(&projectileObstacles);
+				projectiles.back()->setObstacleLocations(&tileArray);
 				enemy->setFire(false);
 			}
 		}
@@ -425,9 +422,8 @@ int GameLoop::runSinglePlayer()
 			for(auto player : players) {
 				player->update();
 			}
-			//update the enemy movement and projectiles vector
+
 			for (auto enemy: enemies) {
-				enemy->setProjectiles(projectiles);
 				enemy->update();
 			}
 
@@ -440,7 +436,6 @@ int GameLoop::runSinglePlayer()
 					projectiles.at(i)->setSprite(pinksplosion);
 				}
 				else if(projectiles.at(i)->isFinished()){
-					//remove and deallocate the projectile object
 					projectiles.at(i)->~Projectile();
 					//remove the projectile from the render array so the image does not stay
 					render->gProjectiles.erase(render->gProjectiles.begin()+i);

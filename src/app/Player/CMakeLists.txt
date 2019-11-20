@@ -10,8 +10,6 @@ target_link_libraries(Player
   Constants
   Sprite
   ${SDL2_LIBRARY}
-  Enemy
-  Networking
 )
 else()
 target_link_libraries(Player
@@ -19,7 +17,6 @@ target_link_libraries(Player
   Object
   Constants
   Sprite
-  Networking
 )
 endif()
 

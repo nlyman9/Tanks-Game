@@ -14,11 +14,23 @@ target_link_libraries(Credits
   PRIVATE
   ${SDL2_LIBRARY}
   ${SDL2_IMAGE_LIBRARIES}
+  Render
+  ImageLoader
+  Constants
+  Tank
+  Object
+  Projectile
 )
 else()
 target_link_libraries(Credits
   PRIVATE
   SDL2
   SDL2_image
+  Render
+  ImageLoader
+  Constants
+  Tank
+  Object
+  Projectile
 )
 endif()

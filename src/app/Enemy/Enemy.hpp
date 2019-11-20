@@ -15,7 +15,6 @@
 #include <vector>
 #include "Object.hpp"
 #include "Player.hpp"
-#include "Projectile.hpp"
 
 struct coordinate {
 	int row;
@@ -26,9 +25,6 @@ struct coordinate {
 class Enemy : public Object {
     private:
         /* data */
-        // Sprite sprite;
-        // Sprite turret;
-        float x_enemy_pos, y_enemy_pos;
         Player* gPlayer;
         bool left = true;
 		int frame = 0;
@@ -90,15 +86,6 @@ class Enemy : public Object {
         bool move(float x, float y) override;	//	move x offset from current x and y offset from current y
         bool place(float x, float y) override;	//	place/teleport to an x and y
 
-        bool fire();	//	return true if the enemy fired successfully
-        bool rotateEnemy(float theta);	//	rotate the object
-        bool rotateTurret(float theta);	//	rotate the turret
-
-				bool getFire();
-				void setFire(bool fire);
-        float getX();
-        float getY();
-				float getTurretTheta();
         void updatePos();
 				void setProjectiles(std::vector<Projectile *> projectiles); 							//update the projectile vector so enemy can avoid them
 
