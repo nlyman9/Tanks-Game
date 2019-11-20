@@ -1,26 +1,34 @@
 #include "StartUpMenu.hpp"
-#include "GameLoop.hpp"
+#include "Render.hpp"
+#include "LocalGameLoop.hpp"
+#include "OnlineGameLoop.hpp"
+#include "Credits.hpp"
 
-void StartUpMenu::launch(Args *options) 
+void launch(Args *options) 
 {
-  renderer = new Render();
-  renderer->init();
+	Render* renderer = new Render();
+  	renderer->init();
 
-  GameLoop gLoop;
-  gLoop.init(renderer);
+	int ret = 0;
+	while(ret == 0) {
+		// Draw the menu
+		int gameMode = renderer->drawMenu();
 
-  int gameMode = renderer->drawMenu();
-  if(gameMode == MENU_SINGLE) {
-    gLoop.initMapSinglePlayer();
-    gLoop.runSinglePlayer();
-  } else if(gameMode == MENU_MULTI) {
-    gLoop.networkInit(options);
-    gLoop.initMapMultiPlayer();
-    //run the game loop
-	  gLoop.networkRun();
-  } else if(gameMode == MENU_CREDITS) {
-    std::cout << "ROLL CREDITS" << std::endl;
-  } else {
-    renderer->close();
-  }
+		// Select game mode
+		if(gameMode == MENU_SINGLE) {
+			LocalGameLoop localGameLoop(renderer);
+			localGameLoop.init();
+			ret = localGameLoop.run();
+		} else if(gameMode == MENU_MULTI) {
+			OnlineGameLoop onlineGameLoop(renderer);
+			onlineGameLoop.init(options);
+			ret = onlineGameLoop.run();
+		} else if(gameMode == MENU_CREDITS) {
+			Credits credits(renderer);
+			credits.playCredits();
+		} else {
+			renderer->close();
+			exit(0);
+		}
+	}
 }
