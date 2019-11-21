@@ -50,6 +50,7 @@ class Render {
         void setPlayerEnemies(std::vector<Player*> players);
         void setEnemies(std::vector<Enemy *> enemies);
         void setProjectiles(std::vector<Projectile *> projectiles);
+        void setTimer(unsigned int passed_timer); 
 
         //menu stuff
         //draw a box
@@ -69,6 +70,12 @@ class Render {
         SDL_Window* gWindow;
         SDL_Renderer* gRenderer;
         SDL_Surface* gScreenSurface;
+        TTF_Font* font;
+        SDL_Color white;
+        SDL_Surface* surfaceMessage;
+        SDL_Texture* timer_display;
+        SDL_Rect timer_box;
+        unsigned int timer;
 
 
         SDL_Texture* gTileSheet;

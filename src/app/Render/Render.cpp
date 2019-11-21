@@ -60,6 +60,15 @@ bool Render::init()
 			gTileRects[i].h = TILE_SIZE;
 	}
 
+	if(TTF_Init()==-1) 
+	{
+    	printf("TTF_Init: %s\n", TTF_GetError());
+    	exit(2);
+	}
+	// Set initalization for text
+	font = TTF_OpenFont("src/res/fonts/SansUndertale.ttf", 24);
+	white = {255, 255, 255, 0};
+
 	return true;
 }
 
@@ -276,6 +285,18 @@ int Render::draw(double update_lag) {
 		c += TILE_SIZE;
 	}
 
+	//Render timer
+	surfaceMessage = TTF_RenderText_Solid(font, (std::to_string(timer)).c_str(), white);
+	timer_display = SDL_CreateTextureFromSurface(gRenderer, surfaceMessage);
+	SDL_FreeSurface( surfaceMessage ); //free the surface that gets created
+	timer_box.x = BORDER_GAP + 13 * TILE_SIZE - TILE_SIZE/2;
+	timer_box.y = 0;
+	timer_box.w = 48;
+	timer_box.h = 48;
+	SDL_RenderCopy(gRenderer, timer_display, NULL, &timer_box);
+	SDL_DestroyTexture( timer_display );
+
+
 	// Render player
 	for (auto player : gPlayers) {
 		player->draw(gRenderer, update_lag);
@@ -315,4 +336,8 @@ void Render::setEnemies(std::vector<Enemy *> enemies) {
 
 void Render::setProjectiles(std::vector<Projectile *> projectiles) {
 	gProjectiles = projectiles;
+}
+
+void Render::setTimer(unsigned int passed_timer) {
+	timer = passed_timer;
 }
