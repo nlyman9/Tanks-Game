@@ -43,11 +43,21 @@ bool LocalGameLoop::init() {
 	bluesplosion->sheetSetup(48, 48, 6);
 
     // Set up enemy
-    enemy_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
-	enemy_tank->init();
-	enemy_tank->sheetSetup(30, 30, 3);
-    enemy_turret = new Sprite(render-> getRenderer(), "src/res/images/blue_turret.png");
-	enemy_turret->init();
+    enemy_tank_blue = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
+	enemy_tank_blue->init();
+	enemy_tank_blue->sheetSetup(30, 30, 3);
+	enemy_tank_green = new Sprite(render->getRenderer(), "src/res/images/green_tank.png");
+	enemy_tank_green->init();
+	enemy_tank_green->sheetSetup(30, 30, 3);
+	enemy_tank_purple = new Sprite(render->getRenderer(), "src/res/images/purple_tank.png");
+	enemy_tank_purple->init();
+	enemy_tank_purple->sheetSetup(30, 30, 3);
+  enemy_turret_blue = new Sprite(render-> getRenderer(), "src/res/images/blue_turret.png");
+	enemy_turret_blue->init();
+	enemy_turret_green = new Sprite(render->getRenderer(), "src/res/images/green_turret.png");
+	enemy_turret_green->init();
+	enemy_turret_purple = new Sprite(render->getRenderer(), "src/res/images/purple_turret.png");
+	enemy_turret_purple->init();
 
     // Set up cursor
     cursor = loadImage("src/res/images/cursor.png", render->getRenderer());
@@ -86,15 +96,25 @@ void LocalGameLoop::generateMap() {
     player->setObstacleLocations(&tileArray);
 
     std::vector<int> enemySpawn = spawnEnemies(map, 1);
-	enemies.push_back(new Enemy(enemySpawn.at(0), enemySpawn.at(1), player));
+		enemies.push_back(new Enemy(enemySpawn.at(0), enemySpawn.at(1), player, 1));
 
     render->setEnemies(enemies);
 
     for (auto enemy : enemies) {
-		enemy->setSprite(enemy_tank);
-		enemy->setTurretSprite(enemy_turret);
-        enemy->setObstacleLocations(&tileArray);
-		enemy->setTileMap(map);
+			if(enemy->getEnemyType() == 0){
+				enemy->setSprite(enemy_tank_blue);
+				enemy->setTurretSprite(enemy_turret_blue);
+			}
+			else if(enemy->getEnemyType() == 1){
+				enemy->setSprite(enemy_tank_green);
+				enemy->setTurretSprite(enemy_turret_green);
+			}
+			else{
+				enemy->setSprite(enemy_tank_purple);
+				enemy->setTurretSprite(enemy_turret_purple);
+			}
+      enemy->setObstacleLocations(&tileArray);
+			enemy->setTileMap(map);
 	}
 }
 
@@ -191,7 +211,7 @@ int LocalGameLoop::run() {
 
         //The player fired a bullet
         if (player->getFire() == true) {
-            Projectile *newBullet = new Projectile(player->getX() + TANK_WIDTH/4, player->getY() + TANK_HEIGHT/4, player->getTurretTheta());
+            Projectile *newBullet = new Projectile(player->getX() + TANK_WIDTH/4, player->getY() + TANK_HEIGHT/4, player->getTurretTheta(), 1);
             newBullet->setSprite(shell);
             newBullet->setObstacleLocations(&projectileObstacles);
 			newBullet->setFriendly(true);
@@ -204,15 +224,21 @@ int LocalGameLoop::run() {
         }
 
         for(auto enemy : enemies) {
-			if(enemy->getFire() == true) {
-                Projectile *newBullet = new Projectile(enemy->getX() + TANK_WIDTH/4, enemy->getY() + TANK_HEIGHT/4, enemy->getTurretTheta());
-                newBullet->setSprite(shell);
-                newBullet->setObstacleLocations(&projectileObstacles);
-				newBullet->setFriendly(false);
-				newBullet->addTargetLocation(player->get_box());
-				projectiles.push_back(newBullet);
-				render->setProjectiles(projectiles);
-				enemy->setFire(false);
+					if(enemy->getFire() == true) {
+						Projectile *newBullet;
+						if(enemy->getEnemyType() == 1){
+	          	newBullet = new Projectile(enemy->getX() + TANK_WIDTH/4, enemy->getY() + TANK_HEIGHT/4, enemy->getTurretTheta(), 2);
+						}
+						else{
+							newBullet = new Projectile(enemy->getX() + TANK_WIDTH/4, enemy->getY() + TANK_HEIGHT/4, enemy->getTurretTheta(), 1);
+						}
+	          newBullet->setSprite(shell);
+	          newBullet->setObstacleLocations(&projectileObstacles);
+						newBullet->setFriendly(false);
+						newBullet->addTargetLocation(player->get_box());
+						projectiles.push_back(newBullet);
+						render->setProjectiles(projectiles);
+						enemy->setFire(false);
 			}
 		}
 

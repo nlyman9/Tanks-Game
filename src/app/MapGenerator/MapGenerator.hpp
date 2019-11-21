@@ -15,6 +15,7 @@ class MapGenerator{
     std::vector<std::vector<int>> generateMirrorMap();
     std::vector<std::vector<int>> generateLineMap();
     std::vector<std::vector<int>> generateHMazeMap();
+    std::vector<std::vector<int>> generateQuadrantMap();
     std::vector<std::vector<int>> presetCenterCubes();
     std::vector<std::vector<int>> presetHoleMap();
     std::vector<std::vector<int>> generateOpenLineMap();
