@@ -1,19 +1,8 @@
-#if __APPLE__
-#include <SDL2/SDL.h>
-#include <SDL2_image/SDL_image.h>
-#include <SDL2_ttf/SDL_ttf.h>
-#else
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_ttf.h>
-#endif
-
 #include <vector>
 #include <string>
 #include <time.h>
 
 #include "Render.hpp"
-
 Render::~Render() {
   close();
 }
@@ -49,6 +38,17 @@ bool Render::init()
 		std::cout << "Renderer could not be created! SDL_Error: " << SDL_GetError() << std::endl;
 		return false;
 	}
+
+	if( TTF_Init() == -1 )
+	{
+		printf( "SDL_ttf could not initialize! SDL_ttf Error: %s\n", TTF_GetError() );
+		return false;
+	}
+	font = TTF_OpenFont("src/res/font/Roboto.ttf", 24);
+	if (font == NULL) {
+        fprintf(stderr, "error: font not found\n");
+        exit(EXIT_FAILURE);
+    }
 
 	// Set renderer draw/clear color
 	SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
@@ -177,7 +177,66 @@ int Render::drawMenu() {
 
 	return menuOption;
 }
-
+int Render::present(){
+	SDL_RenderPresent( gRenderer );
+}
+int Render::drawBackground(){
+	SDL_RenderClear( gRenderer );
+	SDL_Rect fullscreen = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+	SDL_Texture* background = loadImage("src/res/images/MultiplayerScreen.png", gRenderer);
+	SDL_RenderCopy(gRenderer, background, NULL, &fullscreen);
+}
+int Render::drawText(Box* box, const std::string* toDraw, int XOFFSET, int YOFFSET, int WIDTH, int HEIGHT){
+	SDL_Surface* surfaceMessage = TTF_RenderText_Solid(font, toDraw->c_str(), textColor);
+	Message = SDL_CreateTextureFromSurface(gRenderer, surfaceMessage);
+	SDL_Rect* rect = new SDL_Rect();
+	rect->x = box->getRectangle()->x + XOFFSET;
+	rect->y = box->getRectangle()->y + YOFFSET;
+	rect->w = WIDTH;
+	rect->h = HEIGHT;
+	SDL_RenderCopy(gRenderer, Message, NULL, rect);
+	//clean up memory
+	SDL_FreeSurface(surfaceMessage);
+	SDL_DestroyTexture(Message);
+	delete rect;
+}
+int Render::drawBox(Box toDraw){
+	switch(toDraw.getType()){
+		case BUTTON:
+			return drawButton(toDraw);
+		case TEXT:
+			return drawTextField(toDraw);
+	}
+	return 0;
+}
+int Render::drawButton(Box toDraw){
+	if(toDraw.getIMGPath() == ""){ //if src is empty
+		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF); //default color
+		SDL_RenderFillRect(gRenderer, toDraw.getRectangle());
+	}else{
+		SDL_Texture* button = loadImage(toDraw.getIMGPath(), gRenderer);
+		SDL_RenderCopy(gRenderer, button, NULL, toDraw.getRectangle());
+	}
+	return 0;
+}
+int Render::drawTextField(Box toDraw){
+	if(toDraw.getIMGPath() == ""){ //if src is empty
+		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF); //default color
+		SDL_RenderFillRect(gRenderer, toDraw.getRectangle());
+	}else{
+		SDL_Texture* button = loadImage(toDraw.getIMGPath(), gRenderer);
+		SDL_RenderCopy(gRenderer, button, NULL, toDraw.getRectangle());
+	}
+	SDL_Rect* TextField = new SDL_Rect();
+	TextField->x = toDraw.getRectangle()->x + toDraw.getRectangle()->w + toDraw.TEXT_FIELD_OFFSET();
+	TextField->y = toDraw.getRectangle()->y;
+	TextField->w = toDraw.TEXT_FIELD_WIDTH();
+	TextField->h = toDraw.getRectangle()->h;
+	SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x80, 0xFF); //default textfield color
+	SDL_RenderFillRect(gRenderer, TextField);
+	delete TextField;
+	return 0;
+}
 void Render::setTileMap(std::vector<std::vector<int>>* tileMap) {
 	tile_map = *tileMap;
 }

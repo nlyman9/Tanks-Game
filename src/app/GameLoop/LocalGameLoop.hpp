@@ -20,6 +20,8 @@ class LocalGameLoop {
     	std::vector<Projectile *> projectiles;
 
         Sprite* pinksplosion = nullptr;
+		Sprite* redsplosion = nullptr;
+		Sprite* bluesplosion = nullptr;
         Sprite* enemy_tank = nullptr;
         Sprite* enemy_turret = nullptr;
         Sprite* bullet = nullptr;

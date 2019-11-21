@@ -19,6 +19,7 @@ target_link_libraries(GameLoop
   Multiplayer
   Args
   SDL2_ttf
+  Box
 )
 
 target_include_directories(GameLoop

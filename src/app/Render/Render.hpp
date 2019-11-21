@@ -15,6 +15,7 @@
 #include "Enemy.hpp"
 #include "Projectile.hpp"
 #include "ImageLoader.hpp"
+#include "Box.hpp"
 
 enum {
     MENU_SINGLE,
@@ -26,7 +27,8 @@ enum {
 
 class Render {
     public:
-        std::vector<Enemy *> gEnemies;
+        std::vector<Player*> gPlayers;
+		std::vector<Enemy *> gEnemies;
         std::vector<Projectile *> gProjectiles;
 
         Render() {}
@@ -35,6 +37,7 @@ class Render {
 
         int draw(double update_lag);
         int drawMenu();
+        int drawMultiplayerMenu(char keypress, int selectedBox);
         bool init();
         void close();
 
@@ -48,7 +51,20 @@ class Render {
         void setEnemies(std::vector<Enemy *> enemies);
         void setProjectiles(std::vector<Projectile *> projectiles);
         void setTimer(unsigned int passed_timer); 
+
+        //menu stuff
+        //draw a box
+        int drawBox(Box toDraw);
+        //clear the background
+        int drawBackground();
+        //present the renderer
+        int present();
+        //draw text
+        int drawText(Box* box, const std::string* toDraw, int XOFFSET, int YOFFSET, int WIDTH, int HEIGHT);
     private:
+        //for later to draw buttons differently from text fields
+        int drawButton(Box toDraw);
+        int drawTextField(Box toDraw);
 
         std::vector<SDL_Texture*> gTex;
         SDL_Window* gWindow;
@@ -61,11 +77,17 @@ class Render {
         SDL_Rect timer_box;
         unsigned int timer;
 
-        std::vector<Player*> gPlayers;
 
         SDL_Texture* gTileSheet;
         SDL_Rect gTileRects[3];
 
-       std::vector<std::vector<int>> tile_map;
+        std::vector<std::vector<int>> tile_map;
+
+        //The font that's going to be used
+        TTF_Font *font;
+        //the texture to copy to the renderer
+        SDL_Texture* Message;
+        //The color of the font
+        SDL_Color textColor = { 200, 200, 200 };
 };
 #endif

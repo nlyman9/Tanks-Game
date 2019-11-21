@@ -2,6 +2,10 @@
 #include "Enemy.hpp"
 #include <math.h>
 
+/**
+  * @brief full constructor for enemY
+  * all parameters should be self explanatory
+  */
 Enemy::Enemy(Sprite* sprite, Sprite* turret, int x, int y, Player* player){
   setSprite(sprite);
   setTurretSprite(turret);
@@ -9,8 +13,12 @@ Enemy::Enemy(Sprite* sprite, Sprite* turret, int x, int y, Player* player){
   gPlayer = player;
 }
 
-Enemy::Enemy(float x, float y, Player* player) : x_enemy_pos{x}, y_enemy_pos{y} {
-  gPlayer = player;
+/**
+  * @brief smaller constructor for making an enemY
+  */
+Enemy::Enemy(float x, float y, Player* player) {
+	setPos(x, y);
+	gPlayer = player;
 }
 
 Enemy::~Enemy() {}
@@ -24,45 +32,75 @@ Enemy::~Enemy() {}
  */
  void Enemy::draw(SDL_Renderer *gRenderer, double update_lag) {
 
-   // Extrapolate the x and y positions
-   // "Solves" stuck in the middle rendering.
-   // TODO change MAX_VELOCITY to the enemy's velocity
+   // Create SDL_Rect with current x, y position
+   //SDL_Rect dst = {(int)x_enemy_pos, (int)y_enemy_pos, TANK_WIDTH, TANK_HEIGHT};
+	SDL_Rect* dst = get_box();
+	
+	if(!hit) {
+		if (/*x_vel != 0 || y_vel != 0 && */SDL_GetTicks() - anim_last_time > 100) {
+			frame = (frame + 1) % 3;
+			anim_last_time = SDL_GetTicks();
+		}
 
-   //int x_pos = getX();// + x_velocity * update_lag;
-   //int y_pos = getY();// + y_velocity * update_lag;
-   //printf("x: %d, y: %d\n", x_pos, y_pos);
+		//draw the tank and turret and use the rect from above as parameters for both calls since turret is centered on tank
+		SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), getSprite()->getFrame(frame), dst, theta, NULL, SDL_FLIP_NONE);
+		SDL_RenderCopyEx(gRenderer, getTurretSprite()->getTexture(), NULL, dst, turretTheta, NULL, SDL_FLIP_NONE);
 
-   // Render enemy
-   // SDL_Rect src = {0, 0, 48, 48};
-   SDL_Rect dst = {(int)x_enemy_pos, (int)y_enemy_pos, TANK_WIDTH, TANK_HEIGHT};
-   // SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), &src, &dst, 0, NULL, SDL_FLIP_NONE);
-   //SDL_Rect pos = {(int)x_enemy_pos, (int)y_enemy_pos, TANK_WIDTH, TANK_HEIGHT};
-   //SDL_Rect* dst = get_box();
-   //SDL_Rect* turret_dst = get_box();
-   
-   
-   if (/*x_vel != 0 || y_vel != 0 && */SDL_GetTicks() - anim_last_time > 100) {
-		frame = (frame + 1) % 3;
-		anim_last_time = SDL_GetTicks();
+		//lines coming out of turret "filed of view" have end points and this method finds them
+		findEndValues(turretTheta);
+
+		//draw the two lines with endpoints that were just calculated
+		SDL_RenderDrawLine(gRenderer, getX() + TANK_WIDTH/2, getY() + TANK_HEIGHT/2, line1X, line1Y);
+		SDL_RenderDrawLine(gRenderer, getX() + TANK_WIDTH/2, getY() + TANK_HEIGHT/2, line2X, line2Y);
 	}
-   
-   
-   SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), getSprite()->getFrame(frame), &dst, theta, NULL, SDL_FLIP_NONE);
-   SDL_RenderCopyEx(gRenderer, getTurretSprite()->getTexture(), NULL, &dst, turretTheta, NULL, SDL_FLIP_NONE);
-
-   findEndValues(turretTheta);
-
-   SDL_RenderDrawLine(gRenderer, x_enemy_pos + TANK_WIDTH/2, y_enemy_pos + TANK_HEIGHT/2, line1X, line1Y);
-   SDL_RenderDrawLine(gRenderer, x_enemy_pos + TANK_WIDTH/2, y_enemy_pos + TANK_HEIGHT/2, line2X, line2Y);
+	else {
+		//std::cout << "exploding";
+		
+		Uint32 current_time = SDL_GetTicks();
+		dst->w = EXPLOSION_WIDTH;
+		dst->h = EXPLOSION_HEIGHT;
+		
+		if(frame == 0 && anim_last_time == 0) {
+			//std::cout << "setting anim for first time\n";
+			anim_last_time = SDL_GetTicks();
+		}
+		
+		if(current_time > anim_last_time + 200) {
+			frame++;
+			anim_last_time = SDL_GetTicks();
+			//std::cout << "frame++\n";
+		}
+		
+		if(frame < 6) {
+			//std::cout << "rendering frame = " << frame << "\n";
+			SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), getSprite()->getFrame(frame), dst, theta, NULL, SDL_FLIP_NONE);
+		}
+		else {
+			//std::cout << "destroyed\n";
+			destroyed = true;
+		}
+	}
  }
 
+
+/**
+  * @brief takes current turretTheta and finds endpoints of lines of filed of view
+  *
+  * @param angle : current turretTheta
+  */
  void Enemy::findEndValues(float angle){
+   //multiply turretTheta by -1 to get degrees measured in standard way with counter-clockwise rotation around circle
    angle *= -1;
-   //printf("angle: %f\n", angle);
+   //convert to radians
    angle = angle * M_PI / 180;
+   //radius of unit circle used for calculations
+   //set as SCREEN_WIDTH so range always bigger than screen
    int length = SCREEN_WIDTH;
+   //adjust given angle by +- .25 to create a range
    float ang1 = angle + .25;
    float ang2 = angle - .25;
+   //caclulate endpoints using unit circle trig
+   //sets global variables of each line's endpoints so no return vals
    line1X = cos(ang1) * length + getX();
    line1Y = getY() - sin(ang1) * length;
    line2X = cos(ang2) * length + getX();
@@ -75,7 +113,8 @@ Enemy::~Enemy() {}
  *
  */
 void Enemy::update() {
-  updatePos();
+	if(!hit)
+		updatePos();
 }
 
 /**
@@ -105,10 +144,22 @@ bool Enemy::place(float x, float y) {
     return false;
 }
 
+/* Enemy Specific Functions */
+
+/**
+  * @brief calculates the area of a triangle
+  * @params the x, y coordinates of the three corners
+  * @return the area
+  */
 float Enemy::area(float x1, float y1, float x2, float y2, float x3, float y3){
   return abs((x1*(y2-y3) + x2*(y3-y1)+ x3*(y1-y2))/2.0);
 }
 
+/**
+  * @brief checks if a given point is within a triangle
+  * @params the x, y coordinates of the triangle corners and the x,y of the point checking
+  * @return true if point is within triangle, false otherwise
+  */
 bool Enemy::isInRange(float x1, float y1, float x2, float y2, float x3, float y3, float playerX, float playerY){
   //overall area
   float A = area(x1, y1, x2, y2, x3, y3);
@@ -119,8 +170,11 @@ bool Enemy::isInRange(float x1, float y1, float x2, float y2, float x3, float y3
   //trianlge PAB
   float a3 = area(x1, y1, x2, y2, playerX, playerY);
 
+  //sum the three smaller areas
   float sum = a1 + a2 + a3;
 
+  //if the sum is within 1 of overall area then point is inside big triangle
+  //otherwise it is not and return false
   if(abs(A - sum) < 1){
     return true;
   }
@@ -129,86 +183,78 @@ bool Enemy::isInRange(float x1, float y1, float x2, float y2, float x3, float y3
   }
 }
 
+/**
+  * @brief used to check if distance between two x,y points is less than a given number
+  * @params x,y positions of two points to check against
+  * @return true if distance between is smaller than given number, false otherwise
+  */
 bool Enemy::checkPos(float playX, float playY, float enemX, float enemY) {
+  //calculate all of distance formula except square root
   double stepOne = (double)(pow((playX - enemX), 2) + pow((playY - enemY), 2));
-
+  //do the square root step
 	double distanceAway = (pow(stepOne, .5));
 
-	if (distanceAway < 200.0)
+  //check if distance is < 200 and if so return true
+	if (distanceAway < 250.0)
 	{
 		return true;
 	}
 	return false;
 }
 
-bool Enemy::checkWall(float x, float y) {
-  //left wall
-	if (x <= TILE_SIZE + BORDER_GAP)
-	{
-		return true;
-	}
-	//right wall
-	else if (x >= SCREEN_WIDTH - BORDER_GAP * TANK_WIDTH)
-	{
-		return true;
-	}
-	//top wall
-	else if (y <= TILE_SIZE)
-	{
-		return true;
-	}
-	//bottom wall
-	else if (y >= SCREEN_HEIGHT - 2 * TANK_HEIGHT)
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-float Enemy::getX(){
-  return x_enemy_pos;
-}
-
-float Enemy::getY(){
-  return y_enemy_pos;
-}
-
+/**
+  * @brief used to update the position of the enemy tank including x,y position and turretTheta
+  * additionally checks for outer wall bounds collisions and corrects for those
+  * utilizes shortest path mehtod (generatePath) to develop its latest path
+*/
 void Enemy::updatePos() {
-  //printf("%d\t", isInRange(x_enemy_pos + TANK_WIDTH/2, y_enemy_pos + TANK_HEIGHT/2, line1X, line1Y, line2X, line2Y, gPlayer->getX() + TANK_WIDTH/2, gPlayer->getY() + TANK_HEIGHT/2));
+  //set the current time as this will be used to check whether or not to carry out certain actions based on elapsed time
   Uint32 current_time = SDL_GetTicks();
 
-  if(isInRange(x_enemy_pos + TANK_WIDTH/2, y_enemy_pos + TANK_HEIGHT/2, line1X, line1Y, line2X, line2Y, gPlayer->getX() + TANK_WIDTH/2, gPlayer->getY() + TANK_HEIGHT/2)){
+  //checking if player tank is "in range" of enemy tanks field of view
+  if(isInRange(getX() + TANK_WIDTH/2, getY() + TANK_HEIGHT/2, line1X, line1Y, line2X, line2Y, gPlayer->getX() + TANK_WIDTH/2, gPlayer->getY() + TANK_HEIGHT/2)){
+    //only allowed to shoot every 3 seconds so current time must be greater than last fired time
     if(current_time > fire_last_time + 3000){
       setFire(true);
+      //reset fire_last_time to current time so that can fire again in the future
       fire_last_time = current_time;
     }
   }
 
+  //change turret mode every 3 seconds
+  //trackOrMonitor will be true if track mode and false if monitor mode
   if(current_time > turret_mode_change + 3000){
+    //randonly pick between track and monitor modes
+    //track mode will always point the turret towards the player tank
+    //monitor mode will spin the enemy tank's turret
     if(rand() % 2 == 0){
       trackOrMonitor = true;
     }
     else{
       trackOrMonitor = false;
     }
+    //reset turret_mode_change so can change again in the future
     turret_mode_change = current_time;
   }
+  //track mode
   if(trackOrMonitor){
     //hi frems
-    //track mode
+    //Use trig to calculate the correct angle the turret should point at based on player location
     float curTheta = getTurretTheta();
     float delta_x = (gPlayer->getX() + TANK_WIDTH / 2) - (getX() + TANK_WIDTH / 2);
     float delta_y = (gPlayer->getY() + TANK_HEIGHT / 2) - (getY() + TANK_HEIGHT / 2);
     float theta_radians = atan2(delta_y, delta_x);
     turretTheta = (int)(theta_radians * 180 / M_PI);
   }
+  //monitor mode
   else{
-    //monitor mode
+    //since turretTheta is -180 to 180 degrees need to account for that by using global rotateUp bool
+    //rotateUp will be true if spinning 0 to 180 degrees
+    //rotateUp will be false if spinning -180 to 0 degrees
+    //add 1 to turretTheta each updatePos call to have a good speed
     if(rotateUp){
       turretTheta += 1;
+      //when turretTheta eclipses 180, set it to -180 (same actual pos so still spins seemlessly) and switch rotateUp bool
       if(turretTheta > 180){
         turretTheta = -180;
         rotateUp = false;
@@ -216,6 +262,7 @@ void Enemy::updatePos() {
     }
     else{
       turretTheta += 1;
+      //similar to above, since in negatives, when gets > 0 switch back to rotateUp being true
       if(turretTheta > 0){
         turretTheta = 0;
         rotateUp = true;
@@ -223,48 +270,60 @@ void Enemy::updatePos() {
     }
   }
 
+  //change states of the enemy tank every 5 seconds
+  //utilize the global moveState boolean
+  //if moveState is true then tank will randomly moveState around map
+  //if moveState is false then tank will "follow" or move towards the player
   if(current_time > last_state_change + 5000){
+    //give it a one in three chance of entering moveState mode
     if(rand() % 3 == 0){
-      wander = true;
+      moveState = 1;
     }
     else{
-      wander = false;
+      moveState = 0;
     }
+    //need to clear the current path it is on so that it can create a new one based on state change
     enemyPath.clear();
+    //update last_state_change time so that can update in the future
     last_state_change = current_time;
   }
 
+  //change states of the enemy tank if bullet is within range
+  for(auto bullet : enemyProjectiles){
+    if(checkPos(bullet->getX(), bullet->getY(), getX(), getY())){
+      //printf("AHHHH\n");
+      bulletXblock = findXBlock(bullet->getX());
+      bulletYblock = findYBlock(bullet->getY());
+      bulletTheta = bullet->getTheta();
+      if(moveState != 2){
+        enemyPath.clear();
+      }
+      moveState = 2;
+      break;
+    }
+  }
+  //the enemy path it is following will need to be updated frequently when the size of the vector is below a value
+  //this value is global randCut variable that will randonly change what this cutoff is in the range 2-6
+  //this is done so to give the enemy some sense of randomness as it will change how far it travels down its current path before updating
+  //range low bound is 2 because need at least two points in pathway to have tank move
+  //once the path size is less than randCut then set a new pathway for the enemy to follow and reassign randCut
   if(enemyPath.size() < randCut){
     setPathway(this->tile_map, *this->gPlayer, *this);
     randCut = rand() % 4 + 2;
   }
 
+
   float x_pos = gPlayer->getX();
   float y_pos = gPlayer->getY();
   bool retreat;
-  retreat = checkPos(x_pos, y_pos, x_enemy_pos, y_enemy_pos);
+  retreat = checkPos(x_pos, y_pos, getX(), getY());
   //See if player and enemy are intersecting
-  SDL_Rect enemy_rect;
-  SDL_Rect player_rect;
-  enemy_rect = {(int)x_enemy_pos, (int)y_enemy_pos, TANK_WIDTH, TANK_HEIGHT};
-  player_rect = {(int)x_pos, (int)y_pos, TANK_WIDTH, TANK_HEIGHT};
+  SDL_Rect enemy_rect = {(int)getX(), (int)getY(), TANK_WIDTH, TANK_HEIGHT};
+  SDL_Rect player_rect = {(int)x_pos, (int)y_pos, TANK_WIDTH, TANK_HEIGHT};
   //std::cout << enemy_rect.w << ":" << enemy_rect.h << ":" << enemy_rect.x << ":" << enemy_rect.y << std::endl;
 
   SDL_Rect* overlap;
   overlap = check_collision(&enemy_rect, &player_rect);
-
-  /*
-  SDL_Rect enemy_rect;
-  SDL_Rect player_rect;
-  SDL_Rect* overlap;
-  enemy_rect = {x_enemy_pos, y_enemy_pos, TANK_WIDTH, TANK_HEIGHT};
-  player_rect = {x_pos, y_pos, TANK_WIDTH, TANK_HEIGHT};
-  overlap = check_collision(&enemy_rect, &player_rect);
-  */
-  bool nearWall;
-  nearWall = checkWall(x_enemy_pos, y_enemy_pos);
-
-  int startingPosition =  SCREEN_WIDTH - TANK_WIDTH/2 - 75;
 
   //Get direction of current direction moving
   if (theta == 0) {
@@ -285,24 +344,29 @@ void Enemy::updatePos() {
   }
 
 
+  //main moving function of the tank based on the path it currently has
+  //need check that size is > 1 since utilize pop and can't pop if size is < 1
   if(enemyPath.size() > 1){
 
+    //these two coordinates will be how the enemy picks which direction to move
+    //because of pathing algorithm these coordinates will always be adjacent on the map
     coordinate moveFrom = enemyPath[enemyPath.size() - 1];
     coordinate moveTo = enemyPath[enemyPath.size() - 2];
 
     //move LEFT
     if(moveFrom.col > moveTo.col){
       if (moveLeft || rightLeft) {
-        //std::cout << "Moving left" << std::endl;
-        x_enemy_pos -= MAX_VELOCITY;
-        y_enemy_pos += 0;
-        if(x_enemy_pos < (moveTo.col * TILE_SIZE + TILE_SIZE + 36)){
+        //x_enemy_pos -= MAX_VELOCITY;
+		setX(getX() - MAX_VELOCITY);
+        //y_enemy_pos += 0;
+        //check that the tank position arrived in desired location
+        if(getX() < (moveTo.col * TILE_SIZE + TILE_SIZE + 36)){
           enemyPath.pop_back();
         }
         //check collision with player
         if (overlap != nullptr) {
-          x_enemy_pos += MAX_VELOCITY;
-          //std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
+          //x_enemy_pos += MAX_VELOCITY;
+		  setX(getX() + MAX_VELOCITY);
         }
       }
       else {
@@ -313,23 +377,23 @@ void Enemy::updatePos() {
         else {
           theta += PHI;
         }
-        //std::cout << "Updated theta to go left: " << theta << std::endl;
         setFalse();
       }
     }
-    //move right
+    //move RIGHT
     if(moveFrom.col < moveTo.col){
       if (moveRight || rightLeft) {
-        //std::cout << "Moving right" << std::endl;
-        x_enemy_pos += MAX_VELOCITY;
-        y_enemy_pos += 0;
-        if(x_enemy_pos > (moveTo.col * TILE_SIZE + TILE_SIZE*2 - 20)){
+        //x_enemy_pos += MAX_VELOCITY;
+		setX(getX() + MAX_VELOCITY);
+        //y_enemy_pos += 0;
+        //check that the tank position arrived in desired location
+        if(getX() > (moveTo.col * TILE_SIZE + TILE_SIZE*2 - 20)){
           enemyPath.pop_back();
         }
         //check collision
         if (overlap != nullptr) {
-          x_enemy_pos -= MAX_VELOCITY;
-          //std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
+          //x_enemy_pos -= MAX_VELOCITY;
+		  setX(getX() - MAX_VELOCITY);
         }
       }
       else {
@@ -344,22 +408,23 @@ void Enemy::updatePos() {
           //If pointed down, rotate left
           theta -= PHI;
         }
-        //std::cout << "Updated theta to go right: " << theta << std::endl;
         setFalse();
       }
     }
-    //move up
+    //move UP
     if(moveFrom.row > moveTo.row){
       if (moveUp || upDown) {
-        x_enemy_pos += 0;
-        y_enemy_pos -= MAX_VELOCITY;
-        if(y_enemy_pos < (moveTo.row * TILE_SIZE + TILE_SIZE + 20)){
+        //x_enemy_pos += 0;
+        //y_enemy_pos -= MAX_VELOCITY;
+		setY(getY() - MAX_VELOCITY);
+        //check that the tank position arrived in desired location
+        if(getY() < (moveTo.row * TILE_SIZE + TILE_SIZE + 20)){
           enemyPath.pop_back();
         }
         //check collision
         if (overlap != nullptr) {
-          y_enemy_pos += MAX_VELOCITY;
-          //std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
+          //y_enemy_pos += MAX_VELOCITY;
+		  setY(getY() + MAX_VELOCITY);
         }
       }
       else {
@@ -370,22 +435,23 @@ void Enemy::updatePos() {
           theta = 360;
           theta -= PHI;
         }
-        //std::cout << "Updated theta to go up: " << theta << std::endl;
         setFalse();
       }
     }
     //move DOWN
     if(moveFrom.row < moveTo.row){
       if (moveDown || upDown) {
-        x_enemy_pos += 0;
-        y_enemy_pos += MAX_VELOCITY;
-        if(y_enemy_pos > (moveTo.row * TILE_SIZE + TILE_SIZE + 20)){
+        //x_enemy_pos += 0;
+        //y_enemy_pos += MAX_VELOCITY;
+		setY(getY() + MAX_VELOCITY);
+        //check that the tank position arrived in desired location
+        if(getY() > (moveTo.row * TILE_SIZE + TILE_SIZE + 20)){
           enemyPath.pop_back();
         }
         //check collision
         if (overlap != nullptr) {
-          y_enemy_pos -= MAX_VELOCITY;
-          //std::cout << overlap->w << ":" << overlap->h << ":" << overlap->x << ":" << overlap->y << std::endl;
+          //y_enemy_pos -= MAX_VELOCITY;
+		  setY(getY() - MAX_VELOCITY);
         }
       }
       else {
@@ -395,93 +461,31 @@ void Enemy::updatePos() {
         else {
           theta += PHI;
         }
-        //std::cout << "Updated theta to go down: " << theta << std::endl;
         setFalse();
       }
     }
   }
-  rotate(theta);       //update enemy rotation to match direction
-
-
-  SDL_Rect* box = get_box(); // required to update box    //Enemy box is within 8 pixels of an obstacle
-  /*
-  SDL_Rect player_rect = {x_pos, y_pos, TANK_WIDTH, TANK_HEIGHT};
-  overlap = check_collision(&currentPos, &player_rect);
-  if (overlap != nullptr) {
-    setPos(getX() - (x_vel * updateStep), getY() - (y_vel * updateStep));
-  }
-  */
-
-  for(auto obstacle : obstacles) {
-    if(check_collision(&obstacle)) {
-      if (left) {
-        //x_enemy_pos += MAX_VELOCITY;
-        y_enemy_pos += 3;
-      }
-      //correct by going up a pixel
-      else {
-        //x_enemy_pos += -MAX_VELOCITY;
-        y_enemy_pos += 3;
-      }
-    }
-	}
-
-  if (x_enemy_pos + TANK_WIDTH > SCREEN_WIDTH - TILE_SIZE - 16)
+  //run checks to see if enemy tank went outside bounds of play area
+  if (getX() + TANK_WIDTH > SCREEN_WIDTH - TILE_SIZE - 16)
   {
-      x_enemy_pos = SCREEN_WIDTH - TILE_SIZE - 16 - TANK_WIDTH;
+      //x_enemy_pos = SCREEN_WIDTH - TILE_SIZE - 16 - TANK_WIDTH;
+	  setX(SCREEN_WIDTH - TILE_SIZE - 16 - TANK_WIDTH);
   }
-  if (x_enemy_pos < TILE_SIZE + 16)
+  if (getX() < TILE_SIZE + 16)
   {
-      x_enemy_pos = TILE_SIZE + 16;
+      //x_enemy_pos = TILE_SIZE + 16;
+	  setX(TILE_SIZE + 16);
   }
-  if (y_enemy_pos < TILE_SIZE)
+  if (getY() < TILE_SIZE)
   {
-      y_enemy_pos = TILE_SIZE;
+      //y_enemy_pos = TILE_SIZE;
+	  setY(TILE_SIZE);
   }
-  if (y_enemy_pos + TANK_HEIGHT > SCREEN_HEIGHT - TILE_SIZE)
+  if (getY() + TANK_HEIGHT > SCREEN_HEIGHT - TILE_SIZE)
   {
-      y_enemy_pos = SCREEN_HEIGHT - TILE_SIZE - TANK_HEIGHT;
+      //y_enemy_pos = SCREEN_HEIGHT - TILE_SIZE - TANK_HEIGHT;
+	  setY(SCREEN_HEIGHT - TILE_SIZE - TANK_HEIGHT);
   }
-}
-
-
-int Enemy::xArrPosR(float pos) {
-	int lowBound = TILE_SIZE+25;
-	int upBound = TILE_SIZE*2+25;
-	for(int i = 0; i < 24; i++){
-		if(pos <= upBound && pos >= lowBound){
-			return i;
-		}
-		lowBound += TILE_SIZE;
-		upBound += TILE_SIZE;
-	}
-	return 23;
-}
-
-int Enemy::yArrPos(float pos) {
-	int lowBound = TILE_SIZE-30;
-	int upBound = TILE_SIZE*2-30;
-	for(int i = 0; i < 12; i++){
-		if(pos <= upBound && pos >= lowBound){
-			return i - 1;
-		}
-		lowBound += TILE_SIZE;
-		upBound += TILE_SIZE;
-	}
-	return 11;
-}
-
-int Enemy::xArrPosL(float pos) {
-	int lowBound = TILE_SIZE-20;
-	int upBound = TILE_SIZE*2-20;
-	for(int i = 0; i < 24; i++){
-		if(pos <= upBound && pos >= lowBound){
-			return i;
-		}
-		lowBound += TILE_SIZE;
-		upBound += TILE_SIZE;
-	}
-	return 23;
 }
 
 void Enemy::setTileMap(std::vector<std::vector<int>>* tileMap) {
@@ -519,37 +523,78 @@ BoundingBox* Enemy::getBoundingBox() {
 
     return box;
 }
+
+/**
+  * @brief develop a pathway for the enmy tank to follow
+  * @params the game map, the player, and the enemy tank
+  * do to needing the shortest path to run quickly a "ghost" tank needs to be created as the target location for the enemy
+  */
 void Enemy::setPathway(std::vector<std::vector<int>> move_map, Player player, Enemy enemy){
+  //The ghost X and Y block are first initialized to the players location
+  //the findXBlock and findYBlock methods will give tile block location that the tank is in
+  //will be 0-23 for findXBlock and 0-12 for findYBlock
   int ghostXblock = findXBlock(player.getX());
   int ghostYblock = findYBlock(player.getY());
+  //Do the same thing but for the current enemy position
   int enemyXblock = findXBlock(enemy.getX());
   int enemyYblock = findYBlock(enemy.getY());
-  if(abs(ghostXblock - enemyXblock) < 2 && abs(ghostYblock - enemyYblock) < 2 && !wander){
+  //if the player and enemy are within 2 blocks in the X and Y AND not in moveState mode then just use the actual player tank to generate the path
+  //will not need to calculate a ghost tank since close enough algorithm will run quickly
+  if(abs(ghostXblock - enemyXblock) < 2 && abs(ghostYblock - enemyYblock) < 2 && (moveState == 0)){
     enemyPath = generatePath(move_map, player, enemy);
   }
+  //otherwise will need to generate the path using a ghost tank
   else{
-    if(wander){
+    //whether or not in moveState or follow mode need to make a ghost location
+    //main difference is if ghost location is towards the player (!moveState) or in a random direction (moveState)
+    if(moveState == 1){
       coordinate randGhostPos = Enemy::randGhostPos(enemyXblock, enemyYblock);
+      //adjust return values from x,y tile block locations to actual x,y positions on the play area
       int randGhostX = randGhostPos.col * TILE_SIZE + TILE_SIZE + BORDER_GAP;
       int randGhostY = randGhostPos.row * TILE_SIZE + TILE_SIZE;
+      //make the ghost tank given the new x, y positions
       Player* randGhost = new Player(randGhostX, randGhostY, true);
+      //generate the path using this ghost tank
       enemyPath = generatePath(move_map, *randGhost, enemy);
+    }
+    else if(moveState == 2){
+      coordinate awayGhostPos = Enemy::awayGhostPos(enemyXblock, enemyYblock, bulletXblock, bulletYblock, bulletTheta);
+      //adjust return values from x,y tile block locations to actual x,y positions on the play area
+      int awayGhostX = awayGhostPos.col * TILE_SIZE + TILE_SIZE + BORDER_GAP;
+      int awayGhostY = awayGhostPos.row * TILE_SIZE + TILE_SIZE;
+      //make the ghost tank given the new x, y positions
+      Player* awayGhost = new Player(awayGhostX, awayGhostY, true);
+      //generate the path using this ghost tank
+      enemyPath = generatePath(move_map, *awayGhost, enemy);
     }
     else{
       coordinate newGhostPos = Enemy::newGhostPos(ghostXblock, ghostYblock, enemyXblock, enemyYblock);
+      //adjust return values from x,y tile block locations to actual x,y positions on the play area
       int ghostX = newGhostPos.col * TILE_SIZE + TILE_SIZE + BORDER_GAP;
       int ghostY = newGhostPos.row * TILE_SIZE + TILE_SIZE;
+      //make the ghost tank given the new x, y positions
       Player* ghost = new Player(ghostX, ghostY, true);
+      //generate the path using this ghost tank
       enemyPath = generatePath(move_map, *ghost, enemy);
     }
   }
 }
 
+/**
+  * @brief used to randomly generate a direction for the ghost tank to spawn
+  * @params the TILE block locations of the enemy tank
+  * @return the coordinate of the ghost tank
+  */
 coordinate Enemy::randGhostPos(int eX, int eY){
+  //randomly pick a direction in the x and y for the ghost to go
   int randX = rand() % 3;
   int randY = rand() % 3;
+  //start coordinate of the ghost tank = the enemy tank
+  //will be adjusted later but needs to start at enemy tank so path is short
   coordinate newPos = {eY, eX, 0};
 
+  //if randX == 0 or 1 then +- 1 from newPos.row
+  //if == 2 then ghost will be in the same row
   if(randX == 0){
     newPos.row -= 1;
   }
@@ -557,6 +602,8 @@ coordinate Enemy::randGhostPos(int eX, int eY){
     newPos.row += 1;
   }
 
+  //if randY == 0 or 1 then +- from newPos.col
+  //if == 2 then ghost will be in the same col
   if(randY == 0){
     newPos.col -= 1;
   }
@@ -564,6 +611,8 @@ coordinate Enemy::randGhostPos(int eX, int eY){
     newPos.col += 1;
   }
 
+  //need end path location to be a valid moveable space on the map
+  //if it is not adjust the ghost location using findClosestOpenBlock and then return newPos
   if(!isValidBlock(newPos.row, newPos.col)){
     newPos = findClosestOpenBlock(newPos);
   }
@@ -571,11 +620,131 @@ coordinate Enemy::randGhostPos(int eX, int eY){
 
 }
 
-coordinate Enemy::newGhostPos(int gX, int gY, int eX, int eY){
+coordinate Enemy::awayGhostPos(int eX, int eY, int bX, int bY, int bT){
   coordinate newPos = {eY, eX, 0};
+
+  //if above and to the left
+  if(eX >= bX && eY >= bY){
+    if(bT <= 0 && bT > -90){
+      newPos.row += 1;
+      newPos.col -= 1;
+    }
+    else if(bT <= -90 && bT > -180){
+      newPos.row += 1;
+      newPos.col += 1;
+    }
+    else if(bT <= 180 && bT > 90){
+      newPos.row -= 1;
+      newPos.col += 1;
+    }
+    else{
+      if(rand() % 2 == 0){
+        newPos.row -= 1;
+        newPos.col += 1;
+      }
+      else{
+        newPos.row += 1;
+        newPos.col -= 1;
+      }
+    }
+  }
+  //above and right
+  else if(eX <= bX && eY >= bY){
+    if(bT <= 0 && bT > -90){
+      newPos.row += 1;
+      newPos.col -= 1;
+    }
+    else if(bT <= -90 && bT > -180){
+      newPos.row += 1;
+      newPos.col += 1;
+    }
+    else if(bT <= 90 && bT > 0){
+      newPos.row -= 1;
+      newPos.col -= 1;
+    }
+    else{
+      if(rand() % 2 == 0){
+        newPos.row -= 1;
+        newPos.col -= 1;
+      }
+      else{
+        newPos.row += 1;
+        newPos.col -= 1;
+      }
+    }
+  }
+  //below and left
+  else if(eX >= bX && eY <= bY){
+    if(bT <= -90 && bT > -180){
+      newPos.row += 1;
+      newPos.col += 1;
+    }
+    else if(bT <= 180 && bT > 90){
+      newPos.row -= 1;
+      newPos.col += 1;
+    }
+    else if(bT <= 90 && bT > 0){
+      newPos.row -= 1;
+      newPos.col -= 1;
+    }
+    else{
+      if(rand() % 2 == 0){
+        newPos.row -= 1;
+        newPos.col -= 1;
+      }
+      else{
+        newPos.row += 1;
+        newPos.col += 1;
+      }
+    }
+  }
+  //below and right
+  else if(eX <= bX && eY <= bY){
+    if(bT <= 0 && bT > -90){
+      newPos.row += 1;
+      newPos.col -= 1;
+    }
+    else if(bT <= 180 && bT > 90){
+      newPos.row -= 1;
+      newPos.col += 1;
+    }
+    else if(bT <= 90 && bT > 0){
+      newPos.row -= 1;
+      newPos.col -= 1;
+    }
+    else{
+      if(rand() % 2 == 0){
+        newPos.row -= 1;
+        newPos.col += 1;
+      }
+      else{
+        newPos.row += 1;
+        newPos.col -= 1;
+      }
+    }
+  }
+
+  //need end path location to be a valid moveable space on the map
+  //if it is not adjust the ghost location using findClosestOpenBlock and then return newPos
+  if(!isValidBlock(newPos.row, newPos.col)){
+    newPos = findClosestOpenBlock(newPos);
+  }
+  return newPos;
+}
+
+/**
+  * @brief used to find ghost location that is in direction towards the player tank
+  * @params the TILE block locations of the enemy and player tanks
+  * @return the coordinate of the ghost tank
+  */
+coordinate Enemy::newGhostPos(int gX, int gY, int eX, int eY){
+  //start newPos coordinate where the enemy currently is
+  coordinate newPos = {eY, eX, 0};
+  //if the tanks are in the same block, return newPos since enemy tank shouldn't move b/c can't get closer
   if(gX == eX && gY == eY){
     return newPos;
   }
+  //adjust row and col of newPos based on relationship between inputs
   //player above enemy
   if(gY < eY){
     //player left of enemy
@@ -620,16 +789,27 @@ coordinate Enemy::newGhostPos(int gX, int gY, int eX, int eY){
       newPos.col += 1;
     }
   }
+  //need end path location to be a valid moveable space on the map
+  //if it is not adjust the ghost location using findClosestOpenBlock and then return newPos
   if(!isValidBlock(newPos.row, newPos.col)){
     newPos = findClosestOpenBlock(newPos);
   }
   return newPos;
 }
 
+/**
+  * @brief used to find the closet block to a given location that is moveable to
+  * @param start : the block location in question
+  * @return the coordinate of the block that is closest and moveable to
+  */
 coordinate Enemy::findClosestOpenBlock(coordinate start){
   coordinate test = {start.row, start.col, 0};
+  //count increments once every while loop call to cycle between the options for adjacency
   int count = 0;
+  //increment is the block distance away currently checking on
   int increment = 1;
+  //check until find a block that isValid
+  //test by incrementing/decrementing test.row/test.col and then resetting those values back when check fails
   while(1){
     //check above
     if(count%8 == 0){
@@ -708,19 +888,36 @@ coordinate Enemy::findClosestOpenBlock(coordinate start){
   }
 }
 
+/**
+  * @brief used to test if a tile block location is valid (moveable to)
+  * @params x, y are tile block locations in question
+  * @return true if a valid block and falase if not valid
+  */
 bool Enemy::isValidBlock(int x, int y){
-  int curX = findXBlock(x_enemy_pos);
-  int curY = findYBlock(y_enemy_pos);
+  //find curX and curY to be the block locations that the enemy tank is currently in
+  int curX = findXBlock(getX());
+  int curY = findYBlock(getY());
+  //if location in question is outside the bounds of the map return false
   if(y < 0 || y > 23 || x < 0 || x > 12){
     return false;
   }
+  //if tile_map location is a 0 means can access this location
+  //second check determines block location in question does not equal the current location of the enemy tank
+  //don't want to allow this to return true or else enemy won't move
+  //if these two conditions are met then return true, otherwise false
   if((tile_map[y][x] == 0) && !(y == curX && x == curY)){
     return true;
   }
   return false;
 }
 
+/**
+  * @brief helper method to generatePath that will be used in building the pathway
+  * @params the coordinate to move towards and the coodinate the path is currentlyAt
+  * @return true if a valid move and false otherwise
+  */
 bool Enemy::validMove(coordinate moveTo, coordinate currentlyAt){
+  //find the row, col, and weight of the inputs
 	int moveToRow = moveTo.row;
 	int moveToCol = moveTo.col;
 	int moveToWeight = moveTo.weight;
@@ -728,7 +925,7 @@ bool Enemy::validMove(coordinate moveTo, coordinate currentlyAt){
 	int atCol = currentlyAt.col;
 	int atWeight = currentlyAt.weight;
 
-	//if weights valid
+	//if weights valid - one less than weight currently at
 	if(moveToWeight == (atWeight - 1)){
 		//if same row different column
 		if((moveToRow == atRow) && (moveToCol == (atCol - 1) || (moveToCol == (atCol + 1)))){
@@ -742,29 +939,42 @@ bool Enemy::validMove(coordinate moveTo, coordinate currentlyAt){
 	return false;
 }
 
+
+/**
+  * @brief generate the shortest path from the enemy to the player
+  * @params the tile_map, the player to move to, and the enemy to move from
+  * @return a vector list of coordinates from the enemy to the player
+  */
 std::vector<coordinate> Enemy::generatePath(std::vector<std::vector<int>> move_map, Player player, Enemy enemy){
+  //caclulate the x and y tile block locations of the player that will be used as endpoints to traverse to
 	int xPlayer = findXBlock(player.getX());
 	int yPlayer = findYBlock(player.getY());
 	std::vector<coordinate> coordList;
 	std::vector<coordinate> finalPath;
+  //make the first coordinate in the list the location of the enemy
 	coordinate enemyStart = {findYBlock(enemy.getY()), findXBlock(enemy.getX()), 0};
 	coordList.push_back(enemyStart);
+  //initialize other values
 	bool keepGoing = false;
 	bool inList = false;
+  //count used as check to see if proper weight value is seen
 	int count = 0;
 	int coordListLength;
 
+  //if player is in same location as enemy then return coordList since enemy shouldn't move since already close as possible
   if(abs(yPlayer - enemyStart.row) < 1 && abs(xPlayer - enemyStart.col) < 1){
     return coordList;
   }
 
 	while(!keepGoing) {
-    //printf("generating path %d\n", count);
-	//add surrounding squares to list
+	  //add surrounding squares to list - left, right, up, down
+    //only add if
+      // 1. not already in the list
+      // 2. not a border
+      // 3. an open tile
+    //if all of these are true add it to the coordList
 		coordListLength = coordList.size();
-		//printf("List length = %d\n", coordListLength);
 		for(int i = 0; i < coordListLength; i++){
-			//printf("Current coordinate = {%d, %d, %d}\n", coordList[i].row, coordList[i].col, coordList[i].weight);
 			if(coordList[i].weight == count){
 				coordinate left = {coordList[i].row, coordList[i].col - 1, coordList[i].weight + 1};
 				//check isnt a wall
@@ -841,10 +1051,12 @@ std::vector<coordinate> Enemy::generatePath(std::vector<std::vector<int>> move_m
 		count++;
 	}
 
+  //finally add the coordinate of the player with weight = count
 	coordinate currentCoord = {yPlayer, xPlayer, count};
 	finalPath.push_back(currentCoord);
 	coordListLength = coordList.size();
 
+  //work backwards from player location to enemy location to develop shortest path
 	while(count != 0){
 		for(int i = 0; i < coordListLength; i++){
 			if(coordList[i].weight == (count - 1)){
@@ -857,20 +1069,15 @@ std::vector<coordinate> Enemy::generatePath(std::vector<std::vector<int>> move_m
 			}
 		}
 	}
-	/*
-	for(int i = 0; i < coordList.size(); i++){
-		printf("{%d, %d, %d}", coordList[i].row, coordList[i].col, coordList[i].weight);
-	}
 
-	for(int i = 0; i < finalPath.size(); i++){
-		printf("{%d, %d, %d}", finalPath[i].row, finalPath[i].col, finalPath[i].weight);
-	}
-
-	printf("\n");
-*/
 	return finalPath;
 }
 
+/**
+  * @brief used to find tile block location in the X based on pos
+  * @param pos : position to use
+  * @return tile block that pos is in, range 0-23
+  */
 int Enemy::findXBlock(float pos) {
   int center = pos + TANK_WIDTH/2;
 	int trueX = center - TILE_SIZE - BORDER_GAP;
@@ -878,6 +1085,12 @@ int Enemy::findXBlock(float pos) {
 	return block;
 }
 
+
+/**
+  * @brief used to find tile block location in the Y based on pos
+  * @param pos : position to use
+  * @return tile block that pos is in, range 0-12
+  */
 int Enemy::findYBlock(float pos) {
   int center = pos + TANK_HEIGHT/2;
 	int trueY = center - TILE_SIZE;
@@ -892,4 +1105,11 @@ void Enemy::setFalse() {
   moveRight = false;
   rightLeft = false;
   upDown = false;
+}
+
+//Receive the updated projectiles array from Game.cpp. Use the vector to avoid all of the projectiles
+//@param the projectiles vector from game.cpp containing all of the bullets
+void Enemy::setProjectiles(std::vector<Projectile *> projectiles) {
+  enemyProjectiles.clear();
+  enemyProjectiles = projectiles;
 }

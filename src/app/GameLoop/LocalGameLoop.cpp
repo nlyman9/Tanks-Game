@@ -1,4 +1,3 @@
-
 #include "LocalGameLoop.hpp"
 #include "MapGenerator.hpp"
 #include "ImageLoader.hpp"
@@ -35,6 +34,12 @@ bool LocalGameLoop::init() {
 	pinksplosion = new Sprite(render->getRenderer(), "src/res/images/pinksplosion.png");
     pinksplosion->init();
     pinksplosion->sheetSetup(42, 42, 6);
+    redsplosion =  new Sprite(render->getRenderer(), "src/res/images/redsplosion.png");		
+		redsplosion->init();		
+		redsplosion->sheetSetup(48, 48, 6);		
+		bluesplosion =  new Sprite(render->getRenderer(), "src/res/images/bluesplosion.png");		
+		bluesplosion->init();		
+		bluesplosion->sheetSetup(48, 48, 6);
 
     // Set up enemy
     enemy_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
@@ -215,6 +220,10 @@ int LocalGameLoop::run() {
             Projectile *newBullet = new Projectile(player->getX() + TANK_WIDTH/4, player->getY() + TANK_HEIGHT/4, player->getTurretTheta());
             newBullet->setSprite(shell);
             newBullet->setObstacleLocations(&projectileObstacles);
+            newBullet->setFriendly(true);		
+	          for(auto enemy : enemies) {		
+					      newBullet->addTargetLocation(enemy->get_box());		
+				    }
             projectiles.push_back(newBullet);
             render->setProjectiles(projectiles);
             player->setFire(false);
@@ -225,35 +234,75 @@ int LocalGameLoop::run() {
                 Projectile *newBullet = new Projectile(enemy->getX() + TANK_WIDTH/4, enemy->getY() + TANK_HEIGHT/4, enemy->getTurretTheta());
                 newBullet->setSprite(shell);
                 newBullet->setObstacleLocations(&projectileObstacles);
+                newBullet->setFriendly(false);		                
+					      newBullet->addTargetLocation(player->get_box());		
                 projectiles.push_back(newBullet);
 				render->setProjectiles(projectiles);
 				enemy->setFire(false);
 			}
 		}
 
-        // 2. Update
+    // 2. Update
 		// Update if time since last update is >= MS_PER_UPDATE
 		while(lag_time >= MS_PER_UPDATE) {
-			
             player->setTurretTheta();
             player->update();
 
-			for (auto enemy: enemies) {
-				enemy->update();
+			if(player->isDestroyed()) {
+				//kill player
+				//erase player from render
+			}
+
+			for (int i = 0; i < enemies.size(); i++) {
+				enemies.at(i)->update();
+				enemies.at(i)->setProjectiles(projectiles);
+				if(enemies.at(i)->isDestroyed()) {
+					enemies.erase(enemies.begin()+i);
+					render->gEnemies.erase(render->gEnemies.begin()+i);
+				}
 			}
 
             int count = 0;
-            for (auto projectile : projectiles) {
-                projectile->update();
-                if(projectile->isExploding()) {
-                    projectile->setSprite(pinksplosion);
-                } else if(projectile->isFinished()) {
-                    projectiles.erase(projectiles.begin() + count);
-                    projectile->~Projectile();
-                    render->setProjectiles(projectiles);
-                }
-                count++;
-            }
+            for (int i = 0; i < projectiles.size(); i++) {
+				projectiles.at(i)->clearTargets();
+				if(projectiles.at(i)->getFriendly() == true) {
+					for(auto enemy : enemies) {
+						projectiles.at(i)->addTargetLocation(enemy->get_box());
+					}
+				}
+				else {
+					projectiles.at(i)->addTargetLocation(player->get_box());
+				}
+				projectiles.at(i)->update();
+				if(projectiles.at(i)->isHit()){
+					SDL_Rect* hitObject = projectiles.at(i)->getTarget();
+					SDL_Rect* playerRect = player->get_box();
+					if(playerRect->x == hitObject->x && playerRect->y == hitObject->y && !player->isHit()) {
+						player->setHit(true);
+						player->setSprite(redsplosion);
+						player->resetFrame();
+					}
+					for(auto enemy: enemies) {
+						SDL_Rect* enemyRect = enemy->get_box();
+						if(enemyRect->x == hitObject->x && enemyRect->y == hitObject->y && !enemy->isHit()) {
+							enemy->setHit(true);
+							enemy->setSprite(bluesplosion);
+							enemy->resetFrame();
+							break;
+						}
+					}
+				}
+				if(projectiles.at(i)->isExploding()){
+					projectiles.at(i)->setSprite(pinksplosion);
+				}
+				else if(projectiles.at(i)->isFinished()){
+					render->gProjectiles.erase(render->gProjectiles.begin()+i);
+					//erase the projectile object from the projectiles vector
+					projectiles.erase(projectiles.begin()+i);
+					i--;
+				}
+				count++;
+			}
 
 			lag_time -= MS_PER_UPDATE;
 		}
