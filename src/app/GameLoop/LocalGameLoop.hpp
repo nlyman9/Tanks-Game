@@ -43,6 +43,7 @@ class LocalGameLoop {
         std::chrono::system_clock::time_point previous_time;
         std::chrono::system_clock::time_point current_time;
         double lag_time;
+        unsigned int timer, begin_timer, current_timer;
 
         // Member Functions
         void generateMap();

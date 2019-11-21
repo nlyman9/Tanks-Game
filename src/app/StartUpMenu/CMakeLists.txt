@@ -10,6 +10,7 @@ target_link_libraries(StartUpMenu
   ${SDL2_LIBRARY}
   Render
   Args
+  MultiplayerMenu
   Credits
 )
 else()
@@ -19,6 +20,7 @@ target_link_libraries(StartUpMenu
   SDL2
   Render
   Args
+  MultiplayerMenu
   Credits
 )
 endif()

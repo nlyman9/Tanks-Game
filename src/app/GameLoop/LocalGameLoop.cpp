@@ -1,4 +1,3 @@
-
 #include "LocalGameLoop.hpp"
 #include "MapGenerator.hpp"
 #include "ImageLoader.hpp"
@@ -107,6 +106,30 @@ void LocalGameLoop::generateMap() {
  */
 std::vector<int> LocalGameLoop::spawnEnemies(std::vector<std::vector<int>> *map, int count)
 {
+	// SET TO TRUE TO DEBUG
+	std::vector<std::vector<int>> transpose;
+	if(true)
+	{
+		std::cout << "LocalGameLoop::spawnEnemies()" << std::endl;
+
+		for(int i = 0; i < Y_HIGH; i++)
+		{
+			transpose.push_back(std::vector<int>(X_WIDE));
+			for(int j = 0; j < X_WIDE; j++)
+			{
+				transpose[i][j] = (*map)[j][i];
+			}
+		}
+
+		for( auto i : transpose )
+		{
+			for( auto j : i )
+				std::cout << j;
+			std::cout << std::endl;
+		}
+		std::cout << std::endl;
+	}
+
 	std::vector<std::vector<int>> tileMap = *map;
 	std::vector<int> coords;
 	int enemy_x, enemy_y;
@@ -117,7 +140,7 @@ std::vector<int> LocalGameLoop::spawnEnemies(std::vector<std::vector<int>> *map,
 		enemy_x = (rand() % 16) + 4;
 		enemy_y = (rand() % 3) + 10;
 
-		if(tileMap[enemy_y][enemy_x] == 0)
+		if(transpose[enemy_y][enemy_x] == 0)
 		{
 			if(i < count)
 			{
@@ -130,8 +153,11 @@ std::vector<int> LocalGameLoop::spawnEnemies(std::vector<std::vector<int>> *map,
 		}
 	}
 
-	coords.push_back(enemy_x * 48 + 100);
+	coords.push_back(enemy_x * 48 + 64);
 	coords.push_back(enemy_y * 48 + 48);
+
+	// std::cout << "X" << enemy_x << ":Y" << enemy_y << std::endl;
+	// std::cout << "V" << transpose[enemy_y][enemy_x] << std::endl;
 
 	return coords;
 }
@@ -166,13 +192,13 @@ int LocalGameLoop::run() {
     SDL_Event e;
 	previous_time = std::chrono::system_clock::now(); // get current time of system
 	lag_time = 0.0;	// Set duration of time to 0
-
+	begin_timer = SDL_GetTicks();
 
     while(isGameOn) {
         current_time = std::chrono::system_clock::now();
 		elapsed_time = current_time - previous_time;
 		previous_time = current_time;
-		lag_time += elapsed_time.count();
+		lag_time += elapsed_time.count(); 
 
         // 1. Process input
 		while (SDL_PollEvent(&e))
@@ -216,10 +242,9 @@ int LocalGameLoop::run() {
 			}
 		}
 
-        // 2. Update
+    // 2. Update
 		// Update if time since last update is >= MS_PER_UPDATE
 		while(lag_time >= MS_PER_UPDATE) {
-			
             player->setTurretTheta();
             player->update();
 
@@ -230,6 +255,7 @@ int LocalGameLoop::run() {
 
 			for (int i = 0; i < enemies.size(); i++) {
 				enemies.at(i)->update();
+				enemies.at(i)->setProjectiles(projectiles);
 				if(enemies.at(i)->isDestroyed()) {
 					enemies.erase(enemies.begin()+i);
 					render->gEnemies.erase(render->gEnemies.begin()+i);
@@ -247,7 +273,6 @@ int LocalGameLoop::run() {
 				else {
 					projectiles.at(i)->addTargetLocation(player->get_box());
 				}
-				
 				projectiles.at(i)->update();
 				if(projectiles.at(i)->isHit()){
 					SDL_Rect* hitObject = projectiles.at(i)->getTarget();
@@ -257,7 +282,6 @@ int LocalGameLoop::run() {
 						player->setSprite(redsplosion);
 						player->resetFrame();
 					}
-					
 					for(auto enemy: enemies) {
 						SDL_Rect* enemyRect = enemy->get_box();
 						if(enemyRect->x == hitObject->x && enemyRect->y == hitObject->y && !enemy->isHit()) {
@@ -268,14 +292,12 @@ int LocalGameLoop::run() {
 						}
 					}
 				}
-				
 				if(projectiles.at(i)->isExploding()){
 					projectiles.at(i)->setSprite(pinksplosion);
 				}
 				else if(projectiles.at(i)->isFinished()){
-					projectiles.erase(projectiles.begin()+i);
 					render->gProjectiles.erase(render->gProjectiles.begin()+i);
-
+					//erase the projectile object from the projectiles vector
 					projectiles.erase(projectiles.begin()+i);
 					i--;
 				}
@@ -290,6 +312,12 @@ int LocalGameLoop::run() {
 		if(e.type == SDL_MOUSEMOTION || e.type == SDL_MOUSEBUTTONDOWN) {
 			SDL_GetMouseState(&cursorX, &cursorY);
 		}
+
+		//Update current timer
+		current_timer = SDL_GetTicks();
+		timer = TIMER_LENGTH - ((current_timer - begin_timer) / 1000);
+		render->setTimer(timer);
+		//std::cout << "timer : " << timer;
 
 		SDL_Rect cursorRect = {cursorX, cursorY, CROSSHAIR_SIZE, CROSSHAIR_SIZE};
 

@@ -4,16 +4,6 @@
 #include "Credits.hpp"
 #include "ImageLoader.hpp"
 
-#ifdef __APPLE__ 
-#include <SDL2/SDL.h>
-#include <SDL2_image/SDL_image.h>
-#else
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_ttf.h>
-
-#endif // __APPLE__
-
 int Credits::playCredits() {
 
 	// Jakob's Credit Scene

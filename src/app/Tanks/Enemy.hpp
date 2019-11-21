@@ -15,6 +15,7 @@
 #include <vector>
 #include "Object.hpp"
 #include "Player.hpp"
+#include "Projectile.hpp"
 #include "Tank.hpp"
 
 struct coordinate {
@@ -30,6 +31,7 @@ class Enemy : public Object, public Tank {
         bool left = true;
 		bool anim_last_time = 0;
         std::vector<coordinate> enemyPath;
+				std::vector<Projectile *> enemyProjectiles;
 
 		float line1X, line1Y, line2X, line2Y;
 		int randCut = 2;
@@ -42,7 +44,8 @@ class Enemy : public Object, public Tank {
 		bool moveRight = false;
 		bool rightLeft = false;
 		bool upDown = false;
-		bool wander = false;
+		int moveState = 0;
+		int bulletXblock, bulletYblock, bulletTheta;
 
 		Uint32 last_state_change = 0;
 		Uint32 turret_mode_change = 0;
@@ -65,11 +68,12 @@ class Enemy : public Object, public Tank {
 		coordinate findClosestOpenBlock(coordinate start);
 		coordinate newGhostPos(int gX, int gY, int eX, int eY);
 		coordinate randGhostPos(int eX, int eY);
+		coordinate awayGhostPos(int eX, int eY, int bX, int bY, int bT);
         std::vector<coordinate> generatePath(std::vector<std::vector<int>> move_map, Player player, Enemy enemy);
 				bool validMove(coordinate moveTo, coordinate currentlyAt);
         std::vector<std::vector<int>> tile_map;
-		
-		
+
+
     public:
 		Enemy(Sprite* sprite, Sprite* turret, int x, int y, Player* player); //constructor, initialize the x, y, and sprite
         Enemy(float x, float y, Player* player); //constructor, initialize the x, y, and sprite
@@ -81,6 +85,7 @@ class Enemy : public Object, public Tank {
         bool place(float x, float y) override;	//	place/teleport to an x and y
 
         void updatePos();
+				void setProjectiles(std::vector<Projectile *> projectiles);	//set the projectiles vector from localgameloop.cpp
 
         BoundingBox* getBoundingBox() override;
 

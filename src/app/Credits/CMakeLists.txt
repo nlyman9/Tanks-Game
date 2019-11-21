@@ -32,5 +32,6 @@ target_link_libraries(Credits
   Tank
   Object
   Projectile
+  Box
 )
 endif()
