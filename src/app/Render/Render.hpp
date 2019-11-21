@@ -70,7 +70,6 @@ class Render {
         SDL_Window* gWindow;
         SDL_Renderer* gRenderer;
         SDL_Surface* gScreenSurface;
-        TTF_Font* font;
         SDL_Color white;
         SDL_Surface* surfaceMessage;
         SDL_Texture* timer_display;
