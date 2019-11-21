@@ -285,7 +285,6 @@ void Enemy::updatePos() {
   if(current_time > last_state_change + 5000){
     //give it a one in three chance of entering wander mode
     if(rand() % 3 == 0 && enemyType != 1){
-      printf("wandering\n");
       moveState = 1;
     }
     else{
