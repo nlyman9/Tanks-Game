@@ -16,9 +16,10 @@ Enemy::Enemy(Sprite* sprite, Sprite* turret, int x, int y, Player* player){
 /**
   * @brief smaller constructor for making an enemY
   */
-Enemy::Enemy(float x, float y, Player* player) {
+Enemy::Enemy(float x, float y, Player* player, int type) {
 	setPos(x, y);
 	gPlayer = player;
+  enemyType = type;
 }
 
 Enemy::~Enemy() {}
@@ -35,7 +36,7 @@ Enemy::~Enemy() {}
    // Create SDL_Rect with current x, y position
    //SDL_Rect dst = {(int)x_enemy_pos, (int)y_enemy_pos, TANK_WIDTH, TANK_HEIGHT};
 	SDL_Rect* dst = get_box();
-	
+
 	if(!hit) {
 		if (/*x_vel != 0 || y_vel != 0 && */SDL_GetTicks() - anim_last_time > 100) {
 			frame = (frame + 1) % 3;
@@ -55,22 +56,22 @@ Enemy::~Enemy() {}
 	}
 	else {
 		//std::cout << "exploding";
-		
+
 		Uint32 current_time = SDL_GetTicks();
 		dst->w = EXPLOSION_WIDTH;
 		dst->h = EXPLOSION_HEIGHT;
-		
+
 		if(frame == 0 && anim_last_time == 0) {
 			//std::cout << "setting anim for first time\n";
 			anim_last_time = SDL_GetTicks();
 		}
-		
+
 		if(current_time > anim_last_time + 200) {
 			frame++;
 			anim_last_time = SDL_GetTicks();
 			//std::cout << "frame++\n";
 		}
-		
+
 		if(frame < 6) {
 			//std::cout << "rendering frame = " << frame << "\n";
 			SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), getSprite()->getFrame(frame), dst, theta, NULL, SDL_FLIP_NONE);
@@ -142,6 +143,13 @@ bool Enemy::move(float x, float y) {
  */
 bool Enemy::place(float x, float y) {
     return false;
+}
+
+/**
+  * returns the enemy type 
+  */
+int Enemy::getEnemyType(){
+  return enemyType;
 }
 
 /* Enemy Specific Functions */
@@ -275,8 +283,9 @@ void Enemy::updatePos() {
   //if moveState is true then tank will randomly moveState around map
   //if moveState is false then tank will "follow" or move towards the player
   if(current_time > last_state_change + 5000){
-    //give it a one in three chance of entering moveState mode
-    if(rand() % 3 == 0){
+    //give it a one in three chance of entering wander mode
+    if(rand() % 3 == 0 && enemyType != 1){
+      printf("wandering\n");
       moveState = 1;
     }
     else{
@@ -290,7 +299,7 @@ void Enemy::updatePos() {
 
   //change states of the enemy tank if bullet is within range
   for(auto bullet : enemyProjectiles){
-    if(checkPos(bullet->getX(), bullet->getY(), getX(), getY())){
+    if(checkPos(bullet->getX(), bullet->getY(), getX(), getY()) && bullet->getFriendly() == true){
       //printf("AHHHH\n");
       bulletXblock = findXBlock(bullet->getX());
       bulletYblock = findYBlock(bullet->getY());
