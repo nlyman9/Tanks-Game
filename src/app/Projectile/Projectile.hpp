@@ -20,6 +20,7 @@ class Projectile : public Object {
         float y_deltav = 0;
         float velocity = 0;
         float delta_velocity = 0;
+        int speedFactor = 1;
 		bool friendly = false;
         bool exploding = false;
 		int frame = 0;
@@ -33,34 +34,33 @@ class Projectile : public Object {
     public:
         Projectile(Sprite *missile, float x, float y); //constructor, initialize the x, y, and sprite
         Projectile(float x, float y); //constructor, initialize the x, y
-		Projectile(float x, float y, int theta);	//constructor, initialize with x, y, and theta
+		Projectile(float x, float y, int theta, int speed);	//constructor, initialize with x, y, and theta
 
 		//Object methods
         void draw(SDL_Renderer *gRenderer, double update_lag) override;
         void update() override;
         bool move(float x, float y) override; //move x offset from current x and y offset from current y
         bool place(float x, float y) override; //place/teleport to an x and y
-		
-		
+
 		int getTheta();
 		bool rotateProjectile(float theta);	// rotates the projectile
 		bool bouncePriority(SDL_Rect* A, SDL_Rect *B); // checks the side of the tile that the projectile is colliding with
         bool wall();	//	return true if projectile hits a wall. X and Y projectile should change depending on orientation
-        
+
 		bool isHit();
 		bool isExploding();
 		bool isFinished();
-		
+
 		bool getFriendly(); // returns friendly
 		bool setFriendly(bool a); // modifies and returns the value of friendly
-		
+
         void addTargetLocation(SDL_Rect* targetLoc); // adds a target to the vector of targets
 		void clearTargets(); // resets the vector list of targets
 		SDL_Rect* getTarget();
-		
-		
+
+
         BoundingBox* getBoundingBox() override;
-		
+
         ~Projectile();
 };
 #endif
