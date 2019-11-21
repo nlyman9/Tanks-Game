@@ -96,7 +96,7 @@ void LocalGameLoop::generateMap() {
     player->setObstacleLocations(&tileArray);
 
     std::vector<int> enemySpawn = spawnEnemies(map, 1);
-		enemies.push_back(new Enemy(enemySpawn.at(0), enemySpawn.at(1), player, 2));
+		enemies.push_back(new Enemy(enemySpawn.at(0), enemySpawn.at(1), player, 1));
 
     render->setEnemies(enemies);
 
