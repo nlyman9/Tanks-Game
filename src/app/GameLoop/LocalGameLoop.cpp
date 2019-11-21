@@ -1,3 +1,4 @@
+
 #include "LocalGameLoop.hpp"
 #include "MapGenerator.hpp"
 #include "ImageLoader.hpp"
@@ -42,11 +43,17 @@ bool LocalGameLoop::init() {
 	bluesplosion->sheetSetup(48, 48, 6);
 
     // Set up enemy
-    enemy_tank = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
-	enemy_tank->init();
-	enemy_tank->sheetSetup(30, 30, 3);
-    enemy_turret = new Sprite(render-> getRenderer(), "src/res/images/blue_turret.png");
-	enemy_turret->init();
+    enemy_tank_blue = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
+	enemy_tank_blue->init();
+	enemy_tank_blue->sheetSetup(30, 30, 3);
+	enemy_tank_green = new Sprite(render->getRenderer(), "src/res/images/green_tank.png");
+	enemy_tank_green->init();
+	enemy_tank_green->sheetSetup(30, 30, 3);
+	enemy_tank_purple = new Sprite(render->getRenderer(), "src/res/images/purple_tank.png");
+	enemy_tank_purple->init();
+	enemy_tank_purple->sheetSetup(30, 30, 3);
+  enemy_turret_blue = new Sprite(render-> getRenderer(), "src/res/images/blue_turret.png");
+	enemy_turret_blue->init();
 
     // Set up cursor
     cursor = loadImage("src/res/images/cursor.png", render->getRenderer());
@@ -56,7 +63,7 @@ bool LocalGameLoop::init() {
     generateMap();
 
 	// Initialized successfully
-	return true;	
+	return true;
 }
 
 void LocalGameLoop::generateMap() {
@@ -85,16 +92,26 @@ void LocalGameLoop::generateMap() {
     player->setObstacleLocations(&tileArray);
 
     std::vector<int> enemySpawn = spawnEnemies(map, 1);
-	enemies.push_back(new Enemy(enemySpawn.at(0), enemySpawn.at(1), player));
+		enemies.push_back(new Enemy(enemySpawn.at(0), enemySpawn.at(1), player, 1));
 
     render->setEnemies(enemies);
 
     for (auto enemy : enemies) {
-		enemy->setSprite(enemy_tank);
-		enemy->setTurretSprite(enemy_turret);
-        enemy->setObstacleLocations(&tileArray);
-		enemy->setTileMap(map);
-	}	
+			if(enemy->getEnemyType() == 0){
+				enemy->setSprite(enemy_tank_blue);
+				enemy->setTurretSprite(enemy_turret_blue);
+			}
+			else if(enemy->getEnemyType() == 1){
+				enemy->setSprite(enemy_tank_green);
+				enemy->setTurretSprite(enemy_turret_blue);
+			}
+			else{
+				enemy->setSprite(enemy_tank_purple);
+				enemy->setTurretSprite(enemy_turret_blue);
+			}
+      enemy->setObstacleLocations(&tileArray);
+			enemy->setTileMap(map);
+	}
 }
 
 /**
@@ -106,30 +123,6 @@ void LocalGameLoop::generateMap() {
  */
 std::vector<int> LocalGameLoop::spawnEnemies(std::vector<std::vector<int>> *map, int count)
 {
-	// SET TO TRUE TO DEBUG
-	std::vector<std::vector<int>> transpose;
-	if(true)
-	{
-		std::cout << "LocalGameLoop::spawnEnemies()" << std::endl;
-
-		for(int i = 0; i < Y_HIGH; i++)
-		{
-			transpose.push_back(std::vector<int>(X_WIDE));
-			for(int j = 0; j < X_WIDE; j++)
-			{
-				transpose[i][j] = (*map)[j][i];
-			}
-		}
-
-		for( auto i : transpose )
-		{
-			for( auto j : i )
-				std::cout << j;
-			std::cout << std::endl;
-		}
-		std::cout << std::endl;
-	}
-
 	std::vector<std::vector<int>> tileMap = *map;
 	std::vector<int> coords;
 	int enemy_x, enemy_y;
@@ -140,24 +133,21 @@ std::vector<int> LocalGameLoop::spawnEnemies(std::vector<std::vector<int>> *map,
 		enemy_x = (rand() % 16) + 4;
 		enemy_y = (rand() % 3) + 10;
 
-		if(transpose[enemy_y][enemy_x] == 0)
+		if(tileMap[enemy_y][enemy_x] == 0)
 		{
 			if(i < count)
 			{
 				i++;
 			}
 			else
-			{	
+			{
 				break;
 			}
 		}
 	}
 
-	coords.push_back(enemy_x * 48 + 64);
+	coords.push_back(enemy_x * 48 + 100);
 	coords.push_back(enemy_y * 48 + 48);
-
-	// std::cout << "X" << enemy_x << ":Y" << enemy_y << std::endl;
-	// std::cout << "V" << transpose[enemy_y][enemy_x] << std::endl;
 
 	return coords;
 }
@@ -192,13 +182,13 @@ int LocalGameLoop::run() {
     SDL_Event e;
 	previous_time = std::chrono::system_clock::now(); // get current time of system
 	lag_time = 0.0;	// Set duration of time to 0
-	begin_timer = SDL_GetTicks();
+
 
     while(isGameOn) {
         current_time = std::chrono::system_clock::now();
 		elapsed_time = current_time - previous_time;
 		previous_time = current_time;
-		lag_time += elapsed_time.count(); 
+		lag_time += elapsed_time.count();
 
         // 1. Process input
 		while (SDL_PollEvent(&e))
@@ -207,17 +197,17 @@ int LocalGameLoop::run() {
 			{
 				return -1; // close window
 			}
-            if (e.key.keysym.sym == SDLK_ESCAPE) 
+            if (e.key.keysym.sym == SDLK_ESCAPE)
             {
                 return 0; // return to menu
-            } 
+            }
 		}
 
         player->getEvent(elapsed_time, &e, SDL_GetKeyboardState(nullptr));
 
         //The player fired a bullet
         if (player->getFire() == true) {
-            Projectile *newBullet = new Projectile(player->getX() + TANK_WIDTH/4, player->getY() + TANK_HEIGHT/4, player->getTurretTheta());
+            Projectile *newBullet = new Projectile(player->getX() + TANK_WIDTH/4, player->getY() + TANK_HEIGHT/4, player->getTurretTheta(), 1);
             newBullet->setSprite(shell);
             newBullet->setObstacleLocations(&projectileObstacles);
 			newBullet->setFriendly(true);
@@ -230,19 +220,25 @@ int LocalGameLoop::run() {
         }
 
         for(auto enemy : enemies) {
-			if(enemy->getFire() == true) {
-                Projectile *newBullet = new Projectile(enemy->getX() + TANK_WIDTH/4, enemy->getY() + TANK_HEIGHT/4, enemy->getTurretTheta());
-                newBullet->setSprite(shell);
-                newBullet->setObstacleLocations(&projectileObstacles);
-				newBullet->setFriendly(false);
-				newBullet->addTargetLocation(player->get_box());
-				projectiles.push_back(newBullet);
-				render->setProjectiles(projectiles);
-				enemy->setFire(false);
+					if(enemy->getFire() == true) {
+						Projectile *newBullet;
+						if(enemy->getEnemyType() == 1){
+	          	newBullet = new Projectile(enemy->getX() + TANK_WIDTH/4, enemy->getY() + TANK_HEIGHT/4, enemy->getTurretTheta(), 2);
+						}
+						else{
+							newBullet = new Projectile(enemy->getX() + TANK_WIDTH/4, enemy->getY() + TANK_HEIGHT/4, enemy->getTurretTheta(), 1);
+						}
+	          newBullet->setSprite(shell);
+	          newBullet->setObstacleLocations(&projectileObstacles);
+						newBullet->setFriendly(false);
+						newBullet->addTargetLocation(player->get_box());
+						projectiles.push_back(newBullet);
+						render->setProjectiles(projectiles);
+						enemy->setFire(false);
 			}
 		}
 
-    // 2. Update
+        // 2. Update
 		// Update if time since last update is >= MS_PER_UPDATE
 		while(lag_time >= MS_PER_UPDATE) {
             player->setTurretTheta();
@@ -312,12 +308,6 @@ int LocalGameLoop::run() {
 		if(e.type == SDL_MOUSEMOTION || e.type == SDL_MOUSEBUTTONDOWN) {
 			SDL_GetMouseState(&cursorX, &cursorY);
 		}
-
-		//Update current timer
-		current_timer = SDL_GetTicks();
-		timer = TIMER_LENGTH - ((current_timer - begin_timer) / 1000);
-		render->setTimer(timer);
-		//std::cout << "timer : " << timer;
 
 		SDL_Rect cursorRect = {cursorX, cursorY, CROSSHAIR_SIZE, CROSSHAIR_SIZE};
 

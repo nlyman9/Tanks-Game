@@ -14,7 +14,7 @@ class LocalGameLoop {
         int run();
 
     private:
-        // Member Variables 
+        // Member Variables
         Player* player;
         std::vector<Enemy *> enemies;
     	std::vector<Projectile *> projectiles;
@@ -22,8 +22,12 @@ class LocalGameLoop {
         Sprite* pinksplosion = nullptr;
 		Sprite* redsplosion = nullptr;
 		Sprite* bluesplosion = nullptr;
-        Sprite* enemy_tank = nullptr;
-        Sprite* enemy_turret = nullptr;
+        Sprite* enemy_tank_blue = nullptr;
+        Sprite* enemy_tank_green = nullptr;
+        Sprite* enemy_tank_purple = nullptr;
+        Sprite* enemy_turret_blue = nullptr;
+        Sprite* enemy_turret_green = nullptr;
+        Sprite* enemy_turret_purple = nullptr;
         Sprite* bullet = nullptr;
         Sprite* shell = nullptr;
         SDL_Texture* cursor = nullptr;
@@ -43,7 +47,6 @@ class LocalGameLoop {
         std::chrono::system_clock::time_point previous_time;
         std::chrono::system_clock::time_point current_time;
         double lag_time;
-        unsigned int timer, begin_timer, current_timer;
 
         // Member Functions
         void generateMap();
@@ -53,4 +56,4 @@ class LocalGameLoop {
 };
 
 
-#endif 
+#endif
