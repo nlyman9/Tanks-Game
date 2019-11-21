@@ -117,7 +117,7 @@ bool OnlineGameLoop::init(Args* options) {
     buildMap();
 
 	// Initialized successfully
-	return true;	
+	return true;
 }
 
 void OnlineGameLoop::buildMap() {
@@ -157,7 +157,7 @@ void OnlineGameLoop::buildMap() {
 		player->setObstacleLocations(&tileArray);
 	}
 
-	// Set collision for network players 
+	// Set collision for network players
 	for (auto enemy : playerEnemies) {
 		enemy->setObstacleLocations(&tileArray);
 	}
@@ -167,7 +167,7 @@ int OnlineGameLoop::run() {
     SDL_Event e;
 	previous_time = std::chrono::system_clock::now(); // get current time of system
 	lag_time = 0.0;	// Set duration of time to 0
-	
+
 	const Uint8 *keystate;
 	const Uint8 *keyStatePacket;
 	int temp = 0; // For calculating tickrate TODO change later
@@ -190,10 +190,10 @@ int OnlineGameLoop::run() {
 				kill(server_pid, SIGTERM);
                 return -1; // close window
 			}
-            if (e.key.keysym.sym == SDLK_ESCAPE) 
+            if (e.key.keysym.sym == SDLK_ESCAPE)
             {
                 return 0; // return to menu
-            } 
+            }
 		}
 
 		assert(players.size() == 1);
@@ -211,7 +211,7 @@ int OnlineGameLoop::run() {
 
 			// Apply keysates to the network player
 			playerEnemy->getEvent(elapsed_time, &e, keyStatePacket);
-			
+
 		}
 
 		// 2. Update
@@ -234,7 +234,7 @@ int OnlineGameLoop::run() {
 				//network version of player firing bullet
 				// TODO NOT DO THIS - not have this nested inside the tickrate - this is hacky
 				if (players.at(0)->getFire() == true) {
-					Projectile *newBullet = new Projectile(players.at(0)->getX() + TANK_WIDTH/4, players.at(0)->getY() + TANK_HEIGHT/4, players.at(0)->getTurretTheta());
+					Projectile *newBullet = new Projectile(players.at(0)->getX() + TANK_WIDTH/4, players.at(0)->getY() + TANK_HEIGHT/4, players.at(0)->getTurretTheta(), 1);
 					newBullet->setSprite(shell);
 					newBullet->setObstacleLocations(&tileArray);
 					projectiles.push_back(newBullet);
@@ -249,7 +249,7 @@ int OnlineGameLoop::run() {
 				playerEnemy->update();
 
 				if (playerEnemy->getFire() == true) {
-					Projectile *newBullet = new Projectile(playerEnemy->getX() + TANK_WIDTH/4, playerEnemy->getY() + TANK_HEIGHT/4, playerEnemy->getTurretTheta());
+					Projectile *newBullet = new Projectile(playerEnemy->getX() + TANK_WIDTH/4, playerEnemy->getY() + TANK_HEIGHT/4, playerEnemy->getTurretTheta(), 1);
 					newBullet->setSprite(shell);
 					newBullet->setObstacleLocations(&tileArray);
 					projectiles.push_back(newBullet);

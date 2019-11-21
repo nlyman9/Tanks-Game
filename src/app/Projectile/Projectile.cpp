@@ -11,9 +11,10 @@ Projectile::Projectile(float x, float y) {
     setPos(x, y);
 }
 
-Projectile::Projectile(float x, float y, int theta) {
+Projectile::Projectile(float x, float y, int theta, int speed) {
 	setPos(x, y);
 	this->theta = theta;
+  this->speedFactor = speed;
 
 	x_vel = 180 * cos((theta * M_PI) / 180);
 	y_vel = 180 * sin((theta * M_PI) / 180);
@@ -79,11 +80,12 @@ void Projectile::update() {
 	int collisionTheta = theta;
 
     //rotateProjectile(theta_v);
+
 	targetNum = 0;
 
 	if(!exploding) {
-		x_vel = 180 * cos((theta * M_PI) / 180);
-		y_vel = 180 * sin((theta * M_PI) / 180);
+		x_vel = speedFactor*180 * cos((theta * M_PI) / 180);
+		y_vel = speedFactor*180 * sin((theta * M_PI) / 180);
 
 		float updateStep = MS_PER_UPDATE/1000;
 		setPos(getX() + (x_vel * updateStep), getY() + (y_vel * updateStep));
@@ -101,6 +103,7 @@ void Projectile::update() {
 			}
 			targetNum++;
 		}
+
 		for(auto obstacle : obstacles) {
 			overlap = check_collision(&currentPos, &obstacle);
 			if(overlap != nullptr) {

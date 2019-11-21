@@ -46,6 +46,7 @@ class Enemy : public Object, public Tank {
 		bool upDown = false;
 		int moveState = 0;
 		int bulletXblock, bulletYblock, bulletTheta;
+		int enemyType;
 
 		Uint32 last_state_change = 0;
 		Uint32 turret_mode_change = 0;
@@ -76,14 +77,14 @@ class Enemy : public Object, public Tank {
 
     public:
 		Enemy(Sprite* sprite, Sprite* turret, int x, int y, Player* player); //constructor, initialize the x, y, and sprite
-        Enemy(float x, float y, Player* player); //constructor, initialize the x, y, and sprite
+        Enemy(float x, float y, Player* player, int type); //constructor, initialize the x, y, and sprite
 
 		//Object methods
         void draw(SDL_Renderer *gRenderer, double update_lag) override;
         void update() override;
         bool move(float x, float y) override;	//	move x offset from current x and y offset from current y
         bool place(float x, float y) override;	//	place/teleport to an x and y
-
+				int getEnemyType();
         void updatePos();
 				void setProjectiles(std::vector<Projectile *> projectiles);	//set the projectiles vector from localgameloop.cpp
 
