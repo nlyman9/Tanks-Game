@@ -2,6 +2,13 @@
 #include <time.h>
 #include <math.h>
 #include <iostream>
+#include "Edge.hpp"
+#include "Graph.hpp"
+#include "Map.hpp"
+#include "QuadConstants.hpp"
+#include "Quadrant.hpp"
+#include "Quads.hpp"
+#include "Tileset.hpp"
 
 std::vector<std::vector<int>> MapGenerator::generateEmptyMap()
 {
@@ -259,6 +266,20 @@ std::vector<std::vector<int>> MapGenerator::generateOpenLineMap()
 		}
 	}
 
+	return room;
+}
+
+std::vector<std::vector<int>> MapGenerator::generateQuadrantMap() {
+	Quads q;
+	q.make_quads();
+	Graph g(q.get_edges(), q.get_quads(), q.get_num_tilesets());
+	g.populate_edges();
+	g.calculate_weights();
+	std::vector<Tileset> map_tiles = g.get_tiles_for_map();
+	Map m;
+	m.make_map(map_tiles);
+	std::vector<std::vector<int>> room = generateEmptyMap();
+	room = m.get_map();
 	return room;
 }
 
