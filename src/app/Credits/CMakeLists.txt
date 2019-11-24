@@ -14,12 +14,15 @@ target_link_libraries(Credits
   PRIVATE
   ${SDL2_LIBRARY}
   ${SDL2_IMAGE_LIBRARIES}
+  ${SDL2_TTF_LIBRARIES}
   Render
   ImageLoader
   Constants
   Tank
   Object
   Projectile
+  Bomb
+  Box
 )
 else()
 target_link_libraries(Credits
@@ -33,5 +36,6 @@ target_link_libraries(Credits
   Object
   Projectile
   Box
+  Bomb
 )
 endif()

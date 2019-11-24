@@ -19,6 +19,7 @@ target_link_libraries(Render
   Networking
   Multiplayer
   Box
+  Bomb
 )
 else()
 target_link_libraries(Render
@@ -35,6 +36,7 @@ target_link_libraries(Render
   Multiplayer
   SDL2_ttf
   Box
+  Bomb
 )
 endif()
 

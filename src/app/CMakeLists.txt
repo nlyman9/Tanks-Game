@@ -13,6 +13,7 @@ add_subdirectory(MapGenerator)
 add_subdirectory(Render)
 add_subdirectory(ImageLoader)
 add_subdirectory(Args)
+add_subdirectory(Bomb)
 add_subdirectory(Box)
 
 if(${APPLE}) 
@@ -44,11 +45,11 @@ target_link_libraries(Game
 
 target_link_libraries(ServerProcess
   PRIVATE
-  StartUpMenu
-  Args
   ${SDL2_LIBRARY}
   ${SDL2_IMAGE_LIBRARIES}
   ${SDL2_TTF_LIBRARIES}
+  StartUpMenu
+  Args
   Multiplayer
 )
 else()

@@ -10,7 +10,9 @@ class Tank {
         int getTheta();
         float getTurretTheta();
         bool getFire();
-        bool setFire(bool fire);
+        void setFire(bool fire);
+        bool getBomb();
+        void setBomb(bool bomb);
         bool rotate(float theta);
         void rotateTurret(float theta);
         void setTurretSprite(Sprite* new_sprite);
@@ -24,7 +26,9 @@ class Tank {
         int theta = 0;
         int turretTheta = 0;
         bool shotsFired = false;
-        Uint32 fire_last_time = 0;
+        bool bombDeloyed = false;
+        Uint32 fire_last_time_bullet = 0;
+        Uint32 fire_last_time_bomb = 0;
         int frame = 0;
         Sprite turretSprite;
 		bool hit = false;

@@ -6,6 +6,7 @@ add_library(GameLoop
   OnlineGameLoop.cpp
 )
 
+if(${APPLE})
 target_link_libraries(GameLoop
   PUBLIC
   Render
@@ -18,9 +19,28 @@ target_link_libraries(GameLoop
   Networking
   Multiplayer
   Args
+  Bomb
+  ${SDL2_TTF_LIBRARIES}
+  Box
+)
+else()
+target_link_libraries(GameLoop
+  PUBLIC
+  Render
+  Object
+  Tank
+  Constants
+  Sprite
+  MapGenerator
+  Projectile
+  Networking
+  Multiplayer
+  Args
+  Bomb
   SDL2_ttf
   Box
 )
+endif()
 
 target_include_directories(GameLoop
   PUBLIC

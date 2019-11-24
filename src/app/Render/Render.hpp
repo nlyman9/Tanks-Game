@@ -1,5 +1,6 @@
 #ifndef RENDER_HPP
 #define RENDER_HPP
+
 #if __APPLE__
 #include <SDL2/SDL.h>
 #include <SDL2_image/SDL_image.h>
@@ -10,11 +11,13 @@
 #include <SDL2/SDL_ttf.h>
 #endif
 #include <vector>
+#include <memory>
 #include "Constants.hpp"
 #include "Player.hpp"
 #include "Enemy.hpp"
 #include "Projectile.hpp"
 #include "ImageLoader.hpp"
+#include "Bomb.hpp"
 #include "Box.hpp"
 
 enum {
@@ -27,10 +30,6 @@ enum {
 
 class Render {
     public:
-        std::vector<Player*> gPlayers;
-		std::vector<Enemy *> gEnemies;
-        std::vector<Projectile *> gProjectiles;
-
         Render() {}
         Render(std::vector<Player*> players, std::vector<Enemy*> enemies): gPlayers{players}, gEnemies{enemies} {}
         ~Render();
@@ -41,6 +40,11 @@ class Render {
         bool init();
         void close();
 
+        std::vector<Player*> gPlayers;
+		std::vector<Enemy *> gEnemies;
+        std::vector<Projectile *> gProjectiles;
+        std::vector<Bomb *> gBombs;
+
         SDL_Renderer* getRenderer();
 
         void setTileMap(std::vector<std::vector<int>>* tileMap);
@@ -50,7 +54,10 @@ class Render {
         void setPlayerEnemies(std::vector<Player*> players);
         void setEnemies(std::vector<Enemy *> enemies);
         void setProjectiles(std::vector<Projectile *> projectiles);
+        void setBombs(std::vector<Bomb *> bombs);
         void setTimer(unsigned int passed_timer); 
+
+        void clear();
 
         //menu stuff
         //draw a box
@@ -76,14 +83,14 @@ class Render {
         SDL_Rect timer_box;
         unsigned int timer;
 
-
         SDL_Texture* gTileSheet;
         SDL_Rect gTileRects[3];
 
         std::vector<std::vector<int>> tile_map;
 
         //The font that's going to be used
-        TTF_Font *font;
+        TTF_Font *fontRoboto;
+        TTF_Font *fontSansUntertale;
         //the texture to copy to the renderer
         SDL_Texture* Message;
         //The color of the font

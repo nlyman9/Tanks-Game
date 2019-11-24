@@ -22,6 +22,21 @@ Projectile::Projectile(float x, float y, int theta, int speed) {
 
 
 Projectile::~Projectile() {
+	delete &missile;
+	delete &x_vel;
+	delete &y_vel;
+	delete &bounces;
+	delete &theta;
+	delete &theta_v;
+	delete &x_deltav;
+	delete &y_deltav;
+	delete &velocity;
+	delete &delta_velocity;
+	delete &friendly;
+	delete &exploding;
+	delete &frame;
+	delete &anim_last_time;
+	delete &finished;
 }
 
 void Projectile::draw(SDL_Renderer *gRenderer, double update_lag) {
@@ -34,7 +49,8 @@ void Projectile::draw(SDL_Renderer *gRenderer, double update_lag) {
 		dst->h = PROJECTILE_HEIGHT;
 		SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), NULL, dst, theta, NULL, SDL_FLIP_NONE);
 	}
-	else {
+	else 
+	{
 		Uint32 current_time = SDL_GetTicks();
 		dst->w = EXPLOSION_WIDTH;
 		dst->h = EXPLOSION_HEIGHT;
@@ -52,7 +68,7 @@ void Projectile::draw(SDL_Renderer *gRenderer, double update_lag) {
 			SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), getSprite()->getFrame(frame), dst, theta, NULL, SDL_FLIP_NONE);
 		else {
 			finished = true;
-      exploding = false;
+      		exploding = false;
 		}
 
 		//projectiles currently are not being deleted/removed correctly
