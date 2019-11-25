@@ -44,9 +44,17 @@ bool Render::init()
 		printf( "SDL_ttf could not initialize! SDL_ttf Error: %s\n", TTF_GetError() );
 		return false;
 	}
-	font = TTF_OpenFont("src/res/font/Roboto.ttf", 24);
-	if (font == NULL) {
-        fprintf(stderr, "error: font not found\n");
+	
+	fontRoboto = TTF_OpenFont("src/res/fonts/Roboto.ttf", 24);
+	if (fontRoboto == NULL) {
+        fprintf(stderr, "error: Roboto not found\n");
+        exit(EXIT_FAILURE);
+    }
+
+	// Set initalization for text
+	fontSansUntertale = TTF_OpenFont("src/res/fonts/SansUndertale.ttf", 24);
+	if (fontSansUntertale == NULL) {
+        fprintf(stderr, "error: SansUndertale not found\n");
         exit(EXIT_FAILURE);
     }
 
@@ -60,13 +68,8 @@ bool Render::init()
 			gTileRects[i].h = TILE_SIZE;
 	}
 
-	if(TTF_Init()==-1) 
-	{
-    	printf("TTF_Init: %s\n", TTF_GetError());
-    	exit(2);
-	}
-	// Set initalization for text
-	font = TTF_OpenFont("src/res/fonts/SansUndertale.ttf", 24);
+
+
 	white = {255, 255, 255, 0};
 
 	return true;
@@ -187,7 +190,7 @@ int Render::drawBackground(){
 	SDL_RenderCopy(gRenderer, background, NULL, &fullscreen);
 }
 int Render::drawText(Box* box, const std::string* toDraw, int XOFFSET, int YOFFSET, int WIDTH, int HEIGHT){
-	SDL_Surface* surfaceMessage = TTF_RenderText_Solid(font, toDraw->c_str(), textColor);
+	SDL_Surface* surfaceMessage = TTF_RenderText_Solid(fontRoboto, toDraw->c_str(), textColor);
 	Message = SDL_CreateTextureFromSurface(gRenderer, surfaceMessage);
 	SDL_Rect* rect = new SDL_Rect();
 	rect->x = box->getRectangle()->x + XOFFSET;
@@ -286,7 +289,7 @@ int Render::draw(double update_lag) {
 	}
 
 	//Render timer
-	surfaceMessage = TTF_RenderText_Solid(font, (std::to_string(timer)).c_str(), white);
+	surfaceMessage = TTF_RenderText_Solid(fontRoboto, (std::to_string(timer)).c_str(), white);
 	timer_display = SDL_CreateTextureFromSurface(gRenderer, surfaceMessage);
 	SDL_FreeSurface( surfaceMessage ); //free the surface that gets created
 	timer_box.x = BORDER_GAP + 13 * TILE_SIZE - TILE_SIZE/2;
@@ -298,18 +301,23 @@ int Render::draw(double update_lag) {
 
 
 	// Render player
-	for (auto player : gPlayers) {
+	for (auto& player : gPlayers) {
 		player->draw(gRenderer, update_lag);
 	}
 
 	// Render all the enemies
-	for (auto enemy : gEnemies) {
+	for (auto& enemy : gEnemies) {
 		enemy->draw(gRenderer, update_lag);
 	}
 
 	// Render all projectiles
-	for (auto projectile : gProjectiles) {
+	for (auto& projectile : gProjectiles) {
 		projectile->draw(gRenderer, update_lag);
+	}
+
+	// Render all bombs
+	for (auto& bomb : gBombs) {
+		bomb->draw(gRenderer, update_lag);
 	}
 
 	SDL_RenderPresent(gRenderer);
@@ -338,6 +346,17 @@ void Render::setProjectiles(std::vector<Projectile *> projectiles) {
 	gProjectiles = projectiles;
 }
 
+void Render::setBombs(std::vector<Bomb *> bombs) {
+	gBombs = bombs;
+}
+
 void Render::setTimer(unsigned int passed_timer) {
 	timer = passed_timer;
+}
+
+void Render::clear() {
+	gPlayers.clear();
+	gEnemies.clear();
+	gProjectiles.clear();
+	gBombs.clear();
 }

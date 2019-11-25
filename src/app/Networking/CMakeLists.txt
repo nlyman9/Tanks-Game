@@ -45,6 +45,7 @@ target_link_libraries(Server
   MapGenerator
   ${SDL2_LIBRARY}
   ${SDL2_IMAGE_LIBRARIES}
+  ${SDL2_TTF_LIBRARIES}
   Multiplayer
   Constants
 )

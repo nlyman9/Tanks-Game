@@ -5,6 +5,7 @@
 #include "Player.hpp"
 #include "Enemy.hpp"
 #include "Projectile.hpp"
+#include "Bomb.hpp"
 #include <vector>
 
 class LocalGameLoop {
@@ -18,6 +19,7 @@ class LocalGameLoop {
         Player* player;
         std::vector<Enemy *> enemies;
     	std::vector<Projectile *> projectiles;
+        std::vector<Bomb *> bombs;
 
         Sprite* pinksplosion = nullptr;
 		Sprite* redsplosion = nullptr;
@@ -30,6 +32,10 @@ class LocalGameLoop {
         Sprite* enemy_turret_purple = nullptr;
         Sprite* bullet = nullptr;
         Sprite* shell = nullptr;
+        Sprite* bombBlack = nullptr;
+        Sprite* bombRed = nullptr;
+        Sprite* bombPlayerExplosion = nullptr;
+        Sprite* bombEnemyExplosion = nullptr;
         SDL_Texture* cursor = nullptr;
 
         Render* render = nullptr;

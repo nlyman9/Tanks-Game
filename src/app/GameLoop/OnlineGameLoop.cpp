@@ -294,7 +294,6 @@ void OnlineGameLoop::displayLoadingScreen(int screenCounter) {
     SDL_Rect loadingScreenRect = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
     switch(screenCounter) {
         case 0:
-			std::cout << "display load 1" << std::endl;
             SDL_RenderCopy(render->getRenderer(), loadingScreen1, NULL, &loadingScreenRect);
             break;
         case 1:
