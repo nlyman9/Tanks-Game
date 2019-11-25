@@ -326,6 +326,18 @@ int LocalGameLoop::run() {
 				count++;
 			}
 
+            // Check if bullets are colliding mid-air
+			for(auto bullet1 : projectiles){
+				for(auto bullet2 : projectiles){
+					if(bullet1 != bullet2){
+						if(bullet1->projCollisionCheck(bullet2)){
+							bullet1->setExploding(true);
+							bullet2->setExploding(true);
+						}
+					}
+				}
+			}
+
             // Update every bomb in the game
 			int bombCount = 0;
 			for(auto& bomb : bombs) {

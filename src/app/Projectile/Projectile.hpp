@@ -57,8 +57,8 @@ class Projectile : public Object {
         void addTargetLocation(SDL_Rect* targetLoc); // adds a target to the vector of targets
 		void clearTargets(); // resets the vector list of targets
 		SDL_Rect* getTarget();
-
-
+    bool projCollisionCheck(Projectile* bullet2);
+    void setExploding(bool explode);
         BoundingBox* getBoundingBox() override;
 
         ~Projectile();
