@@ -1,5 +1,4 @@
 #include "StartUpMenu.hpp"
-#include "LocalGameLoop.hpp"
 #include "Args.hpp"
 #include <string>
 #include <iostream>
