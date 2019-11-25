@@ -284,8 +284,8 @@ int LocalGameLoop::run() {
 				}
 			}
 
-            int count = 0;
-            for (int i = 0; i < projectiles.size(); i++) {
+      int count = 0;
+      for (int i = 0; i < projectiles.size(); i++) {
 				projectiles.at(i)->clearTargets();
 				if(projectiles.at(i)->getFriendly() == true) {
 					for(auto enemy : enemies) {
@@ -324,6 +324,16 @@ int LocalGameLoop::run() {
 				count++;
 			}
 
+			for(auto bullet1 : projectiles){
+				for(auto bullet2 : projectiles){
+					if(bullet1 != bullet2){
+						if(bullet1->projCollisionCheck(bullet2)){
+							bullet1->setExploding(true);
+							bullet2->setExploding(true);
+						}
+					}
+				}
+			}
 			int bombCount = 0;
 			for(auto& bomb : bombs) {
 				// Update bombs
