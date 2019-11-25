@@ -44,6 +44,8 @@ class Render {
 		std::vector<Enemy *> gEnemies;
         std::vector<Projectile *> gProjectiles;
         std::vector<Bomb *> gBombs;
+        int cursorX; 
+        int cursorY;
 
         SDL_Renderer* getRenderer();
 
@@ -82,6 +84,7 @@ class Render {
         SDL_Texture* timer_display;
         SDL_Rect timer_box;
         unsigned int timer;
+        SDL_Texture* crosshair;
 
         SDL_Texture* gTileSheet;
         SDL_Rect gTileRects[3];

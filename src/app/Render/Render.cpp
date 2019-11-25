@@ -68,7 +68,8 @@ bool Render::init()
 			gTileRects[i].h = TILE_SIZE;
 	}
 
-
+	// Set image fir cursor
+	crosshair = loadImage("src/res/images/cursor.png", gRenderer);
 
 	white = {255, 255, 255, 0};
 
@@ -164,16 +165,14 @@ int Render::drawMenu() {
 			SDL_RenderCopy(gRenderer, menuNone, NULL, &fullscreen); 
 		}
 
-		SDL_Texture* cursor = loadImage("src/res/images/cursor.png", gRenderer);
-
 		int cursorX = 0, cursorY = 0;
 
 		if(e.type == SDL_MOUSEMOTION || e.type == SDL_MOUSEBUTTONDOWN) {
 			SDL_GetMouseState(&cursorX, &cursorY);
 		}
 
-		SDL_Rect cursorRect = {cursorX, cursorY, CROSSHAIR_SIZE, CROSSHAIR_SIZE};
-		SDL_RenderCopy(gRenderer, cursor, NULL, &cursorRect);
+		SDL_Rect cursorRect = {cursorX - CROSSHAIR_SIZE/2, cursorY - CROSSHAIR_SIZE/2, CROSSHAIR_SIZE, CROSSHAIR_SIZE};
+		SDL_RenderCopy(gRenderer, crosshair, NULL, &cursorRect);
 
 		SDL_RenderPresent(gRenderer);
 	}
@@ -319,6 +318,11 @@ int Render::draw(double update_lag) {
 	for (auto& bomb : gBombs) {
 		bomb->draw(gRenderer, update_lag);
 	}
+
+	// Draw the cursor on the screen
+	SDL_Rect cursorRect = {cursorX - CROSSHAIR_SIZE/2, cursorY - CROSSHAIR_SIZE/2, CROSSHAIR_SIZE, CROSSHAIR_SIZE};
+
+	SDL_RenderCopy(gRenderer, crosshair, NULL, &cursorRect);
 
 	SDL_RenderPresent(gRenderer);
 
