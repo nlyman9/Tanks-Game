@@ -23,5 +23,7 @@ const int NUM_OBSTACLES = 312;
 const float PHI = 3;
 const int TURRET_PHI = 6;
 const int CROSSHAIR_SIZE = 30;
-
+const int TIMER_LENGTH = 300;
+const int BOMB_HEIGHT = 22;
+const int BOMB_WIDTH = 17;
 #endif

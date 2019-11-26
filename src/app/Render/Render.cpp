@@ -1,19 +1,8 @@
-#if __APPLE__
-#include <SDL2/SDL.h>
-#include <SDL2_image/SDL_image.h>
-#include <SDL2_ttf/SDL_ttf.h>
-#else
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_ttf.h>
-#endif
-
 #include <vector>
 #include <string>
 #include <time.h>
 
 #include "Render.hpp"
-
 Render::~Render() {
   close();
 }
@@ -50,6 +39,25 @@ bool Render::init()
 		return false;
 	}
 
+	if( TTF_Init() == -1 )
+	{
+		printf( "SDL_ttf could not initialize! SDL_ttf Error: %s\n", TTF_GetError() );
+		return false;
+	}
+
+	fontRoboto = TTF_OpenFont("src/res/fonts/Roboto.ttf", 24);
+	if (fontRoboto == NULL) {
+        fprintf(stderr, "error: Roboto not found\n");
+        exit(EXIT_FAILURE);
+    }
+
+	// Set initalization for text
+	fontSansUntertale = TTF_OpenFont("src/res/fonts/SansUndertale.ttf", 24);
+	if (fontSansUntertale == NULL) {
+        fprintf(stderr, "error: SansUndertale not found\n");
+        exit(EXIT_FAILURE);
+    }
+
 	// Set renderer draw/clear color
 	SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
 	gTileSheet = loadImage("src/res/images/tiles.png", gRenderer);
@@ -59,6 +67,11 @@ bool Render::init()
 			gTileRects[i].w = TILE_SIZE;
 			gTileRects[i].h = TILE_SIZE;
 	}
+
+	// Set image fir cursor
+	crosshair = loadImage("src/res/images/cursor.png", gRenderer);
+
+	white = {255, 255, 255, 0};
 
 	return true;
 }
@@ -113,7 +126,7 @@ int Render::drawMenu() {
 					case SDLK_RETURN:
 						return menuOption;
 						break;
-				} 
+				}
 			} else if(e.type == SDL_MOUSEBUTTONDOWN) {
 				int x, y;
 				SDL_GetMouseState(&x, &y);
@@ -143,16 +156,14 @@ int Render::drawMenu() {
 
 		SDL_Rect fullscreen = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
 		if(menuOption == MENU_SINGLE) {
-			SDL_RenderCopy(gRenderer, menuSinglePlayer, NULL, &fullscreen); 
+			SDL_RenderCopy(gRenderer, menuSinglePlayer, NULL, &fullscreen);
 		} else if(menuOption == MENU_MULTI) {
-			SDL_RenderCopy(gRenderer, menuMultiPlayer, NULL, &fullscreen); 
+			SDL_RenderCopy(gRenderer, menuMultiPlayer, NULL, &fullscreen);
 		} else if(menuOption == MENU_CREDITS) {
-			SDL_RenderCopy(gRenderer, menuCredits, NULL, &fullscreen); 
+			SDL_RenderCopy(gRenderer, menuCredits, NULL, &fullscreen);
 		} else {
-			SDL_RenderCopy(gRenderer, menuNone, NULL, &fullscreen); 
+			SDL_RenderCopy(gRenderer, menuNone, NULL, &fullscreen);
 		}
-
-		SDL_Texture* cursor = loadImage("src/res/images/cursor.png", gRenderer);
 
 		int cursorX = 0, cursorY = 0;
 
@@ -160,15 +171,74 @@ int Render::drawMenu() {
 			SDL_GetMouseState(&cursorX, &cursorY);
 		}
 
-		SDL_Rect cursorRect = {cursorX, cursorY, CROSSHAIR_SIZE, CROSSHAIR_SIZE};
-		SDL_RenderCopy(gRenderer, cursor, NULL, &cursorRect);
+		SDL_Rect cursorRect = {cursorX - CROSSHAIR_SIZE/2, cursorY - CROSSHAIR_SIZE/2, CROSSHAIR_SIZE, CROSSHAIR_SIZE};
+		SDL_RenderCopy(gRenderer, crosshair, NULL, &cursorRect);
 
 		SDL_RenderPresent(gRenderer);
 	}
 
 	return menuOption;
 }
-
+int Render::present(){
+	SDL_RenderPresent( gRenderer );
+}
+int Render::drawBackground(){
+	SDL_RenderClear( gRenderer );
+	SDL_Rect fullscreen = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+	SDL_Texture* background = loadImage("src/res/images/MultiplayerScreen.png", gRenderer);
+	SDL_RenderCopy(gRenderer, background, NULL, &fullscreen);
+}
+int Render::drawText(Box* box, const std::string* toDraw, int XOFFSET, int YOFFSET, int WIDTH, int HEIGHT){
+	SDL_Surface* surfaceMessage = TTF_RenderText_Solid(fontRoboto, toDraw->c_str(), textColor);
+	Message = SDL_CreateTextureFromSurface(gRenderer, surfaceMessage);
+	SDL_Rect* rect = new SDL_Rect();
+	rect->x = box->getRectangle()->x + XOFFSET;
+	rect->y = box->getRectangle()->y + YOFFSET;
+	rect->w = WIDTH;
+	rect->h = HEIGHT;
+	SDL_RenderCopy(gRenderer, Message, NULL, rect);
+	//clean up memory
+	SDL_FreeSurface(surfaceMessage);
+	SDL_DestroyTexture(Message);
+	delete rect;
+}
+int Render::drawBox(Box toDraw){
+	switch(toDraw.getType()){
+		case BUTTON:
+			return drawButton(toDraw);
+		case TEXT:
+			return drawTextField(toDraw);
+	}
+	return 0;
+}
+int Render::drawButton(Box toDraw){
+	if(toDraw.getIMGPath() == ""){ //if src is empty
+		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF); //default color
+		SDL_RenderFillRect(gRenderer, toDraw.getRectangle());
+	}else{
+		SDL_Texture* button = loadImage(toDraw.getIMGPath(), gRenderer);
+		SDL_RenderCopy(gRenderer, button, NULL, toDraw.getRectangle());
+	}
+	return 0;
+}
+int Render::drawTextField(Box toDraw){
+	if(toDraw.getIMGPath() == ""){ //if src is empty
+		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF); //default color
+		SDL_RenderFillRect(gRenderer, toDraw.getRectangle());
+	}else{
+		SDL_Texture* button = loadImage(toDraw.getIMGPath(), gRenderer);
+		SDL_RenderCopy(gRenderer, button, NULL, toDraw.getRectangle());
+	}
+	SDL_Rect* TextField = new SDL_Rect();
+	TextField->x = toDraw.getRectangle()->x + toDraw.getRectangle()->w + toDraw.TEXT_FIELD_OFFSET();
+	TextField->y = toDraw.getRectangle()->y;
+	TextField->w = toDraw.TEXT_FIELD_WIDTH();
+	TextField->h = toDraw.getRectangle()->h;
+	SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x80, 0xFF); //default textfield color
+	SDL_RenderFillRect(gRenderer, TextField);
+	delete TextField;
+	return 0;
+}
 void Render::setTileMap(std::vector<std::vector<int>>* tileMap) {
 	tile_map = *tileMap;
 }
@@ -217,20 +287,42 @@ int Render::draw(double update_lag) {
 		c += TILE_SIZE;
 	}
 
+	//Render timer
+	surfaceMessage = TTF_RenderText_Solid(fontRoboto, (std::to_string(timer)).c_str(), white);
+	timer_display = SDL_CreateTextureFromSurface(gRenderer, surfaceMessage);
+	SDL_FreeSurface( surfaceMessage ); //free the surface that gets created
+	timer_box.x = BORDER_GAP + 13 * TILE_SIZE - TILE_SIZE/2;
+	timer_box.y = 0;
+	timer_box.w = 48;
+	timer_box.h = 48;
+	SDL_RenderCopy(gRenderer, timer_display, NULL, &timer_box);
+	SDL_DestroyTexture( timer_display );
+
+
 	// Render player
-	for (auto player : gPlayers) {
+	for (auto& player : gPlayers) {
 		player->draw(gRenderer, update_lag);
 	}
 
 	// Render all the enemies
-	for (auto enemy : gEnemies) {
+	for (auto& enemy : gEnemies) {
 		enemy->draw(gRenderer, update_lag);
 	}
 
 	// Render all projectiles
-	for (auto projectile : gProjectiles) {
+	for (auto& projectile : gProjectiles) {
 		projectile->draw(gRenderer, update_lag);
 	}
+
+	// Render all bombs
+	for (auto& bomb : gBombs) {
+		bomb->draw(gRenderer, update_lag);
+	}
+
+	// Draw the cursor on the screen
+	SDL_Rect cursorRect = {cursorX - CROSSHAIR_SIZE/2, cursorY - CROSSHAIR_SIZE/2, CROSSHAIR_SIZE, CROSSHAIR_SIZE};
+
+	SDL_RenderCopy(gRenderer, crosshair, NULL, &cursorRect);
 
 	SDL_RenderPresent(gRenderer);
 
@@ -256,4 +348,19 @@ void Render::setEnemies(std::vector<Enemy *> enemies) {
 
 void Render::setProjectiles(std::vector<Projectile *> projectiles) {
 	gProjectiles = projectiles;
+}
+
+void Render::setBombs(std::vector<Bomb *> bombs) {
+	gBombs = bombs;
+}
+
+void Render::setTimer(unsigned int passed_timer) {
+	timer = passed_timer;
+}
+
+void Render::clear() {
+	gPlayers.clear();
+	gEnemies.clear();
+	gProjectiles.clear();
+	gBombs.clear();
 }

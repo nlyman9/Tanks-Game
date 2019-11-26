@@ -2,6 +2,13 @@
 #include <time.h>
 #include <math.h>
 #include <iostream>
+#include "Edge.hpp"
+#include "Graph.hpp"
+#include "Map.hpp"
+#include "QuadConstants.hpp"
+#include "Quadrant.hpp"
+#include "Quads.hpp"
+#include "Tileset.hpp"
 
 std::vector<std::vector<int>> MapGenerator::generateEmptyMap()
 {
@@ -242,8 +249,12 @@ std::vector<std::vector<int>> MapGenerator::generateOpenLineMap()
 	std::vector<int> pre_array = {2, 6, 11, 16, 20};
 	srand(time(NULL));
 
-	for(int i = 0; i < pre_array.size(); i++) {
+	for(auto i : pre_array) {
 		random_index = rand() % (Y_HIGH - 2);
+		if(random_index == 0)
+		{
+			random_index = 1;
+		}
 		for(int j = 0; j < Y_HIGH; j++) {
 			if(random_index == j || random_index == j + 1) {
 				room[i][j] = 0;
@@ -255,6 +266,20 @@ std::vector<std::vector<int>> MapGenerator::generateOpenLineMap()
 		}
 	}
 
+	return room;
+}
+
+std::vector<std::vector<int>> MapGenerator::generateQuadrantMap() {
+	Quads q;
+	q.make_quads();
+	Graph g(q.get_edges(), q.get_quads(), q.get_num_tilesets());
+	g.populate_edges();
+	g.calculate_weights();
+	std::vector<Tileset> map_tiles = g.get_tiles_for_map();
+	Map m;
+	m.make_map(map_tiles);
+	std::vector<std::vector<int>> room = generateEmptyMap();
+	room = m.get_map();
 	return room;
 }
 
@@ -293,6 +318,30 @@ std::vector<std::vector<int>>* MapGenerator::generateMap()
 					tile_map = presetCheckerMap();
 					break;
 			}
+	}
+
+	// MAKE TRUE TO PRINT MAP FOR DEBUG PURPOSES
+	if(false)
+	{
+		std::cout << "MapGenerator::generateMap()" << std::endl;
+		std::vector<std::vector<int>> transpose;
+
+		for(int i = 0; i < Y_HIGH; i++)
+		{
+			transpose.push_back(std::vector<int>(X_WIDE));
+			for(int j = 0; j < X_WIDE; j++)
+			{
+				transpose[i][j] = tile_map[j][i];
+			}
+		}
+
+		for( auto i : transpose )
+		{
+			for( auto j : i )
+				std::cout << j;
+			std::cout << std::endl;
+		}
+		std::cout << std::endl;
 	}
 
 	return &tile_map;

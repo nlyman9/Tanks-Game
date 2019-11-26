@@ -16,6 +16,7 @@
 #include "Object.hpp"
 #include "Player.hpp"
 #include "Projectile.hpp"
+#include "Tank.hpp"
 
 struct coordinate {
 	int row;
@@ -26,9 +27,6 @@ struct coordinate {
 class Enemy : public Object {
     private:
         /* data */
-        // Sprite sprite;
-        // Sprite turret;
-        float x_enemy_pos, y_enemy_pos;
         Player* gPlayer;
         bool left = true;
 		int frame = 0;
@@ -36,20 +34,20 @@ class Enemy : public Object {
         std::vector<coordinate> enemyPath;
 				std::vector<Projectile *> enemyProjectiles;
 
-				float line1X, line1Y, line2X, line2Y;
-				int theta = 0;
-				float turretTheta = 0;
-				int randCut = 2;
-				int updateCalls = 0;
-				bool trackOrMonitor = false;
-				bool rotateUp = true;
-				bool moveUp = false;
-				bool moveDown = false;
-				bool moveLeft = false;
-				bool moveRight = false;
-				bool rightLeft = false;
-				bool upDown = false;
-				bool wander = false;
+		float line1X, line1Y, line2X, line2Y;
+		int randCut = 2;
+		int updateCalls = 0;
+		bool trackOrMonitor = false;
+		bool rotateUp = true;
+		bool moveUp = false;
+		bool moveDown = false;
+		bool moveLeft = false;
+		bool moveRight = false;
+		bool rightLeft = false;
+		bool upDown = false;
+		int moveState = 0;
+		int bulletXblock, bulletYblock, bulletTheta;
+		int enemyType;
 
 
 				Uint32 fire_last_time = 0;
@@ -69,38 +67,30 @@ class Enemy : public Object {
         int yArrPos(float pos);
         int findXBlock(float pos);
         int findYBlock(float pos);
-				float area(float x1, float y1, float x2, float y2, float x3, float y3);
-				bool isInRange(float x1, float y1, float x2, float y2, float x3, float y3, float playerX, float playerY);
-				bool isValidBlock(int x, int y);
-				coordinate findClosestOpenBlock(coordinate start);
-				coordinate newGhostPos(int gX, int gY, int eX, int eY);
-				coordinate randGhostPos(int eX, int eY);
+		float area(float x1, float y1, float x2, float y2, float x3, float y3);
+		bool isInRange(float x1, float y1, float x2, float y2, float x3, float y3, float playerX, float playerY);
+		bool isValidBlock(int x, int y);
+		coordinate findClosestOpenBlock(coordinate start);
+		coordinate newGhostPos(int gX, int gY, int eX, int eY);
+		coordinate randGhostPos(int eX, int eY);
+		coordinate awayGhostPos(int eX, int eY, int bX, int bY, int bT);
         std::vector<coordinate> generatePath(std::vector<std::vector<int>> move_map, Player player, Enemy enemy);
 				bool validMove(coordinate moveTo, coordinate currentlyAt);
         std::vector<std::vector<int>> tile_map;
 
 
     public:
-				Enemy(Sprite* sprite, Sprite* turret, int x, int y, Player* player); //constructor, initialize the x, y, and sprite
-        Enemy(float x, float y, Player* player); //constructor, initialize the x, y, and sprite
+		Enemy(Sprite* sprite, Sprite* turret, int x, int y, Player* player); //constructor, initialize the x, y, and sprite
+        Enemy(float x, float y, Player* player, int type); //constructor, initialize the x, y, and sprite
 
 		//Object methods
         void draw(SDL_Renderer *gRenderer, double update_lag) override;
         void update() override;
         bool move(float x, float y) override;	//	move x offset from current x and y offset from current y
         bool place(float x, float y) override;	//	place/teleport to an x and y
-
-        bool fire();	//	return true if the enemy fired successfully
-        bool rotateEnemy(float theta);	//	rotate the object
-        bool rotateTurret(float theta);	//	rotate the turret
-
-				bool getFire();
-				void setFire(bool fire);
-        float getX();
-        float getY();
-				float getTurretTheta();
+				int getEnemyType();
         void updatePos();
-				void setProjectiles(std::vector<Projectile *> projectiles); 							//update the projectile vector so enemy can avoid them
+				void setProjectiles(std::vector<Projectile *> projectiles);	//set the projectiles vector from localgameloop.cpp
 
         BoundingBox* getBoundingBox() override;
 

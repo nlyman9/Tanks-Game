@@ -11,9 +11,10 @@ Projectile::Projectile(float x, float y) {
     setPos(x, y);
 }
 
-Projectile::Projectile(float x, float y, int theta) {
+Projectile::Projectile(float x, float y, int theta, int speed) {
 	setPos(x, y);
 	this->theta = theta;
+  this->speedFactor = speed;
 
 	x_vel = 180 * cos((theta * M_PI) / 180);
 	y_vel = 180 * sin((theta * M_PI) / 180);
@@ -21,6 +22,21 @@ Projectile::Projectile(float x, float y, int theta) {
 
 
 Projectile::~Projectile() {
+	delete &missile;
+	delete &x_vel;
+	delete &y_vel;
+	delete &bounces;
+	delete &theta;
+	delete &theta_v;
+	delete &x_deltav;
+	delete &y_deltav;
+	delete &velocity;
+	delete &delta_velocity;
+	delete &friendly;
+	delete &exploding;
+	delete &frame;
+	delete &anim_last_time;
+	delete &finished;
 }
 
 void Projectile::draw(SDL_Renderer *gRenderer, double update_lag) {
@@ -33,7 +49,8 @@ void Projectile::draw(SDL_Renderer *gRenderer, double update_lag) {
 		dst->h = PROJECTILE_HEIGHT;
 		SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), NULL, dst, theta, NULL, SDL_FLIP_NONE);
 	}
-	else {
+	else
+	{
 		Uint32 current_time = SDL_GetTicks();
 		dst->w = EXPLOSION_WIDTH;
 		dst->h = EXPLOSION_HEIGHT;
@@ -51,7 +68,7 @@ void Projectile::draw(SDL_Renderer *gRenderer, double update_lag) {
 			SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), getSprite()->getFrame(frame), dst, theta, NULL, SDL_FLIP_NONE);
 		else {
 			finished = true;
-      exploding = false;
+      		exploding = false;
 		}
 
 		//projectiles currently are not being deleted/removed correctly
@@ -83,8 +100,8 @@ void Projectile::update() {
 	targetNum = 0;
 
 	if(!exploding) {
-		x_vel = 180 * cos((theta * M_PI) / 180);
-		y_vel = 180 * sin((theta * M_PI) / 180);
+		x_vel = speedFactor*180 * cos((theta * M_PI) / 180);
+		y_vel = speedFactor*180 * sin((theta * M_PI) / 180);
 
 		float updateStep = MS_PER_UPDATE/1000;
 		setPos(getX() + (x_vel * updateStep), getY() + (y_vel * updateStep));
@@ -266,4 +283,14 @@ void Projectile::addTargetLocation(SDL_Rect* targetLoc) {
 
 SDL_Rect* Projectile::getTarget() {
     return &targetBox;
+}
+
+void Projectile::setExploding(bool explode){
+  this->exploding = explode;
+}
+
+bool Projectile::projCollisionCheck(Projectile* bullet2){
+  SDL_Rect projBox1 = {(int)getX(), (int)getY(), PROJECTILE_WIDTH, PROJECTILE_HEIGHT};
+  SDL_Rect projBox2 = {(int)bullet2->getX(), (int)bullet2->getY(), PROJECTILE_WIDTH, PROJECTILE_HEIGHT};
+  return (check_collision(&projBox1, &projBox2));
 }

@@ -1,5 +1,4 @@
 #include "StartUpMenu.hpp"
-#include "LocalGameLoop.hpp"
 #include "Args.hpp"
 #include <string>
 #include <iostream>
@@ -13,7 +12,7 @@ int main(int argc, char* argv[]) {
 		if (type.compare("host") == 0) {
 			options->isOnline = true;
 			options->isHost = true;
-			// Set host's ip to 0.0.0.0 by default 
+			// Set host's ip to 0.0.0.0 by default
 			options->ip = "0.0.0.0";
 
 			if (argc >= 3) {

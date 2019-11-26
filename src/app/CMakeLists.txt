@@ -5,15 +5,18 @@ add_subdirectory(Multiplayer)
 add_subdirectory(Networking)
 add_subdirectory(Sprite)
 add_subdirectory(Projectile)
-add_subdirectory(Render)
 add_subdirectory(Tanks)
 add_subdirectory(Constants)
 add_subdirectory(StartUpMenu)
+add_subdirectory(MultiplayerMenu)
 add_subdirectory(MapGenerator)
+add_subdirectory(Render)
 add_subdirectory(ImageLoader)
 add_subdirectory(Args)
+add_subdirectory(Bomb)
+add_subdirectory(Box)
 
-if(${APPLE}) 
+if(${APPLE})
 find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
 find_package(SDL2_ttf REQUIRED)
@@ -42,11 +45,11 @@ target_link_libraries(Game
 
 target_link_libraries(ServerProcess
   PRIVATE
-  StartUpMenu
-  Args
   ${SDL2_LIBRARY}
   ${SDL2_IMAGE_LIBRARIES}
   ${SDL2_TTF_LIBRARIES}
+  StartUpMenu
+  Args
   Multiplayer
 )
 else()
