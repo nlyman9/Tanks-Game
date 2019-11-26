@@ -1,0 +1,33 @@
+add_library(Tank
+  STATIC
+  Tank.hpp
+  Tank.cpp
+  Player.hpp
+  Player.cpp
+  Enemy.hpp
+  Enemy.cpp
+)
+
+if(${APPLE})
+target_link_libraries(Tank
+  PRIVATE
+  Object
+  Constants
+  Sprite
+  Projectile
+  ${SDL2_LIBRARY}
+)
+else()
+target_link_libraries(Tank
+  PRIVATE
+  Object
+  Constants
+  Sprite
+  Projectile
+)
+endif()
+
+target_include_directories(Tank
+  PUBLIC
+  .
+)

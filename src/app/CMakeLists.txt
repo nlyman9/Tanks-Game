@@ -36,6 +36,7 @@ if(${APPLE})
 target_link_libraries(Game
   PRIVATE
   StartUpMenu
+  Args
   ${SDL2_LIBRARY}
   ${SDL2_IMAGE_LIBRARIES}
   ${SDL2_TTF_LIBRARIES}
@@ -60,6 +61,7 @@ target_link_libraries(Game
 )
 target_link_libraries(ServerProcess
   PRIVATE
+  Args
   StartUpMenu
 )
 endif()

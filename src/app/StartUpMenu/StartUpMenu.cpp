@@ -5,13 +5,15 @@
 #include "MultiplayerMenu.hpp"
 #include "Credits.hpp"
 
-void StartUpMenu::launch(Args *options)
+void launch(Args *options) 
 {
-  renderer = new Render();
-  renderer->init();
+	Render* renderer = new Render();
+  	renderer->init();
 
-  GameLoop gLoop;
-  gLoop.init(renderer);
+	int ret = 0;
+	while(ret == 0) {
+		// Draw the menu
+		int gameMode = renderer->drawMenu();
 
 		// Select game mode
 		if(gameMode == MENU_SINGLE) {

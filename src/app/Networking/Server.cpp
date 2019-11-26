@@ -1,6 +1,6 @@
 /*
-    Originally created by Jakob - Modified by Adam
-    Modifications:
+    Originally created by Jakob - Modified by Adam 
+    Modifications: 
     test to create a map on a server then send it over as bit data
     and render on client
 */
@@ -53,11 +53,11 @@ Server *server;
 
 /**
  * @brief Main for Server process
- *
+ * 
  * @param argc - Number of arguments passed
  * @param argv - Argument values
  *     - Only one value should be passed. The option's arguments.
- * @return int
+ * @return int 
  */
 int main(int argc, char* argv[])
 {
@@ -77,13 +77,13 @@ int main(int argc, char* argv[])
     // SDL_CreateThread(serverThread, "server thread", NULL);
 
     serverProcess();
-
+    
 }
 
 /**
  * @brief The server process - Basically main when a game is being prepared and running
- *
- * @return int
+ * 
+ * @return int 
  */
 int serverProcess() {
     //timeval is passed into select and is used to say when select should timeout
@@ -101,47 +101,47 @@ int serverProcess() {
         std::cout << "Server: Looping - numClients = " << server->numClients() << std::endl;
         sleep(1);
     }
-
+    
     // Set player starting positions
     //              { Player 1 , Player 2 }
     int x_pos[2] = {100, SCREEN_WIDTH - 100};
     int y_pos[2] = {50, SCREEN_HEIGHT - 50};
-
+    
     // Initialize Player Data
     for (int i = 0; i < server->numClients(); i++) {
         // Packet playerID, inital position
         std::vector<char> data;
         // Add Player's ID
-        data.push_back(std::to_string(i)[0]);
+        data.push_back(std::to_string(i)[0]); 
         data.push_back(' ');
 
         // Tell client where player 1 starts
-        data.push_back(std::to_string(0)[0]);
+        data.push_back(std::to_string(0)[0]); 
         data.push_back(' ');
 
-        std::string xP1 = std::to_string(x_pos[0]);
+        std::string xP1 = std::to_string(x_pos[0]); 
         for (auto x_character : xP1) {
             data.push_back(x_character); // Player 1 x
         }
         data.push_back(' ');
 
-        std::string yP1 = std::to_string(y_pos[0]);
+        std::string yP1 = std::to_string(y_pos[0]); 
         for (auto y_character : yP1) {
             data.push_back(y_character); // Player 1 y
         }
         data.push_back(' ');
 
         // Tell client where player 2 starts
-        data.push_back(std::to_string(1)[0]);
+        data.push_back(std::to_string(1)[0]); 
         data.push_back(' ');
 
-        std::string xP2 = std::to_string(x_pos[1]);
+        std::string xP2 = std::to_string(x_pos[1]); 
         for (auto x_character : xP2) {
             data.push_back(x_character); // Player 2 x
         }
         data.push_back(' ');
 
-        std::string yP2 = std::to_string(y_pos[1]);
+        std::string yP2 = std::to_string(y_pos[1]); 
         for (auto y_character : yP2) {
             data.push_back(y_character); // Player 2 y
         }
@@ -175,9 +175,9 @@ int serverProcess() {
         std::cout << "\n\nSERVER: GAME - # Clients = " << server->numClients() << std::endl;
         fflush(stdout);
 
-        // Poll clients for pending messages
+        // Poll clients for pending messages 
         // This function calls receive! Do not call again unless you have a specific reason
-        // The polling (select function) currently waits for a specified timeout value
+        // The polling (select function) currently waits for a specified timeout value 
         //      @see ServerConnection for timeout value
         while ( (pendingClients = server->pollClientsAndReceive()) == nullptr) {
             // Just go back and pollClientsAndReceive()
@@ -198,7 +198,7 @@ int serverProcess() {
                     std::cout << "SERVER: You got mail!" << std::endl;
                     mail->printData();
                     if (mail->getType() == PackType::KEYSTATE) {
-                        // If a keystate, Prepare to send that client's keystate to the other clients
+                        // If a keystate, Prepare to send that client's keystate to the other clients 
                         server->addPacketFromClientToClients(client->id(), mail);
                     }
                     fflush(stdout);
@@ -216,7 +216,7 @@ int serverProcess() {
         }
 
         // TODO Send Game States
-        // Game states -> slower rate
+        // Game states -> slower rate 
         // server->broadcast(GAMESTATE?);
     }
 
@@ -225,13 +225,13 @@ int serverProcess() {
 
 /**
  * @brief Generate a map on the server to sennd to clients
- *
- * @return std::vector<int>*
+ * 
+ * @return std::vector<int>* 
  */
 std::vector<int>* serverMapGen(){
     // Randomly generate map
     std::vector<int>* map1D = new std::vector<int>();
-    MapGenerator* mapGen = new MapGenerator();
+    MapGenerator* mapGen = new MapGenerator();    
 	std::vector<std::vector<int>>* tile_map = mapGen->generateMap();
     std::vector<std::vector<int>>& map = *tile_map;
 
@@ -241,11 +241,11 @@ std::vector<int>* serverMapGen(){
             map1D->push_back(val);
         }
     }
-
+    
     return map1D;
 }
 
-// get sockaddr, IPv4 or IPv6:
+// get sockaddr, IPv4 or IPv6: 
 //  Code from Beej's guide
 void *get_in_addr(struct sockaddr *sa)
 {

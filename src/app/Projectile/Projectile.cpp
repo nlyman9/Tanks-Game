@@ -49,7 +49,7 @@ void Projectile::draw(SDL_Renderer *gRenderer, double update_lag) {
 		dst->h = PROJECTILE_HEIGHT;
 		SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), NULL, dst, theta, NULL, SDL_FLIP_NONE);
 	}
-	else 
+	else
 	{
 		Uint32 current_time = SDL_GetTicks();
 		dst->w = EXPLOSION_WIDTH;
@@ -75,6 +75,10 @@ void Projectile::draw(SDL_Renderer *gRenderer, double update_lag) {
 		//When std::cout is uncommented, projectiles will continue outputting to the console past exploding
 		//std::cout << frame << " ";
 	}
+}
+
+bool Projectile::isHit(){
+	return this->hit;
 }
 
 bool Projectile::isExploding(){
@@ -117,7 +121,6 @@ void Projectile::update() {
 		}
 
 		for(auto obstacle : obstacles) {
-
 			overlap = check_collision(&currentPos, &obstacle);
 			if(overlap != nullptr) {
 

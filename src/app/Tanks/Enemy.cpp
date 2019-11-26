@@ -1,4 +1,3 @@
-
 #include "Constants.hpp"
 #include "Enemy.hpp"
 #include <math.h>
@@ -147,7 +146,7 @@ bool Enemy::place(float x, float y) {
 }
 
 /**
-  * returns the enemy type 
+  * returns the enemy type
   */
 int Enemy::getEnemyType(){
   return enemyType;
@@ -587,8 +586,6 @@ void Enemy::setPathway(std::vector<std::vector<int>> move_map, Player player, En
       enemyPath = generatePath(move_map, *ghost, enemy);
     }
   }
-  return newPos;
-
 }
 
 /**

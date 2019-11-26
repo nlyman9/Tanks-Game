@@ -38,18 +38,18 @@ class Server {
 
         /**
          * @brief Construct a new Server object
-         *
-         * @param ip - ip to bind to
+         * 
+         * @param ip - ip to bind to 
          * @param port - port to bind to
          */
         Server(std::string ip, int port) {
             host = new ServerController(ip, port);
             std::cout << " Created Server Object " << std::endl;
         }
-
+        
         /**
          * @brief Bind the server's sockets
-         *
+         * 
          * @return true - bind
          * @return false - bind
          */
@@ -59,7 +59,7 @@ class Server {
 
         /**
          * @brief Set the tcp socket to listen
-         *
+         * 
          * @return true - Successful
          * @return false - Failed
          */
@@ -69,7 +69,7 @@ class Server {
 
         /**
          * @brief Accept an incoming client connection
-         *
+         * 
          * @return true - Server accepted a connection
          * @return false - Server did not accept an incoming connection
          */
@@ -81,12 +81,12 @@ class Server {
                 return false;
             }
         }
-
+        
         /**
          * @brief Polls the clients using pselect and then
          *        Receives the packets from the pending clients
          * @warning BLOCKING Function
-         *
+         * 
          * @return std::vector<ClientConnection*>* The connections that had sent data that was received
          */
         std::vector<ClientConnection*>* pollClientsAndReceive() {
@@ -112,7 +112,7 @@ class Server {
 
         /**
          * @brief Get the Packet from a specific client
-         *
+         * 
          * @param id - ID of the client we want to get a packet from
          * @return Packet* - The first packet from the receive buffer of the client's conenction
          */
@@ -124,7 +124,7 @@ class Server {
          * @brief Receive a packet and return the first packet from an ID
          * @warning BLOCKING function
          * @warning Does not gaurantee to return the packe that was received
-         *
+         * 
          * @param id - The client we want to receive from
          * @return Packet* The first packet from the client's receive buffer
          * @warning will return nullptr if receive buffer is empty
@@ -136,7 +136,7 @@ class Server {
 
         /**
          * @brief Add a packet to the broadcast buffer
-         *
+         * 
          * @param mail - The packet we want to broadcast
          * @return int - The size of the broadcast buffer after appending the packet
          */
@@ -146,7 +146,7 @@ class Server {
 
         /**
          * @brief Add a packet from one client to all the other clients' send buffers
-         *
+         * 
          * @param fromClientID - The client the packet originated from  (we do not want to add to this client's send buffer - dont send back the sender)
          * @param mail - The packet we want to send to the other clients
          */
@@ -160,8 +160,8 @@ class Server {
 
         /**
          * @brief Add a packet to a client's send buffer
-         *
-         * @param id - The ID of the client we want to add the packet to
+         * 
+         * @param id - The ID of the client we want to add the packet to 
          * @param mail - The packet we want to add
          */
         void addPacketToClient(int id, Packet *mail) {
@@ -169,13 +169,13 @@ class Server {
         }
 
         /**
-         * @brief
+         * @brief 
          * @warning - Does not gaurantee to send the packet given (due to send buffer)
-         *
-         * @param id - The ID of the client we want to add the packet to
-         * @param mail
-         * @return true
-         * @return false
+         * 
+         * @param id - The ID of the client we want to add the packet to 
+         * @param mail 
+         * @return true 
+         * @return false 
          */
         bool sendPacketToClient(int id, Packet *mail) {
             int index = host->addPacketToSend(id, mail);
@@ -190,7 +190,7 @@ class Server {
 
         /**
          * @brief Broadcast a packet to all the clients
-         *
+         * 
          * @param mail - The packet to broadcast
          * @return true - The packet given (argument) was sent
          * @return false - If the buffer sent a different packet (this like shouldnt happen but thats what everyone says so...)
@@ -208,8 +208,8 @@ class Server {
 
         /**
          * @brief Get the vector of clients connected in the form of Client Connections
-         *
-         * @return std::vector<ClientConnection*>
+         * 
+         * @return std::vector<ClientConnection*> 
          */
         std::vector<ClientConnection*> clients() {
             return host->getClients();
@@ -217,7 +217,7 @@ class Server {
 
         /**
          * @brief Get the number of clients connected
-         *
+         * 
          * @return int - The number of clients connected
          */
         int numClients() {

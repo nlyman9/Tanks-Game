@@ -1,7 +1,9 @@
 add_library(GameLoop
   STATIC
-  GameLoop.hpp
-  GameLoop.cpp
+  LocalGameLoop.hpp
+  LocalGameLoop.cpp
+  OnlineGameLoop.hpp
+  OnlineGameLoop.cpp
 )
 
 if(${APPLE})
@@ -9,9 +11,8 @@ target_link_libraries(GameLoop
   PUBLIC
   Render
   Object
-  Player
+  Tank
   Constants
-  Enemy
   Sprite
   MapGenerator
   Projectile

@@ -44,8 +44,6 @@ int main(int argc, char* argv[]) {
 		options->isOnline = false;
 	}
 
-
-	StartUpMenu startUpMenu;
-	startUpMenu.launch(options);
+	launch(options);
 	return 0;
 }
