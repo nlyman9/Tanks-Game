@@ -57,7 +57,7 @@ bool LocalGameLoop::init() {
     generateMap();
 
 	// Initialized successfully
-	return true;	
+	return true;
 }
 
 void LocalGameLoop::generateMap() {
@@ -95,7 +95,7 @@ void LocalGameLoop::generateMap() {
 		enemy->setTurretSprite(enemy_turret);
         enemy->setObstacleLocations(&tileArray);
 		enemy->setTileMap(map);
-	}	
+	}
 }
 
 /**
@@ -124,7 +124,7 @@ std::vector<int> LocalGameLoop::spawnEnemies(std::vector<std::vector<int>> *map,
 				i++;
 			}
 			else
-			{	
+			{
 				break;
 			}
 		}
@@ -181,10 +181,10 @@ int LocalGameLoop::run() {
 			{
 				return -1; // close window
 			}
-            if (e.key.keysym.sym == SDLK_ESCAPE) 
+            if (e.key.keysym.sym == SDLK_ESCAPE)
             {
                 return 0; // return to menu
-            } 
+            }
 		}
 
         player->getEvent(elapsed_time, &e, SDL_GetKeyboardState(nullptr));
@@ -219,7 +219,6 @@ int LocalGameLoop::run() {
         // 2. Update
 		// Update if time since last update is >= MS_PER_UPDATE
 		while(lag_time >= MS_PER_UPDATE) {
-			
             player->setTurretTheta();
             player->update();
 
@@ -230,6 +229,7 @@ int LocalGameLoop::run() {
 
 			for (int i = 0; i < enemies.size(); i++) {
 				enemies.at(i)->update();
+				enemies.at(i)->setProjectiles(projectiles);
 				if(enemies.at(i)->isDestroyed()) {
 					enemies.erase(enemies.begin()+i);
 					render->gEnemies.erase(render->gEnemies.begin()+i);
@@ -247,7 +247,6 @@ int LocalGameLoop::run() {
 				else {
 					projectiles.at(i)->addTargetLocation(player->get_box());
 				}
-				
 				projectiles.at(i)->update();
 				if(projectiles.at(i)->isHit()){
 					SDL_Rect* hitObject = projectiles.at(i)->getTarget();
@@ -257,7 +256,6 @@ int LocalGameLoop::run() {
 						player->setSprite(redsplosion);
 						player->resetFrame();
 					}
-					
 					for(auto enemy: enemies) {
 						SDL_Rect* enemyRect = enemy->get_box();
 						if(enemyRect->x == hitObject->x && enemyRect->y == hitObject->y && !enemy->isHit()) {
@@ -268,14 +266,12 @@ int LocalGameLoop::run() {
 						}
 					}
 				}
-				
 				if(projectiles.at(i)->isExploding()){
 					projectiles.at(i)->setSprite(pinksplosion);
 				}
 				else if(projectiles.at(i)->isFinished()){
-					projectiles.erase(projectiles.begin()+i);
 					render->gProjectiles.erase(render->gProjectiles.begin()+i);
-
+					//erase the projectile object from the projectiles vector
 					projectiles.erase(projectiles.begin()+i);
 					i--;
 				}

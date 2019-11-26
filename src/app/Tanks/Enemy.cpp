@@ -1,4 +1,3 @@
-
 #include "Constants.hpp"
 #include "Enemy.hpp"
 #include <math.h>
@@ -36,7 +35,7 @@ Enemy::~Enemy() {}
    // Create SDL_Rect with current x, y position
    //SDL_Rect dst = {(int)x_enemy_pos, (int)y_enemy_pos, TANK_WIDTH, TANK_HEIGHT};
 	SDL_Rect* dst = get_box();
-
+	
 	if(!hit) {
 		if (/*x_vel != 0 || y_vel != 0 && */SDL_GetTicks() - anim_last_time > 100) {
 			frame = (frame + 1) % 3;
@@ -56,22 +55,22 @@ Enemy::~Enemy() {}
 	}
 	else {
 		//std::cout << "exploding";
-
+		
 		Uint32 current_time = SDL_GetTicks();
 		dst->w = EXPLOSION_WIDTH;
 		dst->h = EXPLOSION_HEIGHT;
-
+		
 		if(frame == 0 && anim_last_time == 0) {
 			//std::cout << "setting anim for first time\n";
 			anim_last_time = SDL_GetTicks();
 		}
-
+		
 		if(current_time > anim_last_time + 200) {
 			frame++;
 			anim_last_time = SDL_GetTicks();
 			//std::cout << "frame++\n";
 		}
-
+		
 		if(frame < 6) {
 			//std::cout << "rendering frame = " << frame << "\n";
 			SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), getSprite()->getFrame(frame), dst, theta, NULL, SDL_FLIP_NONE);
@@ -196,7 +195,7 @@ bool Enemy::checkPos(float playX, float playY, float enemX, float enemY) {
 	double distanceAway = (pow(stepOne, .5));
 
   //check if distance is < 200 and if so return true
-	if (distanceAway < 200.0)
+	if (distanceAway < 250.0)
 	{
 		return true;
 	}
@@ -272,16 +271,16 @@ void Enemy::updatePos() {
   }
 
   //change states of the enemy tank every 5 seconds
-  //utilize the global wander boolean
-  //if wander is true then tank will randomly wander around map
-  //if wander is false then tank will "follow" or move towards the player
+  //utilize the global moveState boolean
+  //if moveState is true then tank will randomly moveState around map
+  //if moveState is false then tank will "follow" or move towards the player
   if(current_time > last_state_change + 5000){
-    //give it a one in three chance of entering wander mode
+    //give it a one in three chance of entering moveState mode
     if(rand() % 3 == 0){
-      wander = true;
+      moveState = 1;
     }
     else{
-      wander = false;
+      moveState = 0;
     }
     //need to clear the current path it is on so that it can create a new one based on state change
     enemyPath.clear();
@@ -289,6 +288,20 @@ void Enemy::updatePos() {
     last_state_change = current_time;
   }
 
+  //change states of the enemy tank if bullet is within range
+  for(auto bullet : enemyProjectiles){
+    if(checkPos(bullet->getX(), bullet->getY(), getX(), getY())){
+      //printf("AHHHH\n");
+      bulletXblock = findXBlock(bullet->getX());
+      bulletYblock = findYBlock(bullet->getY());
+      bulletTheta = bullet->getTheta();
+      if(moveState != 2){
+        enemyPath.clear();
+      }
+      moveState = 2;
+      break;
+    }
+  }
   //the enemy path it is following will need to be updated frequently when the size of the vector is below a value
   //this value is global randCut variable that will randonly change what this cutoff is in the range 2-6
   //this is done so to give the enemy some sense of randomness as it will change how far it travels down its current path before updating
@@ -525,16 +538,16 @@ void Enemy::setPathway(std::vector<std::vector<int>> move_map, Player player, En
   //Do the same thing but for the current enemy position
   int enemyXblock = findXBlock(enemy.getX());
   int enemyYblock = findYBlock(enemy.getY());
-  //if the player and enemy are within 2 blocks in the X and Y AND not in wander mode then just use the actual player tank to generate the path
+  //if the player and enemy are within 2 blocks in the X and Y AND not in moveState mode then just use the actual player tank to generate the path
   //will not need to calculate a ghost tank since close enough algorithm will run quickly
-  if(abs(ghostXblock - enemyXblock) < 2 && abs(ghostYblock - enemyYblock) < 2 && !wander){
+  if(abs(ghostXblock - enemyXblock) < 2 && abs(ghostYblock - enemyYblock) < 2 && (moveState == 0)){
     enemyPath = generatePath(move_map, player, enemy);
   }
   //otherwise will need to generate the path using a ghost tank
   else{
-    //whether or not in wander or follow mode need to make a ghost location
-    //main difference is if ghost location is towards the player (!wander) or in a random direction (wander)
-    if(wander){
+    //whether or not in moveState or follow mode need to make a ghost location
+    //main difference is if ghost location is towards the player (!moveState) or in a random direction (moveState)
+    if(moveState == 1){
       coordinate randGhostPos = Enemy::randGhostPos(enemyXblock, enemyYblock);
       //adjust return values from x,y tile block locations to actual x,y positions on the play area
       int randGhostX = randGhostPos.col * TILE_SIZE + TILE_SIZE + BORDER_GAP;
@@ -543,6 +556,16 @@ void Enemy::setPathway(std::vector<std::vector<int>> move_map, Player player, En
       Player* randGhost = new Player(randGhostX, randGhostY, true);
       //generate the path using this ghost tank
       enemyPath = generatePath(move_map, *randGhost, enemy);
+    }
+    else if(moveState == 2){
+      coordinate awayGhostPos = Enemy::awayGhostPos(enemyXblock, enemyYblock, bulletXblock, bulletYblock, bulletTheta);
+      //adjust return values from x,y tile block locations to actual x,y positions on the play area
+      int awayGhostX = awayGhostPos.col * TILE_SIZE + TILE_SIZE + BORDER_GAP;
+      int awayGhostY = awayGhostPos.row * TILE_SIZE + TILE_SIZE;
+      //make the ghost tank given the new x, y positions
+      Player* awayGhost = new Player(awayGhostX, awayGhostY, true);
+      //generate the path using this ghost tank
+      enemyPath = generatePath(move_map, *awayGhost, enemy);
     }
     else{
       coordinate newGhostPos = Enemy::newGhostPos(ghostXblock, ghostYblock, enemyXblock, enemyYblock);
@@ -555,8 +578,6 @@ void Enemy::setPathway(std::vector<std::vector<int>> move_map, Player player, En
       enemyPath = generatePath(move_map, *ghost, enemy);
     }
   }
-  return newPos;
-
 }
 
 /**
@@ -597,6 +618,118 @@ coordinate Enemy::randGhostPos(int eX, int eY){
   }
   return newPos;
 
+}
+
+coordinate Enemy::awayGhostPos(int eX, int eY, int bX, int bY, int bT){
+  coordinate newPos = {eY, eX, 0};
+
+  //if above and to the left
+  if(eX >= bX && eY >= bY){
+    if(bT <= 0 && bT > -90){
+      newPos.row += 1;
+      newPos.col -= 1;
+    }
+    else if(bT <= -90 && bT > -180){
+      newPos.row += 1;
+      newPos.col += 1;
+    }
+    else if(bT <= 180 && bT > 90){
+      newPos.row -= 1;
+      newPos.col += 1;
+    }
+    else{
+      if(rand() % 2 == 0){
+        newPos.row -= 1;
+        newPos.col += 1;
+      }
+      else{
+        newPos.row += 1;
+        newPos.col -= 1;
+      }
+    }
+  }
+  //above and right
+  else if(eX <= bX && eY >= bY){
+    if(bT <= 0 && bT > -90){
+      newPos.row += 1;
+      newPos.col -= 1;
+    }
+    else if(bT <= -90 && bT > -180){
+      newPos.row += 1;
+      newPos.col += 1;
+    }
+    else if(bT <= 90 && bT > 0){
+      newPos.row -= 1;
+      newPos.col -= 1;
+    }
+    else{
+      if(rand() % 2 == 0){
+        newPos.row -= 1;
+        newPos.col -= 1;
+      }
+      else{
+        newPos.row += 1;
+        newPos.col -= 1;
+      }
+    }
+  }
+  //below and left
+  else if(eX >= bX && eY <= bY){
+    if(bT <= -90 && bT > -180){
+      newPos.row += 1;
+      newPos.col += 1;
+    }
+    else if(bT <= 180 && bT > 90){
+      newPos.row -= 1;
+      newPos.col += 1;
+    }
+    else if(bT <= 90 && bT > 0){
+      newPos.row -= 1;
+      newPos.col -= 1;
+    }
+    else{
+      if(rand() % 2 == 0){
+        newPos.row -= 1;
+        newPos.col -= 1;
+      }
+      else{
+        newPos.row += 1;
+        newPos.col += 1;
+      }
+    }
+  }
+  //below and right
+  else if(eX <= bX && eY <= bY){
+    if(bT <= 0 && bT > -90){
+      newPos.row += 1;
+      newPos.col -= 1;
+    }
+    else if(bT <= 180 && bT > 90){
+      newPos.row -= 1;
+      newPos.col += 1;
+    }
+    else if(bT <= 90 && bT > 0){
+      newPos.row -= 1;
+      newPos.col -= 1;
+    }
+    else{
+      if(rand() % 2 == 0){
+        newPos.row -= 1;
+        newPos.col += 1;
+      }
+      else{
+        newPos.row += 1;
+        newPos.col -= 1;
+      }
+    }
+  }
+
+  //need end path location to be a valid moveable space on the map
+  //if it is not adjust the ghost location using findClosestOpenBlock and then return newPos
+  if(!isValidBlock(newPos.row, newPos.col)){
+    newPos = findClosestOpenBlock(newPos);
+  }
+  return newPos;
 }
 
 /**

@@ -1,5 +1,5 @@
 /*
-    Originally created by Jakob - Modified by Adam
+    Originally created by Jakob - Modified by Adam 
     Modifications:
     test to create a map on a server then pack it and send it over as bit data
     and unpack render on client
@@ -65,7 +65,7 @@ int Client::clientProcess(void* data) {
                     i++;
                 }
                 int p1X_pos = atoi(x_strP1.c_str());
-
+                
                 i++;
                 std::string y_strP1 = "";
                 while(data->at(i) != ' ') {
@@ -73,7 +73,7 @@ int Client::clientProcess(void* data) {
                     i++;
                 }
                 int p1Y_pos = atoi(y_strP1.c_str());
-
+                
                 // Get player 2's position
                 i++;
                 std::string id_strP2 = "";
@@ -87,7 +87,7 @@ int Client::clientProcess(void* data) {
                     i++;
                 }
                 int p2X_pos = atoi(x_strP2.c_str());
-
+                
                 i++;
                 std::string y_strP2 = "";
                 while(data->at(i) != ' ') {
@@ -113,19 +113,19 @@ int Client::clientProcess(void* data) {
                 } else {
                     std::cout << "Client: Received Illegal ID" << std::endl;
                 }
-
+                
                 recvedInit = true;
             }
 
             // Recv Map
             if (mail->getType() == PackType::MAP) {
                 std::cout << "Client: Loading map... " << mail->data() << std::endl;
-
+                
                 std::vector<int>* map = new std::vector<int>();
                 map = unpack(mail->getBody(), map, 3);
 
                 for (int i = 0; i < map->size();i++){
-                    client->gameMap.push_back(map->at(i));
+                    client->gameMap.push_back(map->at(i));                 
                 }
 
                 client->mapReceived = true;
@@ -133,7 +133,7 @@ int Client::clientProcess(void* data) {
 
                 recvedMap = true;
             }
-
+            
             if(recvedInit && recvedMap) {
                 client->initDataReceived = true;
                 client->gameOn = true;
@@ -158,7 +158,7 @@ int Client::clientProcess(void* data) {
             // fflush(stdout);
         }
 
-        // Receive data from server
+        // Receive data from server 
         Packet *mail = client->receiveAndGet();
         if (mail != nullptr) {
             std::cout << "CLIENT-NET: Received packet type " << (int)mail->getType() << " -> ";
@@ -166,7 +166,7 @@ int Client::clientProcess(void* data) {
             fflush(stdout);
 
             // If keystate, unpack a load into formable keystate
-            // TODO not hardcode id to 0
+            // TODO not hardcode id to 0 
             if (mail->getType() == PackType::KEYSTATE) {
                 int turret_theta = mail->getInt(5); // 5 is the starting index of the integer for the turret theta
                 bool hasShot = mail->getBody()->at(10); // 10 is the index of the boolean if the player has shot

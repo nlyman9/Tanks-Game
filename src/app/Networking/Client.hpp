@@ -29,8 +29,8 @@
 class Client {
   private:
     // The keys we want to check for when we add a keystate packet
-    std::vector<Uint8> keysToCheck =  { SDL_SCANCODE_W, SDL_SCANCODE_A,
-                                        SDL_SCANCODE_S, SDL_SCANCODE_D};
+    std::vector<Uint8> keysToCheck =  { SDL_SCANCODE_W, SDL_SCANCODE_A, 
+                                        SDL_SCANCODE_S, SDL_SCANCODE_D}; 
   public:
     // Network
     ClientController *server;
@@ -47,7 +47,7 @@ class Client {
     std::vector<bool> playerShot;
     // Game state vector?
 
-    // Game
+    // Game 
     bool gameOn = false;
     bool startGame = false;
 
@@ -55,14 +55,14 @@ class Client {
 
     /**
      * @brief Construct a new Client wuth an IP and Port
-     *
+     * 
      * @param ip - remote IP
      * @param port - Port to use
      */
     Client(std::string ip, int port) {
       server = new ClientController(ip, port);
 
-      // This is a little hacky bbut im trying to create a pseudo SDL keystate so Player can use it
+      // This is a little hacky bbut im trying to create a pseudo SDL keystate so Player can use it 
       // It works thus far
       Uint8 *player2Keystats = (Uint8 *) calloc(27, sizeof(Uint8));
       playerKeystates.push_back(player2Keystats);
@@ -75,16 +75,16 @@ class Client {
     }
 
     /**
-     * @brief Initialize the thread for the client
-     *
+     * @brief Initialize the thread for the client 
+     * 
      * @return true - Worked
      * @return false - Failed
      */
     bool init();
 
     /**
-     * @brief Connect to the server with the client's clientController
-     *
+     * @brief Connect to the server with the client's clientController 
+     * 
      * @return true - Successful
      * @return false - Failed
      */
@@ -94,7 +94,7 @@ class Client {
 
     /**
      * @brief Check is the clientController's sockets are connected to the server
-     *
+     * 
      * @return true - Yes
      * @return false - No
      */
@@ -104,18 +104,18 @@ class Client {
 
     /**
      * @brief Set the Tickrate of the client's connection to the server
-     *
-     * @param tickrate - The rate in seconds
+     * 
+     * @param tickrate - The rate in seconds 
      */
-    void setSocketTickrate(int tickrate) {
+    void setSocketTickrate(int tickrate) { 
       return server->setSocketTimeout(tickrate);
     }
 
     /**
-     * @brief Receive a packet from the server and return a packet from the receive buffer
+     * @brief Receive a packet from the server and return a packet from the receive buffer 
      * @warning Does not gaurantee to return the packet it received from the server
      * @warning BLOCKING function
-     *
+     * 
      * @return Packet* The first packet from the receive buffer
      */
     Packet* receiveAndGet() {
@@ -125,7 +125,7 @@ class Client {
 
     /**
      * @brief Get the Key State from the vector of keystates.
-     *
+     * 
      * @param id - The ID (index) of the network players. Use the same index for the same networked players
      * @return const Uint8* A pseudo SDL keystate scan code
      * @warning this is not a fully functional SDL keystate (The array you receive from SDL_getKeyboardState())
@@ -146,7 +146,7 @@ class Client {
 
     /**
      * @brief Get the Turret angle of the networked player
-     *
+     * 
      * @param id - Which online player
      * @return int - Their turret's angle
      */
@@ -158,7 +158,7 @@ class Client {
 
     /**
      * @brief Get the boolean if the networked player shot
-     *
+     * 
      * @param id - Which network player
      * @return true - They shot
      * @return false - They didn't shoot
@@ -170,10 +170,10 @@ class Client {
     }
 
     /**
-     * @brief Add a keystate received from the server to keystates vector
-     *
+     * @brief Add a keystate received from the server to keystates vector 
+     * 
      * @param id - The ID of the client it was from
-     * @param charKeyStates - The keystates
+     * @param charKeyStates - The keystates 
      * @param turretTheta - The player's turret angle from the packet
      * @param hasShot - the boolean if the player shot or not
      */
@@ -188,7 +188,7 @@ class Client {
       Uint8 *keystate = playerKeystates.at(id);
 
       for (int i = 0; i < keysToCheck.size(); i++) {
-        keystate[keysToCheck[i]] = (Uint8) charKeyStates->at(i);
+        keystate[keysToCheck[i]] = (Uint8) charKeyStates->at(i); 
       }
 
       playerTurretThetas[id] = turretTheta;
@@ -202,7 +202,7 @@ class Client {
     /**
      * @brief Add a keystate from the local client we want to prepare to send
      *  - Adds the packet to the clients send buffer
-     *
+     * 
      * @param keystates - Keystates from the local client
      */
     void addLocalKeyState(const Uint8 *keystates, int turretTheta, bool hasShot) {
@@ -221,13 +221,13 @@ class Client {
       std::cout << "Sending keystate - ";
       mail->printData();
       fflush(stdout);
-
+      
       server->addPacket(mail);
     }
 
     /**
      * @brief Send a packet from the send buffer to the server
-     *
+     * 
      * @return true - Sent a packet!
      * @return false - Nothing to send
      */
@@ -237,7 +237,7 @@ class Client {
 
     /**
      * @brief Poll if we have received the map
-     *
+     * 
      * @return true - We have!
      * @return false - We havent :(
      */
@@ -247,7 +247,7 @@ class Client {
 
     /**
      * @brief Poll if we have received the initalization data
-     *
+     * 
      * @return true - We have!
      * @return false - We havent :(
      */
@@ -257,11 +257,11 @@ class Client {
 
 
     /**
-     * @brief The client network process
+     * @brief The client network process 
      * This is invoked on a new thread
-     *
+     * 
      * @param data - The client object
-     * @return int
+     * @return int 
      */
     static int clientProcess(void *data);
 
