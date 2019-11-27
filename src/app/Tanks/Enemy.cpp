@@ -146,7 +146,7 @@ bool Enemy::place(float x, float y) {
 }
 
 /**
-  * returns the enemy type 
+  * returns the enemy type
   */
 int Enemy::getEnemyType(){
   return enemyType;
@@ -223,7 +223,7 @@ void Enemy::updatePos() {
   if(isInRange(getX() + TANK_WIDTH/2, getY() + TANK_HEIGHT/2, line1X, line1Y, line2X, line2Y, gPlayer->getX() + TANK_WIDTH/2, gPlayer->getY() + TANK_HEIGHT/2)){
     //only allowed to shoot every 3 seconds so current time must be greater than last fired time
     if(current_time > fire_last_time_bullet + 3000){
-      setFire(true);
+      //setFire(true);
       //reset fire_last_time to current time so that can fire again in the future
       fire_last_time_bullet = current_time;
     }
@@ -331,7 +331,6 @@ void Enemy::updatePos() {
   //std::cout << enemy_rect.w << ":" << enemy_rect.h << ":" << enemy_rect.x << ":" << enemy_rect.y << std::endl;
 
   SDL_Rect* overlap;
-  overlap = check_collision(&enemy_rect, &player_rect);
 
   //Get direction of current direction moving
   if (theta == 0) {
@@ -365,7 +364,10 @@ void Enemy::updatePos() {
     if(moveFrom.col > moveTo.col){
       if (moveLeft || rightLeft) {
         //x_enemy_pos -= MAX_VELOCITY;
-		setX(getX() - MAX_VELOCITY);
+        setX(getX() - MAX_VELOCITY);
+        SDL_Rect enemy_rect = {(int)getX(), (int)getY(), TANK_WIDTH, TANK_HEIGHT};
+        SDL_Rect player_rect = {(int)x_pos, (int)y_pos, TANK_WIDTH, TANK_HEIGHT};
+        overlap = check_collision(&enemy_rect, &player_rect);
         //y_enemy_pos += 0;
         //check that the tank position arrived in desired location
         if(getX() < (moveTo.col * TILE_SIZE + TILE_SIZE + 36)){
@@ -392,7 +394,10 @@ void Enemy::updatePos() {
     if(moveFrom.col < moveTo.col){
       if (moveRight || rightLeft) {
         //x_enemy_pos += MAX_VELOCITY;
-		setX(getX() + MAX_VELOCITY);
+        setX(getX() + MAX_VELOCITY);
+        SDL_Rect enemy_rect = {(int)getX(), (int)getY(), TANK_WIDTH, TANK_HEIGHT};
+        SDL_Rect player_rect = {(int)x_pos, (int)y_pos, TANK_WIDTH, TANK_HEIGHT};
+        overlap = check_collision(&enemy_rect, &player_rect);
         //y_enemy_pos += 0;
         //check that the tank position arrived in desired location
         if(getX() > (moveTo.col * TILE_SIZE + TILE_SIZE*2 - 20)){
@@ -424,7 +429,10 @@ void Enemy::updatePos() {
       if (moveUp || upDown) {
         //x_enemy_pos += 0;
         //y_enemy_pos -= MAX_VELOCITY;
-		setY(getY() - MAX_VELOCITY);
+        setY(getY() - MAX_VELOCITY);
+        SDL_Rect enemy_rect = {(int)getX(), (int)getY(), TANK_WIDTH, TANK_HEIGHT};
+        SDL_Rect player_rect = {(int)x_pos, (int)y_pos, TANK_WIDTH, TANK_HEIGHT};
+        overlap = check_collision(&enemy_rect, &player_rect);
         //check that the tank position arrived in desired location
         if(getY() < (moveTo.row * TILE_SIZE + TILE_SIZE + 20)){
           enemyPath.pop_back();
@@ -451,7 +459,10 @@ void Enemy::updatePos() {
       if (moveDown || upDown) {
         //x_enemy_pos += 0;
         //y_enemy_pos += MAX_VELOCITY;
-		setY(getY() + MAX_VELOCITY);
+        setY(getY() + MAX_VELOCITY);
+        SDL_Rect enemy_rect = {(int)getX(), (int)getY(), TANK_WIDTH, TANK_HEIGHT};
+        SDL_Rect player_rect = {(int)x_pos, (int)y_pos, TANK_WIDTH, TANK_HEIGHT};
+        overlap = check_collision(&enemy_rect, &player_rect);
         //check that the tank position arrived in desired location
         if(getY() > (moveTo.row * TILE_SIZE + TILE_SIZE + 20)){
           enemyPath.pop_back();
