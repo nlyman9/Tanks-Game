@@ -124,7 +124,6 @@ void LocalGameLoop::generateMap() {
       enemy->setObstacleLocations(&tileArray);
 			enemy->setTileMap(map);
 			SDL_Rect curEnemy = {(int)enemy->getX(), (int)enemy->getY(), TANK_WIDTH, TANK_HEIGHT};
-      printf("x: %d, y: %d\n", curEnemy.x, curEnemy.y);
 			enemyBoxes.push_back(&curEnemy);
 	}
 	player->setEnemies(enemyBoxes);
@@ -286,7 +285,6 @@ int LocalGameLoop::run() {
 			for (int i = 0; i < enemies.size(); i++) {
 				enemies.at(i)->update();
 				enemies.at(i)->setProjectiles(projectiles);
-				//SDL_Rect curEnemy = {(int)enemies.at(i)->getX(), (int)enemies.at(i)->getY(), TANK_WIDTH, TANK_HEIGHT};
 				SDL_Rect* curEnemy = enemies.at(i)->get_box();
 				enemyBoxes.push_back(curEnemy);
 				if(enemies.at(i)->isDestroyed()) {
@@ -295,9 +293,6 @@ int LocalGameLoop::run() {
 				}
 			}
 			player->setEnemies(enemyBoxes);
-			for(auto enemy : enemyBoxes) {
-				printf("GameLoop x: %d, y: %d\n", enemy->x, enemy->y);
-			}
 			enemyBoxes.clear();
 
             // Update every active bomb
