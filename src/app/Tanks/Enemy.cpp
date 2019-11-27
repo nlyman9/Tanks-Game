@@ -223,7 +223,7 @@ void Enemy::updatePos() {
   if(isInRange(getX() + TANK_WIDTH/2, getY() + TANK_HEIGHT/2, line1X, line1Y, line2X, line2Y, gPlayer->getX() + TANK_WIDTH/2, gPlayer->getY() + TANK_HEIGHT/2)){
     //only allowed to shoot every 3 seconds so current time must be greater than last fired time
     if(current_time > fire_last_time_bullet + 3000){
-      //setFire(true);
+      setFire(true);
       //reset fire_last_time to current time so that can fire again in the future
       fire_last_time_bullet = current_time;
     }
