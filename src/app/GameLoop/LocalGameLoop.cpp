@@ -109,19 +109,26 @@ void LocalGameLoop::generateMap() {
     render->setEnemies(enemies);
 
     for (auto enemy : enemies) {
-        if(enemy->getEnemyType() == 0) {
-            enemy->setSprite(enemy_tank_blue);
-            enemy->setTurretSprite(enemy_turret_blue);
-        } else if(enemy->getEnemyType() == 1){
-            enemy->setSprite(enemy_tank_green);
-            enemy->setTurretSprite(enemy_turret_green);
-        } else{
-            enemy->setSprite(enemy_tank_purple);
-            enemy->setTurretSprite(enemy_turret_purple);
-        }
-         enemy->setObstacleLocations(&tileArray);
-        enemy->setTileMap(map);
-    }
+			if(enemy->getEnemyType() == 0){
+				enemy->setSprite(enemy_tank_blue);
+				enemy->setTurretSprite(enemy_turret_blue);
+			}
+			else if(enemy->getEnemyType() == 1){
+				enemy->setSprite(enemy_tank_green);
+				enemy->setTurretSprite(enemy_turret_green);
+			}
+			else{
+				enemy->setSprite(enemy_tank_purple);
+				enemy->setTurretSprite(enemy_turret_purple);
+			}
+      enemy->setObstacleLocations(&tileArray);
+			enemy->setTileMap(map);
+			SDL_Rect curEnemy = {(int)enemy->getX(), (int)enemy->getY(), TANK_WIDTH, TANK_HEIGHT};
+      printf("x: %d, y: %d\n", curEnemy.x, curEnemy.y);
+			enemyBoxes.push_back(&curEnemy);
+	}
+	player->setEnemies(enemyBoxes);
+	enemyBoxes.clear();
 }
 
 /**
@@ -237,7 +244,7 @@ int LocalGameLoop::run() {
             player->setBomb(false);
         }
 
-        // Generate projectile for each enemy if they shot. 
+        // Generate projectile for each enemy if they shot.
         for(auto enemy : enemies) {
             if(enemy->getFire() == true) {
                 Projectile *newBullet;
@@ -279,11 +286,18 @@ int LocalGameLoop::run() {
 			for (int i = 0; i < enemies.size(); i++) {
 				enemies.at(i)->update();
 				enemies.at(i)->setProjectiles(projectiles);
+        SDL_Rect curEnemy = {(int)enemies.at(i)->getX(), (int)enemies.at(i)->getY(), TANK_WIDTH, TANK_HEIGHT};
+        enemyBoxes.push_back(&curEnemy);
 				if(enemies.at(i)->isDestroyed()) {
 					enemies.erase(enemies.begin()+i);
 					render->setEnemies(enemies);
 				}
 			}
+			player->setEnemies(enemyBoxes);
+      for(auto enemy : enemyBoxes){
+        printf("GameLoop x: %d, y: %d\n", enemy->x, enemy->y);
+      }
+			enemyBoxes.clear();
 
             // Update every active bomb
             int count = 0;
