@@ -286,17 +286,18 @@ int LocalGameLoop::run() {
 			for (int i = 0; i < enemies.size(); i++) {
 				enemies.at(i)->update();
 				enemies.at(i)->setProjectiles(projectiles);
-        SDL_Rect curEnemy = {(int)enemies.at(i)->getX(), (int)enemies.at(i)->getY(), TANK_WIDTH, TANK_HEIGHT};
-        enemyBoxes.push_back(&curEnemy);
+				//SDL_Rect curEnemy = {(int)enemies.at(i)->getX(), (int)enemies.at(i)->getY(), TANK_WIDTH, TANK_HEIGHT};
+				SDL_Rect* curEnemy = enemies.at(i)->get_box();
+				enemyBoxes.push_back(curEnemy);
 				if(enemies.at(i)->isDestroyed()) {
 					enemies.erase(enemies.begin()+i);
 					render->setEnemies(enemies);
 				}
 			}
 			player->setEnemies(enemyBoxes);
-      for(auto enemy : enemyBoxes){
-        printf("GameLoop x: %d, y: %d\n", enemy->x, enemy->y);
-      }
+			for(auto enemy : enemyBoxes) {
+				printf("GameLoop x: %d, y: %d\n", enemy->x, enemy->y);
+			}
 			enemyBoxes.clear();
 
             // Update every active bomb
