@@ -65,11 +65,14 @@ class Render {
         //draw a box
         int drawBox(Box toDraw);
         //clear the background
-        int drawBackground();
+        int drawScreen(SDL_Texture* screen);
         //present the renderer
         int present();
         //draw text
         int drawText(Box* box, const std::string* toDraw, int XOFFSET, int YOFFSET, int WIDTH, int HEIGHT);
+
+        int drawGameOver(SDL_Texture* screen);
+
     private:
         //for later to draw buttons differently from text fields
         int drawButton(Box toDraw);

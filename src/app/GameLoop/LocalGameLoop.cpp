@@ -198,13 +198,28 @@ int LocalGameLoop::run() {
     SDL_Event e;
     previous_time = std::chrono::system_clock::now(); // get current time of system
     lag_time = 0.0;	// Set duration of time to 0
-
+    long gameTimer = TIMER_LENGTH;
+    auto startTime = std::chrono::system_clock::now();
 
     while(isGameOn) {
+
         current_time = std::chrono::system_clock::now();
         elapsed_time = current_time - previous_time;
         previous_time = current_time;
         lag_time += elapsed_time.count();
+
+        // Check Game Over Conditions
+        auto timeSinceStart = current_time - startTime;
+        long timeRemaining = gameTimer - (timeSinceStart.count() / 1000000000);
+        render->setTimer(timeRemaining);
+        if(enemies.size() == 0) {
+            return 1;
+        }
+
+        if(player->isHit() || timeRemaining <= 0) {
+            return 2;
+        }
+
 
         // 1. Process input
         while (SDL_PollEvent(&e))

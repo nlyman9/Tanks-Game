@@ -15,6 +15,7 @@
 #include <vector>
 #include <unistd.h>
 #include "Multiplayer.hpp"
+#include "Player.hpp"
 
 // #include <SDL2/SDL_thread.h>
 
@@ -45,6 +46,7 @@ class Server {
         Server(std::string ip, int port) {
             host = new ServerController(ip, port);
             std::cout << " Created Server Object " << std::endl;
+            gamestate = new std::vector<char>();
         }
         
         /**
@@ -223,6 +225,122 @@ class Server {
         int numClients() {
             return host->numClients();
         }
+
+        //simulate game
+        bool simulate(){
+            current_time = std::chrono::system_clock::now();
+            elapsed_time = current_time - previous_time;
+            previous_time = current_time;
+            lag_time += elapsed_time.count();
+            //for each player
+            //apply latest mail
+            gamestate->clear();
+            for(int i = 0; i < numClients(); i++){
+                std::cout << "SERVER: Applying keystates to gamestate" << std::endl;
+                if(!applyKeyStatePacket(lastMail->at(i), players->at(i))){
+                    printf("SERVER Error: could not apply keystate packet\n");
+                    return false;
+                }
+                lastMail->at(i)->printData();
+                std::vector<char>* playerstate = players->at(i)->getState();
+                gamestate->insert(gamestate->end() , playerstate->begin(), playerstate->end());
+                std::cout << std::endl;
+            }
+            //for each projectile
+                //interpolate & add to game state
+            return true;
+        }
+        bool applyKeyStatePacket(Packet* packet, Player* player){
+            SDL_Event e;
+            if(packet == nullptr)
+                return false;
+            if(!packet->getBody())
+                return false;
+            if(!(packet->getType() == PackType::KEYSTATE))
+                return false;
+            packet->printData();
+            Uint8 *keystate = keystateify(packet->getBody());
+            if(keystate == nullptr)
+                return false;
+            try{
+                player->getEvent(elapsed_time, &e, keystate);
+                player->update();
+            }catch (const std::exception &exc){
+                // catch anything thrown within try block that derives from std::exception
+                std::cout << "SERVER ERROR" << std::endl;
+                std::cerr << exc.what() << std::endl;
+                return false;
+            }
+            return true;
+        }
+        Uint8 *keystateify(std::vector<char>* mail){
+            Uint8 *keystate;
+            try{
+                std::cout << "calloc keystate" << std::endl;
+                keystate = (Uint8 *) calloc(27, sizeof(Uint8));
+                
+                std::cout << "for loop on keys" << std::endl;
+                for (int i = 0; i < keysToCheck.size(); i++) {
+                    keystate[keysToCheck[i]] = (Uint8) mail->at(i); 
+                }
+            }
+            catch (const std::exception &exc){
+                // catch anything thrown within try block that derives from std::exception
+                std::cerr << exc.what();
+            }
+            return keystate;
+        }
+        //set the player in the player array - make a copy
+        void addPlayer(Player* newPlayer){
+            players->push_back(newPlayer);
+        }
+        Player* getPlayer(int idx){
+            return players->at(idx);
+        }
+        void setMail(Packet* mail, int idx){
+            lastMail->at(idx) = new Packet(PackType::KEYSTATE);
+            lastMail->at(idx)->appendData(mail->getBodyString());
+        }
+        void initPlayerAndMailLists(){
+            //init player list
+            players = new std::vector<Player*>();
+            //init mail list
+            lastMail = new std::vector<Packet*>;
+            for(int i = 0; i < numClients(); i++){
+                lastMail->push_back(nullptr);
+            }
+        }
+        void startTime(){
+            std::chrono::system_clock::time_point previous_time = std::chrono::system_clock::now();
+        }
+        Packet* getGamestatePacket(){
+            Packet* gamestatepacket = new Packet(PackType::KEYFRAME);
+            for(auto x : *getGamestate())
+                gamestatepacket->appendData(x);
+            std::cout << "Game state" << std::endl;
+            gamestatepacket->printData();
+            return gamestatepacket;
+        }
+        std::vector<char>* getGamestate(){
+            std::vector<char>* retVal = new std::vector<char>();
+            for(auto x : *gamestate)
+                retVal->push_back(x);
+            return retVal;
+        }
+        private:
+            //player vector - parallel to clientConnection
+            std::vector<Player*>* players;
+            //latest mail vector - parallel to player
+            std::vector<Packet*>* lastMail;
+            // The keys we want to check for when we add a keystate packet
+            std::vector<Uint8> keysToCheck =  { SDL_SCANCODE_W, SDL_SCANCODE_A, 
+                                        SDL_SCANCODE_S, SDL_SCANCODE_D}; 
+            std::chrono::duration<double, std::ratio<1, 1000>> elapsed_time;
+            std::chrono::system_clock::time_point previous_time;
+            std::chrono::system_clock::time_point current_time;
+            double lag_time;
+
+            std::vector<char>* gamestate;
 };
 
 #endif

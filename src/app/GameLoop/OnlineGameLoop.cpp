@@ -197,18 +197,37 @@ int OnlineGameLoop::run() {
 		}
 
 		assert(players.size() == 1);
+		//apply network gamestate
+		if(client->stateSet){
+			for(auto player : players) {
+				if(client->id == 0){
+					player->applyState(client->playerStates->at(0));
+				}else{
+					player->applyState(client->playerStates->at(1));
+				}
+			}
+			for(auto playerEnemy : playerEnemies) {
+				if(client->id == 0){
+					playerEnemy->applyState(client->playerStates->at(1));
+				}else{
+					playerEnemy->applyState(client->playerStates->at(0));
+				}			
+			}
+			client->stateSet = false;
+		}
 		for(auto player : players) {
 			// Send same keystate to player object and to the client to send
 			// TODO find a good rate to send player keystates
+			if(client->stateSet){
+				
+			}
 			keystate = SDL_GetKeyboardState(nullptr);
 			player->getEvent(elapsed_time, &e, keystate);
 		}
-
 		// Set inputs of enemy players over network
 		for(auto playerEnemy : playerEnemies) {
 			// Get the keystates from network
 			keyStatePacket = client->getKeyState(0);
-
 			// Apply keysates to the network player
 			playerEnemy->getEvent(elapsed_time, &e, keyStatePacket);
 

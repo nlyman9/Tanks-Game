@@ -11,6 +11,9 @@ Args* MultiplayerMenu(Render* renderer)
     std::cout << "menu created" << std::endl;
     Args* options = new Args();
     std::cout << "In menu" << std::endl;
+
+    SDL_Texture* background = loadImage("src/res/images/MultiplayerScreen.png", renderer->getRenderer());
+
     while(true){
         SDL_Event e;
         int keyPress = 0;
@@ -106,7 +109,7 @@ Args* MultiplayerMenu(Render* renderer)
                     break;
                 case 3:
                     //we clicked ok so check to see if ip and port are set and create the args array  
-                    if(!host && menu->ipDigits() < 4){
+                    if(!host && menu->ipDigits() < 10){
                         std::cout << "Not enough digits in ip, setting to local area connection" << std::endl;
                         options->ip = "0.0.0.0";
                     }else if(host){
@@ -183,7 +186,7 @@ Args* MultiplayerMenu(Render* renderer)
         }
         //now we draw
         //draw background
-        renderer->drawBackground();
+        renderer->drawScreen(background);
         //draw box
         for(int i = 0; i < NUM_BOXES; i++){
             Box currBox = menu->getBox(i);
