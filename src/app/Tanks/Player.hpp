@@ -25,7 +25,6 @@ class Player : public Object, public Tank {
         /* data */
         Sprite *turret = nullptr;
         float x_vel, y_vel; // x and y velocity
-        int lives; //health points left
         int theta_v = 0;
         int mouseTheta = 0;
         int mouseX = 0;
@@ -36,7 +35,6 @@ class Player : public Object, public Tank {
         float velocity = 0;
         float delta_velocity = 0;
         bool localPlayer;
-        bool connected;
         int id;
         Uint32 anim_last_time = 0;
         std::vector<SDL_Rect*> enemies;
@@ -50,8 +48,6 @@ class Player : public Object, public Tank {
         void update() override;
         bool move(float x, float y) override; //move x offset from current x and y offset from current y
         bool place(float x, float y) override; //place/teleport to an x and y
-
-        bool isConnected(); //check if the player has entered the game
 
         void getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time,
                       SDL_Event* e,

@@ -11,6 +11,9 @@ Args* MultiplayerMenu(Render* renderer)
     std::cout << "menu created" << std::endl;
     Args* options = new Args();
     std::cout << "In menu" << std::endl;
+
+    SDL_Texture* background = loadImage("src/res/images/MultiplayerScreen.png", renderer->getRenderer());
+
     while(true){
         SDL_Event e;
         int keyPress = 0;
@@ -183,7 +186,7 @@ Args* MultiplayerMenu(Render* renderer)
         }
         //now we draw
         //draw background
-        renderer->drawBackground();
+        renderer->drawScreen(background);
         //draw box
         for(int i = 0; i < NUM_BOXES; i++){
             Box currBox = menu->getBox(i);

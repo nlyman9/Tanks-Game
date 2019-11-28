@@ -45,19 +45,12 @@ Player::~Player() {}
  * @param update_lag - the value to extrapolate by
  */
 void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
-	if(!hit) {
+	if(!isHit()) {
 		// Extrapolate the x and y positions
 		// "Solves" stuck in the middle rendering.
 		int x_pos = getX() + x_vel * update_lag;
 		int y_pos = getY() + y_vel * update_lag;
 
-		// Render to screen (gRenderer)
-		// SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
-		// SDL_Rect fillRect = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
-		// SDL_RenderFillRect(gRenderer, &fillRect);
-
-		// SDL_Rect pos = {x_pos, y_pos, BOX_WIDTH, BOX_HEIGHT};
-		// SDL_RenderCopy(gRenderer, getSprite()->getTexture(), NULL, &pos);
 		SDL_Rect* dst = get_box();
 		SDL_Rect* turret_dst = get_box();
 
@@ -69,8 +62,7 @@ void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
 
 		SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), getSprite()->getFrame(frame), dst, theta, NULL, SDL_FLIP_NONE);
 		SDL_RenderCopyEx(gRenderer, getTurretSprite()->getTexture(), NULL, turret_dst, turretTheta, NULL, SDL_FLIP_NONE);
-	}
-	else {
+	} else {
 		Uint32 current_time = SDL_GetTicks();
 		SDL_Rect* dst = get_box();
 		dst->w = EXPLOSION_WIDTH;
@@ -90,8 +82,7 @@ void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
 		if(frame < 6) {
 			//std::cout << "rendering frame = " << frame << "\n";
 			SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), getSprite()->getFrame(frame), dst, theta, NULL, SDL_FLIP_NONE);
-		}
-		else {
+		} else {
 			//std::cout << "destroyed\n";
 			destroyed = true;
 		}
