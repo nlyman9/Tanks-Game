@@ -75,18 +75,18 @@ void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
 		SDL_Rect* dst = get_box();
 		dst->w = EXPLOSION_WIDTH;
 		dst->h = EXPLOSION_HEIGHT;
-		
+
 		if(frame == 0 && anim_last_time == 0) {
 			//std::cout << "setting anim for first time\n";
 			anim_last_time = SDL_GetTicks();
 		}
-		
+
 		if(current_time > anim_last_time + 200) {
 			frame++;
 			anim_last_time = SDL_GetTicks();
 			//std::cout << "frame++\n";
 		}
-		
+
 		if(frame < 6) {
 			//std::cout << "rendering frame = " << frame << "\n";
 			SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), getSprite()->getFrame(frame), dst, theta, NULL, SDL_FLIP_NONE);
@@ -100,7 +100,7 @@ void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
 
 /**
  * @brief Set turret theta using the current position of the mouse
- * 
+ *
  */
 void Player::setTurretTheta() {
     // Move the turret
@@ -112,12 +112,21 @@ void Player::setTurretTheta() {
 }
 
 /**
- * @brief Set the turret theta with a given value 
- * 
+ * @brief Set the turret theta with a given value
+ *
  * @param theta - The theta value you want to set it to
  */
 void Player::setTurretTheta(int theta) {
     turretTheta = theta;
+}
+
+/**
+  * @brief Set the enemies for collision checks
+  *
+  * @param enemyList : the SDL_Rects of the enemies
+  */
+void Player::setEnemies(std::vector<SDL_Rect*> enemyList){
+  enemies = enemyList;
 }
 
 /**
@@ -154,6 +163,18 @@ void Player::update() {
         }
     }
 
+    for(auto enemy : enemies){
+      overlap = check_collision(&currentPos, enemy);
+      if(overlap != nullptr) {
+          if(x_vel < 0) {
+              setX(floor(getX() + overlap->w));
+          } else {
+              setX(floor(getX() - overlap->w));
+          }
+          break;
+      }
+    }
+
     // next add Y velocity
     setY(getY() + (y_vel * updateStep));
 
@@ -170,6 +191,18 @@ void Player::update() {
             }
             break;
         }
+    }
+
+    for(auto enemy : enemies){
+      overlap = check_collision(&currentPos, enemy);
+      if(overlap != nullptr) {
+          if(y_vel < 0) {
+              setY(floor(getY() + overlap->h));
+          } else {
+              setY(floor(getY() - overlap->h));
+          }
+          break;
+      }
     }
 
     // Check he isn't moving outside of the map
@@ -219,8 +252,8 @@ bool Player::place(float x, float y) {
 }
 
 /* Player Specific Functions */
-void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time, 
-                      SDL_Event* e, 
+void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time,
+                      SDL_Event* e,
                       const Uint8 *keystate) {
 
     delta_velocity = 0;
