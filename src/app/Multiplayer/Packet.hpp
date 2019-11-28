@@ -100,6 +100,12 @@ class Packet {
             }
             setPacketSize(); // Recalculates the size of the packet after the append
         }
+        /**
+         * @brief clears the body of a packet
+         */
+        void clearData() {
+            this->body.clear();
+        }
 
          /**
          * @brief Appends a char to the body of the packet
@@ -110,6 +116,7 @@ class Packet {
             this->body.push_back(c);
             setPacketSize(); // Recalculates the size of the packet after the append
         }
+        
 
         /**
          * @brief Appends a bool to the body of the packet
@@ -180,7 +187,7 @@ class Packet {
             std::string size_str = std::string(8 - temp_size.size(), '0').append(temp_size);
 
             packet_size.setValue(size_str);
-            std::cout << "Set size of packet to " << size_str << std::endl;
+            //std::cout << "Set size of packet to " << size_str << std::endl;
         }
 
 

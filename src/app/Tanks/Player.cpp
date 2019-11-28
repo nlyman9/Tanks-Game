@@ -25,10 +25,12 @@ Player::Player(Sprite *sprite, Sprite *turret, float x, float y, bool local) : l
     setSprite(sprite);
     setTurretSprite(turret);
     setPos(x, y);
+    gamestate = new std::vector<char>();
 }
 
 Player::Player(float x, float y, bool local) : localPlayer{local}{
     setPos(x, y);
+    gamestate = new std::vector<char>();
 }
 
 /**

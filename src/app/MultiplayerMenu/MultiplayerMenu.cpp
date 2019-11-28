@@ -109,7 +109,7 @@ Args* MultiplayerMenu(Render* renderer)
                     break;
                 case 3:
                     //we clicked ok so check to see if ip and port are set and create the args array  
-                    if(!host && menu->ipDigits() < 4){
+                    if(!host && menu->ipDigits() < 10){
                         std::cout << "Not enough digits in ip, setting to local area connection" << std::endl;
                         options->ip = "0.0.0.0";
                     }else if(host){

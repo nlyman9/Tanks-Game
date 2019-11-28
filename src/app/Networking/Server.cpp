@@ -1,5 +1,5 @@
 /*
-    Originally created by Jakob - Modified by Adam 
+    Originally created by Jakob - Modified by Adam
     Modifications: 
     test to create a map on a server then send it over as bit data
     and render on client
@@ -101,12 +101,17 @@ int serverProcess() {
         std::cout << "Server: Looping - numClients = " << server->numClients() << std::endl;
         sleep(1);
     }
-    
+    //initialize the server lists
+    server->initPlayerAndMailLists();
+
     // Set player starting positions
     //              { Player 1 , Player 2 }
     int x_pos[2] = {100, SCREEN_WIDTH - 100};
     int y_pos[2] = {50, SCREEN_HEIGHT - 50};
-    
+    Player* player1 = new Player(x_pos[0], y_pos[0], false);
+    Player* player2 = new Player(x_pos[1], y_pos[1], false);
+    server->addPlayer(player1);
+    server->addPlayer(player2);
     // Initialize Player Data
     for (int i = 0; i < server->numClients(); i++) {
         // Packet playerID, inital position
@@ -171,6 +176,8 @@ int serverProcess() {
     // Game Loop
     // TODO simulate the game on server's side?
     std::vector<ClientConnection*> *pendingClients;
+    //set time
+    server->startTime();
     while (server->gameOn) {
         std::cout << "\n\nSERVER: GAME - # Clients = " << server->numClients() << std::endl;
         fflush(stdout);
@@ -181,6 +188,19 @@ int serverProcess() {
         //      @see ServerConnection for timeout value
         while ( (pendingClients = server->pollClientsAndReceive()) == nullptr) {
             // Just go back and pollClientsAndReceive()
+            try{
+                if(server->simulate()){
+                    //create packet of gamestate and broadcast
+                    Packet* gamestatepacket = server->getGamestatePacket();
+                    std::cout << "SERVER: Sending keyframe - ";
+                    gamestatepacket->printData();
+                    server->broadcast(gamestatepacket);
+                }else{
+                    std::cout << "Failed to simulate game" << std::endl;
+                }
+            }catch (const std::exception &exc){
+                std::cerr << exc.what();
+            }
         }
         std::cout << "SERVER: Going to check mailbox!!!" << std::endl;
         fflush(stdout);
@@ -198,6 +218,8 @@ int serverProcess() {
                     std::cout << "SERVER: You got mail!" << std::endl;
                     mail->printData();
                     if (mail->getType() == PackType::KEYSTATE) {
+                        //copy the data of the mail
+                        server->setMail(mail, client->id());
                         // If a keystate, Prepare to send that client's keystate to the other clients 
                         server->addPacketFromClientToClients(client->id(), mail);
                     }
@@ -214,12 +236,22 @@ int serverProcess() {
             std::cout << "SERVER: TO " << client->id() << ": ";
             client->sendFromBuffer();
         }
-
-        // TODO Send Game States
-        // Game states -> slower rate 
-        // server->broadcast(GAMESTATE?);
+        //simulate the game
+        try{
+            if(server->simulate()){
+                //create packet of gamestate and broadcast
+                Packet* gamestatepacket = server->getGamestatePacket();
+                std::cout << "SERVER: Sending keyframe - ";
+                gamestatepacket->printData();
+                server->broadcast(gamestatepacket);
+            }else{
+                std::cout << "Failed to simulate game" << std::endl;
+            }
+        }catch (const std::exception &exc){
+            // catch anything thrown within try block that derives from std::exception
+            std::cerr << exc.what();
+        }
     }
-
     return 1;
 }
 
