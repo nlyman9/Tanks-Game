@@ -51,6 +51,7 @@ void Projectile::draw(SDL_Renderer *gRenderer, double update_lag) {
 	}
 	else
 	{
+    //finished = true;
 		Uint32 current_time = SDL_GetTicks();
 		dst->w = EXPLOSION_WIDTH;
 		dst->h = EXPLOSION_HEIGHT;
@@ -67,8 +68,8 @@ void Projectile::draw(SDL_Renderer *gRenderer, double update_lag) {
 		if(frame < 6)
 			SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), getSprite()->getFrame(frame), dst, theta, NULL, SDL_FLIP_NONE);
 		else {
-			finished = true;
-      		exploding = false;
+			//finished = true;
+      exploding = false;
 		}
 
 		//projectiles currently are not being deleted/removed correctly
@@ -293,4 +294,8 @@ bool Projectile::projCollisionCheck(Projectile* bullet2){
   SDL_Rect projBox1 = {(int)getX(), (int)getY(), PROJECTILE_WIDTH, PROJECTILE_HEIGHT};
   SDL_Rect projBox2 = {(int)bullet2->getX(), (int)bullet2->getY(), PROJECTILE_WIDTH, PROJECTILE_HEIGHT};
   return (check_collision(&projBox1, &projBox2));
+}
+
+void Projectile::setFinished(bool fini) {
+  this->finished = fini;
 }

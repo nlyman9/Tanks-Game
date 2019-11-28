@@ -309,8 +309,8 @@ std::vector<std::vector<int>>* MapGenerator::generateMap()
 			switch(rand() % NUM_PRE)
 			{
 				case 0:
-					// tile_map = generateEmptyMap();
-					// break;
+					tile_map = generateEmptyMap();
+					break;
 				case 1:
 					tile_map = presetCenterCubes();
 					break;

@@ -20,6 +20,8 @@ class LocalGameLoop {
         std::vector<Enemy *> enemies;
     	std::vector<Projectile *> projectiles;
         std::vector<Bomb *> bombs;
+        std::vector<SDL_Rect *> enemyBoxes;
+        int shouldMove = 0;     //this int controls speed for the purple tank
 
         Sprite* pinksplosion = nullptr;
 		Sprite* redsplosion = nullptr;

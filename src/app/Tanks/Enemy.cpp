@@ -42,7 +42,7 @@ Enemy::~Enemy() {}
 			frame = (frame + 1) % 3;
 			anim_last_time = SDL_GetTicks();
 		}
-
+    //std::cout << "After hit should be printing\n";
 		//draw the tank and turret and use the rect from above as parameters for both calls since turret is centered on tank
 		SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), getSprite()->getFrame(frame), dst, theta, NULL, SDL_FLIP_NONE);
 		SDL_RenderCopyEx(gRenderer, getTurretSprite()->getTexture(), NULL, dst, turretTheta, NULL, SDL_FLIP_NONE);
@@ -57,28 +57,49 @@ Enemy::~Enemy() {}
 	else {
 		//std::cout << "exploding";
 
-		Uint32 current_time = SDL_GetTicks();
-		dst->w = EXPLOSION_WIDTH;
-		dst->h = EXPLOSION_HEIGHT;
+    Uint32 current_time = SDL_GetTicks();
+    dst->w = EXPLOSION_WIDTH;
+    dst->h = EXPLOSION_HEIGHT;
 
-		if(frame == 0 && anim_last_time == 0) {
-			//std::cout << "setting anim for first time\n";
-			anim_last_time = SDL_GetTicks();
-		}
+    if(frame == 0 && anim_last_time == 0) {
+      //std::cout << "setting anim for first time\n";
+      anim_last_time = SDL_GetTicks();
+    }
 
-		if(current_time > anim_last_time + 200) {
-			frame++;
-			anim_last_time = SDL_GetTicks();
-			//std::cout << "frame++\n";
-		}
-
+    if(current_time > anim_last_time + 200) {
+      frame++;
+      anim_last_time = SDL_GetTicks();
+      //std::cout << "frame++\n";
+    }
 		if(frame < 6) {
 			//std::cout << "rendering frame = " << frame << "\n";
 			SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), getSprite()->getFrame(frame), dst, theta, NULL, SDL_FLIP_NONE);
 		}
 		else {
 			//std::cout << "destroyed\n";
-			destroyed = true;
+      if (enemyType == 2 && shouldExplode < 1) {
+        std::cout << "hit\n";
+        if (SDL_GetTicks() - anim_last_time > 100) {
+          frame = (frame + 1) % 3;
+          anim_last_time = SDL_GetTicks();
+        }
+        //draw the tank and turret and use the rect from above as parameters for both calls since turret is centered on tank
+        //SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), getSprite()->getFrame(frame), dst, theta, NULL, SDL_FLIP_NONE);
+        //SDL_RenderCopyEx(gRenderer, getTurretSprite()->getTexture(), NULL, dst, turretTheta, NULL, SDL_FLIP_NONE);
+
+        //lines coming out of turret "field of view" have end points and this method finds them
+        //findEndValues(turretTheta);
+
+        //draw the two lines with endpoints that were just calculated
+        //SDL_RenderDrawLine(gRenderer, getX() + TANK_WIDTH/2, getY() + TANK_HEIGHT/2, line1X, line1Y);
+        //SDL_RenderDrawLine(gRenderer, getX() + TANK_WIDTH/2, getY() + TANK_HEIGHT/2, line2X, line2Y);
+        shouldExplode++;
+        hit = false;
+      }
+      else {
+        std::cout << "Destroyed\n";
+        destroyed = true;
+      }
 		}
 	}
  }
@@ -331,7 +352,6 @@ void Enemy::updatePos() {
   //std::cout << enemy_rect.w << ":" << enemy_rect.h << ":" << enemy_rect.x << ":" << enemy_rect.y << std::endl;
 
   SDL_Rect* overlap;
-  overlap = check_collision(&enemy_rect, &player_rect);
 
   //Get direction of current direction moving
   if (theta == 0) {
@@ -365,7 +385,10 @@ void Enemy::updatePos() {
     if(moveFrom.col > moveTo.col){
       if (moveLeft || rightLeft) {
         //x_enemy_pos -= MAX_VELOCITY;
-		setX(getX() - MAX_VELOCITY);
+        setX(getX() - MAX_VELOCITY);
+        SDL_Rect enemy_rect = {(int)getX(), (int)getY(), TANK_WIDTH, TANK_HEIGHT};
+        SDL_Rect player_rect = {(int)x_pos, (int)y_pos, TANK_WIDTH, TANK_HEIGHT};
+        overlap = check_collision(&enemy_rect, &player_rect);
         //y_enemy_pos += 0;
         //check that the tank position arrived in desired location
         if(getX() < (moveTo.col * TILE_SIZE + TILE_SIZE + 36)){
@@ -392,7 +415,10 @@ void Enemy::updatePos() {
     if(moveFrom.col < moveTo.col){
       if (moveRight || rightLeft) {
         //x_enemy_pos += MAX_VELOCITY;
-		setX(getX() + MAX_VELOCITY);
+        setX(getX() + MAX_VELOCITY);
+        SDL_Rect enemy_rect = {(int)getX(), (int)getY(), TANK_WIDTH, TANK_HEIGHT};
+        SDL_Rect player_rect = {(int)x_pos, (int)y_pos, TANK_WIDTH, TANK_HEIGHT};
+        overlap = check_collision(&enemy_rect, &player_rect);
         //y_enemy_pos += 0;
         //check that the tank position arrived in desired location
         if(getX() > (moveTo.col * TILE_SIZE + TILE_SIZE*2 - 20)){
@@ -424,7 +450,10 @@ void Enemy::updatePos() {
       if (moveUp || upDown) {
         //x_enemy_pos += 0;
         //y_enemy_pos -= MAX_VELOCITY;
-		setY(getY() - MAX_VELOCITY);
+        setY(getY() - MAX_VELOCITY);
+        SDL_Rect enemy_rect = {(int)getX(), (int)getY(), TANK_WIDTH, TANK_HEIGHT};
+        SDL_Rect player_rect = {(int)x_pos, (int)y_pos, TANK_WIDTH, TANK_HEIGHT};
+        overlap = check_collision(&enemy_rect, &player_rect);
         //check that the tank position arrived in desired location
         if(getY() < (moveTo.row * TILE_SIZE + TILE_SIZE + 20)){
           enemyPath.pop_back();
@@ -451,7 +480,10 @@ void Enemy::updatePos() {
       if (moveDown || upDown) {
         //x_enemy_pos += 0;
         //y_enemy_pos += MAX_VELOCITY;
-		setY(getY() + MAX_VELOCITY);
+        setY(getY() + MAX_VELOCITY);
+        SDL_Rect enemy_rect = {(int)getX(), (int)getY(), TANK_WIDTH, TANK_HEIGHT};
+        SDL_Rect player_rect = {(int)x_pos, (int)y_pos, TANK_WIDTH, TANK_HEIGHT};
+        overlap = check_collision(&enemy_rect, &player_rect);
         //check that the tank position arrived in desired location
         if(getY() > (moveTo.row * TILE_SIZE + TILE_SIZE + 20)){
           enemyPath.pop_back();

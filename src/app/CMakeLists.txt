@@ -16,7 +16,7 @@ add_subdirectory(Args)
 add_subdirectory(Bomb)
 add_subdirectory(Box)
 
-if(${APPLE})
+if(${APPLE}) 
 find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
 find_package(SDL2_ttf REQUIRED)
