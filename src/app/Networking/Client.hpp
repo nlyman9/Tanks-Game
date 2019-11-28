@@ -31,7 +31,10 @@ class Client {
     // The keys we want to check for when we add a keystate packet
     std::vector<Uint8> keysToCheck =  { SDL_SCANCODE_W, SDL_SCANCODE_A, 
                                         SDL_SCANCODE_S, SDL_SCANCODE_D}; 
+    const int PLAYER_STATE_VALUES = 6;
   public:
+    int id;
+
     // Network
     ClientController *server;
 
@@ -46,7 +49,9 @@ class Client {
     std::vector<int> playerTurretThetas;
     std::vector<bool> playerShot;
     // Game state vector?
-
+    std::vector<char>* gameState;
+    std::vector<std::vector<int>>* playerStates;
+    bool stateSet = false;
     // Game 
     bool gameOn = false;
     bool startGame = false;
@@ -68,6 +73,8 @@ class Client {
       playerKeystates.push_back(player2Keystats);
       playerTurretThetas.push_back(0);
       playerShot.push_back(false);
+      playerStates = new std::vector<std::vector<int>>();
+      playerStates->resize(2, std::vector<int>(PLAYER_STATE_VALUES, 0));
     };
 
     ~Client() {
@@ -265,5 +272,29 @@ class Client {
      */
     static int clientProcess(void *data);
 
+    void setGameState(std::vector<char>* state){
+      std::cout << "Setting game state" << std::endl;
+      int offset = 0;
+      int player = 0;
+      while(player < 2){ //while less than num players
+        for(int i = 0; i < PLAYER_STATE_VALUES; i++){ //for each value in the gamestate (players have 5 lives, x, y, xvel, yvel)
+          std::string value = "";
+          while(state->at(offset) != 32){
+            value += state->at(offset);
+            offset++;
+          }
+          offset++;
+          playerStates->at(player).at(i) = stoi(value);
+        }
+        std::cout << "Printing player state of player : " << player << " state : ";
+        for(auto x: playerStates->at(player))
+          std::cout << x  << " ";
+        std::cout << std::endl;
+        player++;
+      }
+      //projectile stuff here - maybe a for x in state loop?
+
+      stateSet = true;
+    }
 };
 #endif

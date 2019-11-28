@@ -39,7 +39,7 @@ class Player : public Object, public Tank {
         bool connected;
         int id;
         Uint32 anim_last_time = 0;
-
+        std::vector<char>* gamestate;
     public:
         
         Player(Sprite *sprite, Sprite *turret, float x, float y, bool local); //constructor, initialize the x, y, and sprite
@@ -63,6 +63,40 @@ class Player : public Object, public Tank {
 
         BoundingBox* getBoundingBox() override;
 
+        std::vector<char>* getState(){
+            gamestate->clear();
+            for(auto x : std::to_string((int)lives))
+                gamestate->push_back(x);
+            gamestate->push_back(' ');
+            for(auto x : std::to_string((int)this->getX()))
+                gamestate->push_back(x);
+            gamestate->push_back(' ');
+            for(auto x : std::to_string((int)this->getY()))
+                gamestate->push_back(x);
+            gamestate->push_back(' ');
+            for(auto x : std::to_string((int)x_vel))
+                gamestate->push_back(x);
+            gamestate->push_back(' ');
+            for(auto x : std::to_string((int)y_vel))
+                gamestate->push_back(x);
+            gamestate->push_back(' ');
+            for(auto x : std::to_string((int)getTheta()))
+                gamestate->push_back(x);
+            gamestate->push_back(' ');
+            std::cout << "Gamestate is : ";
+            for(auto x : *gamestate)
+                std::cout << x << " ";
+            std::cout << std::endl;
+            return gamestate;
+        }
+        void applyState(std::vector<int> state){
+            lives = state.at(0);
+            this->setX(state.at(1));
+            this->setY(state.at(2));
+            this->x_vel = state.at(3);
+            this->y_vel = state.at(4);
+            this->theta = state.at(5);
+        }
         ~Player();
 };
 #endif

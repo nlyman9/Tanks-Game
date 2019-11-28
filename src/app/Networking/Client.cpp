@@ -52,7 +52,7 @@ int Client::clientProcess(void* data) {
                 std::string id_str = "";
                 id_str += data->at(0);
                 int currId = atoi(id_str.c_str());
-
+                client->id = currId;
                 // Get player 1's position
                 std::string id_strP1 = "";
                 id_strP1 += data->at(2);
@@ -172,8 +172,22 @@ int Client::clientProcess(void* data) {
                 bool hasShot = mail->getBody()->at(10); // 10 is the index of the boolean if the player has shot
                 client->addNetworkKeyState(0, mail->getBody(), turret_theta, hasShot);
             }
+            if(mail->getType() == PackType::KEYFRAME){
+                //set gamestate vector
+                try{
+                    mail->printData();
+                    std::cout << "Body of mail ";
+                    for(auto x : *mail->getBody()){
+                        std::cout << x << " ";
+                    }
+                    std::cout << std::endl;
+                    client->setGameState(mail->getBody());
+                }catch (const std::exception &exc){
+                    // catch anything thrown within try block that derives from std::exception
+                    std::cerr << exc.what();
+                }
+            }
         }
-
         // TODO wait if we finish early?
     }
 
