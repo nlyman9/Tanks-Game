@@ -300,6 +300,7 @@ int LocalGameLoop::run() {
 			for (int i = 0; i < enemies.size(); i++) {
 				enemies.at(i)->update();
 				enemies.at(i)->setProjectiles(projectiles);
+        enemies.at(i)->setBombs(bombs);
 				SDL_Rect* curEnemy = enemies.at(i)->get_box();
 				enemyBoxes.push_back(curEnemy);
 				if(enemies.at(i)->isDestroyed()) {
