@@ -103,8 +103,15 @@ void LocalGameLoop::generateMap() {
 
     player->setObstacleLocations(&tileArray);
 
-    std::vector<int> enemySpawn = spawnEnemies(map, 1);
-    enemies.push_back(new Enemy(enemySpawn.at(0), enemySpawn.at(1), player, 0));
+    //spawn random number of enemies between 1 - 4
+    int numEnemies = rand() % 4 + 1;
+    for(int i = 0; i < numEnemies; i++){
+      int randEnemyType = rand() % 3;
+      std::vector<int> enemySpawn = spawnEnemies(map, 1);
+      enemies.push_back(new Enemy(enemySpawn.at(0), enemySpawn.at(1), player, randEnemyType));
+    }
+    //std::vector<int> enemySpawn = spawnEnemies(map, 1);
+    //enemies.push_back(new Enemy(enemySpawn.at(0), enemySpawn.at(1), player, 0));
 
     render->setEnemies(enemies);
 
@@ -301,6 +308,7 @@ int LocalGameLoop::run() {
 				enemies.at(i)->update();
 				enemies.at(i)->setProjectiles(projectiles);
         enemies.at(i)->setBombs(bombs);
+        enemies.at(i)->setEnemies(enemies);
 				SDL_Rect* curEnemy = enemies.at(i)->get_box();
 				enemyBoxes.push_back(curEnemy);
 				if(enemies.at(i)->isDestroyed()) {
