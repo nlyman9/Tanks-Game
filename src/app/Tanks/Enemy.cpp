@@ -223,7 +223,7 @@ void Enemy::updatePos() {
   if(isInRange(getX() + TANK_WIDTH/2, getY() + TANK_HEIGHT/2, line1X, line1Y, line2X, line2Y, gPlayer->getX() + TANK_WIDTH/2, gPlayer->getY() + TANK_HEIGHT/2)){
     //only allowed to shoot every 3 seconds so current time must be greater than last fired time
     if(current_time > fire_last_time_bullet + 3000){
-      setFire(true);
+      //setFire(true);
       //reset fire_last_time to current time so that can fire again in the future
       fire_last_time_bullet = current_time;
     }
@@ -330,6 +330,14 @@ void Enemy::updatePos() {
     }
   }
 
+  /*for(auto enemy : enemyList){
+    if(enemy != this){
+      int xBlock = findXBlock(enemy->getX());
+      int yBlock = findYBlock(enemy->getY());
+      tile_map[yBlock][xBlock] = 1;
+    }
+  }*/
+
   //the enemy path it is following will need to be updated frequently when the size of the vector is below a value
   //this value is global randCut variable that will randonly change what this cutoff is in the range 2-6
   //this is done so to give the enemy some sense of randomness as it will change how far it travels down its current path before updating
@@ -339,6 +347,14 @@ void Enemy::updatePos() {
     setPathway(this->tile_map, *this->gPlayer, *this);
     randCut = rand() % 4 + 2;
   }
+
+  /*for(auto enemy : enemyList){
+    if(enemy != this){
+      int xBlock = findXBlock(enemy->getX());
+      int yBlock = findYBlock(enemy->getY());
+      tile_map[yBlock][xBlock] = 0;
+    }
+  }*/
 
 
   float x_pos = gPlayer->getX();
@@ -369,9 +385,36 @@ void Enemy::updatePos() {
   }
 
 
+  enemyOverlapCheck = false;
+  /*SDL_Rect* enemyOverlap;
+  for(auto enemy : enemyList){
+    if(enemy != this){
+      SDL_Rect other_enemy = {(int)enemy->getX(), (int)enemy->getY(), TANK_WIDTH, TANK_HEIGHT};
+      SDL_Rect this_enemy = {(int)getX(), (int)getY(), TANK_WIDTH, TANK_HEIGHT};
+      enemyOverlap = check_collision(&other_enemy, &this_enemy);
+      if(enemyOverlap != nullptr){
+        enemyPath.clear();
+        moveState = 1;
+        enemyOverlapCheck = true;
+      }
+    }
+  }
+
+  for(auto enemy : enemyList){
+    if(enemy != this && enemyPath.size() > 1){
+      int xBlock = findXBlock(enemy->getX());
+      int yBlock = findYBlock(enemy->getY());
+      coordinate block = {yBlock, xBlock, 0};
+      coordinate goingTo = enemyPath[enemyPath.size() - 2];
+      if(block.col == goingTo.col && block.row == goingTo.row){
+        enemyOverlapCheck = true;
+      }
+    }
+  }*/
+
   //main moving function of the tank based on the path it currently has
   //need check that size is > 1 since utilize pop and can't pop if size is < 1
-  if(enemyPath.size() > 1){
+  if(enemyPath.size() > 1 && !enemyOverlapCheck){
 
     //these two coordinates will be how the enemy picks which direction to move
     //because of pathing algorithm these coordinates will always be adjacent on the map
@@ -1221,4 +1264,9 @@ void Enemy::setProjectiles(std::vector<Projectile *> projectiles) {
 void Enemy::setBombs(std::vector<Bomb *> bombs){
   bombList.clear();
   bombList = bombs;
+}
+
+void Enemy::setEnemies(std::vector<Enemy *> enemies){
+  enemyList.clear();
+  enemyList = enemies;
 }

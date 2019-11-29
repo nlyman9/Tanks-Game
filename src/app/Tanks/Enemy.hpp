@@ -34,6 +34,7 @@ class Enemy : public Object, public Tank {
         std::vector<coordinate> enemyPath;
 				std::vector<Projectile *> enemyProjectiles;
 				std::vector<Bomb *> bombList;
+				std::vector<Enemy *> enemyList;
 
 		float line1X, line1Y, line2X, line2Y;
 		int randCut = 2;
@@ -47,6 +48,7 @@ class Enemy : public Object, public Tank {
 		bool rightLeft = false;
 		bool upDown = false;
 		bool dodgingBullet = false;
+		bool enemyOverlapCheck = false;
 		int moveState = 0;
 		int bulletXblock, bulletYblock, bulletTheta;
 		int bombXblock, bombYblock;
@@ -93,6 +95,7 @@ class Enemy : public Object, public Tank {
         void updatePos();
 				void setProjectiles(std::vector<Projectile *> projectiles);	//set the projectiles vector from localgameloop.cpp
 				void setBombs(std::vector<Bomb *> bombs); //set the bombs vector from LocalGameLoop.cpp
+				void setEnemies(std::vector<Enemy *> enemies); //set the enemies vector from localgameloop.cpp
 
         BoundingBox* getBoundingBox() override;
 
