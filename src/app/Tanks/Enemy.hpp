@@ -16,6 +16,7 @@
 #include "Object.hpp"
 #include "Player.hpp"
 #include "Projectile.hpp"
+#include "Bomb.hpp"
 #include "Tank.hpp"
 
 struct coordinate {
@@ -32,6 +33,7 @@ class Enemy : public Object, public Tank {
 		bool anim_last_time = 0;
         std::vector<coordinate> enemyPath;
 				std::vector<Projectile *> enemyProjectiles;
+				std::vector<Bomb *> bombList;
 
 		float line1X, line1Y, line2X, line2Y;
 		int randCut = 2;
@@ -44,14 +46,16 @@ class Enemy : public Object, public Tank {
 		bool moveRight = false;
 		bool rightLeft = false;
 		bool upDown = false;
+		bool dodgingBullet = false;
 		int moveState = 0;
 		int bulletXblock, bulletYblock, bulletTheta;
+		int bombXblock, bombYblock;
 		int enemyType;
 
 		Uint32 last_state_change = 0;
 		Uint32 turret_mode_change = 0;
 
-        bool checkPos(float playX, float playY, float enemX, float enemY);
+        bool checkPos(float playX, float playY, float enemX, float enemY, float range);
         bool checkWall(float x, float y);
 		//	just wondering if we want to put some kind of custom acceleration on enemies?
 		//	this is just a note for the future since the online pitt library won't let me open the book I found
@@ -70,6 +74,7 @@ class Enemy : public Object, public Tank {
 		coordinate newGhostPos(int gX, int gY, int eX, int eY);
 		coordinate randGhostPos(int eX, int eY);
 		coordinate awayGhostPos(int eX, int eY, int bX, int bY, int bT);
+		coordinate awayBombGhostPos(int eX, int eY, int bX, int bY);
         std::vector<coordinate> generatePath(std::vector<std::vector<int>> move_map, Player player, Enemy enemy);
 				bool validMove(coordinate moveTo, coordinate currentlyAt);
         std::vector<std::vector<int>> tile_map;
@@ -87,6 +92,7 @@ class Enemy : public Object, public Tank {
 				int getEnemyType();
         void updatePos();
 				void setProjectiles(std::vector<Projectile *> projectiles);	//set the projectiles vector from localgameloop.cpp
+				void setBombs(std::vector<Bomb *> bombs); //set the bombs vector from LocalGameLoop.cpp
 
         BoundingBox* getBoundingBox() override;
 
