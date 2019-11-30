@@ -19,7 +19,17 @@ Enemy::Enemy(Sprite* sprite, Sprite* turret, int x, int y, Player* player){
 Enemy::Enemy(float x, float y, Player* player, int type) {
 	setPos(x, y);
 	gPlayer = player;
-  enemyType = type;
+	enemyType = type;
+	switch(enemyType) {
+		case 0:
+		case 1:
+			velocity = 2;
+			break;
+		case 2:
+		case 3:
+			velocity = 1;
+			break;
+	}
 }
 
 Enemy::~Enemy() {}
@@ -425,7 +435,7 @@ void Enemy::updatePos() {
     if(moveFrom.col > moveTo.col){
       if (moveLeft || rightLeft) {
         //x_enemy_pos -= MAX_VELOCITY;
-        setX(getX() - MAX_VELOCITY);
+        setX(getX() - velocity);
         SDL_Rect enemy_rect = {(int)getX(), (int)getY(), TANK_WIDTH, TANK_HEIGHT};
         SDL_Rect player_rect = {(int)x_pos, (int)y_pos, TANK_WIDTH, TANK_HEIGHT};
         overlap = check_collision(&enemy_rect, &player_rect);
@@ -437,7 +447,7 @@ void Enemy::updatePos() {
         //check collision with player
         if (overlap != nullptr) {
           //x_enemy_pos += MAX_VELOCITY;
-		  setX(getX() + MAX_VELOCITY);
+		  setX(getX() + velocity);
         }
       }
       else {
@@ -455,7 +465,7 @@ void Enemy::updatePos() {
     if(moveFrom.col < moveTo.col){
       if (moveRight || rightLeft) {
         //x_enemy_pos += MAX_VELOCITY;
-        setX(getX() + MAX_VELOCITY);
+        setX(getX() + velocity);
         SDL_Rect enemy_rect = {(int)getX(), (int)getY(), TANK_WIDTH, TANK_HEIGHT};
         SDL_Rect player_rect = {(int)x_pos, (int)y_pos, TANK_WIDTH, TANK_HEIGHT};
         overlap = check_collision(&enemy_rect, &player_rect);
@@ -467,7 +477,7 @@ void Enemy::updatePos() {
         //check collision
         if (overlap != nullptr) {
           //x_enemy_pos -= MAX_VELOCITY;
-		  setX(getX() - MAX_VELOCITY);
+		  setX(getX() - velocity);
         }
       }
       else {
@@ -490,7 +500,7 @@ void Enemy::updatePos() {
       if (moveUp || upDown) {
         //x_enemy_pos += 0;
         //y_enemy_pos -= MAX_VELOCITY;
-        setY(getY() - MAX_VELOCITY);
+        setY(getY() - velocity);
         SDL_Rect enemy_rect = {(int)getX(), (int)getY(), TANK_WIDTH, TANK_HEIGHT};
         SDL_Rect player_rect = {(int)x_pos, (int)y_pos, TANK_WIDTH, TANK_HEIGHT};
         overlap = check_collision(&enemy_rect, &player_rect);
@@ -501,7 +511,7 @@ void Enemy::updatePos() {
         //check collision
         if (overlap != nullptr) {
           //y_enemy_pos += MAX_VELOCITY;
-		  setY(getY() + MAX_VELOCITY);
+		  setY(getY() + velocity);
         }
       }
       else {
@@ -520,7 +530,7 @@ void Enemy::updatePos() {
       if (moveDown || upDown) {
         //x_enemy_pos += 0;
         //y_enemy_pos += MAX_VELOCITY;
-        setY(getY() + MAX_VELOCITY);
+        setY(getY() + velocity);
         SDL_Rect enemy_rect = {(int)getX(), (int)getY(), TANK_WIDTH, TANK_HEIGHT};
         SDL_Rect player_rect = {(int)x_pos, (int)y_pos, TANK_WIDTH, TANK_HEIGHT};
         overlap = check_collision(&enemy_rect, &player_rect);
@@ -531,7 +541,7 @@ void Enemy::updatePos() {
         //check collision
         if (overlap != nullptr) {
           //y_enemy_pos -= MAX_VELOCITY;
-		  setY(getY() - MAX_VELOCITY);
+		  setY(getY() - velocity);
         }
       }
       else {
@@ -1084,6 +1094,35 @@ bool Enemy::validMove(coordinate moveTo, coordinate currentlyAt){
 	return false;
 }
 
+/**
+  * @brief helper method to generatePath that will be used in building the pathway
+  * @params coordinate to check, int tile type provided by tile map
+  * @return true if empty, false otherwise
+  */
+bool Enemy::normalCheck(coordinate loc, std::vector<std::vector<int>> move_map) {
+	if(!(loc.row < 0 || loc.row > 12 || loc.col < 0 || loc.col > 23) && move_map[loc.col][loc.row] == 0) {
+		velocity = 2;
+		return true;
+	}
+	else
+		return false;
+}
+
+/**
+  * @brief helper method to generatePath that will be used in building the pathway
+  * @params coordinate to check, int tile type provided by tile map
+  * @return true if empty or block, false otherwise
+  */
+bool Enemy::spiderCheck(coordinate loc, std::vector<std::vector<int>> move_map) {
+	if(!(loc.row < 0 || loc.row > 12 || loc.col < 0 || loc.col > 23) && enemyType == 3 && move_map[loc.col][loc.row] != 1) {
+		setFire(false);
+		velocity = 1;
+		return true;
+	}
+	else
+		return false;
+}
+
 
 /**
   * @brief generate the shortest path from the enemy to the player
@@ -1123,7 +1162,7 @@ std::vector<coordinate> Enemy::generatePath(std::vector<std::vector<int>> move_m
 			if(coordList[i].weight == count){
 				coordinate left = {coordList[i].row, coordList[i].col - 1, coordList[i].weight + 1};
 				//check isnt a wall
-				if(!(left.row < 0 || left.row > 12 || left.col < 0 || left.col > 23) && (move_map[left.col][left.row] == 0)){
+				if(normalCheck(left, move_map) || spiderCheck(left, move_map)) {
 					//check isnt already in list
 					for(int j = 0; j < coordListLength; j++){
 						if(left.row == coordList[j].row && left.col == coordList[j].col){
@@ -1141,7 +1180,7 @@ std::vector<coordinate> Enemy::generatePath(std::vector<std::vector<int>> move_m
 					inList = false;
 				}
 				coordinate right = {coordList[i].row, coordList[i].col + 1, coordList[i].weight + 1};
-				if(!(right.row < 0 || right.row > 12 || right.col < 0 || right.col > 23) && (move_map[right.col][right.row] == 0)){
+				if(normalCheck(right, move_map) || spiderCheck(right, move_map)) {
 					for(int j = 0; j < coordListLength; j++){
 						if(right.row == coordList[j].row && right.col == coordList[j].col){
 							inList = true;
@@ -1158,7 +1197,7 @@ std::vector<coordinate> Enemy::generatePath(std::vector<std::vector<int>> move_m
 					inList = false;
 				}
 				coordinate up = {coordList[i].row - 1, coordList[i].col, coordList[i].weight + 1};
-				if(!(up.row < 0 || up.row > 12 || up.col < 0 || up.col > 23) && (move_map[up.col][up.row] == 0)){
+				if(normalCheck(up, move_map) || spiderCheck(up, move_map)) {
 					for(int j = 0; j < coordListLength; j++){
 						if(up.row == coordList[j].row && up.col == coordList[j].col){
 							inList = true;
@@ -1175,7 +1214,7 @@ std::vector<coordinate> Enemy::generatePath(std::vector<std::vector<int>> move_m
 					inList = false;
 				}
 				coordinate down = {coordList[i].row + 1, coordList[i].col, coordList[i].weight + 1};
-				if(!(down.row < 0 || down.row > 12 || down.col < 0 || down.col > 23) && (move_map[down.col][down.row] == 0)){
+				if(normalCheck(down, move_map) || spiderCheck(down, move_map)) {
 					for(int j = 0; j < coordListLength; j++){
 						if(down.row == coordList[j].row && down.col == coordList[j].col){
 							inList = true;

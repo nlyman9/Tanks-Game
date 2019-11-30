@@ -28,9 +28,11 @@ class LocalGameLoop {
         Sprite* enemy_tank_blue = nullptr;
         Sprite* enemy_tank_green = nullptr;
         Sprite* enemy_tank_purple = nullptr;
+		Sprite* enemy_tank_spider = nullptr;
         Sprite* enemy_turret_blue = nullptr;
         Sprite* enemy_turret_green = nullptr;
         Sprite* enemy_turret_purple = nullptr;
+		Sprite* enemy_turret_spider = nullptr;
         Sprite* bullet = nullptr;
         Sprite* shell = nullptr;
         Sprite* bombBlack = nullptr;

@@ -53,6 +53,7 @@ class Enemy : public Object, public Tank {
 		int bulletXblock, bulletYblock, bulletTheta;
 		int bombXblock, bombYblock;
 		int enemyType;
+		int velocity;
 
 		Uint32 last_state_change = 0;
 		Uint32 turret_mode_change = 0;
@@ -77,6 +78,8 @@ class Enemy : public Object, public Tank {
 		coordinate randGhostPos(int eX, int eY);
 		coordinate awayGhostPos(int eX, int eY, int bX, int bY, int bT);
 		coordinate awayBombGhostPos(int eX, int eY, int bX, int bY);
+		bool normalCheck(coordinate loc, std::vector<std::vector<int>> move_map);
+		bool spiderCheck(coordinate loc, std::vector<std::vector<int>> move_map);
         std::vector<coordinate> generatePath(std::vector<std::vector<int>> move_map, Player player, Enemy enemy);
 				bool validMove(coordinate moveTo, coordinate currentlyAt);
         std::vector<std::vector<int>> tile_map;
