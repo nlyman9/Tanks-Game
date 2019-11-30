@@ -78,7 +78,7 @@ Enemy::~Enemy() {}
 		else {
 			//std::cout << "destroyed\n";
       if (enemyType == 2 && shouldExplode < 1) {
-        std::cout << "hit\n";
+        //std::cout << "hit\n";
         if (SDL_GetTicks() - anim_last_time > 100) {
           frame = (frame + 1) % 3;
           anim_last_time = SDL_GetTicks();
@@ -87,7 +87,7 @@ Enemy::~Enemy() {}
         hit = false;
       }
       else {
-        std::cout << "Destroyed\n";
+        //std::cout << "Destroyed\n";
         destroyed = true;
       }
 		}

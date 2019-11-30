@@ -345,13 +345,13 @@ int LocalGameLoop::run() {
                   enemy->setPurpHit(true);
                 }
                 enemy->setHit(true);
-                std::cout << "hit once\n";
+                //std::cout << "hit once\n";
                 projectiles.at(i)->setFinished(true);
                 count++;
               }
               else {
                 enemy->setHit(true);
-                std::cout << "setting hit to true\n";
+                //std::cout << "setting hit to true\n";
                 //enemy->setSprite(bluesplosion);
                 enemy->resetFrame();
               }
@@ -364,11 +364,10 @@ int LocalGameLoop::run() {
           projectiles.at(i)->setFinished(true);
 				}
         if(projectiles.at(i)->isFinished()){
-          std::cout << "Projectile being deleted\n";
+          //std::cout << "Projectile being deleted\n";
 					//erase the projectile object from the projectiles vector
 					projectiles.erase(projectiles.begin()+i);
 					render->setProjectiles(projectiles);
-          //projectiles.at(i)->~Projectile();
 					i--;
 				}
 				count++;
