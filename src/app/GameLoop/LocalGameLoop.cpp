@@ -162,7 +162,7 @@ std::vector<int> LocalGameLoop::spawnEnemies(std::vector<std::vector<int>> *map,
         }
     }
 
-    coords.push_back(enemy_x * 48 + 100);
+    coords.push_back(enemy_x * 48 + 64);
     coords.push_back(enemy_y * 48 + 48);
 
     return coords;
