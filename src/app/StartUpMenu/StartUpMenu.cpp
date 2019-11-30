@@ -3,12 +3,15 @@
 #include "LocalGameLoop.hpp"
 #include "OnlineGameLoop.hpp"
 #include "MultiplayerMenu.hpp"
+#include "ImageLoader.hpp"
 #include "Credits.hpp"
 
 void launch(Args *options) 
 {
 	Render* renderer = new Render();
   	renderer->init();
+	SDL_Texture* winScreen = loadImage("src/res/images/WinScreen.png", renderer->getRenderer());
+	SDL_Texture* loseScreen = loadImage("src/res/images/LoseScreen.png", renderer->getRenderer());
 
 	int ret = 0;
 	while(ret == 0) {
@@ -22,13 +25,18 @@ void launch(Args *options)
 			ret = localGameLoop.run();
 		} else if(gameMode == MENU_MULTI) {
 			OnlineGameLoop onlineGameLoop(renderer);
-			std::cout << "Going into menu" << std::endl;
-			options = MultiplayerMenu(renderer);
+			
+			// Only load menu if no command line options were inputted
+			if(!options->isOnline) {
+				options = MultiplayerMenu(renderer);
+			}
+
 			if(options == nullptr){
 				//Player exited menu instead of starting a game
 				gameMode = 0;
 				continue;
 			}
+			
 			onlineGameLoop.init(options);
 			ret = onlineGameLoop.run();
 		} else if(gameMode == MENU_CREDITS) {
@@ -37,6 +45,13 @@ void launch(Args *options)
 		} else {
 			renderer->close();
 			exit(0);
+		}
+
+		if(ret == WIN) {
+			ret = renderer->drawGameOver(winScreen);
+		}
+		if(ret == LOSE) {
+			ret = renderer->drawGameOver(loseScreen);
 		}
 	}
 }

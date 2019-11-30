@@ -156,13 +156,13 @@ int Render::drawMenu() {
 
 		SDL_Rect fullscreen = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
 		if(menuOption == MENU_SINGLE) {
-			SDL_RenderCopy(gRenderer, menuSinglePlayer, NULL, &fullscreen); 
+			drawScreen(menuSinglePlayer); 
 		} else if(menuOption == MENU_MULTI) {
-			SDL_RenderCopy(gRenderer, menuMultiPlayer, NULL, &fullscreen); 
+			drawScreen(menuMultiPlayer);
 		} else if(menuOption == MENU_CREDITS) {
-			SDL_RenderCopy(gRenderer, menuCredits, NULL, &fullscreen); 
+			drawScreen(menuCredits);
 		} else {
-			SDL_RenderCopy(gRenderer, menuNone, NULL, &fullscreen); 
+			drawScreen(menuNone);
 		}
 
 		int cursorX = 0, cursorY = 0;
@@ -174,20 +174,71 @@ int Render::drawMenu() {
 		SDL_Rect cursorRect = {cursorX - CROSSHAIR_SIZE/2, cursorY - CROSSHAIR_SIZE/2, CROSSHAIR_SIZE, CROSSHAIR_SIZE};
 		SDL_RenderCopy(gRenderer, crosshair, NULL, &cursorRect);
 
-		SDL_RenderPresent(gRenderer);
+		present();
 	}
 
 	return menuOption;
 }
+
+int Render::drawGameOver(SDL_Texture* screen) {
+
+	SDL_Rect continueBox = {506, 290, 256, 79};
+	SDL_Rect exitBox = {506, 420, 256, 79};
+
+	bool quit = false;
+
+	while(!quit) {
+		SDL_Event e;
+		while(SDL_PollEvent(&e)) {
+			// X button
+			if(e.type == SDL_QUIT || (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_CLOSE)) {
+				quit = true;
+				return -1;
+			}
+
+			// Mouse Click Event
+			if(e.type == SDL_MOUSEBUTTONDOWN) {
+				int x, y;
+				SDL_GetMouseState(&x, &y);
+				SDL_Rect clickBox = {x, y, 1, 1};
+				SDL_Rect intersection;
+
+				// Check for box clicks
+				if(SDL_IntersectRect(&clickBox, &continueBox, &intersection)) {
+					return 0; // Back to main menu
+				}
+				if(SDL_IntersectRect(&clickBox, &exitBox, &intersection)) {
+					return -1; // exit game
+				}
+			}
+
+			// Draw crosshair cursor
+			int cursorX = 0, cursorY = 0;
+			if(e.type == SDL_MOUSEMOTION || e.type == SDL_MOUSEBUTTONDOWN) {
+				SDL_GetMouseState(&cursorX, &cursorY);
+			}
+
+			SDL_Rect cursorRect = {cursorX - CROSSHAIR_SIZE/2, cursorY - CROSSHAIR_SIZE/2, CROSSHAIR_SIZE, CROSSHAIR_SIZE};
+			SDL_RenderCopy(gRenderer, crosshair, NULL, &cursorRect);
+
+		}
+		
+		// Render the correct game over screen (Win/Lose)
+		drawScreen(screen);
+		present();
+	}
+}
+
 int Render::present(){
 	SDL_RenderPresent( gRenderer );
 }
-int Render::drawBackground(){
+
+int Render::drawScreen(SDL_Texture* screen){
 	SDL_RenderClear( gRenderer );
 	SDL_Rect fullscreen = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
-	SDL_Texture* background = loadImage("src/res/images/MultiplayerScreen.png", gRenderer);
-	SDL_RenderCopy(gRenderer, background, NULL, &fullscreen);
+	SDL_RenderCopy(gRenderer, screen, NULL, &fullscreen);
 }
+
 int Render::drawText(Box* box, const std::string* toDraw, int XOFFSET, int YOFFSET, int WIDTH, int HEIGHT){
 	SDL_Surface* surfaceMessage = TTF_RenderText_Solid(fontRoboto, toDraw->c_str(), textColor);
 	Message = SDL_CreateTextureFromSurface(gRenderer, surfaceMessage);
@@ -202,6 +253,7 @@ int Render::drawText(Box* box, const std::string* toDraw, int XOFFSET, int YOFFS
 	SDL_DestroyTexture(Message);
 	delete rect;
 }
+
 int Render::drawBox(Box toDraw){
 	switch(toDraw.getType()){
 		case BUTTON:
@@ -211,6 +263,7 @@ int Render::drawBox(Box toDraw){
 	}
 	return 0;
 }
+
 int Render::drawButton(Box toDraw){
 	if(toDraw.getIMGPath() == ""){ //if src is empty
 		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF); //default color
@@ -221,6 +274,7 @@ int Render::drawButton(Box toDraw){
 	}
 	return 0;
 }
+
 int Render::drawTextField(Box toDraw){
 	if(toDraw.getIMGPath() == ""){ //if src is empty
 		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF); //default color
@@ -239,6 +293,7 @@ int Render::drawTextField(Box toDraw){
 	delete TextField;
 	return 0;
 }
+
 void Render::setTileMap(std::vector<std::vector<int>>* tileMap) {
 	tile_map = *tileMap;
 }

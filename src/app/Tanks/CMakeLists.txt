@@ -15,6 +15,7 @@ target_link_libraries(Tank
   Constants
   Sprite
   Projectile
+  Bomb
   ${SDL2_LIBRARY}
 )
 else()
@@ -24,6 +25,7 @@ target_link_libraries(Tank
   Constants
   Sprite
   Projectile
+  Bomb
 )
 endif()
 

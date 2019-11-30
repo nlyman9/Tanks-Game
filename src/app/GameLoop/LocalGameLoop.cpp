@@ -49,12 +49,17 @@ bool LocalGameLoop::init() {
     enemy_tank_purple = new Sprite(render->getRenderer(), "src/res/images/purple_tank.png");
     enemy_tank_purple->init();
     enemy_tank_purple->sheetSetup(30, 30, 3);
+	enemy_tank_spider = new Sprite(render->getRenderer(), "src/res/images/spider_tank.png");
+    enemy_tank_spider->init();
+    enemy_tank_spider->sheetSetup(48, 48, 8);
     enemy_turret_blue = new Sprite(render-> getRenderer(), "src/res/images/blue_turret.png");
     enemy_turret_blue->init();
     enemy_turret_green = new Sprite(render->getRenderer(), "src/res/images/green_turret.png");
     enemy_turret_green->init();
     enemy_turret_purple = new Sprite(render->getRenderer(), "src/res/images/purple_turret.png");
     enemy_turret_purple->init();
+	enemy_turret_spider = new Sprite(render->getRenderer(), "src/res/images/spider_turret.png");
+    enemy_turret_spider->init();
 
     // Set up bomb
     bombBlack = new Sprite(render->getRenderer(), "src/res/images/bomb_black.png");
@@ -103,25 +108,36 @@ void LocalGameLoop::generateMap() {
 
     player->setObstacleLocations(&tileArray);
 
-    std::vector<int> enemySpawn = spawnEnemies(map, 1);
-    enemies.push_back(new Enemy(enemySpawn.at(0), enemySpawn.at(1), player, 2));
+    //spawn random number of enemies between 1 - 4
+    int numEnemies = rand() % 4 + 1;
+    for(int i = 0; i < numEnemies; i++){
+      int randEnemyType = rand() % 4;
+      std::vector<int> enemySpawn = spawnEnemies(map, 1);
+      enemies.push_back(new Enemy(enemySpawn.at(0), enemySpawn.at(1), player, randEnemyType));
+    }
+    //std::vector<int> enemySpawn = spawnEnemies(map, 1);
+    //enemies.push_back(new Enemy(enemySpawn.at(0), enemySpawn.at(1), player, 0));
 
     render->setEnemies(enemies);
 
     for (auto enemy : enemies) {
-			if(enemy->getEnemyType() == 0){
+			if(enemy->getEnemyType() == 0) {
 				enemy->setSprite(enemy_tank_blue);
 				enemy->setTurretSprite(enemy_turret_blue);
 			}
-			else if(enemy->getEnemyType() == 1){
+			else if(enemy->getEnemyType() == 1) {
 				enemy->setSprite(enemy_tank_green);
 				enemy->setTurretSprite(enemy_turret_green);
 			}
-			else{
+			else if(enemy->getEnemyType() == 2) {
 				enemy->setSprite(enemy_tank_purple);
 				enemy->setTurretSprite(enemy_turret_purple);
 			}
-      enemy->setObstacleLocations(&tileArray);
+			else {
+				enemy->setSprite(enemy_tank_spider);
+				enemy->setTurretSprite(enemy_turret_spider);
+			}
+			enemy->setObstacleLocations(&tileArray);
 			enemy->setTileMap(map);
 			SDL_Rect curEnemy = {(int)enemy->getX(), (int)enemy->getY(), TANK_WIDTH, TANK_HEIGHT};
 			enemyBoxes.push_back(&curEnemy);
@@ -198,13 +214,28 @@ int LocalGameLoop::run() {
     SDL_Event e;
     previous_time = std::chrono::system_clock::now(); // get current time of system
     lag_time = 0.0;	// Set duration of time to 0
-
+    long gameTimer = TIMER_LENGTH;
+    auto startTime = std::chrono::system_clock::now();
 
     while(isGameOn) {
+
         current_time = std::chrono::system_clock::now();
         elapsed_time = current_time - previous_time;
         previous_time = current_time;
         lag_time += elapsed_time.count();
+
+        // Check Game Over Conditions
+        auto timeSinceStart = current_time - startTime;
+        long timeRemaining = gameTimer - (timeSinceStart.count() / 1000000000);
+        render->setTimer(timeRemaining);
+        if(enemies.size() == 0) {
+            return 1;
+        }
+
+        if(player->isHit() || timeRemaining <= 0) {
+            return 2;
+        }
+
 
         // 1. Process input
         while (SDL_PollEvent(&e))
@@ -225,7 +256,7 @@ int LocalGameLoop::run() {
 
         if (player->getFire() == true) {
             Projectile *newBullet = new Projectile(player->getX() + TANK_WIDTH/4, player->getY() + TANK_HEIGHT/4, player->getTurretTheta(), 1);
-            newBullet->setSprite(shell);
+            newBullet->setSprite(bullet);
             newBullet->setObstacleLocations(&projectileObstacles);
             newBullet->setFriendly(true);
             for(auto enemy : enemies) {

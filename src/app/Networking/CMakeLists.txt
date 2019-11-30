@@ -48,6 +48,8 @@ target_link_libraries(Server
   ${SDL2_TTF_LIBRARIES}
   Multiplayer
   Constants
+  Tank
+  Object
 )
 else()
 target_link_libraries(Server
@@ -55,5 +57,7 @@ target_link_libraries(Server
   MapGenerator
   Multiplayer
   Constants
+  Tank
+  Object
 )
 endif()

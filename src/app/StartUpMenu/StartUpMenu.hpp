@@ -3,6 +3,13 @@
 
 #include "Args.hpp"
 
+enum {
+    CLOSE = -1,
+    MENU,
+    WIN,
+    LOSE    
+};
+
 void launch(Args *options);
 
 #endif

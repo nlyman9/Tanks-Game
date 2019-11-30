@@ -19,7 +19,17 @@ Enemy::Enemy(Sprite* sprite, Sprite* turret, int x, int y, Player* player){
 Enemy::Enemy(float x, float y, Player* player, int type) {
 	setPos(x, y);
 	gPlayer = player;
-  enemyType = type;
+	enemyType = type;
+	switch(enemyType) {
+		case 0:
+		case 1:
+			velocity = 2;
+			break;
+		case 2:
+		case 3:
+			velocity = 1;
+			break;
+	}
 }
 
 Enemy::~Enemy() {}
@@ -207,14 +217,14 @@ bool Enemy::isInRange(float x1, float y1, float x2, float y2, float x3, float y3
   * @params x,y positions of two points to check against
   * @return true if distance between is smaller than given number, false otherwise
   */
-bool Enemy::checkPos(float playX, float playY, float enemX, float enemY) {
+bool Enemy::checkPos(float playX, float playY, float enemX, float enemY, float range) {
   //calculate all of distance formula except square root
   double stepOne = (double)(pow((playX - enemX), 2) + pow((playY - enemY), 2));
   //do the square root step
 	double distanceAway = (pow(stepOne, .5));
 
   //check if distance is < 200 and if so return true
-	if (distanceAway < 250.0)
+	if (distanceAway < range)
 	{
 		return true;
 	}
@@ -234,7 +244,7 @@ void Enemy::updatePos() {
   if(isInRange(getX() + TANK_WIDTH/2, getY() + TANK_HEIGHT/2, line1X, line1Y, line2X, line2Y, gPlayer->getX() + TANK_WIDTH/2, gPlayer->getY() + TANK_HEIGHT/2)){
     //only allowed to shoot every 3 seconds so current time must be greater than last fired time
     if(current_time > fire_last_time_bullet + 3000){
-      setFire(true);
+      //setFire(true);
       //reset fire_last_time to current time so that can fire again in the future
       fire_last_time_bullet = current_time;
     }
@@ -309,7 +319,7 @@ void Enemy::updatePos() {
 
   //change states of the enemy tank if bullet is within range
   for(auto bullet : enemyProjectiles){
-    if(checkPos(bullet->getX(), bullet->getY(), getX(), getY()) && bullet->getFriendly() == true){
+    if(checkPos(bullet->getX(), bullet->getY(), getX(), getY(), 250.0) && bullet->getFriendly() == true){
       //printf("AHHHH\n");
       bulletXblock = findXBlock(bullet->getX());
       bulletYblock = findYBlock(bullet->getY());
@@ -318,9 +328,37 @@ void Enemy::updatePos() {
         enemyPath.clear();
       }
       moveState = 2;
+      dodgingBullet = true;
       break;
     }
+    else{
+      dodgingBullet = false;
+    }
   }
+
+  //if not already dodging a bullet, check to see if there are bombs to dodge
+  if(!dodgingBullet){
+    for(auto bomb : bombList){
+      if(checkPos(bomb->getX(), bomb->getY(), getX(), getY(), 100.0)){
+        bombXblock = findXBlock(bomb->getX());
+        bombYblock = findYBlock(bomb->getY());
+        if(moveState != 3){
+          enemyPath.clear();
+        }
+        moveState = 3;
+        break;
+      }
+    }
+  }
+
+  /*for(auto enemy : enemyList){
+    if(enemy != this){
+      int xBlock = findXBlock(enemy->getX());
+      int yBlock = findYBlock(enemy->getY());
+      tile_map[yBlock][xBlock] = 1;
+    }
+  }*/
+
   //the enemy path it is following will need to be updated frequently when the size of the vector is below a value
   //this value is global randCut variable that will randonly change what this cutoff is in the range 2-6
   //this is done so to give the enemy some sense of randomness as it will change how far it travels down its current path before updating
@@ -331,11 +369,17 @@ void Enemy::updatePos() {
     randCut = rand() % 4 + 2;
   }
 
+  /*for(auto enemy : enemyList){
+    if(enemy != this){
+      int xBlock = findXBlock(enemy->getX());
+      int yBlock = findYBlock(enemy->getY());
+      tile_map[yBlock][xBlock] = 0;
+    }
+  }*/
+
 
   float x_pos = gPlayer->getX();
   float y_pos = gPlayer->getY();
-  bool retreat;
-  retreat = checkPos(x_pos, y_pos, getX(), getY());
   //See if player and enemy are intersecting
   SDL_Rect enemy_rect = {(int)getX(), (int)getY(), TANK_WIDTH, TANK_HEIGHT};
   SDL_Rect player_rect = {(int)x_pos, (int)y_pos, TANK_WIDTH, TANK_HEIGHT};
@@ -362,9 +406,36 @@ void Enemy::updatePos() {
   }
 
 
+  enemyOverlapCheck = false;
+  /*SDL_Rect* enemyOverlap;
+  for(auto enemy : enemyList){
+    if(enemy != this){
+      SDL_Rect other_enemy = {(int)enemy->getX(), (int)enemy->getY(), TANK_WIDTH, TANK_HEIGHT};
+      SDL_Rect this_enemy = {(int)getX(), (int)getY(), TANK_WIDTH, TANK_HEIGHT};
+      enemyOverlap = check_collision(&other_enemy, &this_enemy);
+      if(enemyOverlap != nullptr){
+        enemyPath.clear();
+        moveState = 1;
+        enemyOverlapCheck = true;
+      }
+    }
+  }
+
+  for(auto enemy : enemyList){
+    if(enemy != this && enemyPath.size() > 1){
+      int xBlock = findXBlock(enemy->getX());
+      int yBlock = findYBlock(enemy->getY());
+      coordinate block = {yBlock, xBlock, 0};
+      coordinate goingTo = enemyPath[enemyPath.size() - 2];
+      if(block.col == goingTo.col && block.row == goingTo.row){
+        enemyOverlapCheck = true;
+      }
+    }
+  }*/
+
   //main moving function of the tank based on the path it currently has
   //need check that size is > 1 since utilize pop and can't pop if size is < 1
-  if(enemyPath.size() > 1){
+  if(enemyPath.size() > 1 && !enemyOverlapCheck){
 
     //these two coordinates will be how the enemy picks which direction to move
     //because of pathing algorithm these coordinates will always be adjacent on the map
@@ -375,7 +446,7 @@ void Enemy::updatePos() {
     if(moveFrom.col > moveTo.col){
       if (moveLeft || rightLeft) {
         //x_enemy_pos -= MAX_VELOCITY;
-        setX(getX() - MAX_VELOCITY);
+        setX(getX() - velocity);
         SDL_Rect enemy_rect = {(int)getX(), (int)getY(), TANK_WIDTH, TANK_HEIGHT};
         SDL_Rect player_rect = {(int)x_pos, (int)y_pos, TANK_WIDTH, TANK_HEIGHT};
         overlap = check_collision(&enemy_rect, &player_rect);
@@ -387,7 +458,7 @@ void Enemy::updatePos() {
         //check collision with player
         if (overlap != nullptr) {
           //x_enemy_pos += MAX_VELOCITY;
-		  setX(getX() + MAX_VELOCITY);
+		  setX(getX() + velocity);
         }
       }
       else {
@@ -405,7 +476,7 @@ void Enemy::updatePos() {
     if(moveFrom.col < moveTo.col){
       if (moveRight || rightLeft) {
         //x_enemy_pos += MAX_VELOCITY;
-        setX(getX() + MAX_VELOCITY);
+        setX(getX() + velocity);
         SDL_Rect enemy_rect = {(int)getX(), (int)getY(), TANK_WIDTH, TANK_HEIGHT};
         SDL_Rect player_rect = {(int)x_pos, (int)y_pos, TANK_WIDTH, TANK_HEIGHT};
         overlap = check_collision(&enemy_rect, &player_rect);
@@ -417,7 +488,7 @@ void Enemy::updatePos() {
         //check collision
         if (overlap != nullptr) {
           //x_enemy_pos -= MAX_VELOCITY;
-		  setX(getX() - MAX_VELOCITY);
+		  setX(getX() - velocity);
         }
       }
       else {
@@ -440,7 +511,7 @@ void Enemy::updatePos() {
       if (moveUp || upDown) {
         //x_enemy_pos += 0;
         //y_enemy_pos -= MAX_VELOCITY;
-        setY(getY() - MAX_VELOCITY);
+        setY(getY() - velocity);
         SDL_Rect enemy_rect = {(int)getX(), (int)getY(), TANK_WIDTH, TANK_HEIGHT};
         SDL_Rect player_rect = {(int)x_pos, (int)y_pos, TANK_WIDTH, TANK_HEIGHT};
         overlap = check_collision(&enemy_rect, &player_rect);
@@ -451,7 +522,7 @@ void Enemy::updatePos() {
         //check collision
         if (overlap != nullptr) {
           //y_enemy_pos += MAX_VELOCITY;
-		  setY(getY() + MAX_VELOCITY);
+		  setY(getY() + velocity);
         }
       }
       else {
@@ -470,7 +541,7 @@ void Enemy::updatePos() {
       if (moveDown || upDown) {
         //x_enemy_pos += 0;
         //y_enemy_pos += MAX_VELOCITY;
-        setY(getY() + MAX_VELOCITY);
+        setY(getY() + velocity);
         SDL_Rect enemy_rect = {(int)getX(), (int)getY(), TANK_WIDTH, TANK_HEIGHT};
         SDL_Rect player_rect = {(int)x_pos, (int)y_pos, TANK_WIDTH, TANK_HEIGHT};
         overlap = check_collision(&enemy_rect, &player_rect);
@@ -481,7 +552,7 @@ void Enemy::updatePos() {
         //check collision
         if (overlap != nullptr) {
           //y_enemy_pos -= MAX_VELOCITY;
-		  setY(getY() - MAX_VELOCITY);
+		  setY(getY() - velocity);
         }
       }
       else {
@@ -597,6 +668,16 @@ void Enemy::setPathway(std::vector<std::vector<int>> move_map, Player player, En
       //generate the path using this ghost tank
       enemyPath = generatePath(move_map, *awayGhost, enemy);
     }
+    else if(moveState == 3){
+      coordinate awayBombGhostPos = Enemy::awayBombGhostPos(enemyXblock, enemyYblock, bombXblock, bombYblock);
+      //adjust return values from x,y tile block locations to actual x,y positions on the play area
+      int awayBombGhostX = awayBombGhostPos.col * TILE_SIZE + TILE_SIZE + BORDER_GAP;
+      int awayBombGhostY = awayBombGhostPos.row * TILE_SIZE + TILE_SIZE;
+      //make the ghost tank given the new x, y positions
+      Player* awayBombGhost = new Player(awayBombGhostX, awayBombGhostY, true);
+      //generate the path using this ghost tank
+      enemyPath = generatePath(move_map, *awayBombGhost, enemy);
+    }
     else{
       coordinate newGhostPos = Enemy::newGhostPos(ghostXblock, ghostYblock, enemyXblock, enemyYblock);
       //adjust return values from x,y tile block locations to actual x,y positions on the play area
@@ -648,6 +729,61 @@ coordinate Enemy::randGhostPos(int eX, int eY){
   }
   return newPos;
 
+}
+
+coordinate Enemy::awayBombGhostPos(int eX, int eY, int bX, int bY){
+  coordinate newPos = {eY, eX, 0};
+
+  //bomb above enemy
+  if(bY < eY){
+    //bomb left of enemy
+    if(bX < eX){
+      //move down and to the right
+      newPos.row += 1;
+      newPos.col += 1;
+    }
+    //bomb right of enemy
+    else if(bX > eX){
+      //move down and to the left
+      newPos.row += 1;
+      newPos.col -= 1;
+    }
+    //bomb above only
+    else{
+      newPos.row += 1;
+    }
+  }
+  //bomb below enemy
+  else if(bY > eY){
+    if(bX < eX){
+      //move up and to the right
+      newPos.row -= 1;
+      newPos.col += 1;
+    }
+    else if(bX > eX){
+      //move up and to the left
+      newPos.row -= 1;
+      newPos.col -= 1;
+    }
+    else{
+      newPos.row -= 1;
+    }
+  }
+  //player horizontally equal with enemy
+  else{
+    if(bX < eX){
+      newPos.col += 1;
+    }
+    else{
+      newPos.col -= 1;
+    }
+  }
+  //need end path location to be a valid moveable space on the map
+  //if it is not adjust the ghost location using findClosestOpenBlock and then return newPos
+  if(!isValidBlock(newPos.row, newPos.col)){
+    newPos = findClosestOpenBlock(newPos);
+  }
+  return newPos;
 }
 
 coordinate Enemy::awayGhostPos(int eX, int eY, int bX, int bY, int bT){
@@ -969,6 +1105,35 @@ bool Enemy::validMove(coordinate moveTo, coordinate currentlyAt){
 	return false;
 }
 
+/**
+  * @brief helper method to generatePath that will be used in building the pathway
+  * @params coordinate to check, int tile type provided by tile map
+  * @return true if empty, false otherwise
+  */
+bool Enemy::normalCheck(coordinate loc, std::vector<std::vector<int>> move_map) {
+	if(!(loc.row < 0 || loc.row > 12 || loc.col < 0 || loc.col > 23) && move_map[loc.col][loc.row] == 0) {
+		velocity = 2;
+		return true;
+	}
+	else
+		return false;
+}
+
+/**
+  * @brief helper method to generatePath that will be used in building the pathway
+  * @params coordinate to check, int tile type provided by tile map
+  * @return true if empty or block, false otherwise
+  */
+bool Enemy::spiderCheck(coordinate loc, std::vector<std::vector<int>> move_map) {
+	if(!(loc.row < 0 || loc.row > 12 || loc.col < 0 || loc.col > 23) && enemyType == 3 && move_map[loc.col][loc.row] != 1) {
+		setFire(false);
+		velocity = 1;
+		return true;
+	}
+	else
+		return false;
+}
+
 
 /**
   * @brief generate the shortest path from the enemy to the player
@@ -1008,7 +1173,7 @@ std::vector<coordinate> Enemy::generatePath(std::vector<std::vector<int>> move_m
 			if(coordList[i].weight == count){
 				coordinate left = {coordList[i].row, coordList[i].col - 1, coordList[i].weight + 1};
 				//check isnt a wall
-				if(!(left.row < 0 || left.row > 12 || left.col < 0 || left.col > 23) && (move_map[left.col][left.row] == 0)){
+				if(normalCheck(left, move_map) || spiderCheck(left, move_map)) {
 					//check isnt already in list
 					for(int j = 0; j < coordListLength; j++){
 						if(left.row == coordList[j].row && left.col == coordList[j].col){
@@ -1026,7 +1191,7 @@ std::vector<coordinate> Enemy::generatePath(std::vector<std::vector<int>> move_m
 					inList = false;
 				}
 				coordinate right = {coordList[i].row, coordList[i].col + 1, coordList[i].weight + 1};
-				if(!(right.row < 0 || right.row > 12 || right.col < 0 || right.col > 23) && (move_map[right.col][right.row] == 0)){
+				if(normalCheck(right, move_map) || spiderCheck(right, move_map)) {
 					for(int j = 0; j < coordListLength; j++){
 						if(right.row == coordList[j].row && right.col == coordList[j].col){
 							inList = true;
@@ -1043,7 +1208,7 @@ std::vector<coordinate> Enemy::generatePath(std::vector<std::vector<int>> move_m
 					inList = false;
 				}
 				coordinate up = {coordList[i].row - 1, coordList[i].col, coordList[i].weight + 1};
-				if(!(up.row < 0 || up.row > 12 || up.col < 0 || up.col > 23) && (move_map[up.col][up.row] == 0)){
+				if(normalCheck(up, move_map) || spiderCheck(up, move_map)) {
 					for(int j = 0; j < coordListLength; j++){
 						if(up.row == coordList[j].row && up.col == coordList[j].col){
 							inList = true;
@@ -1060,7 +1225,7 @@ std::vector<coordinate> Enemy::generatePath(std::vector<std::vector<int>> move_m
 					inList = false;
 				}
 				coordinate down = {coordList[i].row + 1, coordList[i].col, coordList[i].weight + 1};
-				if(!(down.row < 0 || down.row > 12 || down.col < 0 || down.col > 23) && (move_map[down.col][down.row] == 0)){
+				if(normalCheck(down, move_map) || spiderCheck(down, move_map)) {
 					for(int j = 0; j < coordListLength; j++){
 						if(down.row == coordList[j].row && down.col == coordList[j].col){
 							inList = true;
@@ -1142,4 +1307,16 @@ void Enemy::setFalse() {
 void Enemy::setProjectiles(std::vector<Projectile *> projectiles) {
   enemyProjectiles.clear();
   enemyProjectiles = projectiles;
+}
+
+//Receive the updated bombs array from Game.cpp. Use the vector to avoid all of the bombs
+//@param the bombs vector from game.cpp containing all of the bombs
+void Enemy::setBombs(std::vector<Bomb *> bombs){
+  bombList.clear();
+  bombList = bombs;
+}
+
+void Enemy::setEnemies(std::vector<Enemy *> enemies){
+  enemyList.clear();
+  enemyList = enemies;
 }
