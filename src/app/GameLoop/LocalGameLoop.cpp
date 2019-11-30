@@ -149,7 +149,7 @@ std::vector<int> LocalGameLoop::spawnEnemies(std::vector<std::vector<int>> *map,
         enemy_x = (rand() % 16) + 4;
         enemy_y = (rand() % 3) + 10;
 
-        if(tileMap[enemy_y][enemy_x] == 0)
+        if(tileMap[enemy_x][enemy_y] == 0)
         {
             if(i < count)
             {
