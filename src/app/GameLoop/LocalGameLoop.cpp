@@ -222,6 +222,7 @@ int LocalGameLoop::run() {
         player->getEvent(elapsed_time, &e, SDL_GetKeyboardState(nullptr));
 
         //The player fired a bullet
+
         if (player->getFire() == true) {
             Projectile *newBullet = new Projectile(player->getX() + TANK_WIDTH/4, player->getY() + TANK_HEIGHT/4, player->getTurretTheta(), 1);
             newBullet->setSprite(shell);
@@ -234,6 +235,7 @@ int LocalGameLoop::run() {
             render->setProjectiles(projectiles);
             player->setFire(false);
         }
+
 
         //The player dropped a bomb
         if (player->getBomb() == true) {
@@ -264,7 +266,7 @@ int LocalGameLoop::run() {
                 projectiles.push_back(newBullet);
                 render->setProjectiles(projectiles);
                 enemy->setFire(false);
-                
+
             }
 
             //The enemy dropped a bomb
@@ -284,7 +286,8 @@ int LocalGameLoop::run() {
             player->update();
 
 			if(player->isDestroyed()) {
-				//kill player
+        //get rid of player and display a you lose screen or something
+        //delete player; //This will delete the player, but gets a segfault if you click after it's deleted
 				//erase player from render
 			}
 			for (int i = 0; i < enemies.size(); i++) {
@@ -325,7 +328,7 @@ int LocalGameLoop::run() {
 					projectiles.at(i)->addTargetLocation(player->get_box());
 				}
 				projectiles.at(i)->update();
-				if(projectiles.at(i)->isHit()){
+				if(projectiles.at(i)->isHit()) {
 					SDL_Rect* hitObject = projectiles.at(i)->getTarget();
 					SDL_Rect* playerRect = player->get_box();
 					if(playerRect->x == hitObject->x && playerRect->y == hitObject->y && !player->isHit()) {
@@ -333,18 +336,23 @@ int LocalGameLoop::run() {
 						player->setSprite(redsplosion);
 						player->resetFrame();
 					}
+          int count = 0;
 					for(auto enemy: enemies) {
 						SDL_Rect* enemyRect = enemy->get_box();
 						if(enemyRect->x == hitObject->x && enemyRect->y == hitObject->y && !enemy->isHit()) {
               if (!enemy->purpHit() && enemy->getEnemyType() == 2) {
-                enemy->setPurpHit(true);
+                if (count > 0) {
+                  enemy->setPurpHit(true);
+                }
+                enemy->setHit(true);
                 std::cout << "hit once\n";
                 projectiles.at(i)->setFinished(true);
+                count++;
               }
               else {
                 enemy->setHit(true);
                 std::cout << "setting hit to true\n";
-                enemy->setSprite(bluesplosion);
+                //enemy->setSprite(bluesplosion);
                 enemy->resetFrame();
               }
 							break;
@@ -353,12 +361,14 @@ int LocalGameLoop::run() {
 				}
 				if(projectiles.at(i)->isExploding()) {
 					projectiles.at(i)->setSprite(pinksplosion);
+          projectiles.at(i)->setFinished(true);
 				}
         if(projectiles.at(i)->isFinished()){
           std::cout << "Projectile being deleted\n";
 					//erase the projectile object from the projectiles vector
 					projectiles.erase(projectiles.begin()+i);
 					render->setProjectiles(projectiles);
+          //projectiles.at(i)->~Projectile();
 					i--;
 				}
 				count++;

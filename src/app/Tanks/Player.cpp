@@ -94,6 +94,7 @@ void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
 		else {
 			//std::cout << "destroyed\n";
 			destroyed = true;
+      this->~Player();
 		}
 	}
 }

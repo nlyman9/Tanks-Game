@@ -22,21 +22,6 @@ Projectile::Projectile(float x, float y, int theta, int speed) {
 
 
 Projectile::~Projectile() {
-	delete &missile;
-	delete &x_vel;
-	delete &y_vel;
-	delete &bounces;
-	delete &theta;
-	delete &theta_v;
-	delete &x_deltav;
-	delete &y_deltav;
-	delete &velocity;
-	delete &delta_velocity;
-	delete &friendly;
-	delete &exploding;
-	delete &frame;
-	delete &anim_last_time;
-	delete &finished;
 }
 
 void Projectile::draw(SDL_Renderer *gRenderer, double update_lag) {

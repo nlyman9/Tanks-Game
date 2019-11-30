@@ -38,7 +38,7 @@ Enemy::~Enemy() {}
 	SDL_Rect* dst = get_box();
 
 	if(!hit) {
-		if (/*x_vel != 0 || y_vel != 0 && */SDL_GetTicks() - anim_last_time > 100) {
+		if (SDL_GetTicks() - anim_last_time > 100) {
 			frame = (frame + 1) % 3;
 			anim_last_time = SDL_GetTicks();
 		}
@@ -83,16 +83,6 @@ Enemy::~Enemy() {}
           frame = (frame + 1) % 3;
           anim_last_time = SDL_GetTicks();
         }
-        //draw the tank and turret and use the rect from above as parameters for both calls since turret is centered on tank
-        //SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), getSprite()->getFrame(frame), dst, theta, NULL, SDL_FLIP_NONE);
-        //SDL_RenderCopyEx(gRenderer, getTurretSprite()->getTexture(), NULL, dst, turretTheta, NULL, SDL_FLIP_NONE);
-
-        //lines coming out of turret "field of view" have end points and this method finds them
-        //findEndValues(turretTheta);
-
-        //draw the two lines with endpoints that were just calculated
-        //SDL_RenderDrawLine(gRenderer, getX() + TANK_WIDTH/2, getY() + TANK_HEIGHT/2, line1X, line1Y);
-        //SDL_RenderDrawLine(gRenderer, getX() + TANK_WIDTH/2, getY() + TANK_HEIGHT/2, line2X, line2Y);
         shouldExplode++;
         hit = false;
       }
