@@ -31,20 +31,20 @@ std::vector<std::vector<int>> MapGenerator::generateMirrorMap()
     std::vector<std::vector<int>> array = generateEmptyMap();
 
 	// generate three random cubes
-	int box1_x1 = rand() % 6;
+	int box1_x1 = rand() % 5;
 	int box1_y1 = 1;
-	int box1_x2 = rand() % 6 + 5;
+	int box1_x2 = rand() % 5 + 6;
 	int box1_y2 = rand() % 2 + 3;
 
 	int box2_x1 = rand() % 5 + 1;
-	int box2_y1 = rand() % 2 + 6;
+	int box2_y1 = rand() % 2 + 5;
 	int box2_x2 = rand() % 5 + 6;
 	int box2_y2 = rand() % 2 + 8;
 
-	int box3_x1 = rand() % 6;
+	int box3_x1 = rand() % 5;
 	int box3_y1 = rand() % 2 + 10;
-	int box3_x2 = rand() % 6 + 5;
-	int box3_y2 = rand() % 2 + 12;
+	int box3_x2 = rand() % 5 + 6;
+	int box3_y2 = 12;
 
 	// check if box1 is big enough
 	if(abs((box1_x1 - box1_x2) * (box1_y1 - box1_y2)) >= 4)
@@ -436,6 +436,8 @@ std::vector<std::vector<int>>* MapGenerator::generateMap()
 		}
 		std::cout << std::endl;
 	}
+
+	tile_map = generateMirrorMap();
 
 	return &tile_map;
 }
