@@ -21,16 +21,16 @@ Enemy::Enemy(float x, float y, Player* player, int type) {
 	gPlayer = player;
 	enemyType = type;
 	switch(enemyType) {
-		case 0:
+		case 0:	//normal blue
 			velocity = 2;
 			break;
-		case 1:
-			velocity = 2;
+		case 1:	//speedy green
+			velocity = 2.5;
 			break;
-		case 2:
+		case 2:	//beefy purple
 			velocity = 1;
 			break;
-		case 3:
+		case 3:	//wtf spider
 			velocity = 1;
 			break;
 	}

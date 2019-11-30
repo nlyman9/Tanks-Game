@@ -54,7 +54,7 @@ class Enemy : public Object, public Tank {
 		int bombXblock, bombYblock;
 		int enemyType;
 		int shouldExplode = 0; //determine when purple tank explodes
-		int velocity;
+		double velocity;
 
 		Uint32 last_state_change = 0;
 		Uint32 turret_mode_change = 0;
