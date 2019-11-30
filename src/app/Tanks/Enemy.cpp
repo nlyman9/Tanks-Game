@@ -22,10 +22,14 @@ Enemy::Enemy(float x, float y, Player* player, int type) {
 	enemyType = type;
 	switch(enemyType) {
 		case 0:
+			velocity = 2;
+			break;
 		case 1:
 			velocity = 2;
 			break;
 		case 2:
+			velocity = 1;
+			break;
 		case 3:
 			velocity = 1;
 			break;
@@ -1112,7 +1116,8 @@ bool Enemy::validMove(coordinate moveTo, coordinate currentlyAt){
   */
 bool Enemy::normalCheck(coordinate loc, std::vector<std::vector<int>> move_map) {
 	if(!(loc.row < 0 || loc.row > 12 || loc.col < 0 || loc.col > 23) && move_map[loc.col][loc.row] == 0) {
-		velocity = 2;
+		if(enemyType == 3)
+			velocity = 2;
 		return true;
 	}
 	else

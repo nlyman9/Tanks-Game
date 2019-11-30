@@ -109,9 +109,11 @@ void LocalGameLoop::generateMap() {
     player->setObstacleLocations(&tileArray);
 
     //spawn random number of enemies between 1 - 4
-    int numEnemies = rand() % 4 + 1;
+    //int numEnemies = rand() % 4 + 1;
+	int numEnemies = 4;
     for(int i = 0; i < numEnemies; i++){
       int randEnemyType = rand() % 4;
+	  //int randEnemyType = 2;
       std::vector<int> enemySpawn = spawnEnemies(map, 1);
       enemies.push_back(new Enemy(enemySpawn.at(0), enemySpawn.at(1), player, randEnemyType));
     }
@@ -281,11 +283,11 @@ int LocalGameLoop::run() {
             if(enemy->getFire() == true) {
 
                 Projectile *newBullet;
-                if(enemy->getEnemyType() == 1){
-                      newBullet = new Projectile(enemy->getX() + TANK_WIDTH/4, enemy->getY() + TANK_HEIGHT/4, enemy->getTurretTheta(), 2);
+                if(enemy->getEnemyType() == 1) {
+					newBullet = new Projectile(enemy->getX() + TANK_WIDTH/4, enemy->getY() + TANK_HEIGHT/4, enemy->getTurretTheta(), 2);
                 }
                 else if (enemy->getEnemyType() == 2) {
-                  newBullet = new Projectile(enemy->getX() + TANK_WIDTH/4, enemy->getY() + TANK_HEIGHT/4, enemy->getTurretTheta(), 3);
+					newBullet = new Projectile(enemy->getX() + TANK_WIDTH/4, enemy->getY() + TANK_HEIGHT/4, enemy->getTurretTheta(), 3);
                 }
                 else {
                     newBullet = new Projectile(enemy->getX() + TANK_WIDTH/4, enemy->getY() + TANK_HEIGHT/4, enemy->getTurretTheta(), 1);
@@ -322,27 +324,14 @@ int LocalGameLoop::run() {
 				//erase player from render
 			}
 			for (int i = 0; i < enemies.size(); i++) {
-        if (enemies.at(i)->getEnemyType() == 2 && shouldMove < 2) {  //Purple tank should not move
-          enemies.at(i)->setProjectiles(projectiles);
-          SDL_Rect* curEnemy = enemies.at(i)->get_box();
-          enemyBoxes.push_back(curEnemy);
-          if(enemies.at(i)->isDestroyed()) {
-            enemies.erase(enemies.begin()+i);
-            render->setEnemies(enemies);
-          }
-          shouldMove++;
-        }
-        else {
-          enemies.at(i)->update();
-          enemies.at(i)->setProjectiles(projectiles);
-          SDL_Rect* curEnemy = enemies.at(i)->get_box();
-          enemyBoxes.push_back(curEnemy);
-          if(enemies.at(i)->isDestroyed()) {
-            enemies.erase(enemies.begin()+i);
-            render->setEnemies(enemies);
-          }
-          shouldMove = 0;         //increment time for purple tank to move
-        }
+				  enemies.at(i)->update();
+				  enemies.at(i)->setProjectiles(projectiles);
+				  SDL_Rect* curEnemy = enemies.at(i)->get_box();
+				  enemyBoxes.push_back(curEnemy);
+				  if(enemies.at(i)->isDestroyed()) {
+					enemies.erase(enemies.begin()+i);
+					render->setEnemies(enemies);
+				  }
 			}
 			player->setEnemies(enemyBoxes);
 			enemyBoxes.clear();
@@ -367,7 +356,7 @@ int LocalGameLoop::run() {
 						player->setSprite(redsplosion);
 						player->resetFrame();
 					}
-          int count = 0;
+					int count = 0;
 					for(auto enemy: enemies) {
 						SDL_Rect* enemyRect = enemy->get_box();
 						if(enemyRect->x == hitObject->x && enemyRect->y == hitObject->y && !enemy->isHit()) {
@@ -392,7 +381,7 @@ int LocalGameLoop::run() {
 				}
 				if(projectiles.at(i)->isExploding()) {
 					projectiles.at(i)->setSprite(pinksplosion);
-          projectiles.at(i)->setFinished(true);
+					projectiles.at(i)->setFinished(true);
 				}
         if(projectiles.at(i)->isFinished()){
           //std::cout << "Projectile being deleted\n";
