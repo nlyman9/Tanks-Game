@@ -53,6 +53,7 @@ class Enemy : public Object, public Tank {
 		int bulletXblock, bulletYblock, bulletTheta;
 		int bombXblock, bombYblock;
 		int enemyType;
+		int shouldExplode = 0; //determine when purple tank explodes
 		int velocity;
 
 		Uint32 last_state_change = 0;
@@ -83,6 +84,8 @@ class Enemy : public Object, public Tank {
         std::vector<coordinate> generatePath(std::vector<std::vector<int>> move_map, Player player, Enemy enemy);
 				bool validMove(coordinate moveTo, coordinate currentlyAt);
         std::vector<std::vector<int>> tile_map;
+
+		//void playExplosion(SDL_Renderer *gRenderer, double update_lag);
 
 
     public:

@@ -253,6 +253,7 @@ int LocalGameLoop::run() {
         player->getEvent(elapsed_time, &e, SDL_GetKeyboardState(nullptr));
 
         //The player fired a bullet
+
         if (player->getFire() == true) {
             Projectile *newBullet = new Projectile(player->getX() + TANK_WIDTH/4, player->getY() + TANK_HEIGHT/4, player->getTurretTheta(), 1);
             newBullet->setSprite(bullet);
@@ -266,6 +267,7 @@ int LocalGameLoop::run() {
             player->setFire(false);
         }
 
+
         //The player dropped a bomb
         if (player->getBomb() == true) {
             Bomb* newBomb(new Bomb(player->get_box(), player->getTheta(), bombBlack, bombRed, bombPlayerExplosion));
@@ -277,10 +279,15 @@ int LocalGameLoop::run() {
         // Generate projectile for each enemy if they shot.
         for(auto enemy : enemies) {
             if(enemy->getFire() == true) {
+
                 Projectile *newBullet;
                 if(enemy->getEnemyType() == 1){
                       newBullet = new Projectile(enemy->getX() + TANK_WIDTH/4, enemy->getY() + TANK_HEIGHT/4, enemy->getTurretTheta(), 2);
-                } else {
+                }
+                else if (enemy->getEnemyType() == 2) {
+                  newBullet = new Projectile(enemy->getX() + TANK_WIDTH/4, enemy->getY() + TANK_HEIGHT/4, enemy->getTurretTheta(), 3);
+                }
+                else {
                     newBullet = new Projectile(enemy->getX() + TANK_WIDTH/4, enemy->getY() + TANK_HEIGHT/4, enemy->getTurretTheta(), 1);
                 }
                 newBullet->setSprite(shell);
@@ -290,6 +297,7 @@ int LocalGameLoop::run() {
                 projectiles.push_back(newBullet);
                 render->setProjectiles(projectiles);
                 enemy->setFire(false);
+
             }
 
             //The enemy dropped a bomb
@@ -309,28 +317,39 @@ int LocalGameLoop::run() {
             player->update();
 
 			if(player->isDestroyed()) {
-				//kill player
+        //get rid of player and display a you lose screen or something
+        //delete player; //This will delete the player, but gets a segfault if you click after it's deleted
 				//erase player from render
 			}
-
 			for (int i = 0; i < enemies.size(); i++) {
-				enemies.at(i)->update();
-				enemies.at(i)->setProjectiles(projectiles);
-				enemies.at(i)->setBombs(bombs);
-				enemies.at(i)->setEnemies(enemies);
-				SDL_Rect* curEnemy = enemies.at(i)->get_box();
-				enemyBoxes.push_back(curEnemy);
-				if(enemies.at(i)->isDestroyed()) {
-					enemies.erase(enemies.begin()+i);
-					render->setEnemies(enemies);
-				}
+        if (enemies.at(i)->getEnemyType() == 2 && shouldMove < 2) {  //Purple tank should not move
+          enemies.at(i)->setProjectiles(projectiles);
+          SDL_Rect* curEnemy = enemies.at(i)->get_box();
+          enemyBoxes.push_back(curEnemy);
+          if(enemies.at(i)->isDestroyed()) {
+            enemies.erase(enemies.begin()+i);
+            render->setEnemies(enemies);
+          }
+          shouldMove++;
+        }
+        else {
+          enemies.at(i)->update();
+          enemies.at(i)->setProjectiles(projectiles);
+          SDL_Rect* curEnemy = enemies.at(i)->get_box();
+          enemyBoxes.push_back(curEnemy);
+          if(enemies.at(i)->isDestroyed()) {
+            enemies.erase(enemies.begin()+i);
+            render->setEnemies(enemies);
+          }
+          shouldMove = 0;         //increment time for purple tank to move
+        }
 			}
 			player->setEnemies(enemyBoxes);
 			enemyBoxes.clear();
 
-            // Update every active bomb
-            int count = 0;
-            for (int i = 0; i < projectiles.size(); i++) {
+      // Update every active bomb
+      int count = 0;
+      for (int i = 0; i < projectiles.size(); i++) {
 				projectiles.at(i)->clearTargets();
 				if(projectiles.at(i)->getFriendly() == true) {
 					for(auto enemy : enemies) {
@@ -340,7 +359,7 @@ int LocalGameLoop::run() {
 					projectiles.at(i)->addTargetLocation(player->get_box());
 				}
 				projectiles.at(i)->update();
-				if(projectiles.at(i)->isHit()){
+				if(projectiles.at(i)->isHit()) {
 					SDL_Rect* hitObject = projectiles.at(i)->getTarget();
 					SDL_Rect* playerRect = player->get_box();
 					if(playerRect->x == hitObject->x && playerRect->y == hitObject->y && !player->isHit()) {
@@ -348,19 +367,35 @@ int LocalGameLoop::run() {
 						player->setSprite(redsplosion);
 						player->resetFrame();
 					}
+          int count = 0;
 					for(auto enemy: enemies) {
 						SDL_Rect* enemyRect = enemy->get_box();
 						if(enemyRect->x == hitObject->x && enemyRect->y == hitObject->y && !enemy->isHit()) {
-							enemy->setHit(true);
-							enemy->setSprite(bluesplosion);
-							enemy->resetFrame();
+              if (!enemy->purpHit() && enemy->getEnemyType() == 2) {
+                if (count > 0) {
+                  enemy->setPurpHit(true);
+                }
+                enemy->setHit(true);
+                //std::cout << "hit once\n";
+                projectiles.at(i)->setFinished(true);
+                count++;
+              }
+              else {
+                enemy->setHit(true);
+                //std::cout << "setting hit to true\n";
+                //enemy->setSprite(bluesplosion);
+                enemy->resetFrame();
+              }
 							break;
 						}
 					}
 				}
 				if(projectiles.at(i)->isExploding()) {
 					projectiles.at(i)->setSprite(pinksplosion);
-				} else if(projectiles.at(i)->isFinished()){
+          projectiles.at(i)->setFinished(true);
+				}
+        if(projectiles.at(i)->isFinished()){
+          //std::cout << "Projectile being deleted\n";
 					//erase the projectile object from the projectiles vector
 					projectiles.erase(projectiles.begin()+i);
 					render->setProjectiles(projectiles);
