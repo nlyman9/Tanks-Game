@@ -95,8 +95,6 @@ void Projectile::update() {
 
 	int collisionTheta = theta;
 
-    //rotateProjectile(theta_v);
-
 	targetNum = 0;
 
 	if(!exploding) {
@@ -130,34 +128,20 @@ void Projectile::update() {
 				int y_dist = currentPos.y - obstacle.y;
 				bool x_bounce = bouncePriority(&currentPos, &obstacle);
 
-				//std::cout << "new\n";
-				//std::cout << "x_dist = " << x_dist << " ; y_dist = " << y_dist << std::endl;
-
 				if(x_bounce) { // collision left or right
-					//std::cout << "SIDES" << std::endl;
 					double num = -1 * cos((theta * M_PI) / 180);
 					if(theta > 180)
 						theta = 270 - (theta - 270);
 					else
 						theta = acos(num) * 180 / M_PI;
-					//std::cout << "num = " << num << std::endl;
-					//std::cout << "theta = " << theta << std::endl << std::endl;
 				}
 				else { // collision up or down
-					//std::cout << "TOPSIES" << std::endl;
 					double num = -1 * sin((theta * M_PI) / 180);
 					if(theta > 90 && theta < 270 || theta < -90)
 						theta = 180 - asin(num) * 180 / M_PI;
 					else
 						theta = asin(num) * 180 / M_PI;
-					//std::cout << "num = " << num << std::endl;
-					//std::cout << "theta = " << theta << std::endl << std::endl;
 				}
-
-				//std::cout << "proj_x = " << currentPos.x << " ; proj_y = " << currentPos.y << std::endl;
-				//std::cout << "proj_x + width = " << currentPos.x + PROJECTILE_WIDTH << " ; proj_y + height = " << currentPos.y + PROJECTILE_HEIGHT << std::endl;
-				//std::cout << "ob.x = " << obstacle.x << " ; ob.y = " << obstacle.y << std::endl;
-				//std::cout << "ob.x + t.size = " << obstacle.x + TILE_SIZE << " ; ob.y + t.size = " << obstacle.y + TILE_SIZE << std::endl << std::endl << std::endl;
 
 				setPos(getX() - (x_vel * updateStep), getY() - (y_vel * updateStep));
 				bounces++;

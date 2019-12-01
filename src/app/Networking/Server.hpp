@@ -256,15 +256,12 @@ class Server {
                     return false;
                 }
 
-                /*
-                    Check for collisions with projectiles and bombs here
-                */
-
+                //Check for collisions with projectiles and bombs here
                 int count = 0;
-                for (auto& projectile : *projectiles) {
+                for (auto& projectile : projectiles) {
                     projectile->update();
                     if(projectile->isFinished()) {
-                        projectiles->erase(projectiles->begin() + count);
+                        projectiles.erase(projectiles.begin() + count);
                         count--;
                     }
                     count++;
@@ -272,13 +269,13 @@ class Server {
 
 			    // Update every bomb in the game
                 int bombCount = 0;
-                for(auto& bomb : *bombs) {
+                for(auto& bomb : bombs) {
                     // Update bombs
 				    bomb->update();
 
                     // Check if bomb is done exploding
                     if(bomb->getFinished()) {
-                        bombs->erase(bombs->begin() + bombCount);
+                        bombs.erase(bombs.begin() + bombCount);
                         bombCount--;
                     }
                     bombCount++;
@@ -312,12 +309,12 @@ class Server {
                 player->update();
                 if(hasShot) {
                     Projectile* projectile = new Projectile(player->getX() + TANK_WIDTH/4, player->getY() + TANK_HEIGHT/4, player->getTurretTheta(), 1);
-                    projectiles->push_back(projectile);
+                    projectiles.push_back(projectile);
                     hasShot = false;
                 }                
                 if(droppedBomb) {
                     Bomb* bomb = new Bomb(player->get_box(), player->getTheta());
-                    bombs->push_back(bomb);
+                    bombs.push_back(bomb);
                     droppedBomb = false;
                 }
             }catch (const std::exception &exc){
@@ -419,9 +416,9 @@ class Server {
         //latest mail vector - parallel to player
         std::vector<Packet*>* lastMail;
         // Vector of simulated bombs
-        std::vector<Bomb*>* bombs;
+        std::vector<Bomb*> bombs;
         // Vector of simulated projectiles
-        std::vector<Projectile*>* projectiles;
+        std::vector<Projectile*> projectiles;
         // The keys we want to check for when we add a keystate packet
         std::vector<Uint8> keysToCheck =  { SDL_SCANCODE_W, SDL_SCANCODE_A, 
                                     SDL_SCANCODE_S, SDL_SCANCODE_D}; 
