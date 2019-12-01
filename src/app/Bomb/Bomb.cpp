@@ -34,6 +34,40 @@ Bomb::Bomb(SDL_Rect* box, int theta, Sprite* bombBlack, Sprite* bombRed, Sprite*
     flipIntervals.push_back(2950000000);
 }
 
+Bomb::Bomb(SDL_Rect* box, int theta) :
+    blackBomb(nullptr),
+    redBomb(nullptr),
+    bombExplosion(nullptr) 
+{
+    startTime = std::chrono::steady_clock::now();
+
+    // Calculate position of bomb center
+    int bombCenterX = box->x + box->w / 2 + ((box->w / 2 + BOMB_DROP_PADDING) * cos((theta + 180) * M_PI / 180));
+    int bombCenterY = box->y + box->h / 2 + ((box->h / 2 + BOMB_DROP_PADDING) * sin((theta + 180) * M_PI / 180));
+    
+    // Get top left corner of bomb box
+    int x = bombCenterX - BOMB_WIDTH / 2;
+    int y = bombCenterY - BOMB_HEIGHT / 2;
+
+    // Set the position of the bomb to behind the tank
+    setPos(x, y);
+
+    // Populate the vector of ns intervals to change the bomb color
+    flipIntervals.push_back(1000000000);
+    flipIntervals.push_back(1750000000);
+    flipIntervals.push_back(2250000000);
+    flipIntervals.push_back(2450000000);
+    flipIntervals.push_back(2550000000);
+    flipIntervals.push_back(2600000000);
+    flipIntervals.push_back(2650000000);
+    flipIntervals.push_back(2700000000);
+    flipIntervals.push_back(2750000000);
+    flipIntervals.push_back(2800000000);
+    flipIntervals.push_back(2850000000);
+    flipIntervals.push_back(2900000000);
+    flipIntervals.push_back(2950000000);
+}
+
 Bomb::~Bomb() {}
 
 void Bomb::draw(SDL_Renderer *gRenderer, double update_lag) {

@@ -10,6 +10,8 @@ const auto BOMB_DROP_PADDING = 5;
 class Bomb : public Object {
     public:
         Bomb(SDL_Rect* box, int theta, Sprite* bombBlack, Sprite* bombRed, Sprite* explosion);
+        Bomb(SDL_Rect* box, int theta);
+
         ~Bomb();
 
         void draw(SDL_Renderer *gRenderer, double update_lag) override;

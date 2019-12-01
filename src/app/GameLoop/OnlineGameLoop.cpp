@@ -334,24 +334,6 @@ int OnlineGameLoop::run() {
 				// Update bombs
 				bomb->update();
 
-				if(bomb->isExploding()) {
-					// Check if bomb hits player
-					if(players.at(0)->check_collision(bomb)) {
-						players.at(0)->setHit(true);
-						players.at(0)->setSprite(redsplosion);
-						players.at(0)->resetFrame();
-					}
-
-					// Check if bomb hits enemy
-					for(auto enemy: playerEnemies) {
-						if(enemy->check_collision(bomb)) {
-							enemy->setHit(true);
-							enemy->setSprite(bluesplosion);
-							enemy->resetFrame();
-						}
-					}
-				}
-
 				// Check if bomb is done exploding
 				if(bomb->getFinished()) {
 					bombs.erase(bombs.begin() + bombCount);

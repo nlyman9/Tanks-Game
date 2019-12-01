@@ -14,6 +14,9 @@
 #include <iostream>
 #include <vector>
 #include <unistd.h>
+
+#include "Bomb.hpp"
+#include "Projectile.hpp"
 #include "Multiplayer.hpp"
 #include "Player.hpp"
 
@@ -239,9 +242,12 @@ class Server {
             //for each player
             //apply latest mail
             gamestate->clear();
+
             for(int i = 0; i < numClients(); i++){
 #ifdef VERBOSE
                 std::cout << "SERVER: Applying keystates to gamestate" << std::endl;
+                lastMail->at(i)->printData();
+                std::cout << std::endl;
 #endif
                 if(!applyKeyStatePacket(lastMail->at(i), players->at(i))){
 #ifdef VERBOSE
@@ -249,17 +255,38 @@ class Server {
 #endif
                     return false;
                 }
-#ifdef VERBOSE
-                lastMail->at(i)->printData();
-#endif
+
+                /*
+                    Check for collisions with projectiles and bombs here
+                */
+
+                int count = 0;
+                for (auto& projectile : *projectiles) {
+                    projectile->update();
+                    if(projectile->isFinished()) {
+                        projectiles->erase(projectiles->begin() + count);
+                    }
+                    count++;
+                }
+
+			    // Update every bomb in the game
+                int bombCount = 0;
+                for(auto& bomb : *bombs) {
+                    // Update bombs
+				    bomb->update();
+
+                    // Check if bomb is done exploding
+                    if(bomb->getFinished()) {
+                        bombs->erase(bombs->begin() + bombCount);
+                        bombCount--;
+                    }
+                    bombCount++;
+                }
+
                 std::vector<char>* playerstate = players->at(i)->getState();
                 gamestate->insert(gamestate->end() , playerstate->begin(), playerstate->end());
-#ifdef VERBOSE
-                std::cout << std::endl;
-#endif
             }
-            //for each projectile
-                //interpolate & add to game state
+
             return true;
         }
 
@@ -275,11 +302,23 @@ class Server {
             packet->printData();
 #endif
             Uint8 *keystate = keystateify(packet->getBody());
+            bool hasShot = getHasShot(packet->getBody());
+            bool droppedBomb = getDroppedBomb(packet->getBody());
             if(keystate == nullptr)
                 return false;
             try{
                 player->getEvent(elapsed_time, &e, keystate);
                 player->update();
+                if(hasShot) {
+                    Projectile* projectile = new Projectile(player->getX() + TANK_WIDTH/4, player->getY() + TANK_HEIGHT/4, player->getTurretTheta(), 1);
+                    projectiles->push_back(projectile);
+                    hasShot = false;
+                }                
+                if(droppedBomb) {
+                    Bomb* bomb = new Bomb(player->get_box(), player->getTheta());
+                    bombs->push_back(bomb);
+                    droppedBomb = false;
+                }
             }catch (const std::exception &exc){
                 // catch anything thrown within try block that derives from std::exception
                 std::cout << "SERVER ERROR" << std::endl;
@@ -294,20 +333,33 @@ class Server {
             try{
 #ifdef VERBOSE
                 std::cout << "calloc keystate" << std::endl;
-#endif
-                keystate = (Uint8 *) calloc(27, sizeof(Uint8));
-#ifdef VERBOSE                
                 std::cout << "for loop on keys" << std::endl;
 #endif
+                keystate = (Uint8 *) calloc(27, sizeof(Uint8));
                 for (int i = 0; i < keysToCheck.size(); i++) {
                     keystate[keysToCheck[i]] = (Uint8) mail->at(i); 
                 }
+                
             }
             catch (const std::exception &exc){
                 // catch anything thrown within try block that derives from std::exception
                 std::cerr << exc.what();
             }
             return keystate;
+        }
+
+        bool getHasShot(std::vector<char>* mail) {
+            if(mail->at(10) == '1') {
+                return true;
+            }
+            return false;
+        }
+
+        bool getDroppedBomb(std::vector<char>* mail) {
+            if(mail->at(11) == '1') {
+                return true;
+            }
+            return false;
         }
 
         //set the player in the player array - make a copy
@@ -365,6 +417,10 @@ class Server {
         std::vector<Player*>* players;
         //latest mail vector - parallel to player
         std::vector<Packet*>* lastMail;
+        // Vector of simulated bombs
+        std::vector<Bomb*>* bombs;
+        // Vector of simulated projectiles
+        std::vector<Projectile*>* projectiles;
         // The keys we want to check for when we add a keystate packet
         std::vector<Uint8> keysToCheck =  { SDL_SCANCODE_W, SDL_SCANCODE_A, 
                                     SDL_SCANCODE_S, SDL_SCANCODE_D}; 

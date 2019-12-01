@@ -252,7 +252,7 @@ int LocalGameLoop::run() {
 
         //The player dropped a bomb
         if (player->getBomb() == true) {
-            Bomb* newBomb(new Bomb(player->get_box(), player->getTheta(), bombBlack, bombRed, bombPlayerExplosion));
+            Bomb* newBomb = new Bomb(player->get_box(), player->getTheta(), bombBlack, bombRed, bombPlayerExplosion);
             bombs.push_back(newBomb);
             render->setBombs(bombs);
             player->setBomb(false);
