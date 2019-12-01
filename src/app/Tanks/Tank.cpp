@@ -54,11 +54,19 @@ bool Tank::isDestroyed() {
     return destroyed;
 }
 
-void Tank::setTurretSprite(Sprite *new_sprite) 
+void Tank::setTurretSprite(Sprite *new_sprite)
 {
     turretSprite = *new_sprite;
 }
 
 Sprite* Tank::getTurretSprite(){
     return &turretSprite;
+}
+
+bool Tank::purpHit() {
+  return purpleHit;
+}
+
+void Tank::setPurpHit(bool hiterino) {
+  purpleHit = hiterino;
 }
