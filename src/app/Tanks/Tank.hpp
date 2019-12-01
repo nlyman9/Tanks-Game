@@ -3,16 +3,38 @@
 
 #include "Object.hpp"
 #include "Sprite.hpp"
+#include <chrono>
 
 class Tank {
+    private: 
+      std::chrono::system_clock::time_point prev_fire_time = std::chrono::system_clock::now();
+      std::chrono::system_clock::time_point prev_bomb_time = std::chrono::system_clock::now();
     public:
         // Member Functions
         int getTheta();
         float getTurretTheta();
         bool getFire();
-        void setFire(bool fire);
+        bool setFire(bool fire){
+            std::chrono::system_clock::time_point current_fire_time = std::chrono::system_clock::now();
+            if((current_fire_time - prev_fire_time) > std::chrono::seconds{1}){
+                prev_fire_time = std::chrono::system_clock::now();
+                shotsFired = fire;
+                return true;
+            }
+            shotsFired = false;
+            return false;
+        }
         bool getBomb();
-        void setBomb(bool bomb);
+        bool setBomb(bool bomb){
+            std::chrono::system_clock::time_point current_bomb_time = std::chrono::system_clock::now();
+            if((current_bomb_time - prev_bomb_time) > std::chrono::seconds{1}){
+                prev_bomb_time = std::chrono::system_clock::now();
+                bombDeloyed = bomb;
+                return true;
+            }
+            bombDeloyed = false;
+            return false;
+        }
         bool rotate(float theta);
         void rotateTurret(float theta);
         void setTurretSprite(Sprite* new_sprite);
