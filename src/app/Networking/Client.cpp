@@ -96,6 +96,14 @@ int Client::clientProcess(void* data) {
                 }
                 int p2Y_pos = atoi(y_strP2.c_str());
 
+                i++;
+                std::string timeStr = "";
+                while(data->at(i) != ' ') {
+                    timeStr += data->at(i);
+                    i++;
+                }
+                client->setStartTime(timeStr);
+
                 if(currId == p1ID) {
                     std::cout << "Client: ID: " << currId << " Starting Position: (" << p1X_pos << ", " << p1Y_pos << ")" << std::endl;
                     client->initData.push_back(currId);

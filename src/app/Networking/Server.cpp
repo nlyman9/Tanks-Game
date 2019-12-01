@@ -112,6 +112,8 @@ int serverProcess() {
     Player* player2 = new Player(x_pos[1], y_pos[1], false);
     server->addPlayer(player1);
     server->addPlayer(player2);
+    //set time
+    server->setStartTime();
     // Initialize Player Data
     for (int i = 0; i < server->numClients(); i++) {
         // Packet playerID, inital position
@@ -152,6 +154,12 @@ int serverProcess() {
         }
         data.push_back(' ');
 
+        std::string startTimeStr = server->getStartTimeStr(); 
+        for (auto character : startTimeStr) {
+            data.push_back(character); // Time stamp
+        }
+        data.push_back(' ');
+
         std::cout << "Server: Preparing to send init data to player " << i << "!" << std::endl;
         Packet *initPacket = new Packet(PackType::INIT);
         std::cout << "Init packet size is " << data.size() << std::endl;
@@ -176,8 +184,7 @@ int serverProcess() {
     // Game Loop
     // TODO simulate the game on server's side?
     std::vector<ClientConnection*> *pendingClients;
-    //set time
-    server->startTime();
+
     while (server->gameOn) {
 #ifdef VERBOSE
         std::cout << "\n\nSERVER: GAME - # Clients = " << server->numClients() << std::endl;

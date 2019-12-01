@@ -183,6 +183,8 @@ int OnlineGameLoop::run() {
 	const Uint8 *keystate;
 	const Uint8 *keyStatePacket;
 	int temp = 0; // For calculating tickrate TODO change later
+    long gameTimer = TIMER_LENGTH + 2; // +2 to allow for set up time
+
     // Main game loop
     while (client->gameOn)
 	{
@@ -190,6 +192,22 @@ int OnlineGameLoop::run() {
 		elapsed_time = current_time - previous_time;
 		previous_time = current_time;
 		lag_time += elapsed_time.count();
+
+		std::time_t curr_c = std::chrono::system_clock::to_time_t(current_time);
+		std::tm curr_tm = *std::localtime(&curr_c);
+		char timeStr[10];
+		strftime(timeStr, 10, "%S", &curr_tm);
+		long currTime = std::stol(timeStr);
+
+        auto timeSinceStart = currTime - client->getStartTime();
+        long timeRemaining = gameTimer - timeSinceStart;
+
+		// Don't decriment timer until less than 300
+		if(timeRemaining > 300) {
+			render->setTimer(300);
+		} else {
+        	render->setTimer(timeRemaining);
+		}
 
 		// 1. Process input
 		while (SDL_PollEvent(&e))

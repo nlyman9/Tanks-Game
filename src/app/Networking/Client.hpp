@@ -32,6 +32,8 @@ class Client {
     std::vector<Uint8> keysToCheck =  { SDL_SCANCODE_W, SDL_SCANCODE_A, 
                                         SDL_SCANCODE_S, SDL_SCANCODE_D}; 
     const int PLAYER_STATE_VALUES = 6;
+
+    long startTime = 0;
   public:
     int id;
 
@@ -321,5 +323,14 @@ class Client {
 
       stateSet = true;
     }
+
+    void setStartTime(std::string time) {
+        startTime = stol(time);
+    }
+
+    long getStartTime() {
+      return startTime;
+    }
+
 };
 #endif
