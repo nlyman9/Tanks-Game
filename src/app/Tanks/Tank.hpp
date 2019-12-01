@@ -29,10 +29,10 @@ class Tank {
             std::chrono::system_clock::time_point current_bomb_time = std::chrono::system_clock::now();
             if((current_bomb_time - prev_bomb_time) > std::chrono::seconds{5}){
                 prev_bomb_time = std::chrono::system_clock::now();
-                bombDeloyed = bomb;
+                bombDeployed = bomb;
                 return true;
             }
-            bombDeloyed = false;
+            bombDeployed = false;
             return false;
         }
         bool rotate(float theta);
@@ -50,13 +50,13 @@ class Tank {
         int theta = 0;
         int turretTheta = 0;
         bool shotsFired = false;
-        bool bombDeloyed = false;
+        bool bombDeployed = false;
         Uint32 fire_last_time_bullet = 0;
         Uint32 fire_last_time_bomb = 0;
         int frame = 0;
         Sprite turretSprite;
 		bool hit = false;
-    bool purpleHit = false;
+        bool purpleHit = false;
 		bool destroyed = false;
 };
 

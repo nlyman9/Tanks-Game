@@ -13,7 +13,7 @@ bool Tank::getFire() {
 }
 
 bool Tank::getBomb() {
-    return bombDeloyed;
+    return bombDeployed;
 }
 
 bool Tank::rotate(float t){
