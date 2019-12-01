@@ -16,7 +16,7 @@ class Tank {
         bool getFire();
         bool setFire(bool fire){
             std::chrono::system_clock::time_point current_fire_time = std::chrono::system_clock::now();
-            if((current_fire_time - prev_fire_time) > std::chrono::seconds{1}){
+            if((current_fire_time - prev_fire_time) > std::chrono::seconds{3}){
                 prev_fire_time = std::chrono::system_clock::now();
                 shotsFired = fire;
                 return true;
@@ -27,7 +27,7 @@ class Tank {
         bool getBomb();
         bool setBomb(bool bomb){
             std::chrono::system_clock::time_point current_bomb_time = std::chrono::system_clock::now();
-            if((current_bomb_time - prev_bomb_time) > std::chrono::seconds{1}){
+            if((current_bomb_time - prev_bomb_time) > std::chrono::seconds{5}){
                 prev_bomb_time = std::chrono::system_clock::now();
                 bombDeloyed = bomb;
                 return true;
