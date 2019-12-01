@@ -50,6 +50,7 @@ class Projectile : public Object {
 		bool isHit();
 		bool isExploding();
 		bool isFinished();
+    void setFinished(bool fini);
 
 		bool getFriendly(); // returns friendly
 		bool setFriendly(bool a); // modifies and returns the value of friendly
