@@ -317,12 +317,7 @@ int LocalGameLoop::run() {
         while(lag_time >= MS_PER_UPDATE) {
             player->setTurretTheta();
             player->update();
-
-			if(player->isDestroyed()) {
-        //get rid of player and display a you lose screen or something
-        //delete player; //This will delete the player, but gets a segfault if you click after it's deleted
-				//erase player from render
-			}
+            
 			for (int i = 0; i < enemies.size(); i++) {
 				  enemies.at(i)->update();
 				  enemies.at(i)->setProjectiles(projectiles);

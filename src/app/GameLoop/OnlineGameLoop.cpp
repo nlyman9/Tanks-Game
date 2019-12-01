@@ -239,6 +239,7 @@ int OnlineGameLoop::run() {
 			}
 			client->stateSet = false;
 		}
+		
 		for(auto player : players) {
 			// Send same keystate to player object and to the client to send
 			// TODO find a good rate to send player keystates
