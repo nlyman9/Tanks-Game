@@ -239,6 +239,14 @@ class Server {
             elapsed_time = current_time - previous_time;
             previous_time = current_time;
             lag_time += elapsed_time.count();
+
+            // Check that the last states of the players is not null
+            //  If the server didnt receive packets on the first tick, the server would segfault
+            for (auto& mail : *lastMail) {
+                if (mail == nullptr)
+                    return false;
+            }
+
             //for each player
             //apply latest mail
             gamestate->clear();
