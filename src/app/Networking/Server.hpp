@@ -339,11 +339,7 @@ class Server {
         }
 
         std::string getStartTimeStr(){
-            std::time_t now_c = std::chrono::system_clock::to_time_t(start_time);
-            std::tm now_tm = *std::localtime(&now_c);
-            char timeStr[10];
-            strftime(timeStr, 10, "%S", &now_tm);
-            return timeStr;
+            return std::to_string(start_time.time_since_epoch().count());
         }
 
         Packet* getGamestatePacket(){

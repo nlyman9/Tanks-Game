@@ -193,14 +193,8 @@ int OnlineGameLoop::run() {
 		previous_time = current_time;
 		lag_time += elapsed_time.count();
 
-		std::time_t curr_c = std::chrono::system_clock::to_time_t(current_time);
-		std::tm curr_tm = *std::localtime(&curr_c);
-		char timeStr[10];
-		strftime(timeStr, 10, "%S", &curr_tm);
-		long currTime = std::stol(timeStr);
-
-        auto timeSinceStart = currTime - client->getStartTime();
-        long timeRemaining = gameTimer - timeSinceStart;
+        auto timeSinceStart = current_time.time_since_epoch().count() - client->getStartTime();
+        long timeRemaining = gameTimer - timeSinceStart / 1000000000;
 
 		// Don't decriment timer until less than 300
 		if(timeRemaining > 300) {
