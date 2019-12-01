@@ -265,6 +265,7 @@ class Server {
                     projectile->update();
                     if(projectile->isFinished()) {
                         projectiles->erase(projectiles->begin() + count);
+                        count--;
                     }
                     count++;
                 }
