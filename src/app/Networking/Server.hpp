@@ -234,14 +234,16 @@ class Server {
         int numClients() {
             return host->numClients();
         }
-
+        void reset_lag_time(){
+            lag_time = prev_lag_time;
+        }
         //simulate game
         bool simulate(){
             current_time = std::chrono::system_clock::now();
             elapsed_time = current_time - previous_time;
             previous_time = current_time;
+            prev_lag_time = lag_time;
             lag_time += elapsed_time.count();
-            
             // Check that the last states of the players is not null
             //  If the server didnt receive packets on the first tick, the server would segfault
             for (auto& mail : *lastMail) {
@@ -289,6 +291,12 @@ class Server {
                     bombCount++;
                 }
             }
+            //update everything
+            if(lag_time >= MS_PER_UPDATE) {
+                for(auto player: *players)
+                    player->update();
+                lag_time -= MS_PER_UPDATE;
+            }
 
             return true;
         }
@@ -311,9 +319,6 @@ class Server {
                 return false;
             try{
                 player->getEvent(elapsed_time, &e, keystate);
-                if(lag_time >= MS_PER_UPDATE) {
-                    player->update();
-                }
                 if(hasShot) {
                     Projectile* projectile = new Projectile(player->getX() + TANK_WIDTH/4, player->getY() + TANK_HEIGHT/4, player->getTurretTheta(), 1);
                     projectile->setObstacleLocations(&projectileObstacles);
@@ -450,8 +455,9 @@ class Server {
         std::chrono::duration<double, std::ratio<1, 1000>> elapsed_time;
         std::chrono::system_clock::time_point previous_time;
         std::chrono::system_clock::time_point current_time;
-        double lag_time;
-
+        double lag_time = 0;
+        double prev_lag_time;
+        bool ready_to_update = false;
         std::vector<char>* gamestate;
 
         std::chrono::system_clock::time_point start_time;
