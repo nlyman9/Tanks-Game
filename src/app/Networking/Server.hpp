@@ -289,6 +289,12 @@ class Server {
                     bombCount++;
                 }
             }
+            //update everything
+            if(lag_time >= MS_PER_UPDATE) {
+                for(auto player: *players)
+                    player->update();
+                lag_time -= MS_PER_UPDATE;
+            }
 
             return true;
         }
@@ -311,9 +317,6 @@ class Server {
                 return false;
             try{
                 player->getEvent(elapsed_time, &e, keystate);
-                if(lag_time >= MS_PER_UPDATE) {
-                    player->update();
-                }
                 if(hasShot) {
                     Projectile* projectile = new Projectile(player->getX() + TANK_WIDTH/4, player->getY() + TANK_HEIGHT/4, player->getTurretTheta(), 1);
                     projectile->setObstacleLocations(&projectileObstacles);
@@ -450,7 +453,7 @@ class Server {
         std::chrono::duration<double, std::ratio<1, 1000>> elapsed_time;
         std::chrono::system_clock::time_point previous_time;
         std::chrono::system_clock::time_point current_time;
-        double lag_time;
+        double lag_time = 0;
 
         std::vector<char>* gamestate;
 

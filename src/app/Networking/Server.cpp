@@ -201,7 +201,6 @@ int serverProcess() {
                 if(server->simulate()){
                     //create packet of gamestate and broadcast
                     if((std::chrono::system_clock::now() - server->time_since_last_keyframe) > std::chrono::seconds{1}){
-                        std::cout << " Sending key frame" << std::endl;
                         server->time_since_last_keyframe - std::chrono::system_clock::now();
                         Packet* gamestatepacket = server->getGamestatePacket();
 #ifdef VERBOSE                    
@@ -268,7 +267,6 @@ int serverProcess() {
             if(server->simulate()){
                 //create packet of gamestate and broadcast
                 if((std::chrono::system_clock::now() - server->time_since_last_keyframe) > std::chrono::seconds{1}){
-                    std::cout << " Sending key frame" << std::endl;
                     server->time_since_last_keyframe - std::chrono::system_clock::now();
                     Packet* gamestatepacket = server->getGamestatePacket();
                     server->broadcast(gamestatepacket);
