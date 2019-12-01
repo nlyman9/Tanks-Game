@@ -239,7 +239,7 @@ int OnlineGameLoop::run() {
 			}
 			client->stateSet = false;
 		}
-		
+
 		for(auto player : players) {
 			// Send same keystate to player object and to the client to send
 			// TODO find a good rate to send player keystates
@@ -273,7 +273,7 @@ int OnlineGameLoop::run() {
 				keystate = nullptr; //only need to send one per update loop
 				temp = 0;
 
-				//network version of player firing bullet
+				// network version of player firing bullet
 				// TODO NOT DO THIS - not have this nested inside the tickrate - this is hacky
 				if (players.at(0)->getFire() == true) {
 					Projectile *newBullet = new Projectile(players.at(0)->getX() + TANK_WIDTH/4, players.at(0)->getY() + TANK_HEIGHT/4, players.at(0)->getTurretTheta(), 1);

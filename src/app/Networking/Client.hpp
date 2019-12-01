@@ -177,7 +177,7 @@ class Client {
      * @return false - They didn't shoot
      */
     bool getPlayerShot(int id) {
-      assert(id < playerTurretThetas.size());
+      assert(id < playerShot.size());
 
       return playerShot.at(id);
     }
@@ -190,7 +190,7 @@ class Client {
      * @return false - They didn't drop a bomb
      */
     bool getPlayerBomb(int id) {
-      assert(id < playerTurretThetas.size());
+      assert(id < playerBomb.size());
 
       return playerBomb.at(id);
     }

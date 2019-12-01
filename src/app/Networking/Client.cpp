@@ -199,6 +199,9 @@ int Client::clientProcess(void* data) {
                     std::cerr << exc.what();
                 }
             }
+            if(mail->getType() == PackType::GAME_OVER) {
+                // TODO: END GAME STATES
+            }
         }
         // TODO wait if we finish early?
     }

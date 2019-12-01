@@ -154,7 +154,7 @@ int serverProcess() {
         }
         data.push_back(' ');
 
-        std::string startTimeStr = server->getStartTimeStr(); 
+        std::string startTimeStr = std::to_string(server->getStartTime()); 
         for (auto character : startTimeStr) {
             data.push_back(character); // Time stamp
         }
@@ -185,7 +185,18 @@ int serverProcess() {
     // TODO simulate the game on server's side?
     std::vector<ClientConnection*> *pendingClients;
     server->time_since_last_keyframe = std::chrono::system_clock::now();
+    long gameTimer = TIMER_LENGTH + 2; // +2 to allow for set up time
     while (server->gameOn) {
+        auto current_time = std::chrono::system_clock::now();
+        auto timeSinceStart = current_time.time_since_epoch().count() - server->getStartTime();
+        long timeRemaining = gameTimer - timeSinceStart / 1000000000;
+
+		// Don't decriment timer until less than 300
+		if(timeRemaining <= 0) {
+            Packet* gameOverPacket = new Packet(PackType::GAME_OVER);
+            server->broadcast(gameOverPacket);
+		}
+
 #ifdef VERBOSE
         std::cout << "\n\nSERVER: GAME - # Clients = " << server->numClients() << std::endl;
         fflush(stdout);
@@ -200,12 +211,12 @@ int serverProcess() {
             try{
                 if(server->simulate()){
                     //create packet of gamestate and broadcast
-                    if((std::chrono::system_clock::now() - server->time_since_last_keyframe) > std::chrono::seconds{1}){
+                    if((std::chrono::system_clock::now() - server->time_since_last_keyframe) > std::chrono::milliseconds{500}){
                         server->time_since_last_keyframe - std::chrono::system_clock::now();
                         Packet* gamestatepacket = server->getGamestatePacket();
 #ifdef VERBOSE                    
-                    std::cout << "SERVER: Sending keyframe - ";
-                    gamestatepacket->printData();
+                        std::cout << "SERVER: Sending keyframe - ";
+                        gamestatepacket->printData();
 #endif
                         server->broadcast(gamestatepacket);
                     }
@@ -267,16 +278,16 @@ int serverProcess() {
         try{
             if(server->simulate()){
                 //create packet of gamestate and broadcast
-                if((std::chrono::system_clock::now() - server->time_since_last_keyframe) > std::chrono::seconds{1}){
+                if((std::chrono::system_clock::now() - server->time_since_last_keyframe) > std::chrono::milliseconds{500}){
                     server->time_since_last_keyframe - std::chrono::system_clock::now();
                     Packet* gamestatepacket = server->getGamestatePacket();
                     server->broadcast(gamestatepacket);
 #ifdef VERBOSE
-                std::cout << "SERVER: Sending keyframe - ";
-                gamestatepacket->printData();
+                    std::cout << "SERVER: Sending keyframe - ";
+                    gamestatepacket->printData();
 #endif
                 }
-            }else{
+            } else {
 #ifdef VERBOSE
                 std::cout << "Failed to simulate game" << std::endl;
 #endif

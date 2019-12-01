@@ -366,8 +366,7 @@ int LocalGameLoop::run() {
               }
               else {
                 enemy->setHit(true);
-                //std::cout << "setting hit to true\n";
-                //enemy->setSprite(bluesplosion);
+
                 enemy->resetFrame();
               }
 							break;
@@ -379,8 +378,6 @@ int LocalGameLoop::run() {
 					projectiles.at(i)->setFinished(true);
 				}
             if(projectiles.at(i)->isFinished()){
-            //std::cout << "Projectile being deleted\n";
-					//erase the projectile object from the projectiles vector
 					projectiles.erase(projectiles.begin()+i);
 					render->setProjectiles(projectiles);
 					i--;

@@ -270,6 +270,9 @@ class Server {
                 int count = 0;
                 for (auto& projectile : projectiles) {
                     projectile->update();
+                    if(projectile->check_collision(players->at(i))) {
+                        std::cout << "Player " << i << " was shot" << std::endl;
+                    }
                     if(projectile->isFinished()) {
                         projectiles.erase(projectiles.begin() + count);
                         count--;
@@ -282,7 +285,9 @@ class Server {
                 for(auto& bomb : bombs) {
                     // Update bombs
 				    bomb->update();
-
+                    if(bomb->check_collision(players->at(i))) {
+                        std::cout << "Player " << i << " was bombed" << std::endl;
+                    }
                     // Check if bomb is done exploding
                     if(bomb->getFinished()) {
                         bombs.erase(bombs.begin() + bombCount);
@@ -293,8 +298,9 @@ class Server {
             }
             //update everything
             if(lag_time >= MS_PER_UPDATE) {
-                for(auto player: *players)
+                for(auto player: *players) {
                     player->update();
+                }
                 lag_time -= MS_PER_UPDATE;
             }
 
@@ -404,8 +410,8 @@ class Server {
             start_time = std::chrono::system_clock::now();
         }
 
-        std::string getStartTimeStr(){
-            return std::to_string(start_time.time_since_epoch().count());
+        long getStartTime(){
+            return start_time.time_since_epoch().count();
         }
 
         Packet* getGamestatePacket(){
