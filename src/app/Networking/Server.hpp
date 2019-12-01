@@ -21,6 +21,7 @@
 #include "Player.hpp"
 #include "Constants.hpp"
 
+
 // #include <SDL2/SDL_thread.h>
 
 // Packed (compresed) map to send to clients
@@ -240,7 +241,7 @@ class Server {
             elapsed_time = current_time - previous_time;
             previous_time = current_time;
             lag_time += elapsed_time.count();
-
+            
             // Check that the last states of the players is not null
             //  If the server didnt receive packets on the first tick, the server would segfault
             for (auto& mail : *lastMail) {
@@ -250,7 +251,6 @@ class Server {
 
             //for each player
             //apply latest mail
-            gamestate->clear();
             for(int i = 0; i < numClients(); i++){
 #ifdef VERBOSE
                 std::cout << "SERVER: Applying keystates to gamestate" << std::endl;
@@ -275,11 +275,11 @@ class Server {
                     count++;
                 }
 
-                // Update every bomb in the game
+			    // Update every bomb in the game
                 int bombCount = 0;
                 for(auto& bomb : bombs) {
                     // Update bombs
-                    bomb->update();
+				    bomb->update();
 
                     // Check if bomb is done exploding
                     if(bomb->getFinished()) {
@@ -288,12 +288,9 @@ class Server {
                     }
                     bombCount++;
                 }
-
-                std::vector<char>* playerstate = players->at(i)->getState();
-                gamestate->insert(gamestate->end() , playerstate->begin(), playerstate->end());
             }
+
             return true;
- 
         }
 
         bool applyKeyStatePacket(Packet* packet, Player* player, double lag_time){
@@ -315,6 +312,7 @@ class Server {
             try{
                 player->getEvent(elapsed_time, &e, keystate);
                 if(lag_time >= MS_PER_UPDATE) {
+
                     player->update();
                 }
                 if(hasShot) {
@@ -418,7 +416,12 @@ class Server {
         }
 
         std::vector<char>* getGamestate(){
+            gamestate->clear();
             std::vector<char>* retVal = new std::vector<char>();
+            for(auto player: *players){
+                std::vector<char>* playerstate = player->getState();
+                gamestate->insert(gamestate->end() , playerstate->begin(), playerstate->end());
+            }
             for(auto x : *gamestate)
                 retVal->push_back(x);
             return retVal;
