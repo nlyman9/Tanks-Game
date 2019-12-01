@@ -234,14 +234,16 @@ class Server {
         int numClients() {
             return host->numClients();
         }
-
+        void reset_lag_time(){
+            lag_time = prev_lag_time;
+        }
         //simulate game
         bool simulate(){
             current_time = std::chrono::system_clock::now();
             elapsed_time = current_time - previous_time;
             previous_time = current_time;
+            prev_lag_time = lag_time;
             lag_time += elapsed_time.count();
-            
             // Check that the last states of the players is not null
             //  If the server didnt receive packets on the first tick, the server would segfault
             for (auto& mail : *lastMail) {
@@ -454,7 +456,8 @@ class Server {
         std::chrono::system_clock::time_point previous_time;
         std::chrono::system_clock::time_point current_time;
         double lag_time = 0;
-
+        double prev_lag_time;
+        bool ready_to_update = false;
         std::vector<char>* gamestate;
 
         std::chrono::system_clock::time_point start_time;

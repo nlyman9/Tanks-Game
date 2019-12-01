@@ -213,6 +213,7 @@ int serverProcess() {
 #ifdef VERBOSE
                     std::cout << "Failed to simulate game" << std::endl;
 #endif
+                    server->reset_lag_time();
                 }
             }catch (const std::exception &exc){
                 std::cerr << exc.what();
@@ -279,6 +280,7 @@ int serverProcess() {
 #ifdef VERBOSE
                 std::cout << "Failed to simulate game" << std::endl;
 #endif
+            server->reset_lag_time();
             }
         }catch (const std::exception &exc){
             // catch anything thrown within try block that derives from std::exception
