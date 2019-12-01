@@ -295,7 +295,7 @@ class ServerController {
                 return nullptr;
             } else {
                 std::vector<ClientConnection*> *pendingClients = new std::vector<ClientConnection*>();
-                for (auto client : clients) {
+                for (auto& client : clients) {
                     if (FD_ISSET(client->fd(), &read_fds)) {
                         pendingClients->push_back(client);
                     }
@@ -389,7 +389,7 @@ class ServerController {
             Packet *mail =  broadcastBuffer.front();
             broadcastBuffer.pop_front();
 
-            for (auto client : clients) {
+            for (auto& client : clients) {
                 client->sendPacket(mail);
             }
 #ifdef VERBOSE
@@ -421,7 +421,7 @@ class ServerController {
         }
 
         /**
-         * @brief Get the Clients I D object
+         * @brief Get the Clients ID object
          * @warning this has to iterate through the list of clients
          * 
          * @param fd - The file descriptor you are searching for 
@@ -431,10 +431,12 @@ class ServerController {
         int getClientsID(int fd) {
             assert(fd < clients.size());
 
-            for (int i = 0; i < clients.size(); i++) {
-                if (clients.at(i)->fd() == fd) {
-                    return i;
+            int counter = 0;
+            for (auto& client : clients) {
+                if (client->fd() == fd) {
+                    return counter;
                 }
+                counter++;
             }
 
             return -1;

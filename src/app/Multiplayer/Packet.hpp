@@ -83,7 +83,11 @@ class Packet {
             headers.push_back(size);
             headers.push_back(type);
             for (int i = 0; i < data_size; i++) {
-                this->body.push_back((char) data[i]);
+                if(i >= data_size) {
+                    std::cout << "PACKET VECTOR OVER RUN" << std::endl;
+                } else {
+                    this->body.push_back((char) data[i]);
+                }
             }
 #ifdef VERBOSE
             std::cout << "Appended data = " << std::endl;
