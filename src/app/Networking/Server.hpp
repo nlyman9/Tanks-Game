@@ -343,9 +343,12 @@ class Server {
 #endif
                 keystate = (Uint8 *) calloc(27, sizeof(Uint8));
                 for (int i = 0; i < keysToCheck.size(); i++) {
-                    keystate[keysToCheck[i]] = (Uint8) mail->at(i); 
+                    if(i >= keysToCheck.size()) {
+                        std::cout << "SERVER VECTOR OVER RUN" << std::endl;
+                    } else {
+                        keystate[keysToCheck[i]] = (Uint8) mail->at(i); 
+                    }
                 }
-                
             }
             catch (const std::exception &exc){
                 // catch anything thrown within try block that derives from std::exception

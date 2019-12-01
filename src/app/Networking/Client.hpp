@@ -214,7 +214,11 @@ class Client {
       Uint8 *keystate = playerKeystates.at(id);
 
       for (int i = 0; i < keysToCheck.size(); i++) {
-        keystate[keysToCheck[i]] = (Uint8) charKeyStates->at(i); 
+        if(i >= keysToCheck.size()) {
+          std::cout << "CLIENT VECTOR OVER RUN" << std::endl;
+        } else {
+          keystate[keysToCheck[i]] = (Uint8) charKeyStates->at(i); 
+        }
       }
 
       playerTurretThetas[id] = turretTheta;
