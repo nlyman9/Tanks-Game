@@ -184,7 +184,7 @@ int serverProcess() {
     // Game Loop
     // TODO simulate the game on server's side?
     std::vector<ClientConnection*> *pendingClients;
-
+    server->time_since_last_keyframe = std::chrono::system_clock::now();
     while (server->gameOn) {
 #ifdef VERBOSE
         std::cout << "\n\nSERVER: GAME - # Clients = " << server->numClients() << std::endl;
@@ -200,12 +200,16 @@ int serverProcess() {
             try{
                 if(server->simulate()){
                     //create packet of gamestate and broadcast
-                    Packet* gamestatepacket = server->getGamestatePacket();
+                    if((std::chrono::system_clock::now() - server->time_since_last_keyframe) > std::chrono::seconds{1}){
+                        std::cout << " Sending key frame" << std::endl;
+                        server->time_since_last_keyframe - std::chrono::system_clock::now();
+                        Packet* gamestatepacket = server->getGamestatePacket();
 #ifdef VERBOSE                    
                     std::cout << "SERVER: Sending keyframe - ";
                     gamestatepacket->printData();
 #endif
-                    server->broadcast(gamestatepacket);
+                        server->broadcast(gamestatepacket);
+                    }
                 }else{
 #ifdef VERBOSE
                     std::cout << "Failed to simulate game" << std::endl;
@@ -263,12 +267,16 @@ int serverProcess() {
         try{
             if(server->simulate()){
                 //create packet of gamestate and broadcast
-                Packet* gamestatepacket = server->getGamestatePacket();
+                if((std::chrono::system_clock::now() - server->time_since_last_keyframe) > std::chrono::seconds{1}){
+                    std::cout << " Sending key frame" << std::endl;
+                    server->time_since_last_keyframe - std::chrono::system_clock::now();
+                    Packet* gamestatepacket = server->getGamestatePacket();
+                    server->broadcast(gamestatepacket);
 #ifdef VERBOSE
                 std::cout << "SERVER: Sending keyframe - ";
                 gamestatepacket->printData();
 #endif
-                server->broadcast(gamestatepacket);
+                }
             }else{
 #ifdef VERBOSE
                 std::cout << "Failed to simulate game" << std::endl;

@@ -312,7 +312,6 @@ class Server {
             try{
                 player->getEvent(elapsed_time, &e, keystate);
                 if(lag_time >= MS_PER_UPDATE) {
-
                     player->update();
                 }
                 if(hasShot) {
@@ -427,6 +426,9 @@ class Server {
         std::vector<SDL_Rect> getProjectileObstacles() {
             return projectileObstacles;
         }
+    
+    
+    std::chrono::system_clock::time_point time_since_last_keyframe;
 
     private:
         //player vector - parallel to clientConnection
