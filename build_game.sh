@@ -12,7 +12,7 @@ elif [ "$1" = "-v" ]; then
   cmake ../src -DVERBOSE=ON
   make
 else
-   cd build
+  cd build
   cmake ../src -DVERBOSE=OFF
   make
 fi

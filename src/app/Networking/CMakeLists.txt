@@ -52,6 +52,7 @@ target_link_libraries(Server
   Object
   Bomb
   Projectile
+  Constants
 )
 else()
 target_link_libraries(Server
@@ -63,5 +64,6 @@ target_link_libraries(Server
   Object
   Bomb
   Projectile
+  Constants
 )
 endif()

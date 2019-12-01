@@ -19,6 +19,7 @@
 #include "Projectile.hpp"
 #include "Multiplayer.hpp"
 #include "Player.hpp"
+#include "Constants.hpp"
 
 // #include <SDL2/SDL_thread.h>
 
@@ -242,14 +243,13 @@ class Server {
             //for each player
             //apply latest mail
             gamestate->clear();
-
             for(int i = 0; i < numClients(); i++){
 #ifdef VERBOSE
                 std::cout << "SERVER: Applying keystates to gamestate" << std::endl;
                 lastMail->at(i)->printData();
                 std::cout << std::endl;
 #endif
-                if(!applyKeyStatePacket(lastMail->at(i), players->at(i))){
+                if(!applyKeyStatePacket(lastMail->at(i), players->at(i), lag_time)){
 #ifdef VERBOSE
                     printf("SERVER Error: could not apply keystate packet\n");
 #endif
@@ -267,11 +267,11 @@ class Server {
                     count++;
                 }
 
-			    // Update every bomb in the game
+                // Update every bomb in the game
                 int bombCount = 0;
                 for(auto& bomb : bombs) {
                     // Update bombs
-				    bomb->update();
+                    bomb->update();
 
                     // Check if bomb is done exploding
                     if(bomb->getFinished()) {
@@ -284,11 +284,11 @@ class Server {
                 std::vector<char>* playerstate = players->at(i)->getState();
                 gamestate->insert(gamestate->end() , playerstate->begin(), playerstate->end());
             }
-
             return true;
+ 
         }
 
-        bool applyKeyStatePacket(Packet* packet, Player* player){
+        bool applyKeyStatePacket(Packet* packet, Player* player, double lag_time){
             SDL_Event e;
             if(packet == nullptr)
                 return false;
@@ -306,9 +306,12 @@ class Server {
                 return false;
             try{
                 player->getEvent(elapsed_time, &e, keystate);
-                player->update();
+                if(lag_time >= MS_PER_UPDATE) {
+                    player->update();
+                }
                 if(hasShot) {
                     Projectile* projectile = new Projectile(player->getX() + TANK_WIDTH/4, player->getY() + TANK_HEIGHT/4, player->getTurretTheta(), 1);
+                    projectile->setObstacleLocations(&projectileObstacles);
                     projectiles.push_back(projectile);
                     hasShot = false;
                 }                
@@ -410,6 +413,10 @@ class Server {
             return retVal;
         }
 
+        std::vector<SDL_Rect> getProjectileObstacles() {
+            return projectileObstacles;
+        }
+
     private:
         //player vector - parallel to clientConnection
         std::vector<Player*>* players;
@@ -419,6 +426,8 @@ class Server {
         std::vector<Bomb*> bombs;
         // Vector of simulated projectiles
         std::vector<Projectile*> projectiles;
+        // Vector of obstacles the projectiles see
+        std::vector<SDL_Rect> projectileObstacles;
         // The keys we want to check for when we add a keystate packet
         std::vector<Uint8> keysToCheck =  { SDL_SCANCODE_W, SDL_SCANCODE_A, 
                                     SDL_SCANCODE_S, SDL_SCANCODE_D}; 

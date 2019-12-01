@@ -300,6 +300,23 @@ std::vector<int>* serverMapGen(){
             map1D->push_back(val);
         }
     }
+    std::vector<SDL_Rect> tileArray;
+    int count = 0;
+    for (int x = BORDER_GAP + TILE_SIZE, i = 0; x < SCREEN_WIDTH - BORDER_GAP - TILE_SIZE; x+=TILE_SIZE, i++) {
+        for (int y = TILE_SIZE, j = 0; y < SCREEN_HEIGHT - TILE_SIZE; y+=TILE_SIZE, j++) {
+            SDL_Rect cur_out = { x, y, TILE_SIZE, TILE_SIZE};
+            SDL_Rect hole_tile = { x+5, y+5, TILE_SIZE-5, TILE_SIZE-5 }; //does not work, enemy AI needs update
+            if(map[i][j] == 2) {
+                tileArray.push_back(cur_out);
+                server->getProjectileObstacles().push_back(cur_out);
+            } else if(map[i][j] == 1) {
+                tileArray.push_back(hole_tile);
+            }
+        }
+    }
+    for(int i = 0; i < server->numClients(); i++) {
+        server->getPlayer(i)->setObstacleLocations(&tileArray);
+    }
     
     return map1D;
 }

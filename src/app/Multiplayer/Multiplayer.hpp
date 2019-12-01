@@ -49,8 +49,10 @@ class ClientConnection {
             if (mail != nullptr) {
                 recvBuffer.push_back(mail);
             } else {
+#ifdef VERBOSE
                 // Packet was probably invalid
                 std::cerr << "SERVER: Packet from client was invalid!" << std::endl;
+#endif
             }
         }
 
