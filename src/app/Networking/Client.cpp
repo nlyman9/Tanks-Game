@@ -161,26 +161,30 @@ int Client::clientProcess(void* data) {
         // Receive data from server 
         Packet *mail = client->receiveAndGet();
         if (mail != nullptr) {
+#ifdef VERBOSE
             std::cout << "CLIENT-NET: Received packet type " << (int)mail->getType() << " -> ";
             mail->printData();
             fflush(stdout);
-
+#endif
             // If keystate, unpack a load into formable keystate
             // TODO not hardcode id to 0 
             if (mail->getType() == PackType::KEYSTATE) {
                 int turret_theta = mail->getInt(5); // 5 is the starting index of the integer for the turret theta
                 bool hasShot = mail->getBody()->at(10); // 10 is the index of the boolean if the player has shot
-                client->addNetworkKeyState(0, mail->getBody(), turret_theta, hasShot);
+                bool hasBomb = mail->getBody()->at(11); // 11 is the index of the boolean if the player has dropped a bomb
+                client->addNetworkKeyState(0, mail->getBody(), turret_theta, hasShot, hasBomb);
             }
             if(mail->getType() == PackType::KEYFRAME){
                 //set gamestate vector
                 try{
+#ifdef VERBOSE
                     mail->printData();
                     std::cout << "Body of mail ";
                     for(auto x : *mail->getBody()){
                         std::cout << x << " ";
                     }
                     std::cout << std::endl;
+#endif
                     client->setGameState(mail->getBody());
                 }catch (const std::exception &exc){
                     // catch anything thrown within try block that derives from std::exception

@@ -83,10 +83,12 @@ class Player : public Object, public Tank {
             for(auto x : std::to_string((int)getTheta()))
                 gamestate->push_back(x);
             gamestate->push_back(' ');
+#ifdef VERBOSE
             std::cout << "Gamestate is : ";
             for(auto x : *gamestate)
                 std::cout << x << " ";
             std::cout << std::endl;
+#endif
             return gamestate;
         }
         void applyState(std::vector<int> state){

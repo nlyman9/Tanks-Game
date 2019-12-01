@@ -179,8 +179,10 @@ int serverProcess() {
     //set time
     server->startTime();
     while (server->gameOn) {
+#ifdef VERBOSE
         std::cout << "\n\nSERVER: GAME - # Clients = " << server->numClients() << std::endl;
         fflush(stdout);
+#endif
 
         // Poll clients for pending messages 
         // This function calls receive! Do not call again unless you have a specific reason
@@ -192,18 +194,24 @@ int serverProcess() {
                 if(server->simulate()){
                     //create packet of gamestate and broadcast
                     Packet* gamestatepacket = server->getGamestatePacket();
+#ifdef VERBOSE                    
                     std::cout << "SERVER: Sending keyframe - ";
                     gamestatepacket->printData();
+#endif
                     server->broadcast(gamestatepacket);
                 }else{
+#ifdef VERBOSE
                     std::cout << "Failed to simulate game" << std::endl;
+#endif
                 }
             }catch (const std::exception &exc){
                 std::cerr << exc.what();
             }
         }
+#ifdef VERBOSE
         std::cout << "SERVER: Going to check mailbox!!!" << std::endl;
         fflush(stdout);
+#endif
 
         // Get packages from pending clients
         // pendingClients can be null IF:
@@ -211,12 +219,16 @@ int serverProcess() {
         Packet *mail;
         if (pendingClients != nullptr) {
             for (auto client : *pendingClients) {
+#ifdef VERBOSE
                 std::cout << "SERVER: Getting packet from client " << client->id() << std::endl;
                 fflush(stdout);
+#endif
                 mail = server->getPacket(client->id());
                 if (mail != nullptr) {
+#ifdef VERBOSE
                     std::cout << "SERVER: You got mail!" << std::endl;
                     mail->printData();
+#endif
                     if (mail->getType() == PackType::KEYSTATE) {
                         //copy the data of the mail
                         server->setMail(mail, client->id());
@@ -225,15 +237,19 @@ int serverProcess() {
                     }
                     fflush(stdout);
                 } else {
+#ifdef VERBOSE
                     std::cout << "SERVER: No mail :(" << std::endl;
                     fflush(stdout);
+#endif
                 }
             }
         }
 
         // Share data with clients - send data from buffer
         for (auto client : server->clients()) {
+#ifdef VERBOSE
             std::cout << "SERVER: TO " << client->id() << ": ";
+#endif
             client->sendFromBuffer();
         }
         //simulate the game
@@ -241,11 +257,15 @@ int serverProcess() {
             if(server->simulate()){
                 //create packet of gamestate and broadcast
                 Packet* gamestatepacket = server->getGamestatePacket();
+#ifdef VERBOSE
                 std::cout << "SERVER: Sending keyframe - ";
                 gamestatepacket->printData();
+#endif
                 server->broadcast(gamestatepacket);
             }else{
+#ifdef VERBOSE
                 std::cout << "Failed to simulate game" << std::endl;
+#endif
             }
         }catch (const std::exception &exc){
             // catch anything thrown within try block that derives from std::exception

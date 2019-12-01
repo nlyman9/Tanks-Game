@@ -64,6 +64,18 @@ bool OnlineGameLoop::init(Args* options) {
     loadingScreen6 = loadImage("src/res/images/loadingScreen6.png", render->getRenderer());
     loadingScreen7 = loadImage("src/res/images/loadingScreen7.png", render->getRenderer());
 
+	// Set up bomb
+    bombBlack = new Sprite(render->getRenderer(), "src/res/images/bomb_black.png");
+    bombBlack->init();
+    bombRed = new Sprite(render->getRenderer(), "src/res/images/bomb_red.png");
+    bombRed->init();
+    bombPlayerExplosion = new Sprite(render->getRenderer(), "src/res/images/redsplosion.png");
+    bombPlayerExplosion->init();
+    bombPlayerExplosion->sheetSetup(48, 48, 6);
+    bombEnemyExplosion = new Sprite(render->getRenderer(), "src/res/images/bluesplosion.png");
+    bombEnemyExplosion->init();
+    bombEnemyExplosion->sheetSetup(48, 48, 6);
+
     // Set up cursor
     cursor = loadImage("src/res/images/cursor.png", render->getRenderer());
 
@@ -246,7 +258,7 @@ int OnlineGameLoop::run() {
 			// TODO Consolidate tickrates
 			if (temp > 2 && keystate != nullptr) {
 				// Add keystate from local player to send
-				client->addLocalKeyState(keystate, players.at(0)->turretTheta, players.at(0)->getFire());
+				client->addLocalKeyState(keystate, players.at(0)->turretTheta, players.at(0)->getFire(), players.at(0)->getBomb());
 				keystate = nullptr; //only need to send one per update loop
 				temp = 0;
 
@@ -260,11 +272,19 @@ int OnlineGameLoop::run() {
 					render->setProjectiles(projectiles);
 					players.at(0)->setFire(false);
 				}
+
+				if(players.at(0)->getBomb() == true) {
+					Bomb* newBomb(new Bomb(players.at(0)->get_box(), players.at(0)->getTheta(), bombBlack, bombRed, bombPlayerExplosion));
+					bombs.push_back(newBomb);
+					render->setBombs(bombs);
+					players.at(0)->setBomb(false);
+				}
 			}
 
 			for (auto playerEnemy : playerEnemies) {
 				playerEnemy->setTurretTheta(client->getTurretTheta(0));
 				playerEnemy->setFire(client->getPlayerShot(0));
+				playerEnemy->setBomb(client->getPlayerBomb(0));
 				playerEnemy->update();
 
 				if (playerEnemy->getFire() == true) {
@@ -275,20 +295,60 @@ int OnlineGameLoop::run() {
 					render->setProjectiles(projectiles);
 					playerEnemy->setFire(false);
 				}
+
+				if(playerEnemy->getBomb() == true) {
+					Bomb* newBomb = new Bomb(playerEnemy->get_box(), playerEnemy->getTheta(), bombBlack, bombRed, bombPlayerExplosion);
+					bombs.push_back(newBomb);
+					render->setBombs(bombs);
+					playerEnemy->setBomb(false);
+				}
 			}
 
 			int count = 0;
-            for (auto projectile : projectiles) {
+            for (auto& projectile : projectiles) {
                 projectile->update();
                 if(projectile->isExploding()) {
                     projectile->setSprite(pinksplosion);
                 } else if(projectile->isFinished()) {
                     projectiles.erase(projectiles.begin() + count);
-                    projectile->~Projectile();
                     render->setProjectiles(projectiles);
                 }
                 count++;
             }
+
+			// Update every bomb in the game
+			int bombCount = 0;
+			for(auto& bomb : bombs) {
+				// Update bombs
+				bomb->update();
+
+				if(bomb->isExploding()) {
+					// Check if bomb hits player
+					if(players.at(0)->check_collision(bomb)) {
+						players.at(0)->setHit(true);
+						players.at(0)->setSprite(redsplosion);
+						players.at(0)->resetFrame();
+					}
+
+					// Check if bomb hits enemy
+					for(auto enemy: playerEnemies) {
+						if(enemy->check_collision(bomb)) {
+							enemy->setHit(true);
+							enemy->setSprite(bluesplosion);
+							enemy->resetFrame();
+						}
+					}
+				}
+
+				// Check if bomb is done exploding
+				if(bomb->getFinished()) {
+					bombs.erase(bombs.begin() + bombCount);
+					render->setBombs(bombs);
+					bombCount--;
+				}
+				bombCount++;
+            }
+
 			lag_time -= MS_PER_UPDATE;
 		}
 

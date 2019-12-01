@@ -263,7 +263,7 @@ int LocalGameLoop::run() {
             if(enemy->getFire() == true) {
                 Projectile *newBullet;
                 if(enemy->getEnemyType() == 1){
-                      newBullet = new Projectile(enemy->getX() + TANK_WIDTH/4, enemy->getY() + TANK_HEIGHT/4, enemy->getTurretTheta(), 2);
+                    newBullet = new Projectile(enemy->getX() + TANK_WIDTH/4, enemy->getY() + TANK_HEIGHT/4, enemy->getTurretTheta(), 2);
                 } else {
                     newBullet = new Projectile(enemy->getX() + TANK_WIDTH/4, enemy->getY() + TANK_HEIGHT/4, enemy->getTurretTheta(), 1);
                 }
@@ -278,7 +278,7 @@ int LocalGameLoop::run() {
 
             //The enemy dropped a bomb
             if (enemy->getBomb() == true) {
-                Bomb * newBomb(new Bomb(enemy->get_box(), player->getTheta(), bombBlack, bombRed, bombPlayerExplosion));
+                Bomb* newBomb = new Bomb(enemy->get_box(), player->getTheta(), bombBlack, bombRed, bombPlayerExplosion);
                 newBomb->setSprite(bombBlack);
                 bombs.push_back(newBomb);
                 render->setBombs(bombs);
@@ -310,7 +310,7 @@ int LocalGameLoop::run() {
 			player->setEnemies(enemyBoxes);
 			enemyBoxes.clear();
 
-            // Update every active bomb
+            // Update every active projectile
             int count = 0;
             for (int i = 0; i < projectiles.size(); i++) {
 				projectiles.at(i)->clearTargets();
@@ -392,7 +392,6 @@ int LocalGameLoop::run() {
 					bombs.erase(bombs.begin() + bombCount);
 					render->setBombs(bombs);
 					bombCount--;
-					delete bomb; // Potential Seg Fault here
 				}
 				bombCount++;
             }

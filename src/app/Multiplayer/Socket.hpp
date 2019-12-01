@@ -266,7 +266,9 @@ class Socket {
             assert(isConnected | isReceiving);
 
             int num_bytes_sent = send(socket_fd, p->data(), p->size(), 0);
+#ifdef VERBOSE
             std::cout << "Sent packet of size: " << p->size() << std::endl;
+#endif
     
             return num_bytes_sent;
         }
@@ -291,11 +293,15 @@ class Socket {
                 // Use tcp
                 num_bytes = recv(socket_fd, headBuffer, HEAD.size(), 0);
                 if (num_bytes == -1) {
+#ifdef VERBOSE
                     std::cerr << "SOCKET: read header error: " << strerror(errno) <<  std::endl;
+#endif
                     return nullptr;
                 }
                 if (num_bytes == EWOULDBLOCK) {
+#ifdef VERBOSE
                     std::cout << "SOCKET: Receive timed out" << std::endl;
+#endif
                     return nullptr;
                 }
             } else {
@@ -313,8 +319,9 @@ class Socket {
             
             // Check to see if there is more data left
             int packet_size_left = std::stoi(size_header.getValue()) - HEAD.size();
+#ifdef VERBOSE
             std::cout << "Packet size remaining is " << packet_size_left << std::endl;
-
+#endif
             // Check packet size is normal
             if (packet_size_left < 0) {
                 std::cerr << "RECEIVE ERROR: Packet size remaining is negative" << std::endl;
@@ -343,9 +350,10 @@ class Socket {
                 }
             }
 
+#ifdef VERBOSE
             // For debugging
             std::cout << "Bytes received  " << num_bytes << std::endl;
-
+#endif
             // This buffer should just be the data segments of the packet
             return new Packet(size_header, type_header, dataBuffer, packet_size_left);
         }

@@ -67,9 +67,9 @@ class ClientConnection {
 
             Packet *mail = recvBuffer.front();
             recvBuffer.pop_front();
-            
+#ifdef VERBOSE            
             std::cout << "Size of recv buffer is === " << recvBuffer.size() << std::endl;
-
+#endif
             return mail;
         }
         
@@ -284,10 +284,10 @@ class ServerController {
                 fflush(stdout);
                 return nullptr;
             }
-
+#ifdef VERBOSE
             std::cout << "Number of clients from pselect -- " << numberOfPendingClients << std::endl;
             fflush(stdout);
-
+#endif
             // fd_set's will be modified with the clients that have pending messages, return that list
             if (numberOfPendingClients == 0) {
                 return nullptr;
@@ -381,16 +381,18 @@ class ServerController {
             }
 
             // Send to all clients 
+#ifdef VERBOSE
             std::cout << "Broadcasting to clients..." << std::endl;
+#endif
             Packet *mail =  broadcastBuffer.front();
             broadcastBuffer.pop_front();
 
             for (auto client : clients) {
                 client->sendPacket(mail);
             }
-
+#ifdef VERBOSE
             std::cout << "Broadcasted to clients!" << std::endl;
-
+#endif
             // Free packet we are done with it!
             delete mail;
             return true;

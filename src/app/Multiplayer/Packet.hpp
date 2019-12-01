@@ -85,8 +85,10 @@ class Packet {
             for (int i = 0; i < data_size; i++) {
                 this->body.push_back((char) data[i]);
             }
+#ifdef VERBOSE
             std::cout << "Appended data = " << std::endl;
             this->printData();
+#endif
         }
 
         /**
@@ -154,7 +156,9 @@ class Packet {
                 this->body.push_back((val>>8) & 0xFF);
                 this->body.push_back(val & 0xFF);
             }
+#ifdef VERBOSE
             std::cout << "Appended data = " << std::string(body.data(), body.size()) << std::endl;
+#endif
             setPacketSize();
         }
         /**

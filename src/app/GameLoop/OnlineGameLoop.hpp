@@ -15,12 +15,17 @@ class OnlineGameLoop {
         std::vector<Player *> players;
         std::vector<Player *> playerEnemies;
     	std::vector<Projectile *> projectiles;
+        std::vector<Bomb *> bombs;
 
         Sprite* pinksplosion = nullptr;
 		Sprite* redsplosion = nullptr;
 		Sprite* bluesplosion = nullptr;
         Sprite* bullet = nullptr;
         Sprite* shell = nullptr;
+        Sprite* bombBlack = nullptr;
+        Sprite* bombRed = nullptr;
+        Sprite* bombPlayerExplosion = nullptr;
+        Sprite* bombEnemyExplosion = nullptr;
         SDL_Texture* cursor = nullptr;
         SDL_Texture* loadingScreen1 = nullptr;
         SDL_Texture* loadingScreen2 = nullptr;

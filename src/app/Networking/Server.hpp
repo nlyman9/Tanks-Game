@@ -97,15 +97,19 @@ class Server {
 
             if (pendingClients == nullptr) {
                 // No messages from clients!
+#ifdef VERBOSE
                 std::cout << "SERVER: No pending clients" << std::endl;
                 fflush(stdout);
+#endif
                 return nullptr;
             }
 
             // if there are clients pending, get their data
             for (auto client : *pendingClients) {
+#ifdef VERBOSE
                 std::cout << "SERVER: Going to receive from " << client->id() << std::endl;
                 fflush(stdout);
+#endif
                 host->receiveFromClient(client->id());
             }
 
@@ -236,15 +240,23 @@ class Server {
             //apply latest mail
             gamestate->clear();
             for(int i = 0; i < numClients(); i++){
+#ifdef VERBOSE
                 std::cout << "SERVER: Applying keystates to gamestate" << std::endl;
+#endif
                 if(!applyKeyStatePacket(lastMail->at(i), players->at(i))){
+#ifdef VERBOSE
                     printf("SERVER Error: could not apply keystate packet\n");
+#endif
                     return false;
                 }
+#ifdef VERBOSE
                 lastMail->at(i)->printData();
+#endif
                 std::vector<char>* playerstate = players->at(i)->getState();
                 gamestate->insert(gamestate->end() , playerstate->begin(), playerstate->end());
+#ifdef VERBOSE
                 std::cout << std::endl;
+#endif
             }
             //for each projectile
                 //interpolate & add to game state
@@ -258,7 +270,9 @@ class Server {
                 return false;
             if(!(packet->getType() == PackType::KEYSTATE))
                 return false;
+#ifdef VERBOSE
             packet->printData();
+#endif
             Uint8 *keystate = keystateify(packet->getBody());
             if(keystate == nullptr)
                 return false;
@@ -276,10 +290,13 @@ class Server {
         Uint8 *keystateify(std::vector<char>* mail){
             Uint8 *keystate;
             try{
+#ifdef VERBOSE
                 std::cout << "calloc keystate" << std::endl;
+#endif
                 keystate = (Uint8 *) calloc(27, sizeof(Uint8));
-                
+#ifdef VERBOSE                
                 std::cout << "for loop on keys" << std::endl;
+#endif
                 for (int i = 0; i < keysToCheck.size(); i++) {
                     keystate[keysToCheck[i]] = (Uint8) mail->at(i); 
                 }
@@ -317,8 +334,10 @@ class Server {
             Packet* gamestatepacket = new Packet(PackType::KEYFRAME);
             for(auto x : *getGamestate())
                 gamestatepacket->appendData(x);
+#ifdef VERBOSE
             std::cout << "Game state" << std::endl;
             gamestatepacket->printData();
+#endif
             return gamestatepacket;
         }
         std::vector<char>* getGamestate(){

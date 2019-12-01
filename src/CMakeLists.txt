@@ -16,4 +16,8 @@ if(${APPLE})
   set (CMAKE_CXX_STANDARD 17)
 endif()
 
+if(VERBOSE) 
+  add_definitions(-DVERBOSE)
+endif()
+
 add_subdirectory(app)
