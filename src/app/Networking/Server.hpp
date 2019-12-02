@@ -271,7 +271,7 @@ class Server {
                 lastMail->at(i)->printData();
                 std::cout << std::endl;
 #endif
-                if(!applyKeyStatePacket(lastMail->at(i), players->at(i), lag_time)){
+                if(!applyKeyStatePacket(lastMail->at(i), players->at(i), lag_time, i)){
 #ifdef VERBOSE
                     printf("SERVER Error: could not apply keystate packet\n");
 #endif
@@ -321,7 +321,7 @@ class Server {
             return true;
         }
 
-        bool applyKeyStatePacket(Packet* packet, Player* player, double lag_time){
+        bool applyKeyStatePacket(Packet* packet, Player* player, double lag_time, int playerIdx){
             SDL_Event e;
             if(packet == nullptr)
                 return false;
@@ -335,22 +335,30 @@ class Server {
             Uint8 *keystate = keystateify(packet->getBody());
             bool hasShot = getHasShot(packet->getBody());
             bool droppedBomb = getDroppedBomb(packet->getBody());
-            if(keystate == nullptr)
+
+            player->setFire(hasShot);
+            player->setBomb(droppedBomb);
+
+            if(keystate == nullptr) {
                 return false;
-            try{
+            }
+
+            try {
                 player->getEvent(elapsed_time, &e, keystate);
-                if(hasShot) {
+                if(player->getFire()) {
+                    std::cout << "New projectile on server: " << projectiles.size() << std::endl;
                     Projectile* projectile = new Projectile(player->getX() + TANK_WIDTH/4, player->getY() + TANK_HEIGHT/4, player->getTurretTheta(), 1);
                     projectile->setObstacleLocations(&projectileObstacles);
                     projectiles.push_back(projectile);
-                    hasShot = false;
+                    player->setFire(false);
                 }                
-                if(droppedBomb) {
+                if(player->getBomb()) {
+                    std::cout << "New bomb on server: " << bombs.size() << std::endl;
                     Bomb* bomb = new Bomb(player->get_box(), player->getTheta());
                     bombs.push_back(bomb);
-                    droppedBomb = false;
+                    player->setBomb(false);
                 }
-            }catch (const std::exception &exc){
+            } catch (const std::exception &exc) {
                 // catch anything thrown within try block that derives from std::exception
                 std::cout << "SERVER ERROR" << std::endl;
                 std::cerr << exc.what() << std::endl;
@@ -383,14 +391,14 @@ class Server {
         }
 
         bool getHasShot(std::vector<char>* mail) {
-            if(mail->at(10) == '1') {
+            if((int)mail->at(10) == 1) {
                 return true;
             }
             return false;
         }
 
         bool getDroppedBomb(std::vector<char>* mail) {
-            if(mail->at(11) == '1') {
+            if((int)mail->at(11) == 1) {
                 return true;
             }
             return false;

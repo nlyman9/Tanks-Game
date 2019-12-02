@@ -28,6 +28,10 @@ class Tank {
                 return false;
             }
         }
+        bool setFireNOCD(bool fire){
+          shotsFired = fire;
+          return true;
+        }
         bool getBomb();
         bool setBomb(bool bomb){
             if (bomb == false) {
@@ -35,13 +39,17 @@ class Tank {
                 return true;
             } else {
                 std::chrono::system_clock::time_point current_time = std::chrono::system_clock::now();
-                if (current_time - prev_fire_time >= std::chrono::seconds{5}) {
-                    prev_fire_time = std::chrono::system_clock::now();
+                if (current_time - prev_bomb_time >= std::chrono::seconds{5}) {
+                    prev_bomb_time = std::chrono::system_clock::now();
                     bombDeployed = true;
                     return true;
                 }
                 return false;
             }
+        }
+        bool setBombNOCD(bool fire){
+          bombDeployed = fire;
+          return true;
         }
         bool rotate(float theta);
         void rotateTurret(float theta);

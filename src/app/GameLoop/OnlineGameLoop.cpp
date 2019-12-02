@@ -264,7 +264,7 @@ int OnlineGameLoop::run() {
 			}
             if (e.key.keysym.sym == SDLK_ESCAPE)
             {
-                return 0; // return to menu
+                //return 0; // return to menu
             }
 		}
 
@@ -311,11 +311,18 @@ int OnlineGameLoop::run() {
 			// TODO change player from vector to single class - localPlayer
 			players.at(0)->setTurretTheta();
 			players.at(0)->update();
+			
+			for (auto playerEnemy : playerEnemies) {
+				playerEnemy->setTurretTheta(client->getTurretTheta(0));
+				playerEnemy->setFireNOCD(client->getPlayerShot(0));
+				playerEnemy->setBombNOCD(client->getPlayerBomb(0));
+				playerEnemy->update();
+			}
 
 			// Basically add a keyframe every ~2 updates -> 30 times a second
-			temp += 1;
+			temp++;
 			// TODO Consolidate tickrates
-			if (temp > 2 && keystate != nullptr) {
+			if (temp > 1 && keystate != nullptr) {
 				// Add keystate from local player to send
 				client->addLocalKeyState(keystate, players.at(0)->turretTheta, players.at(0)->getFire(), players.at(0)->getBomb());
 				keystate = nullptr; //only need to send one per update loop
@@ -329,38 +336,40 @@ int OnlineGameLoop::run() {
 					newBullet->setObstacleLocations(&tileArray);
 					projectiles.push_back(newBullet);
 					render->setProjectiles(projectiles);
-					players.at(0)->setFire(false);
 				}
 
 				if(players.at(0)->getBomb() == true) {
 					Bomb* newBomb(new Bomb(players.at(0)->get_box(), players.at(0)->getTheta(), bombBlack, bombRed, bombPlayerExplosion));
 					bombs.push_back(newBomb);
 					render->setBombs(bombs);
-					players.at(0)->setBomb(false);
-				}
-			}
-
-			for (auto playerEnemy : playerEnemies) {
-				playerEnemy->setTurretTheta(client->getTurretTheta(0));
-				playerEnemy->setFire(client->getPlayerShot(0));
-				playerEnemy->setBomb(client->getPlayerBomb(0));
-				playerEnemy->update();
-
-				if (playerEnemy->getFire() == true) {
-					Projectile *newBullet = new Projectile(playerEnemy->getX() + TANK_WIDTH/4, playerEnemy->getY() + TANK_HEIGHT/4, playerEnemy->getTurretTheta(), 1);
-					newBullet->setSprite(shell);
-					newBullet->setObstacleLocations(&tileArray);
-					projectiles.push_back(newBullet);
-					render->setProjectiles(projectiles);
-					playerEnemy->setFire(false);
 				}
 
-				if(playerEnemy->getBomb() == true) {
-					Bomb* newBomb = new Bomb(playerEnemy->get_box(), playerEnemy->getTheta(), bombBlack, bombRed, bombPlayerExplosion);
-					bombs.push_back(newBomb);
-					render->setBombs(bombs);
-					playerEnemy->setBomb(false);
+				for (auto playerEnemy : playerEnemies) {
+					playerEnemy->setTurretTheta(client->getTurretTheta(0));
+					playerEnemy->setFire(client->getPlayerShot(0));
+					playerEnemy->setBomb(client->getPlayerBomb(0));
+					playerEnemy->update();
+
+					if (playerEnemy->getFire() == true) {
+						Projectile *newBullet = new Projectile(playerEnemy->getX() + TANK_WIDTH/4, playerEnemy->getY() + TANK_HEIGHT/4, playerEnemy->getTurretTheta(), 1);
+						newBullet->setSprite(shell);
+						newBullet->setObstacleLocations(&tileArray);
+						projectiles.push_back(newBullet);
+						render->setProjectiles(projectiles);
+						playerEnemy->setFire(false);
+					}
+
+					if(playerEnemy->getBomb() == true) {
+						Bomb* newBomb = new Bomb(playerEnemy->get_box(), playerEnemy->getTheta(), bombBlack, bombRed, bombPlayerExplosion);
+						bombs.push_back(newBomb);
+						render->setBombs(bombs);
+						playerEnemy->setBomb(false);
+					}
 				}
+				players.at(0)->setFire(false);
+				playerEnemies.at(0)->setFire(false);
+				players.at(0)->setBomb(false);
+				playerEnemies.at(0)->setBomb(false);
 			}
 
 			int count = 0;

@@ -32,6 +32,9 @@ class Projectile : public Object {
 		SDL_Rect targetBox;
 
     public:
+    
+        int ticks = 0;
+        
         Projectile(Sprite *missile, float x, float y); //constructor, initialize the x, y, and sprite
         Projectile(float x, float y); //constructor, initialize the x, y
 		Projectile(float x, float y, int theta, int speed);	//constructor, initialize with x, y, and theta

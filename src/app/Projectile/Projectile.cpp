@@ -36,7 +36,6 @@ void Projectile::draw(SDL_Renderer *gRenderer, double update_lag) {
 	}
 	else
 	{
-    //finished = true;
 		Uint32 current_time = SDL_GetTicks();
 		dst->w = EXPLOSION_WIDTH;
 		dst->h = EXPLOSION_HEIGHT;
@@ -54,7 +53,7 @@ void Projectile::draw(SDL_Renderer *gRenderer, double update_lag) {
 			SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), getSprite()->getFrame(frame), dst, theta, NULL, SDL_FLIP_NONE);
 		else {
 			//finished = true;
-      exploding = false;
+      		exploding = false;
 		}
 
 		//projectiles currently are not being deleted/removed correctly
@@ -66,8 +65,12 @@ void Projectile::draw(SDL_Renderer *gRenderer, double update_lag) {
 bool Projectile::isHit(){
 	return this->hit;
 }
-
 bool Projectile::isExploding(){
+	if(this->exploding)
+		this->ticks++;
+	if(this->ticks >= 30){
+		this->setFinished(true);
+	}
 	return this->exploding;
 }
 
