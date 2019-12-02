@@ -303,18 +303,28 @@ int OnlineGameLoop::run() {
 					bombs.push_back(newBomb);
 					render->setBombs(bombs);
 				}
-				if (playerEnemies.at(0)->getFire() == true) {
-					Projectile *newBullet = new Projectile(playerEnemies.at(0)->getX() + TANK_WIDTH/4, playerEnemies.at(0)->getY() + TANK_HEIGHT/4, playerEnemies.at(0)->getTurretTheta(), 1);
-					newBullet->setSprite(shell);
-					newBullet->setObstacleLocations(&tileArray);
-					projectiles.push_back(newBullet);
-					render->setProjectiles(projectiles);
-				}
 
-				if(playerEnemies.at(0)->getBomb() == true) {
-					Bomb* newBomb(new Bomb(playerEnemies.at(0)->get_box(), playerEnemies.at(0)->getTheta(), bombBlack, bombRed, bombPlayerExplosion));
-					bombs.push_back(newBomb);
-					render->setBombs(bombs);
+				for (auto playerEnemy : playerEnemies) {
+					playerEnemy->setTurretTheta(client->getTurretTheta(0));
+					playerEnemy->setFire(client->getPlayerShot(0));
+					playerEnemy->setBomb(client->getPlayerBomb(0));
+					playerEnemy->update();
+
+					if (playerEnemy->getFire() == true) {
+						Projectile *newBullet = new Projectile(playerEnemy->getX() + TANK_WIDTH/4, playerEnemy->getY() + TANK_HEIGHT/4, playerEnemy->getTurretTheta(), 1);
+						newBullet->setSprite(shell);
+						newBullet->setObstacleLocations(&tileArray);
+						projectiles.push_back(newBullet);
+						render->setProjectiles(projectiles);
+						playerEnemy->setFire(false);
+					}
+
+					if(playerEnemy->getBomb() == true) {
+						Bomb* newBomb = new Bomb(playerEnemy->get_box(), playerEnemy->getTheta(), bombBlack, bombRed, bombPlayerExplosion);
+						bombs.push_back(newBomb);
+						render->setBombs(bombs);
+						playerEnemy->setBomb(false);
+					}
 				}
 				players.at(0)->setFire(false);
 				playerEnemies.at(0)->setFire(false);

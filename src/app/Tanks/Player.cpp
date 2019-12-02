@@ -278,10 +278,10 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time,
     if(e->type == SDL_MOUSEBUTTONDOWN) {
   		Uint32 current_time = SDL_GetTicks();
         if(e->button.button == SDL_BUTTON_LEFT) {
-                setFire(true);
+            setFire(true);
         }
         if(e->button.button == SDL_BUTTON_RIGHT) {
-                setBomb(true);
+            setBomb(true);
         }
   	}
 
