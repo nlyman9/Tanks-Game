@@ -30,6 +30,7 @@ class Projectile : public Object {
 		int targetNum = 0;
 		bool hit = false;
 		SDL_Rect targetBox;
+        int id;
 
     public:
     
@@ -53,16 +54,23 @@ class Projectile : public Object {
 		bool isHit();
 		bool isExploding();
 		bool isFinished();
-    void setFinished(bool fini);
+        void setFinished(bool fini);
 
 		bool getFriendly(); // returns friendly
 		bool setFriendly(bool a); // modifies and returns the value of friendly
 
+        void setID(int i) {
+            id = i;
+        }
+        int getID() {
+            return id;
+        }
+
         void addTargetLocation(SDL_Rect* targetLoc); // adds a target to the vector of targets
 		void clearTargets(); // resets the vector list of targets
 		SDL_Rect* getTarget();
-    bool projCollisionCheck(Projectile* bullet2);
-    void setExploding(bool explode);
+        bool projCollisionCheck(Projectile* bullet2);
+        void setExploding(bool explode);
         BoundingBox* getBoundingBox() override;
 
         ~Projectile();

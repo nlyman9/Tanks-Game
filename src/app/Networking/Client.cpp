@@ -205,11 +205,12 @@ int Client::clientProcess(void* data) {
                   client->gameOver = true;
                } else {
                     std::vector<char> *mailBody= mail->getBody();
-                    if(client->id == mailBody->at(0)) {
+
+                    if(client->id == (int)mailBody->at(3)) {
                         client->win = false;
                         client->gameOver = true;
                     } else {
-                        client->win = false;
+                        client->win = true;
                         client->gameOver = true;
                     }
                 }

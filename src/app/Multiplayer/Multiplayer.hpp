@@ -591,6 +591,18 @@ class ClientController {
             return true;
         }
 
+         /**
+         * @brief Send the packet from the client
+         * 
+         * @return true - We sent a packet
+         * @return false - There wa nothing to send
+         */
+        bool sendPacket(Packet* p) {
+            assert(server->isOnline());
+            server->sendPacket(p);
+            return true;
+        }
+
         /**
          * @brief Check the socket has been connected correctly 
          * 

@@ -274,29 +274,13 @@ class Server {
                     return false;
                 }
 
-                //Check for collisions with projectiles and bombs here
-                int count = 0;
-                for (auto& projectile : projectiles) {
-                    projectile->update();
-                    if(projectile->check_collision(players->at(i))) {
-                        players->at(i)->setHit(true);
-                        std::cout << "Player " << i << " was shot" << std::endl;
-                    }
-                    if(projectile->isFinished()) {
-                        projectiles.erase(projectiles.begin() + count);
-                        count--;
-                    }
-                    count++;
-                }
-
 			    // Update every bomb in the game
                 int bombCount = 0;
                 for(auto& bomb : bombs) {
                     // Update bombs
-				    bomb->update();
-                    if(bomb->check_collision(players->at(i))) {
+                    players->at(i)->get_box();
+                    if((players->at(i)->check_collision(bomb) != nullptr) && bomb->isExploding()) {
                         players->at(i)->setHit(true);
-                        std::cout << "Player " << i << " was bombed" << std::endl;
                     }
                     // Check if bomb is done exploding
                     if(bomb->getFinished()) {
@@ -306,10 +290,15 @@ class Server {
                     bombCount++;
                 }
             }
+
             //update everything
             if(lag_time >= MS_PER_UPDATE) {
                 for(auto player: *players) {
                     player->update();
+                }
+
+                for(auto& bomb : bombs) {
+                    bomb->update();
                 }
                 lag_time -= MS_PER_UPDATE;
             }
@@ -342,14 +331,13 @@ class Server {
             try {
                 player->getEvent(elapsed_time, &e, keystate);
                 if(player->getFire()) {
-                    std::cout << "New projectile on server: " << projectiles.size() << std::endl;
                     Projectile* projectile = new Projectile(player->getX() + TANK_WIDTH/4, player->getY() + TANK_HEIGHT/4, player->getTurretTheta(), 1);
                     projectile->setObstacleLocations(&projectileObstacles);
+                    projectile->setID(playerIdx);
                     projectiles.push_back(projectile);
                     player->setFire(false);
                 }                
                 if(player->getBomb()) {
-                    std::cout << "New bomb on server: " << bombs.size() << std::endl;
                     Bomb* bomb = new Bomb(player->get_box(), player->getTheta());
                     bombs.push_back(bomb);
                     player->setBomb(false);

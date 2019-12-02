@@ -110,6 +110,8 @@ int serverProcess() {
     int y_pos[2] = {50, SCREEN_HEIGHT - 50};
     Player* player1 = new Player(x_pos[0], y_pos[0], false);
     Player* player2 = new Player(x_pos[1], y_pos[1], false);
+    player1->setId(0);
+    player2->setId(1);
     server->addPlayer(player1);
     server->addPlayer(player2);
     //set time
@@ -255,6 +257,13 @@ int serverProcess() {
                         server->setMail(mail, client->id());
                         // If a keystate, Prepare to send that client's keystate to the other clients 
                         server->addPacketFromClientToClients(client->id(), mail);
+                    }
+
+                    if(mail->getType() == PackType::GAME_OVER) {
+                        std::vector<char> *mailBody= mail->getBody();
+                        Packet* gameOverPacket = new Packet(PackType::GAME_OVER);
+                        gameOverPacket->appendData((int)mailBody->at(3));
+                        server->broadcast(gameOverPacket);
                     }
                     fflush(stdout);
                 } else {

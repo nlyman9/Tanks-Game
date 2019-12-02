@@ -14,8 +14,8 @@ Projectile::Projectile(float x, float y) {
 Projectile::Projectile(float x, float y, int theta, int speed) {
 	setPos(x, y);
 	this->theta = theta;
-  this->speedFactor = speed;
-
+  	this->speedFactor = speed;
+	
 	x_vel = 180 * cos((theta * M_PI) / 180);
 	y_vel = 180 * sin((theta * M_PI) / 180);
 }
@@ -99,6 +99,7 @@ void Projectile::update() {
 		for(auto target : targets) {
 			overlap = check_collision(&currentPos, &target);
 			if (overlap != nullptr) {
+				std::cout << "collision in proj" << std::endl;
 				hit = true;
 				targetBox = target;
 				exploding = true;
@@ -184,8 +185,7 @@ void Projectile::update() {
 			exploding = true;
 			theta = collisionTheta;
 		}
-	}
-	else {
+	} else {
 		x_vel = 0;
 		y_vel = 0;
 

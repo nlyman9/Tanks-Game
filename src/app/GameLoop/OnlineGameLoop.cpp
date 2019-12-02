@@ -294,6 +294,7 @@ int OnlineGameLoop::run() {
 					Projectile *newBullet = new Projectile(players.at(0)->getX() + TANK_WIDTH/4, players.at(0)->getY() + TANK_HEIGHT/4, players.at(0)->getTurretTheta(), 1);
 					newBullet->setSprite(shell);
 					newBullet->setObstacleLocations(&tileArray);
+					newBullet->setID(players.at(0)->getId());
 					projectiles.push_back(newBullet);
 					render->setProjectiles(projectiles);
 				}
@@ -314,6 +315,7 @@ int OnlineGameLoop::run() {
 						Projectile *newBullet = new Projectile(playerEnemy->getX() + TANK_WIDTH/4, playerEnemy->getY() + TANK_HEIGHT/4, playerEnemy->getTurretTheta(), 1);
 						newBullet->setSprite(shell);
 						newBullet->setObstacleLocations(&tileArray);
+						newBullet->setID(playerEnemy->getId());
 						projectiles.push_back(newBullet);
 						render->setProjectiles(projectiles);
 						playerEnemy->setFire(false);
@@ -332,17 +334,55 @@ int OnlineGameLoop::run() {
 				playerEnemies.at(0)->setBomb(false);
 			}
 
-			int count = 0;
-            for (auto& projectile : projectiles) {
-                projectile->update();
-                if(projectile->isExploding()) {
-                    projectile->setSprite(pinksplosion);
-                } else if(projectile->isFinished()) {
-                    projectiles.erase(projectiles.begin() + count);
-                    render->setProjectiles(projectiles);
-                }
-                count++;
-            }
+			// Update every active projectile
+            int count = 0;
+            for (int i = 0; i < projectiles.size(); i++) {
+				projectiles.at(i)->clearTargets();
+				if(projectiles.at(i)->getID() == players.at(0)->getId()) {
+					for(auto enemy : playerEnemies) {
+						projectiles.at(i)->addTargetLocation(enemy->get_box());
+					}
+				} else {
+					for(auto player : players) {
+						projectiles.at(i)->addTargetLocation(player->get_box());
+					}
+				}
+				projectiles.at(i)->update();
+				if(projectiles.at(i)->isHit()) {
+					SDL_Rect* hitObject = projectiles.at(i)->getTarget();
+					for(auto player : players) {
+						SDL_Rect* playerRect = player->get_box();
+					
+						if(playerRect->x == hitObject->x && playerRect->y == hitObject->y && !player->isHit()) {
+							player->setHit(true);
+							client->sendGameOver(player->getId());
+							player->setSprite(redsplosion);
+							player->resetFrame();
+						}
+					}
+					int count = 0;
+					for(auto enemy: playerEnemies) {
+						SDL_Rect* enemyRect = enemy->get_box();
+						if(enemyRect->x == hitObject->x && enemyRect->y == hitObject->y && !enemy->isHit()) {
+							enemy->setHit(true);
+							client->sendGameOver(enemy->getId());
+							enemy->resetFrame();
+							break;
+						}
+					}
+				}
+
+				if(projectiles.at(i)->isExploding()) {
+					projectiles.at(i)->setSprite(pinksplosion);
+					projectiles.at(i)->setFinished(true);
+				}
+                if(projectiles.at(i)->isFinished()){
+					projectiles.erase(projectiles.begin()+i);
+					render->setProjectiles(projectiles);
+					i--;
+				}
+				count++;
+			}
 
 			// Update every bomb in the game
 			int bombCount = 0;

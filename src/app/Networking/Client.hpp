@@ -273,6 +273,22 @@ class Client {
     }
 
     /**
+     * @brief Send a packet from the send buffer to the server
+     * 
+     * @return true - Sent a packet!
+     * @return false - Nothing to send
+     */
+    bool send(Packet* p) {
+      return server->sendPacket(p);
+    }
+
+    void sendGameOver(int id) {
+      Packet* gameOverPacket = new Packet(PackType::GAME_OVER);
+      gameOverPacket->appendData(id);
+      send(gameOverPacket);
+    }
+
+    /**
      * @brief Poll if we have received the map
      * 
      * @return true - We have!

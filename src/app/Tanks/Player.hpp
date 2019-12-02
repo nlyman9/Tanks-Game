@@ -57,6 +57,9 @@ class Player : public Object, public Tank {
         void setId(int i) {
             id = i;
         }
+        int getId() {
+            return id;
+        }
         void setTurretTheta();
         void setTurretTheta(int theta);
         void setEnemies(std::vector<SDL_Rect*> enemyList);

@@ -355,20 +355,18 @@ int LocalGameLoop::run() {
 					for(auto enemy: enemies) {
 						SDL_Rect* enemyRect = enemy->get_box();
 						if(enemyRect->x == hitObject->x && enemyRect->y == hitObject->y && !enemy->isHit()) {
-              if (!enemy->purpHit() && enemy->getEnemyType() == 2) {
-                if (count > 0) {
-                  enemy->setPurpHit(true);
-                }
-                enemy->setHit(true);
-                //std::cout << "hit once\n";
-                projectiles.at(i)->setFinished(true);
-                count++;
-              }
-              else {
-                enemy->setHit(true);
-
-                enemy->resetFrame();
-              }
+                            if (!enemy->purpHit() && enemy->getEnemyType() == 2) {
+                                if (count > 0) {
+                                    enemy->setPurpHit(true);
+                                }
+                                enemy->setHit(true);
+                                //std::cout << "hit once\n";
+                                projectiles.at(i)->setFinished(true);
+                                count++;
+                            } else {
+                                enemy->setHit(true);
+                                enemy->resetFrame();
+                            }
 							break;
 						}
 					}
@@ -377,7 +375,7 @@ int LocalGameLoop::run() {
 					projectiles.at(i)->setSprite(pinksplosion);
 					projectiles.at(i)->setFinished(true);
 				}
-            if(projectiles.at(i)->isFinished()){
+                if(projectiles.at(i)->isFinished()){
 					projectiles.erase(projectiles.begin()+i);
 					render->setProjectiles(projectiles);
 					i--;
