@@ -307,12 +307,14 @@ int OnlineGameLoop::run() {
 					newBullet->setObstacleLocations(&tileArray);
 					projectiles.push_back(newBullet);
 					render->setProjectiles(projectiles);
+					client->playerShot[0] = false;
 				}
 
 				if(client->getPlayerBomb(0) == true) {
 					Bomb* newBomb(new Bomb(playerEnemies.at(0)->get_box(), playerEnemies.at(0)->getTheta(), bombBlack, bombRed, bombPlayerExplosion));
 					bombs.push_back(newBomb);
 					render->setBombs(bombs);
+					client->playerBomb[0] = false;
 				}
 				players.at(0)->setFire(false);
 				players.at(0)->setBomb(false);
