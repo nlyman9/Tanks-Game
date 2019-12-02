@@ -111,6 +111,7 @@ bool OnlineGameLoop::init(Args* options) {
 	// Get initial position of the players from the server
 	std::cout << "Waiting on init" << std::endl;
 	int screenCounter = 0;
+	SDL_Event e;
 	while(!client->pollInitData()) {
 		displayLoadingScreen(screenCounter);
         screenCounter++;
@@ -118,6 +119,24 @@ bool OnlineGameLoop::init(Args* options) {
             screenCounter = 0;
         }
 
+		// Check if user wants to exit multiplayer or close window while waiting to connect to server
+		while (SDL_PollEvent(&e))
+		{
+			if (e.type == SDL_QUIT)
+			{
+				client->gameOn = false;
+				// Kill server/client thread
+				if (server_pid != 0) {
+					std::cout << "Killing server process " << server_pid << std::endl;
+					kill(server_pid, SIGTERM);
+				}
+                return -1; // close window
+			}
+            if (e.key.keysym.sym == SDLK_ESCAPE)
+            {
+                return 0; // return to menu
+            }
+		}
 	}
 	auto initData = client->initData;
 	player->setId(initData[0]);
