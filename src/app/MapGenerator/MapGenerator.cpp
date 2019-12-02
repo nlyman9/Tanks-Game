@@ -437,7 +437,5 @@ std::vector<std::vector<int>>* MapGenerator::generateMap()
 		std::cout << std::endl;
 	}
 
-	tile_map = generateMirrorMap();
-
 	return &tile_map;
 }
