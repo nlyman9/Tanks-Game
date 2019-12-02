@@ -255,8 +255,7 @@ int serverProcess() {
                         server->setMail(mail, client->id());
                         // If a keystate, Prepare to send that client's keystate to the other clients 
                         server->addPacketFromClientToClients(client->id(), mail);
-                    }
-                    if (mail->getType() == PackType::DISCONNECT) {
+                    } else if (mail->getType() == PackType::DISCONNECT) {
                         // Client has disconnected!
                         std::cout << "Client [" << client->id() << "] disconnected!!" << std::endl;
 
