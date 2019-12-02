@@ -46,7 +46,10 @@ class ClientConnection {
         void receive() {
             Packet *mail = clientSocket->receive();
 
-            if (mail != nullptr) {
+            if ((long) mail == ECONNRESET) {
+                // The connection has been reset? -> closed
+                recvBuffer.push_back(new Packet(PackType::DISCONNECT));
+            } else if (mail != nullptr) {
                 recvBuffer.push_back(mail);
             } else {
 #ifdef VERBOSE
@@ -398,6 +401,14 @@ class ServerController {
             // Free packet we are done with it!
             delete mail;
             return true;
+        }
+
+        void closeClient(int idx) {
+            assert(idx < clients.size());
+            std::vector<ClientConnection *>::iterator it = clients.begin() + idx;
+            ClientConnection *c = clients.at(idx);
+            delete c;
+            clients.erase(it);
         }
 
         /**
