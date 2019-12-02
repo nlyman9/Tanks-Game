@@ -437,5 +437,8 @@ std::vector<std::vector<int>>* MapGenerator::generateMap()
 		std::cout << std::endl;
 	}
 
+	// for testing
+	tile_map[3][3] = 4;
+
 	return &tile_map;
 }
