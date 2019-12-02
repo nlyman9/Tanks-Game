@@ -218,8 +218,10 @@ int OnlineGameLoop::run() {
 			{
 				client->gameOn = false;
 				// Kill server/client thread
-				std::cout << "Killing server process " << server_pid << std::endl;
-				kill(server_pid, SIGTERM);
+				if (server_pid != 0) {
+					std::cout << "Killing server process " << server_pid << std::endl;
+					kill(server_pid, SIGTERM);
+				}
                 return -1; // close window
 			}
             if (e.key.keysym.sym == SDLK_ESCAPE)

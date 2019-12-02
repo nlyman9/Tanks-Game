@@ -255,6 +255,14 @@ int serverProcess() {
                         server->setMail(mail, client->id());
                         // If a keystate, Prepare to send that client's keystate to the other clients 
                         server->addPacketFromClientToClients(client->id(), mail);
+                    } else if (mail->getType() == PackType::DISCONNECT) {
+                        // Client has disconnected!
+                        std::cout << "Client [" << client->id() << "] disconnected!!" << std::endl;
+                        server->disconnectClient(client->id());
+
+                        // TODO destroy tank? tanks explode?
+                        Player *p = server->getPlayer(client->id());
+                        p->setHit(true);
                     }
                     fflush(stdout);
                 } else {
