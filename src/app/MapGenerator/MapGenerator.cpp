@@ -344,5 +344,6 @@ std::vector<std::vector<int>>* MapGenerator::generateMap()
 		std::cout << std::endl;
 	}
 
+	// tile_map = generateEmptyMap();
 	return &tile_map;
 }

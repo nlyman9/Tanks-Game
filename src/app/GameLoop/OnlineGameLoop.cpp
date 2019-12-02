@@ -33,13 +33,6 @@ bool OnlineGameLoop::init(Args* options) {
 	client = new Client(options->ip, options->port);
 	client->init();
 
-    // Add player and network players to render in vector format
-    players.push_back(player);
-	playerEnemies.push_back(player2);
-
-	render->setPlayer(players);
-	render->setPlayerEnemies(playerEnemies);
-
     // Set up bullet
     bullet = new Sprite(render->getRenderer(), "src/res/images/bullet.png");
 	bullet->init();
@@ -125,6 +118,13 @@ bool OnlineGameLoop::init(Args* options) {
 	player->setY(initData[2]);
 	player2->setX(initData[3]);
 	player2->setY(initData[4]);
+
+	// Add player and network players to render in vector format
+    players.push_back(player);
+	playerEnemies.push_back(player2);
+
+	render->setPlayer(players);
+	render->setPlayerEnemies(playerEnemies);
 
     buildMap();
 
@@ -355,7 +355,7 @@ int OnlineGameLoop::run() {
 					
 						if(playerRect->x == hitObject->x && playerRect->y == hitObject->y && !player->isHit()) {
 							player->setHit(true);
-							client->sendGameOver(player->getId());
+							client->sendGameOver(client->id);
 							player->setSprite(redsplosion);
 							player->resetFrame();
 						}
@@ -365,7 +365,13 @@ int OnlineGameLoop::run() {
 						SDL_Rect* enemyRect = enemy->get_box();
 						if(enemyRect->x == hitObject->x && enemyRect->y == hitObject->y && !enemy->isHit()) {
 							enemy->setHit(true);
-							client->sendGameOver(enemy->getId());
+							int losingId;
+							if(client->id == 0) {
+								losingId = 1;
+							} else {
+								losingId = 0;
+							}
+							client->sendGameOver(losingId);
 							enemy->resetFrame();
 							break;
 						}
