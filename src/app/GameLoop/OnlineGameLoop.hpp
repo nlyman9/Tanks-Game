@@ -16,6 +16,7 @@ class OnlineGameLoop {
         std::vector<Player *> playerEnemies;
     	std::vector<Projectile *> projectiles;
         std::vector<Bomb *> bombs;
+        std::vector<std::vector<int>> map2D;
 
         Sprite* pinksplosion = nullptr;
 		Sprite* redsplosion = nullptr;
@@ -55,7 +56,7 @@ class OnlineGameLoop {
         // Member Functions
         void buildMap();
         void displayLoadingScreen(int screenCounter);
-
+        void updateObstacleArrays(std::vector<std::vector<int>> tile_map);
 };
 
 #endif

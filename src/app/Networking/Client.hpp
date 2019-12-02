@@ -288,6 +288,25 @@ class Client {
       send(gameOverPacket);
     }
 
+    void updateMap(std::vector<std::vector<int>> map) {
+      std::vector<char> packedMap;
+      std::vector<int>* map1D = new std::vector<int>();
+
+      // Convert the 2D map into a 1D vector for the map packer
+      for(auto row : map) {
+          for(auto val : row) {
+              map1D->push_back(val);
+          }
+      }
+
+      pack(map1D, &packedMap, 3); //pack map into 3 bits
+
+      // Send map to the clients!
+      Packet *mapPacket = new Packet(PackType::MAPSTATE);
+      mapPacket->appendData(packedMap);
+      send(mapPacket);
+    }
+
     /**
      * @brief Poll if we have received the map
      * 

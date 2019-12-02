@@ -265,7 +265,7 @@ int serverProcess() {
                         gameOverPacket->appendData((int)mailBody->at(3));
                         server->broadcast(gameOverPacket);
                     }
-                    fflush(stdout);
+
                 } else {
 #ifdef VERBOSE
                     std::cout << "SERVER: No mail :(" << std::endl;

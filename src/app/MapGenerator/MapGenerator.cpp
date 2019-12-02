@@ -502,6 +502,8 @@ std::vector<std::vector<int>>* MapGenerator::generateMap()
 		}
 		std::cout << std::endl;
 	}
-
+	
+	tile_map = generateOpenLineMap();
+	tile_map = addDestructibleTiles(tile_map);
 	return &tile_map;
 }

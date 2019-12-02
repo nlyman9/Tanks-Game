@@ -136,8 +136,8 @@ void OnlineGameLoop::buildMap() {
 	//wait for both players to connect (Map data arrives when both connect)
     int screenCounter = 0;
     while(!client->pollMap()) {}
+	map2D.clear();
 
-	std::vector<std::vector<int>> map2D;
 	// init the first row
 	map2D.push_back(std::vector<int>((SCREEN_WIDTH - BORDER_GAP - TILE_SIZE) / TILE_SIZE - 1));
 	int row = 0;
@@ -156,7 +156,7 @@ void OnlineGameLoop::buildMap() {
 	for (int x = BORDER_GAP + TILE_SIZE, i = 0; x < SCREEN_WIDTH - BORDER_GAP - TILE_SIZE; x+=TILE_SIZE, i++) {
 		for (int y = TILE_SIZE, j = 0; y < SCREEN_HEIGHT - TILE_SIZE; y+=TILE_SIZE, j++) {
 			SDL_Rect cur_out = { x, y, TILE_SIZE, TILE_SIZE};
-			if(map2D[i][j] == 2){
+			if(map2D[i][j] >= 2){
 				tileArray.push_back(cur_out);
 				projectileObstacles.push_back(cur_out);
 			}
@@ -295,6 +295,8 @@ int OnlineGameLoop::run() {
 					newBullet->setSprite(shell);
 					newBullet->setObstacleLocations(&tileArray);
 					newBullet->setID(players.at(0)->getId());
+					newBullet->setTileArray(render->getTileMap());
+					newBullet->setObstacleLocations(&projectileObstacles);
 					projectiles.push_back(newBullet);
 					render->setProjectiles(projectiles);
 				}
@@ -316,6 +318,8 @@ int OnlineGameLoop::run() {
 						newBullet->setSprite(shell);
 						newBullet->setObstacleLocations(&tileArray);
 						newBullet->setID(playerEnemy->getId());
+						newBullet->setTileArray(render->getTileMap());
+						newBullet->setObstacleLocations(&projectileObstacles);
 						projectiles.push_back(newBullet);
 						render->setProjectiles(projectiles);
 						playerEnemy->setFire(false);
@@ -348,6 +352,42 @@ int OnlineGameLoop::run() {
 					}
 				}
 				projectiles.at(i)->update();
+
+				 // check if hitting destructible terrain
+                if(projectiles.at(i)->hasDestructCollision())
+                {
+                    std::vector<std::vector<int>> tile_map = render->getTileMap();
+                    int xIndex = projectiles.at(i)->getColX();
+                    int yIndex = projectiles.at(i)->getColY();
+                    int currValue = tile_map[xIndex][yIndex];
+
+                    if(currValue == 4)
+                    {
+                        tile_map[xIndex][yIndex] = 3;
+                    }
+                    else
+                    {
+                        tile_map[xIndex][yIndex] = 0;
+                    }
+
+                    render->setTileMap(&tile_map);
+
+					for (auto player : players) {
+						player->setObstacleLocations(&tileArray);
+					}
+
+					// Set collision for network players
+					for (auto enemy : playerEnemies) {
+						enemy->setObstacleLocations(&tileArray);
+					}
+
+                    projectiles.at(i)->setExploding(true);
+
+                    // update tile arrays
+                    client->updateMap(tile_map);
+					updateObstacleArrays(tile_map);
+                }
+
 				if(projectiles.at(i)->isHit()) {
 					SDL_Rect* hitObject = projectiles.at(i)->getTarget();
 					for(auto player : players) {
@@ -455,4 +495,45 @@ void OnlineGameLoop::displayLoadingScreen(int screenCounter) {
     }
 	SDL_RenderPresent(render->getRenderer());
     sleep(1);
+}
+
+// Updates player, enemies, and projectiles obstacle arrays
+// Called when destroying destructible terrain
+void OnlineGameLoop::updateObstacleArrays(std::vector<std::vector<int>> tile_map)
+{
+    std::vector<SDL_Rect> player_obstacle_array;
+    std::vector<SDL_Rect> enemy_obstacle_array;
+    std::vector<SDL_Rect> projectile_obstacle_array;
+
+    for (int x = BORDER_GAP + TILE_SIZE, i = 0; x < SCREEN_WIDTH - BORDER_GAP - TILE_SIZE; x+=TILE_SIZE, i++) {
+        for (int y = TILE_SIZE, j = 0; y < SCREEN_HEIGHT - TILE_SIZE; y+=TILE_SIZE, j++) {
+            SDL_Rect normal_tile = { x, y, TILE_SIZE, TILE_SIZE};
+            SDL_Rect hole_tile = { x+5, y+5, TILE_SIZE-5, TILE_SIZE-5 }; //does not work, enemy AI needs update
+            if(tile_map[i][j] >= 2) {
+                player_obstacle_array.push_back(normal_tile);
+                enemy_obstacle_array.push_back(normal_tile);
+                projectile_obstacle_array.push_back(normal_tile);
+            } else if(tile_map[i][j] == 1) {
+                player_obstacle_array.push_back(hole_tile);
+                enemy_obstacle_array.push_back(normal_tile);
+            }
+        }
+    }
+
+	for(auto player : players){
+    	player->setObstacleLocations(&player_obstacle_array);
+	}
+
+    for(auto enemy : playerEnemies)
+    {
+        enemy->setObstacleLocations(&enemy_obstacle_array);
+    }
+
+    for(auto projectile : projectiles)
+    {
+        projectile->setObstacleLocations(&projectile_obstacle_array);
+    }
+
+    tileArray = player_obstacle_array;
+    projectileObstacles = projectile_obstacle_array;
 }

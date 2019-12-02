@@ -290,9 +290,9 @@ void Projectile::setFinished(bool fini) {
   this->finished = fini;
 }
 
-void Projectile::setTileArray(std::vector<std::vector<int>> tile_array)
+void Projectile::setTileArray(std::vector<std::vector<int>> array)
 {
-	this->tile_array = tile_array;
+	tile_array = array;
 }
 
 // Given the pixel x,y coordinates of an obstacle, returns the tile coordinates of the obstacle.
@@ -312,10 +312,10 @@ std::vector<int> Projectile::getTilePosition(int pixelX, int pixelY)
 
 bool Projectile::hasDestructCollision()
 {
-	if(this->colTileX >= 0 &&
-	   this->colTileY >= 0)
+	if(colTileX >= 0 &&
+	   colTileY >= 0)
 	{
-		if(this->tile_array[colTileX][colTileY] >= 3)
+		if(tile_array[colTileX][colTileY] >= 3)
 		{
 			return true;
 		}
