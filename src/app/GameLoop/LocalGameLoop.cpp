@@ -248,7 +248,7 @@ int LocalGameLoop::run() {
             }
             if (e.key.keysym.sym == SDLK_ESCAPE)
             {
-                return 0; // return to menu
+                // return 0; // return to menu
             }
         }
 
@@ -430,6 +430,26 @@ int LocalGameLoop::run() {
 				bomb->update();
 
 				if(bomb->isExploding()) {
+                    // Check if bomb blew up a destructable tile
+                    std::vector<std::vector<int>> tile_map = render->getTileMap();
+                    int xIndex = (bomb->getX() + BOMB_WIDTH / 2 - BORDER_GAP) / TILE_SIZE - 1;
+                    int yIndex = (bomb->getY() + BOMB_HEIGHT / 2) / TILE_SIZE - 1;
+                    int currValue = tile_map[xIndex][yIndex];
+                    
+                    if(currValue == 4)
+                    {
+                        tile_map[xIndex][yIndex] = 3;
+                    }
+                    if(currValue == 3)
+                    {
+                        tile_map[xIndex][yIndex] = 0;
+                    }
+
+                    render->setTileMap(&tile_map);
+
+                    // update tile arrays
+                    updateObstacleArrays(tile_map);
+
 					// Check if bomb hits player
 					if(player->check_collision(bomb)) {
 						player->setHit(true);
@@ -470,7 +490,7 @@ int LocalGameLoop::run() {
     }
 
     // Exit normally
-    return 0;
+    // return 0;
 }
 
 // Updates player, enemies, and projectiles obstacle arrays

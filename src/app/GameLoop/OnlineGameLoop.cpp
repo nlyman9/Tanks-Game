@@ -372,15 +372,6 @@ int OnlineGameLoop::run() {
 
                     render->setTileMap(&tile_map);
 
-					for (auto player : players) {
-						player->setObstacleLocations(&tileArray);
-					}
-
-					// Set collision for network players
-					for (auto enemy : playerEnemies) {
-						enemy->setObstacleLocations(&tileArray);
-					}
-
                     projectiles.at(i)->setExploding(true);
 
                     // update tile arrays
@@ -436,12 +427,36 @@ int OnlineGameLoop::run() {
 				// Update bombs
 				bomb->update();
 
+				std::vector<std::vector<int>> tile_map = render->getTileMap();
+				if(bomb->isExploding()) {
+					 // Check if bomb blew up a destructable tile
+                    int xIndex = (bomb->getX() + BOMB_WIDTH / 2 - BORDER_GAP) / TILE_SIZE - 1;
+                    int yIndex = (bomb->getY() + BOMB_HEIGHT / 2) / TILE_SIZE - 1;
+                    int currValue = tile_map[xIndex][yIndex];
+                    
+                    if(currValue == 4)
+                    {
+                        tile_map[xIndex][yIndex] = 3;
+                    }
+                    if(currValue == 3)
+                    {
+                        tile_map[xIndex][yIndex] = 0;
+                    }
+
+                    render->setTileMap(&tile_map);
+
+                    // update tile arrays
+                    updateObstacleArrays(tile_map);
+				}
+
 				// Check if bomb is done exploding
 				if(bomb->getFinished()) {
 					bombs.erase(bombs.begin() + bombCount);
 					render->setBombs(bombs);
 					bombCount--;
+					client->updateMap(tile_map);
 				}
+				
 				bombCount++;
             }
 
