@@ -31,6 +31,10 @@ class Projectile : public Object {
 		bool hit = false;
 		SDL_Rect targetBox;
         int id;
+        
+        std::vector<std::vector<int>> tile_array;
+        int colTileX = -1;
+        int colTileY = -1;
 
     public:
     
@@ -72,6 +76,13 @@ class Projectile : public Object {
         bool projCollisionCheck(Projectile* bullet2);
         void setExploding(bool explode);
         BoundingBox* getBoundingBox() override;
+
+        // methods for breaking destructible blocks
+        std::vector<int> getTilePosition(int pixelX, int pixelY);
+        void setTileArray(std::vector<std::vector<int>> tile_array);
+        bool hasDestructCollision();
+        int getColX();
+        int getColY();
 
         ~Projectile();
 };

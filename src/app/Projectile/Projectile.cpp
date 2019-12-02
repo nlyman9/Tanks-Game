@@ -14,8 +14,8 @@ Projectile::Projectile(float x, float y) {
 Projectile::Projectile(float x, float y, int theta, int speed) {
 	setPos(x, y);
 	this->theta = theta;
-  	this->speedFactor = speed;
-	
+  this->speedFactor = speed;
+
 	x_vel = 180 * cos((theta * M_PI) / 180);
 	y_vel = 180 * sin((theta * M_PI) / 180);
 }
@@ -36,6 +36,7 @@ void Projectile::draw(SDL_Renderer *gRenderer, double update_lag) {
 	}
 	else
 	{
+    //finished = true;
 		Uint32 current_time = SDL_GetTicks();
 		dst->w = EXPLOSION_WIDTH;
 		dst->h = EXPLOSION_HEIGHT;
@@ -53,7 +54,7 @@ void Projectile::draw(SDL_Renderer *gRenderer, double update_lag) {
 			SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), getSprite()->getFrame(frame), dst, theta, NULL, SDL_FLIP_NONE);
 		else {
 			//finished = true;
-      		exploding = false;
+      exploding = false;
 		}
 
 		//projectiles currently are not being deleted/removed correctly
@@ -65,12 +66,8 @@ void Projectile::draw(SDL_Renderer *gRenderer, double update_lag) {
 bool Projectile::isHit(){
 	return this->hit;
 }
+
 bool Projectile::isExploding(){
-	if(this->exploding)
-		this->ticks++;
-	if(this->ticks >= 30){
-		this->setFinished(true);
-	}
 	return this->exploding;
 }
 
@@ -83,6 +80,8 @@ void Projectile::update() {
 		theta = theta + 360;
 
 	int collisionTheta = theta;
+
+    //rotateProjectile(theta_v);
 
 	targetNum = 0;
 
@@ -99,7 +98,6 @@ void Projectile::update() {
 		for(auto target : targets) {
 			overlap = check_collision(&currentPos, &target);
 			if (overlap != nullptr) {
-				std::cout << "collision in proj" << std::endl;
 				hit = true;
 				targetBox = target;
 				exploding = true;
@@ -112,26 +110,45 @@ void Projectile::update() {
 			overlap = check_collision(&currentPos, &obstacle);
 			if(overlap != nullptr) {
 
+				// destructible terrain code
+				std::vector<int> coordinate = getTilePosition(obstacle.x, obstacle.y);
+				this->colTileX = coordinate.at(0);
+				this->colTileY = coordinate.at(1);
+
 				theta_v = theta % 90;
 
 				int x_dist = currentPos.x - obstacle.x;
 				int y_dist = currentPos.y - obstacle.y;
 				bool x_bounce = bouncePriority(&currentPos, &obstacle);
 
+				//std::cout << "new\n";
+				//std::cout << "x_dist = " << x_dist << " ; y_dist = " << y_dist << std::endl;
+
 				if(x_bounce) { // collision left or right
+					//std::cout << "SIDES" << std::endl;
 					double num = -1 * cos((theta * M_PI) / 180);
 					if(theta > 180)
 						theta = 270 - (theta - 270);
 					else
 						theta = acos(num) * 180 / M_PI;
+					//std::cout << "num = " << num << std::endl;
+					//std::cout << "theta = " << theta << std::endl << std::endl;
 				}
 				else { // collision up or down
+					//std::cout << "TOPSIES" << std::endl;
 					double num = -1 * sin((theta * M_PI) / 180);
 					if(theta > 90 && theta < 270 || theta < -90)
 						theta = 180 - asin(num) * 180 / M_PI;
 					else
 						theta = asin(num) * 180 / M_PI;
+					//std::cout << "num = " << num << std::endl;
+					//std::cout << "theta = " << theta << std::endl << std::endl;
 				}
+
+				//std::cout << "proj_x = " << currentPos.x << " ; proj_y = " << currentPos.y << std::endl;
+				//std::cout << "proj_x + width = " << currentPos.x + PROJECTILE_WIDTH << " ; proj_y + height = " << currentPos.y + PROJECTILE_HEIGHT << std::endl;
+				//std::cout << "ob.x = " << obstacle.x << " ; ob.y = " << obstacle.y << std::endl;
+				//std::cout << "ob.x + t.size = " << obstacle.x + TILE_SIZE << " ; ob.y + t.size = " << obstacle.y + TILE_SIZE << std::endl << std::endl << std::endl;
 
 				setPos(getX() - (x_vel * updateStep), getY() - (y_vel * updateStep));
 				bounces++;
@@ -185,7 +202,8 @@ void Projectile::update() {
 			exploding = true;
 			theta = collisionTheta;
 		}
-	} else {
+	}
+	else {
 		x_vel = 0;
 		y_vel = 0;
 
@@ -270,4 +288,48 @@ bool Projectile::projCollisionCheck(Projectile* bullet2){
 
 void Projectile::setFinished(bool fini) {
   this->finished = fini;
+}
+
+void Projectile::setTileArray(std::vector<std::vector<int>> tile_array)
+{
+	this->tile_array = tile_array;
+}
+
+// Given the pixel x,y coordinates of an obstacle, returns the tile coordinates of the obstacle.
+// Returns: std::vector<int> length two, first value is X, second is Y coordinate
+std::vector<int> Projectile::getTilePosition(int pixelX, int pixelY)
+{
+	int tileX = (pixelX - 64) / 48;
+	int tileY = (pixelY - 48) / 48;
+
+	std::vector<int> coordinates;
+
+	coordinates.push_back(tileX);
+	coordinates.push_back(tileY);
+
+	return coordinates;
+}
+
+bool Projectile::hasDestructCollision()
+{
+	if(this->colTileX >= 0 &&
+	   this->colTileY >= 0)
+	{
+		if(this->tile_array[colTileX][colTileY] >= 3)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+int Projectile::getColX()
+{
+	return colTileX;
+}
+
+int Projectile::getColY()
+{
+	return colTileY;
 }

@@ -26,23 +26,114 @@ std::vector<std::vector<int>> MapGenerator::generateEmptyMap()
 	return array;
 }
 
-std::vector<std::vector<int>> MapGenerator::generateMirrorMap() //tile_map is 24x13
+std::vector<std::vector<int>> MapGenerator::generateMirrorMap()
 {
-    std::vector<std::vector<int>> array;
-    for(int i = 0; i < X_WIDE; i++)
-    {
-        array.push_back(std::vector<int>(Y_HIGH));
-        for(int j = 0; j < Y_HIGH; j++)
-        {
-            array[i][j] = 0;
-        }
-    }
+    std::vector<std::vector<int>> array = generateEmptyMap();
 
-    srand(time(NULL));
+	// generate three random cubes
+	int box1_x1 = rand() % 5;
+	int box1_y1 = 1;
+	int box1_x2 = rand() % 5 + 6;
+	int box1_y2 = rand() % 2 + 3;
 
-    array[Y_HIGH][10] = 2;
+	int box2_x1 = rand() % 5 + 1;
+	int box2_y1 = rand() % 2 + 5;
+	int box2_x2 = rand() % 5 + 6;
+	int box2_y2 = rand() % 2 + 8;
 
-    return array;
+	int box3_x1 = rand() % 5;
+	int box3_y1 = rand() % 2 + 10;
+	int box3_x2 = rand() % 5 + 6;
+	int box3_y2 = 12;
+
+	// check if box1 is big enough
+	if(abs((box1_x1 - box1_x2) * (box1_y1 - box1_y2)) >= 4)
+	{
+		if(box1_x1 > box1_x1)
+		{
+			int temp = box1_x1;
+			box1_x1 = box1_x2;
+			box1_x2 = temp;
+		}
+
+		if(box1_y1 > box1_y1)
+		{
+			int temp = box1_y1;
+			box1_y1 = box1_y2;
+			box1_y2 = temp;
+		}
+
+		for(int i = box1_x1; i < box1_x2; i++)
+		{
+			for(int j = box1_y1; j < box1_y2; j++)
+			{
+				array[i][j] = 2;
+			}
+		}
+	}
+
+	// check if box2 is big enough
+	if(abs((box2_x1 - box2_x2) * (box2_y1 - box2_y2)) >= 4)
+	{
+		if(box2_x1 > box2_x1)
+		{
+			int temp = box2_x1;
+			box2_x1 = box2_x2;
+			box2_x2 = temp;
+		}
+
+		if(box2_y1 > box2_y1)
+		{
+			int temp = box2_y1;
+			box2_y1 = box2_y2;
+			box2_y2 = temp;
+		}
+
+		for(int i = box2_x1; i < box2_x2; i++)
+		{
+			for(int j = box2_y1; j < box2_y2; j++)
+			{
+				array[i][j] = 2;
+			}
+		}
+	}
+
+	// check if box3 is big enough
+	if(abs((box3_x1 - box3_x2) * (box3_y1 - box3_y2)) > 4)
+	{
+		if(box3_x1 > box3_x1)
+		{
+			int temp = box3_x1;
+			box3_x1 = box3_x2;
+			box3_x2 = temp;
+		}
+
+		if(box3_y1 > box3_y1)
+		{
+			int temp = box3_y1;
+			box3_y1 = box3_y2;
+			box3_y2 = temp;
+		}
+
+		for(int i = box3_x1; i < box3_x2; i++)
+		{
+			for(int j = box3_y1; j < box3_y2; j++)
+			{
+				array[i][j] = 2;
+			}
+		}
+	}
+
+	// copy boxes to opposite side and flip
+	for(int i = 12; i < 24; i++)
+	{
+		for(int j = 0; j < 13; j++)
+		{
+			array[i][j] = array[23 - i][12 - j];
+		}
+	}
+
+	return array;
 }
 
 std::vector<std::vector<int>> MapGenerator::generateLineMap()
@@ -283,11 +374,72 @@ std::vector<std::vector<int>> MapGenerator::generateQuadrantMap() {
 	return room;
 }
 
+bool MapGenerator::checkNeighbors(int x, int y, std::vector<std::vector<int>> tile_array) {
+	int open_neighbors = 0;
+	//check right
+	if(x + 1 == X_WIDE) {
+		open_neighbors++;
+	}
+	else if(tile_array[x + 1][y] == 0) {
+		open_neighbors++;
+	}
+	//check below
+	if(y + 1 == Y_HIGH) {
+		open_neighbors++;
+	}
+	else if(tile_array[x][y + 1]) {
+		open_neighbors++;
+	}
+	//check left
+	if(x == 0) {
+		open_neighbors++;
+	}
+	else if(tile_array[x - 1][y]) {
+		open_neighbors++;
+	}
+	//check above
+	if(y == 0) {
+		open_neighbors++;
+	}
+	else if(tile_array[x][y - 1]) {
+		open_neighbors++;
+	}
+	//check how many neighbors we are using
+	if(open_neighbors > 1) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+std::vector<std::vector<int>> MapGenerator::addDestructibleTiles(std::vector<std::vector<int>> tile_array) {
+	int random_index;
+	//how often we want a destructible block to appear in place of a normal one
+	int destructible_chance = 3;
+	srand(time(NULL));
+
+	for(int i = 0; i < X_WIDE; i++) {
+		for(int j = 0; j < Y_HIGH; j++) {
+			//if we have a solid block and it has less than two solid neighbors
+			if(tile_array[i][j] == 2 && !checkNeighbors(i, j, tile_array)) {
+				random_index = rand() % destructible_chance + 1;
+				if(random_index == 1) {
+					tile_array[i][j] = 4;
+				}
+			}
+		}
+	}
+	return tile_array;
+}
+
 std::vector<std::vector<int>>* MapGenerator::generateMap()
 {
   	// UPDATE THESE WHEN ADDING NEW MAP TYPES
-	int NUM_GEN = 3;
+	int NUM_GEN = 4;
 	int NUM_PRE = 3;
+	int DESCTRUCTIBLE_GEN = 4;
+	int destructible_index;
 	// init tile map
 	tile_map = generateEmptyMap();
 
@@ -304,7 +456,9 @@ std::vector<std::vector<int>>* MapGenerator::generateMap()
 		case 3:
 			tile_map = generateOpenLineMap();
 			break;
-			// double check for seg fault
+		case 4:
+			tile_map = generateMirrorMap();
+			break;
 		default:
 			switch(rand() % NUM_PRE)
 			{
@@ -318,6 +472,11 @@ std::vector<std::vector<int>>* MapGenerator::generateMap()
 					tile_map = presetCheckerMap();
 					break;
 			}
+	}
+
+	destructible_index = rand() % DESCTRUCTIBLE_GEN;
+	if(destructible_index != 1) {
+		tile_map = addDestructibleTiles(tile_map);
 	}
 
 	// MAKE TRUE TO PRINT MAP FOR DEBUG PURPOSES
@@ -344,6 +503,5 @@ std::vector<std::vector<int>>* MapGenerator::generateMap()
 		std::cout << std::endl;
 	}
 
-	// tile_map = generateEmptyMap();
 	return &tile_map;
 }
