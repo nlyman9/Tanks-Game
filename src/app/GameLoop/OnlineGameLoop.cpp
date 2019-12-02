@@ -274,7 +274,6 @@ int OnlineGameLoop::run() {
 			
 			for (auto playerEnemy : playerEnemies) {
 				playerEnemy->setTurretTheta(client->getTurretTheta(0));
-				playerEnemy->setBomb(client->getPlayerBomb(0));
 				playerEnemy->update();
 			}
 
@@ -310,7 +309,7 @@ int OnlineGameLoop::run() {
 					render->setProjectiles(projectiles);
 				}
 
-				if(playerEnemies.at(0)->getBomb() == true) {
+				if(client->getPlayerBomb(0) == true) {
 					Bomb* newBomb(new Bomb(playerEnemies.at(0)->get_box(), playerEnemies.at(0)->getTheta(), bombBlack, bombRed, bombPlayerExplosion));
 					bombs.push_back(newBomb);
 					render->setBombs(bombs);
