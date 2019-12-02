@@ -205,7 +205,7 @@ int serverProcess() {
         // This function calls receive! Do not call again unless you have a specific reason
         // The polling (select function) currently waits for a specified timeout value 
         //      @see ServerConnection for timeout value
-        while ( (pendingClients = server->pollClientsAndReceive()) == nullptr) {
+        while ( (pendingClients = server->pollClientsAndReceive()) == nullptr ) {
             // Just go back and pollClientsAndReceive()
             try{
                 if(server->simulate()){

@@ -8,7 +8,7 @@
 class OnlineGameLoop {
     public:
         OnlineGameLoop(Render* renderer);
-        bool init(Args* options);
+        int init(Args* options);
         int run();
     private:
         // Member Variables 
@@ -53,7 +53,7 @@ class OnlineGameLoop {
         Client* client;
 
         // Member Functions
-        void buildMap();
+        int buildMap();
         void displayLoadingScreen(int screenCounter);
 
 };

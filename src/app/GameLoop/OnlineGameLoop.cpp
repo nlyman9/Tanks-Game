@@ -5,7 +5,7 @@
 
 OnlineGameLoop::OnlineGameLoop(Render* renderer) : render{renderer} {}
 
-bool OnlineGameLoop::init(Args* options) {
+int OnlineGameLoop::init(Args* options) {
     // Set up player 1
     Player* player = new Player(0, 0, true); // Position set from server
     Sprite *red_player_tank = new Sprite(render->getRenderer(), "src/res/images/red_tank.png");
@@ -138,6 +138,7 @@ bool OnlineGameLoop::init(Args* options) {
             }
 		}
 	}
+
 	auto initData = client->initData;
 	player->setId(initData[0]);
 	player->setX(initData[1]);
@@ -145,16 +146,32 @@ bool OnlineGameLoop::init(Args* options) {
 	player2->setX(initData[3]);
 	player2->setY(initData[4]);
 
-    buildMap();
-
-	// Initialized successfully
-	return true;
+    return buildMap();
 }
 
-void OnlineGameLoop::buildMap() {
+int OnlineGameLoop::buildMap() {
 	//wait for both players to connect (Map data arrives when both connect)
     int screenCounter = 0;
-    while(!client->pollMap()) {}
+	SDL_Event e;
+    while(!client->pollMap()) {
+		while (SDL_PollEvent(&e))
+		{
+			if (e.type == SDL_QUIT)
+			{
+				client->gameOn = false;
+				// Kill server/client thread
+				if (server_pid != 0) {
+					std::cout << "Killing server process " << server_pid << std::endl;
+					kill(server_pid, SIGTERM);
+				}
+                return -1; // close window
+			}
+            if (e.key.keysym.sym == SDLK_ESCAPE)
+            {
+                return 0; // return to menu
+            }
+		}
+	}
 
 	std::vector<std::vector<int>> map2D;
 	// init the first row
@@ -192,6 +209,8 @@ void OnlineGameLoop::buildMap() {
 	for (auto enemy : playerEnemies) {
 		enemy->setObstacleLocations(&tileArray);
 	}
+
+	return 1; // Success
 }
 
 int OnlineGameLoop::run() {

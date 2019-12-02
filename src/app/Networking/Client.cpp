@@ -141,6 +141,10 @@ int Client::clientProcess(void* data) {
 
                 recvedMap = true;
             }
+
+            if (mail->getType() == PackType::DISCONNECT) {
+                return 0;
+            }
             
             if(recvedInit && recvedMap) {
                 client->initDataReceived = true;
