@@ -191,7 +191,6 @@ int serverProcess() {
         auto timeSinceStart = current_time.time_since_epoch().count() - server->getStartTime();
         long timeRemaining = gameTimer - timeSinceStart / 1000000000;
 
-		// Don't decriment timer until less than 300
 		if(timeRemaining <= 0) {
             Packet* gameOverPacket = new Packet(PackType::GAME_OVER);
             server->broadcast(gameOverPacket);

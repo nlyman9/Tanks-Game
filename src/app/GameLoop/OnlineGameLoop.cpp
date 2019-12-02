@@ -203,6 +203,14 @@ int OnlineGameLoop::run() {
         	render->setTimer(timeRemaining);
 		}
 
+		if(client->gameOver) {
+			if(client->win) {
+				return 1;
+			} else {
+				return 2;
+			}
+		}
+
 		// 1. Process input
 		while (SDL_PollEvent(&e))
 		{

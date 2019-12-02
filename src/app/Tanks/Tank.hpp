@@ -41,8 +41,8 @@ class Tank {
         Sprite* getTurretSprite();
 		bool isHit();
 		void setHit(bool val);
-    bool purpHit();
-    void setPurpHit(bool hiterino);
+        bool purpHit();
+        void setPurpHit(bool hiterino);
 		void resetFrame();
 		bool isDestroyed();
 

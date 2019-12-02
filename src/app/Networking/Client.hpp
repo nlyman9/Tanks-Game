@@ -34,8 +34,11 @@ class Client {
     const int PLAYER_STATE_VALUES = 6;
 
     long startTime = 0;
+
   public:
     int id;
+    bool win = false;
+    bool gameOver = false;
 
     // Network
     ClientController *server;

@@ -200,7 +200,19 @@ int Client::clientProcess(void* data) {
                 }
             }
             if(mail->getType() == PackType::GAME_OVER) {
-                // TODO: END GAME STATES
+               if(mail->getBody()->size() == 0) {
+                  client->win = false;
+                  client->gameOver = true;
+               } else {
+                    std::vector<char> *mailBody= mail->getBody();
+                    if(client->id == mailBody->at(0)) {
+                        client->win = false;
+                        client->gameOver = true;
+                    } else {
+                        client->win = false;
+                        client->gameOver = true;
+                    }
+                }
             }
         }
         // TODO wait if we finish early?
