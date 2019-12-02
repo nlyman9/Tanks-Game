@@ -101,7 +101,8 @@ class ClientConnection {
             } else {
                 Packet *mail = sendBuffer.front();
                 sendBuffer.pop_front();
-
+                std::cout << "Sending packet [" << (int)mail->getType() << "]: " << std::endl;
+                mail->printData();
                 clientSocket->sendPacket(mail);
 
                 delete mail;
@@ -398,6 +399,16 @@ class ServerController {
             // Free packet we are done with it!
             delete mail;
             return true;
+        }
+
+        void closeClient(int idx) {
+            assert(idx < clients.size());
+            std::vector<ClientConnection *>::iterator it = clients.begin() + idx;
+            ClientConnection *c = clients.at(idx);
+
+            FD_CLR(c->fd(), &client_fds);   // Remove client from fds
+            delete c;                       // Free allocated memory
+            clients.erase(it);              // Remove pointer from vector
         }
 
         /**

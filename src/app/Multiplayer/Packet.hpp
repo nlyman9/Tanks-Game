@@ -23,7 +23,8 @@ enum class PackType {
     MAPSTATE,   // 3
     KEYFRAME,   // 4
     NUM_TYPES,  // 5
-    GAME_OVER   // 6
+    GAME_OVER,  // 6
+    DISCONNECT  // 7
 };
 
 /**

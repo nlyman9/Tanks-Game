@@ -207,7 +207,7 @@ int serverProcess() {
         // This function calls receive! Do not call again unless you have a specific reason
         // The polling (select function) currently waits for a specified timeout value 
         //      @see ServerConnection for timeout value
-        while ( (pendingClients = server->pollClientsAndReceive()) == nullptr) {
+        while ( (pendingClients = server->pollClientsAndReceive()) == nullptr ) {
             // Just go back and pollClientsAndReceive()
             try{
                 if(server->simulate()){
@@ -257,6 +257,17 @@ int serverProcess() {
                         server->setMail(mail, client->id());
                         // If a keystate, Prepare to send that client's keystate to the other clients 
                         server->addPacketFromClientToClients(client->id(), mail);
+                    } else if (mail->getType() == PackType::DISCONNECT) {
+                        // Client has disconnected!
+                        std::cout << "Client [" << client->id() << "] disconnected!!" << std::endl;
+
+                        // TODO destroy tank? tanks explode?
+                        Player *p = server->getPlayer(client->id());
+                        p->setHit(true);
+
+                        server->disconnectClient(client->id());
+                        fflush(stdout);
+                        exit(0);
                     }
 
                     if(mail->getType() == PackType::GAME_OVER) {
@@ -277,9 +288,7 @@ int serverProcess() {
 
         // Share data with clients - send data from buffer
         for (auto client : server->clients()) {
-#ifdef VERBOSE
             std::cout << "SERVER: TO " << client->id() << ": ";
-#endif
             client->sendFromBuffer();
         }
         //simulate the game

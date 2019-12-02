@@ -5,7 +5,7 @@
 
 OnlineGameLoop::OnlineGameLoop(Render* renderer) : render{renderer} {}
 
-bool OnlineGameLoop::init(Args* options) {
+int OnlineGameLoop::init(Args* options) {
     // Set up player 1
     Player* player = new Player(0, 0, true); // Position set from server
     Sprite *red_player_tank = new Sprite(render->getRenderer(), "src/res/images/red_tank.png");
@@ -104,6 +104,7 @@ bool OnlineGameLoop::init(Args* options) {
 	// Get initial position of the players from the server
 	std::cout << "Waiting on init" << std::endl;
 	int screenCounter = 0;
+	SDL_Event e;
 	while(!client->pollInitData()) {
 		displayLoadingScreen(screenCounter);
         screenCounter++;
@@ -111,7 +112,26 @@ bool OnlineGameLoop::init(Args* options) {
             screenCounter = 0;
         }
 
+		// Check if user wants to exit multiplayer or close window while waiting to connect to server
+		while (SDL_PollEvent(&e))
+		{
+			if (e.type == SDL_QUIT)
+			{
+				client->gameOn = false;
+				// Kill server/client thread
+				if (server_pid != 0) {
+					std::cout << "Killing server process " << server_pid << std::endl;
+					kill(server_pid, SIGTERM);
+				}
+                return -1; // close window
+			}
+            if (e.key.keysym.sym == SDLK_ESCAPE)
+            {
+                return 0; // return to menu
+            }
+		}
 	}
+
 	auto initData = client->initData;
 	player->setId(initData[0]);
 	player->setX(initData[1]);
@@ -126,16 +146,32 @@ bool OnlineGameLoop::init(Args* options) {
 	render->setPlayer(players);
 	render->setPlayerEnemies(playerEnemies);
 
-    buildMap();
-
 	// Initialized successfully
-	return true;
+    return buildMap();
 }
 
-void OnlineGameLoop::buildMap() {
+int OnlineGameLoop::buildMap() {
 	//wait for both players to connect (Map data arrives when both connect)
-    int screenCounter = 0;
-    while(!client->pollMap()) {}
+	SDL_Event e;
+    while(!client->pollMap()) {
+		while (SDL_PollEvent(&e))
+		{
+			if (e.type == SDL_QUIT)
+			{
+				client->gameOn = false;
+				// Kill server/client thread
+				if (server_pid != 0) {
+					std::cout << "Killing server process " << server_pid << std::endl;
+					kill(server_pid, SIGTERM);
+				}
+                return -1; // close window
+			}
+            if (e.key.keysym.sym == SDLK_ESCAPE)
+            {
+                return 0; // return to menu
+            }
+		}
+	}
 	map2D.clear();
 
 	// init the first row
@@ -173,6 +209,8 @@ void OnlineGameLoop::buildMap() {
 	for (auto enemy : playerEnemies) {
 		enemy->setObstacleLocations(&tileArray);
 	}
+
+	return 1; // Success
 }
 
 int OnlineGameLoop::run() {
@@ -218,8 +256,10 @@ int OnlineGameLoop::run() {
 			{
 				client->gameOn = false;
 				// Kill server/client thread
-				std::cout << "Killing server process " << server_pid << std::endl;
-				kill(server_pid, SIGTERM);
+				if (server_pid != 0) {
+					std::cout << "Killing server process " << server_pid << std::endl;
+					kill(server_pid, SIGTERM);
+				}
                 return -1; // close window
 			}
             if (e.key.keysym.sym == SDLK_ESCAPE)
@@ -282,7 +322,7 @@ int OnlineGameLoop::run() {
 			// Basically add a keyframe every ~2 updates -> 30 times a second
 			temp++;
 			// TODO Consolidate tickrates
-			if (temp > 1 && keystate != nullptr) {
+			if (temp > 2 && keystate != nullptr) {
 				// Add keystate from local player to send
 				client->addLocalKeyState(keystate, players.at(0)->turretTheta, players.at(0)->getFire(), players.at(0)->getBomb());
 				keystate = nullptr; //only need to send one per update loop

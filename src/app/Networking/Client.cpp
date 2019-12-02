@@ -141,6 +141,10 @@ int Client::clientProcess(void* data) {
 
                 recvedMap = true;
             }
+
+            if (mail->getType() == PackType::DISCONNECT) {
+                return 0;
+            }
             
             if(recvedInit && recvedMap) {
                 client->initDataReceived = true;
@@ -169,11 +173,11 @@ int Client::clientProcess(void* data) {
         // Receive data from server 
         Packet *mail = client->receiveAndGet();
         if (mail != nullptr) {
-#ifdef VERBOSE
+// #ifdef VERBOSE
             std::cout << "CLIENT-NET: Received packet type " << (int)mail->getType() << " -> ";
             mail->printData();
             fflush(stdout);
-#endif
+// #endif
             // If keystate, unpack a load into formable keystate
             // TODO not hardcode id to 0 
             if (mail->getType() == PackType::KEYSTATE) {
@@ -181,8 +185,7 @@ int Client::clientProcess(void* data) {
                 bool hasShot = mail->getBody()->at(10); // 10 is the index of the boolean if the player has shot
                 bool hasBomb = mail->getBody()->at(11); // 11 is the index of the boolean if the player has dropped a bomb
                 client->addNetworkKeyState(0, mail->getBody(), turret_theta, hasShot, hasBomb);
-            }
-            if(mail->getType() == PackType::KEYFRAME){
+            } else if(mail->getType() == PackType::KEYFRAME){
                 //set gamestate vector
                 try{
 #ifdef VERBOSE
@@ -198,8 +201,7 @@ int Client::clientProcess(void* data) {
                     // catch anything thrown within try block that derives from std::exception
                     std::cerr << exc.what();
                 }
-            }
-            if(mail->getType() == PackType::GAME_OVER) {
+            } else if(mail->getType() == PackType::GAME_OVER) {
                if(mail->getBody()->size() == 0) {
                   client->win = false;
                   client->gameOver = true;
@@ -214,10 +216,12 @@ int Client::clientProcess(void* data) {
                         client->gameOver = true;
                     }
                 }
+            } else if (mail->getType() == PackType::DISCONNECT) {
+                std::cerr << "You have disconnected from server." << std::endl;
+                client->gameOver = true;
+                break;
             }
         }
-        // TODO wait if we finish early?
     }
-
     return -1;
 }

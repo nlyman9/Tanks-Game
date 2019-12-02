@@ -37,8 +37,10 @@ void launch(Args *options)
 				continue;
 			}
 			
-			onlineGameLoop.init(options);
-			ret = onlineGameLoop.run();
+			ret = onlineGameLoop.init(options);
+			if (ret == 1) {
+				ret = onlineGameLoop.run();
+			}
 		} else if(gameMode == MENU_CREDITS) {
 			Credits credits(renderer);
 			credits.playCredits();

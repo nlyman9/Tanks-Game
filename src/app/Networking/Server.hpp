@@ -217,6 +217,10 @@ class Server {
             return true;
         }
 
+        void disconnectClient(int id) {
+            host->closeClient(id);
+        }
+
         /**
          * @brief Get the vector of clients connected in the form of Client Connections
          * 

@@ -293,16 +293,18 @@ class Socket {
                 // Use tcp
                 num_bytes = recv(socket_fd, headBuffer, HEAD.size(), 0);
                 if (num_bytes == -1) {
+                    if (errno == ECONNRESET) {
+                        std::cout << "SOCKET: Connection RESET!!! D:" << std::endl;
+                        return new Packet(PackType::DISCONNECT);
+                    } else if (errno == EWOULDBLOCK) {
 #ifdef VERBOSE
-                    std::cerr << "SOCKET: read header error: " << strerror(errno) <<  std::endl;
+                        std::cout << "SOCKET: Receive timed out" << std::endl;
 #endif
-                    return nullptr;
-                }
-                if (num_bytes == EWOULDBLOCK) {
-#ifdef VERBOSE
-                    std::cout << "SOCKET: Receive timed out" << std::endl;
-#endif
-                    return nullptr;
+                        return nullptr;
+                    } else {
+                        std::cerr << "SOCKET: read header error: " << strerror(errno) <<  std::endl;
+                        return nullptr;
+                    }
                 }
             } else {
                 // Use udp
