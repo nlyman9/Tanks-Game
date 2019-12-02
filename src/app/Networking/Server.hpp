@@ -254,6 +254,14 @@ class Server {
             //for each player
             //apply latest mail
             for(int i = 0; i < numClients(); i++){
+
+                // Game Over
+                if(players->at(i)->isHit()) {
+                    Packet* gameOverPacket = new Packet(PackType::GAME_OVER);
+                    gameOverPacket->appendData(i); // send ID of losing player
+                    broadcast(gameOverPacket);
+                    return false;
+                }
 #ifdef VERBOSE
                 std::cout << "SERVER: Applying keystates to gamestate" << std::endl;
                 lastMail->at(i)->printData();
@@ -271,6 +279,7 @@ class Server {
                 for (auto& projectile : projectiles) {
                     projectile->update();
                     if(projectile->check_collision(players->at(i))) {
+                        players->at(i)->setHit(true);
                         std::cout << "Player " << i << " was shot" << std::endl;
                     }
                     if(projectile->isFinished()) {
@@ -286,6 +295,7 @@ class Server {
                     // Update bombs
 				    bomb->update();
                     if(bomb->check_collision(players->at(i))) {
+                        players->at(i)->setHit(true);
                         std::cout << "Player " << i << " was bombed" << std::endl;
                     }
                     // Check if bomb is done exploding
