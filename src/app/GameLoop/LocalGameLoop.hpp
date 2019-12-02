@@ -63,7 +63,7 @@ class LocalGameLoop {
         void generateMap();
         std::vector<int> spawnEnemies(std::vector<std::vector<int>> *map, int count);
         std::vector<int> spawnEnemy(std::vector<std::vector<int>> *map);
-
+        void updateObstacleArrays(std::vector<std::vector<int>> tile_map);
 };
 
 
