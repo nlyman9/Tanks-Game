@@ -61,6 +61,8 @@ class Render {
 
         void clear();
 
+        std::vector<std::vector<int>> getTileMap();
+
         //menu stuff
         //draw a box
         int drawBox(Box toDraw);
@@ -90,7 +92,7 @@ class Render {
         SDL_Texture* crosshair;
 
         SDL_Texture* gTileSheet;
-        SDL_Rect gTileRects[3];
+        SDL_Rect gTileRects[5];
 
         std::vector<std::vector<int>> tile_map;
 

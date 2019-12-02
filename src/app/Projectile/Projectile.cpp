@@ -110,6 +110,11 @@ void Projectile::update() {
 			overlap = check_collision(&currentPos, &obstacle);
 			if(overlap != nullptr) {
 
+				// destructible terrain code
+				std::vector<int> coordinate = getTilePosition(obstacle.x, obstacle.y);
+				this->colTileX = coordinate.at(0);
+				this->colTileY = coordinate.at(1);
+
 				theta_v = theta % 90;
 
 				int x_dist = currentPos.x - obstacle.x;
@@ -283,4 +288,48 @@ bool Projectile::projCollisionCheck(Projectile* bullet2){
 
 void Projectile::setFinished(bool fini) {
   this->finished = fini;
+}
+
+void Projectile::setTileArray(std::vector<std::vector<int>> tile_array)
+{
+	this->tile_array = tile_array;
+}
+
+// Given the pixel x,y coordinates of an obstacle, returns the tile coordinates of the obstacle.
+// Returns: std::vector<int> length two, first value is X, second is Y coordinate
+std::vector<int> Projectile::getTilePosition(int pixelX, int pixelY)
+{
+	int tileX = (pixelX - 64) / 48;
+	int tileY = (pixelY - 48) / 48;
+
+	std::vector<int> coordinates;
+
+	coordinates.push_back(tileX);
+	coordinates.push_back(tileY);
+
+	return coordinates;
+}
+
+bool Projectile::hasDestructCollision()
+{
+	if(this->colTileX >= 0 &&
+	   this->colTileY >= 0)
+	{
+		if(this->tile_array[colTileX][colTileY] >= 3)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+int Projectile::getColX()
+{
+	return colTileX;
+}
+
+int Projectile::getColY()
+{
+	return colTileY;
 }

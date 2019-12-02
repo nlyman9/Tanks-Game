@@ -95,7 +95,7 @@ void LocalGameLoop::generateMap() {
         for (int y = TILE_SIZE, j = 0; y < SCREEN_HEIGHT - TILE_SIZE; y+=TILE_SIZE, j++) {
             SDL_Rect cur_out = { x, y, TILE_SIZE, TILE_SIZE};
             SDL_Rect hole_tile = { x+5, y+5, TILE_SIZE-5, TILE_SIZE-5 }; //does not work, enemy AI needs update
-            if(mapVectors[i][j] == 2) {
+            if(mapVectors[i][j] >= 2) {
                 tileArray.push_back(cur_out);
                 enemyTileArray.push_back(cur_out);
                 projectileObstacles.push_back(cur_out);
@@ -261,6 +261,7 @@ int LocalGameLoop::run() {
             newBullet->setSprite(bullet);
             newBullet->setObstacleLocations(&projectileObstacles);
             newBullet->setFriendly(true);
+            newBullet->setTileArray(render->getTileMap());
             for(auto enemy : enemies) {
                 newBullet->addTargetLocation(enemy->get_box());
             }
@@ -348,6 +349,33 @@ int LocalGameLoop::run() {
 					projectiles.at(i)->addTargetLocation(player->get_box());
 				}
 				projectiles.at(i)->update();
+
+
+                // check if hitting destructible terrain
+                if(projectiles.at(i)->hasDestructCollision())
+                {
+                    std::vector<std::vector<int>> tile_map = render->getTileMap();
+                    int xIndex = projectiles.at(i)->getColX();
+                    int yIndex = projectiles.at(i)->getColY();
+                    int currValue = tile_map[xIndex][yIndex];
+                    
+                    if(currValue == 4)
+                    {
+                        tile_map[xIndex][yIndex] = 3;
+                    }
+                    else
+                    {
+                        tile_map[xIndex][yIndex] = 0;
+                    }
+
+                    render->setTileMap(&tile_map);
+
+                    projectiles.at(i)->setExploding(true);
+
+                    // update tile arrays
+                    updateObstacleArrays(tile_map);
+                }
+
 				if(projectiles.at(i)->isHit()) {
 					SDL_Rect* hitObject = projectiles.at(i)->getTarget();
 					SDL_Rect* playerRect = player->get_box();
@@ -360,21 +388,21 @@ int LocalGameLoop::run() {
 					for(auto enemy: enemies) {
 						SDL_Rect* enemyRect = enemy->get_box();
 						if(enemyRect->x == hitObject->x && enemyRect->y == hitObject->y && !enemy->isHit()) {
-              if (!enemy->purpHit() && enemy->getEnemyType() == 2) {
-                if (count > 0) {
-                  enemy->setPurpHit(true);
-                }
-                enemy->setHit(true);
-                //std::cout << "hit once\n";
-                projectiles.at(i)->setFinished(true);
-                count++;
-              }
-              else {
-                enemy->setHit(true);
-                //std::cout << "setting hit to true\n";
-                //enemy->setSprite(bluesplosion);
-                enemy->resetFrame();
-              }
+                            if (!enemy->purpHit() && enemy->getEnemyType() == 2) {
+                                if (count > 0) {
+                                enemy->setPurpHit(true);
+                                }
+                                enemy->setHit(true);
+                                //std::cout << "hit once\n";
+                                projectiles.at(i)->setFinished(true);
+                                count++;
+                            }
+                            else {
+                                enemy->setHit(true);
+                                //std::cout << "setting hit to true\n";
+                                //enemy->setSprite(bluesplosion);
+                                enemy->resetFrame();
+                            }
 							break;
 						}
 					}
@@ -454,4 +482,45 @@ int LocalGameLoop::run() {
 
     // Exit normally
     return 0;
+}
+
+// Updates player, enemies, and projectiles obstacle arrays
+// Called when destroying destructible terrain
+void LocalGameLoop::updateObstacleArrays(std::vector<std::vector<int>> tile_map)
+{
+    std::vector<SDL_Rect> player_obstacle_array;
+    std::vector<SDL_Rect> enemy_obstacle_array;
+    std::vector<SDL_Rect> projectile_obstacle_array;
+
+    for (int x = BORDER_GAP + TILE_SIZE, i = 0; x < SCREEN_WIDTH - BORDER_GAP - TILE_SIZE; x+=TILE_SIZE, i++) {
+        for (int y = TILE_SIZE, j = 0; y < SCREEN_HEIGHT - TILE_SIZE; y+=TILE_SIZE, j++) {
+            SDL_Rect normal_tile = { x, y, TILE_SIZE, TILE_SIZE};
+            SDL_Rect hole_tile = { x+5, y+5, TILE_SIZE-5, TILE_SIZE-5 }; //does not work, enemy AI needs update
+            if(tile_map[i][j] >= 2) {
+                player_obstacle_array.push_back(normal_tile);
+                enemy_obstacle_array.push_back(normal_tile);
+                projectile_obstacle_array.push_back(normal_tile);
+            } else if(tile_map[i][j] == 1) {
+                player_obstacle_array.push_back(hole_tile);
+                enemy_obstacle_array.push_back(normal_tile);
+            }
+        }
+    }
+
+    player->setObstacleLocations(&player_obstacle_array);
+
+    for(auto enemy : enemies)
+    {
+        enemy->setObstacleLocations(&enemy_obstacle_array);
+        enemy->setTileMap(&tile_map);
+    }
+
+    for(auto projectile : projectiles)
+    {
+        projectile->setObstacleLocations(&projectile_obstacle_array);
+    }
+
+    tileArray = player_obstacle_array;
+    enemyTileArray = enemy_obstacle_array;
+    projectileObstacles = projectile_obstacle_array;
 }
