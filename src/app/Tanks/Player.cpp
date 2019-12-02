@@ -253,7 +253,6 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time,
     x_deltav = 0;
     y_deltav = 0;
     theta_v = 0;
-    shotsFired = false;
 
     //std::cout << "access keystate" << std::endl;
     if (keystate[SDL_SCANCODE_W]) {
