@@ -374,11 +374,72 @@ std::vector<std::vector<int>> MapGenerator::generateQuadrantMap() {
 	return room;
 }
 
+bool MapGenerator::checkNeighbors(int x, int y, std::vector<std::vector<int>> tile_array) {
+	int open_neighbors = 0;
+	//check right
+	if(x + 1 == X_WIDE) {
+		open_neighbors++;
+	}
+	else if(tile_array[x + 1][y] == 0) {
+		open_neighbors++;
+	}
+	//check below
+	if(y + 1 == Y_HIGH) {
+		open_neighbors++;
+	}
+	else if(tile_array[x][y + 1]) {
+		open_neighbors++;
+	}
+	//check left
+	if(x == 0) {
+		open_neighbors++;
+	}
+	else if(tile_array[x - 1][y]) {
+		open_neighbors++;
+	}
+	//check above
+	if(y == 0) {
+		open_neighbors++;
+	}
+	else if(tile_array[x][y - 1]) {
+		open_neighbors++;
+	}
+	//check how many neighbors we are using
+	if(open_neighbors > 1) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+std::vector<std::vector<int>> MapGenerator::addDestructibleTiles(std::vector<std::vector<int>> tile_array) {
+	int random_index;
+	//how often we want a destructible block to appear in place of a normal one
+	int destructible_chance = 3;
+	srand(time(NULL));
+
+	for(int i = 0; i < X_WIDE; i++) {
+		for(int j = 0; j < Y_HIGH; j++) {
+			//if we have a solid block and it has less than two solid neighbors
+			if(tile_array[i][j] == 2 && !checkNeighbors(i, j, tile_array)) {
+				random_index = rand() % destructible_chance + 1;
+				if(random_index == 1) {
+					tile_array[i][j] = 4;
+				}
+			}
+		}
+	}
+	return tile_array;
+}
+
 std::vector<std::vector<int>>* MapGenerator::generateMap()
 {
   	// UPDATE THESE WHEN ADDING NEW MAP TYPES
 	int NUM_GEN = 4;
 	int NUM_PRE = 3;
+	int DESCTRUCTIBLE_GEN = 4;
+	int destructible_index;
 	// init tile map
 	tile_map = generateEmptyMap();
 
@@ -411,6 +472,11 @@ std::vector<std::vector<int>>* MapGenerator::generateMap()
 					tile_map = presetCheckerMap();
 					break;
 			}
+	}
+
+	destructible_index = rand() % DESCTRUCTIBLE_GEN;
+	if(destructible_index != 1) {
+		tile_map = addDestructibleTiles(tile_map);
 	}
 
 	// MAKE TRUE TO PRINT MAP FOR DEBUG PURPOSES
