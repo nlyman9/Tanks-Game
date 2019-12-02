@@ -224,7 +224,7 @@ int OnlineGameLoop::run() {
 			}
             if (e.key.keysym.sym == SDLK_ESCAPE)
             {
-                return 0; // return to menu
+                //return 0; // return to menu
             }
 		}
 
@@ -274,7 +274,6 @@ int OnlineGameLoop::run() {
 			
 			for (auto playerEnemy : playerEnemies) {
 				playerEnemy->setTurretTheta(client->getTurretTheta(0));
-				playerEnemy->setFire(client->getPlayerShot(0));
 				playerEnemy->setBomb(client->getPlayerBomb(0));
 				playerEnemy->update();
 			}
@@ -303,7 +302,7 @@ int OnlineGameLoop::run() {
 					bombs.push_back(newBomb);
 					render->setBombs(bombs);
 				}
-				if (playerEnemies.at(0)->getFire() == true) {
+				if (client->getPlayerShot(0) == true) {
 					Projectile *newBullet = new Projectile(playerEnemies.at(0)->getX() + TANK_WIDTH/4, playerEnemies.at(0)->getY() + TANK_HEIGHT/4, playerEnemies.at(0)->getTurretTheta(), 1);
 					newBullet->setSprite(shell);
 					newBullet->setObstacleLocations(&tileArray);
@@ -317,7 +316,6 @@ int OnlineGameLoop::run() {
 					render->setBombs(bombs);
 				}
 				players.at(0)->setFire(false);
-				playerEnemies.at(0)->setFire(false);
 				players.at(0)->setBomb(false);
 				playerEnemies.at(0)->setBomb(false);
 			}
