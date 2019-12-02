@@ -7,33 +7,41 @@
 
 class Tank {
     private: 
-      std::chrono::system_clock::time_point prev_fire_time = std::chrono::system_clock::now();
-      std::chrono::system_clock::time_point prev_bomb_time = std::chrono::system_clock::now();
+      std::chrono::system_clock::time_point prev_fire_time = std::chrono::system_clock::now() - std::chrono::seconds{3};
+      std::chrono::system_clock::time_point prev_bomb_time = std::chrono::system_clock::now() - std::chrono::seconds{5};
     public:
         // Member Functions
         int getTheta();
         float getTurretTheta();
         bool getFire();
         bool setFire(bool fire){
-            std::chrono::system_clock::time_point current_fire_time = std::chrono::system_clock::now();
-            if((current_fire_time - prev_fire_time) > std::chrono::seconds{3}){
-                prev_fire_time = std::chrono::system_clock::now();
-                shotsFired = fire;
+            if (fire == false) {
+                shotsFired = false;
                 return true;
+            } else {
+                std::chrono::system_clock::time_point current_time = std::chrono::system_clock::now();
+                if (current_time - prev_fire_time >= std::chrono::seconds{3}) {
+                    prev_fire_time = std::chrono::system_clock::now();
+                    shotsFired = true;
+                    return true;
+                }
+                return false;
             }
-            shotsFired = false;
-            return false;
         }
         bool getBomb();
         bool setBomb(bool bomb){
-            std::chrono::system_clock::time_point current_bomb_time = std::chrono::system_clock::now();
-            if((current_bomb_time - prev_bomb_time) > std::chrono::seconds{5}){
-                prev_bomb_time = std::chrono::system_clock::now();
-                bombDeployed = bomb;
+            if (bomb == false) {
+                bombDeployed = false;
                 return true;
+            } else {
+                std::chrono::system_clock::time_point current_time = std::chrono::system_clock::now();
+                if (current_time - prev_fire_time >= std::chrono::seconds{5}) {
+                    prev_fire_time = std::chrono::system_clock::now();
+                    bombDeployed = true;
+                    return true;
+                }
+                return false;
             }
-            bombDeployed = false;
-            return false;
         }
         bool rotate(float theta);
         void rotateTurret(float theta);
