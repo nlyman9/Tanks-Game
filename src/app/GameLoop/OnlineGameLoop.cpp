@@ -322,7 +322,7 @@ int OnlineGameLoop::run() {
 			// Basically add a keyframe every ~2 updates -> 30 times a second
 			temp++;
 			// TODO Consolidate tickrates
-			if (temp > 1 && keystate != nullptr) {
+			if (temp > 2 && keystate != nullptr) {
 				// Add keystate from local player to send
 				client->addLocalKeyState(keystate, players.at(0)->turretTheta, players.at(0)->getFire(), players.at(0)->getBomb());
 				keystate = nullptr; //only need to send one per update loop

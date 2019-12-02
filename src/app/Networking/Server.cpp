@@ -255,7 +255,8 @@ int serverProcess() {
                         server->setMail(mail, client->id());
                         // If a keystate, Prepare to send that client's keystate to the other clients 
                         server->addPacketFromClientToClients(client->id(), mail);
-                    } else if (mail->getType() == PackType::DISCONNECT) {
+                    }
+                    if (mail->getType() == PackType::DISCONNECT) {
                         // Client has disconnected!
                         std::cout << "Client [" << client->id() << "] disconnected!!" << std::endl;
 
@@ -264,6 +265,7 @@ int serverProcess() {
                         p->setHit(true);
 
                         server->disconnectClient(client->id());
+                        fflush(stdout);
                         exit(0);
                     }
                     fflush(stdout);
@@ -278,9 +280,7 @@ int serverProcess() {
 
         // Share data with clients - send data from buffer
         for (auto client : server->clients()) {
-#ifdef VERBOSE
             std::cout << "SERVER: TO " << client->id() << ": ";
-#endif
             client->sendFromBuffer();
         }
         //simulate the game

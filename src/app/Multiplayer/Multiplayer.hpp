@@ -101,7 +101,8 @@ class ClientConnection {
             } else {
                 Packet *mail = sendBuffer.front();
                 sendBuffer.pop_front();
-
+                std::cout << "Sending packet [" << (int)mail->getType() << "]: " << std::endl;
+                mail->printData();
                 clientSocket->sendPacket(mail);
 
                 delete mail;
