@@ -35,8 +35,8 @@ class Tank {
                 return true;
             } else {
                 std::chrono::system_clock::time_point current_time = std::chrono::system_clock::now();
-                if (current_time - prev_fire_time >= std::chrono::seconds{5}) {
-                    prev_fire_time = std::chrono::system_clock::now();
+                if (current_time - prev_bomb_time >= std::chrono::seconds{5}) {
+                    prev_bomb_time = std::chrono::system_clock::now();
                     bombDeployed = true;
                     return true;
                 }
