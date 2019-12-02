@@ -258,11 +258,13 @@ int serverProcess() {
                     } else if (mail->getType() == PackType::DISCONNECT) {
                         // Client has disconnected!
                         std::cout << "Client [" << client->id() << "] disconnected!!" << std::endl;
-                        server->disconnectClient(client->id());
 
                         // TODO destroy tank? tanks explode?
                         Player *p = server->getPlayer(client->id());
                         p->setHit(true);
+
+                        server->disconnectClient(client->id());
+                        exit(0);
                     }
                     fflush(stdout);
                 } else {

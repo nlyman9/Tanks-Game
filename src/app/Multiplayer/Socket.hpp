@@ -293,7 +293,7 @@ class Socket {
                 // Use tcp
                 num_bytes = recv(socket_fd, headBuffer, HEAD.size(), 0);
                 if (errno == ECONNRESET) {
-                    return (Packet *) ECONNRESET;
+                    return new Packet(PackType::DISCONNECT);
                 } else if (errno == EWOULDBLOCK) {
 #ifdef VERBOSE
                     std::cout << "SOCKET: Receive timed out" << std::endl;

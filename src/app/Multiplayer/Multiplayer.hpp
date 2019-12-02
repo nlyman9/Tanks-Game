@@ -46,10 +46,7 @@ class ClientConnection {
         void receive() {
             Packet *mail = clientSocket->receive();
 
-            if ((long) mail == ECONNRESET) {
-                // The connection has been reset? -> closed
-                recvBuffer.push_back(new Packet(PackType::DISCONNECT));
-            } else if (mail != nullptr) {
+            if (mail != nullptr) {
                 recvBuffer.push_back(mail);
             } else {
 #ifdef VERBOSE
@@ -407,8 +404,10 @@ class ServerController {
             assert(idx < clients.size());
             std::vector<ClientConnection *>::iterator it = clients.begin() + idx;
             ClientConnection *c = clients.at(idx);
-            delete c;
-            clients.erase(it);
+
+            FD_CLR(c->fd(), &client_fds);    // Remove client from fds
+            delete c;                       // Free allocated memory
+            clients.erase(it);              // Remove pointer from vector
         }
 
         /**
