@@ -28,6 +28,10 @@ class Tank {
                 return false;
             }
         }
+        bool setFireNOCD(bool fire){
+          shotsFired = fire;
+          return true;
+        }
         bool getBomb();
         bool setBomb(bool bomb){
             if (bomb == false) {
@@ -42,6 +46,10 @@ class Tank {
                 }
                 return false;
             }
+        }
+        bool setBombNOCD(bool fire){
+          bombDeployed = fire;
+          return true;
         }
         bool rotate(float theta);
         void rotateTurret(float theta);
