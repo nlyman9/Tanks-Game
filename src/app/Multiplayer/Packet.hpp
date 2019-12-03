@@ -22,7 +22,9 @@ enum class PackType {
     KEYSTATE,   // 2
     MAPSTATE,   // 3
     KEYFRAME,   // 4
-    NUM_TYPES   // 5
+    NUM_TYPES,  // 5
+    GAME_OVER,  // 6
+    DISCONNECT  // 7
 };
 
 /**
@@ -83,10 +85,16 @@ class Packet {
             headers.push_back(size);
             headers.push_back(type);
             for (int i = 0; i < data_size; i++) {
-                this->body.push_back((char) data[i]);
+                if(i >= data_size) {
+                    std::cout << "PACKET VECTOR OVER RUN" << std::endl;
+                } else {
+                    this->body.push_back((char) data[i]);
+                }
             }
+#ifdef VERBOSE
             std::cout << "Appended data = " << std::endl;
             this->printData();
+#endif
         }
 
         /**
@@ -154,7 +162,9 @@ class Packet {
                 this->body.push_back((val>>8) & 0xFF);
                 this->body.push_back(val & 0xFF);
             }
+#ifdef VERBOSE
             std::cout << "Appended data = " << std::string(body.data(), body.size()) << std::endl;
+#endif
             setPacketSize();
         }
         /**

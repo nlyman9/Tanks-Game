@@ -61,7 +61,7 @@ bool Render::init()
 	// Set renderer draw/clear color
 	SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
 	gTileSheet = loadImage("src/res/images/tiles.png", gRenderer);
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 5; i++) {
 			gTileRects[i].x = i * TILE_SIZE;
 			gTileRects[i].y = 0;
 			gTileRects[i].w = TILE_SIZE;
@@ -298,6 +298,10 @@ void Render::setTileMap(std::vector<std::vector<int>>* tileMap) {
 	tile_map = *tileMap;
 }
 
+std::vector<std::vector<int>> Render::getTileMap() {
+	return tile_map;
+}
+
 int Render::draw(double update_lag) {
 	int c;
 	SDL_Rect cur_out;
@@ -373,6 +377,11 @@ int Render::draw(double update_lag) {
 	for (auto& bomb : gBombs) {
 		bomb->draw(gRenderer, update_lag);
 	}
+	
+	// Render all explosions
+	for (auto& explosion : gExplosions) {
+		explosion->draw(gRenderer, update_lag);
+	}
 
 	// Draw the cursor on the screen
 	SDL_Rect cursorRect = {cursorX - CROSSHAIR_SIZE/2, cursorY - CROSSHAIR_SIZE/2, CROSSHAIR_SIZE, CROSSHAIR_SIZE};
@@ -413,9 +422,14 @@ void Render::setTimer(unsigned int passed_timer) {
 	timer = passed_timer;
 }
 
+void Render::setExplosions(std::vector<Explosion *> explosions) {
+	gExplosions = explosions;
+}
+
 void Render::clear() {
 	gPlayers.clear();
 	gEnemies.clear();
 	gProjectiles.clear();
 	gBombs.clear();
+	gExplosions.clear();
 }

@@ -50,6 +50,9 @@ target_link_libraries(Server
   Constants
   Tank
   Object
+  Bomb
+  Projectile
+  Constants
 )
 else()
 target_link_libraries(Server
@@ -59,5 +62,8 @@ target_link_libraries(Server
   Constants
   Tank
   Object
+  Bomb
+  Projectile
+  Constants
 )
 endif()

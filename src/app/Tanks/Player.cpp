@@ -65,29 +65,8 @@ void Player::draw(SDL_Renderer *gRenderer, double update_lag) {
 		SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), getSprite()->getFrame(frame), dst, theta, NULL, SDL_FLIP_NONE);
 		SDL_RenderCopyEx(gRenderer, getTurretSprite()->getTexture(), NULL, turret_dst, turretTheta, NULL, SDL_FLIP_NONE);
 	} else {
-		Uint32 current_time = SDL_GetTicks();
-		SDL_Rect* dst = get_box();
-		dst->w = EXPLOSION_WIDTH;
-		dst->h = EXPLOSION_HEIGHT;
-
-		if(frame == 0 && anim_last_time == 0) {
-			//std::cout << "setting anim for first time\n";
-			anim_last_time = SDL_GetTicks();
-		}
-
-		if(current_time > anim_last_time + 200) {
-			frame++;
-			anim_last_time = SDL_GetTicks();
-			//std::cout << "frame++\n";
-		}
-
-		if(frame < 6) {
-			//std::cout << "rendering frame = " << frame << "\n";
-			SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), getSprite()->getFrame(frame), dst, theta, NULL, SDL_FLIP_NONE);
-		} else {
-			//std::cout << "destroyed\n";
-			destroyed = true;
-		}
+		//std::cout << "destroyed\n";
+		destroyed = true;
 	}
 }
 
@@ -253,7 +232,6 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time,
     x_deltav = 0;
     y_deltav = 0;
     theta_v = 0;
-    shotsFired = false;
 
     //std::cout << "access keystate" << std::endl;
     if (keystate[SDL_SCANCODE_W]) {
@@ -279,16 +257,10 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time,
     if(e->type == SDL_MOUSEBUTTONDOWN) {
   		Uint32 current_time = SDL_GetTicks();
         if(e->button.button == SDL_BUTTON_LEFT) {
-            if (current_time > fire_last_time_bullet + 1500) {
-                setFire(true);
-                fire_last_time_bullet = current_time;
-            }
+            setFire(true);
         }
-         if(e->button.button == SDL_BUTTON_RIGHT) {
-            if (current_time > fire_last_time_bomb + 5000) {
-                setBomb(true);
-                fire_last_time_bomb = current_time;
-            }
+        if(e->button.button == SDL_BUTTON_RIGHT) {
+            setBomb(true);
         }
   	}
 

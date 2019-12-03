@@ -15,6 +15,7 @@ add_subdirectory(ImageLoader)
 add_subdirectory(Args)
 add_subdirectory(Bomb)
 add_subdirectory(Box)
+add_subdirectory(Explosion)
 
 if(${APPLE}) 
 find_package(SDL2 REQUIRED)

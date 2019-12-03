@@ -49,8 +49,10 @@ class ClientConnection {
             if (mail != nullptr) {
                 recvBuffer.push_back(mail);
             } else {
+#ifdef VERBOSE
                 // Packet was probably invalid
                 std::cerr << "SERVER: Packet from client was invalid!" << std::endl;
+#endif
             }
         }
 
@@ -67,9 +69,9 @@ class ClientConnection {
 
             Packet *mail = recvBuffer.front();
             recvBuffer.pop_front();
-            
+#ifdef VERBOSE            
             std::cout << "Size of recv buffer is === " << recvBuffer.size() << std::endl;
-
+#endif
             return mail;
         }
         
@@ -99,7 +101,8 @@ class ClientConnection {
             } else {
                 Packet *mail = sendBuffer.front();
                 sendBuffer.pop_front();
-
+                std::cout << "Sending packet [" << (int)mail->getType() << "]: " << std::endl;
+                mail->printData();
                 clientSocket->sendPacket(mail);
 
                 delete mail;
@@ -284,16 +287,16 @@ class ServerController {
                 fflush(stdout);
                 return nullptr;
             }
-
+#ifdef VERBOSE
             std::cout << "Number of clients from pselect -- " << numberOfPendingClients << std::endl;
             fflush(stdout);
-
+#endif
             // fd_set's will be modified with the clients that have pending messages, return that list
             if (numberOfPendingClients == 0) {
                 return nullptr;
             } else {
                 std::vector<ClientConnection*> *pendingClients = new std::vector<ClientConnection*>();
-                for (auto client : clients) {
+                for (auto& client : clients) {
                     if (FD_ISSET(client->fd(), &read_fds)) {
                         pendingClients->push_back(client);
                     }
@@ -381,19 +384,31 @@ class ServerController {
             }
 
             // Send to all clients 
+#ifdef VERBOSE
             std::cout << "Broadcasting to clients..." << std::endl;
+#endif
             Packet *mail =  broadcastBuffer.front();
             broadcastBuffer.pop_front();
 
-            for (auto client : clients) {
+            for (auto& client : clients) {
                 client->sendPacket(mail);
             }
-
+#ifdef VERBOSE
             std::cout << "Broadcasted to clients!" << std::endl;
-
+#endif
             // Free packet we are done with it!
             delete mail;
             return true;
+        }
+
+        void closeClient(int idx) {
+            assert(idx < clients.size());
+            std::vector<ClientConnection *>::iterator it = clients.begin() + idx;
+            ClientConnection *c = clients.at(idx);
+
+            FD_CLR(c->fd(), &client_fds);   // Remove client from fds
+            delete c;                       // Free allocated memory
+            clients.erase(it);              // Remove pointer from vector
         }
 
         /**
@@ -417,7 +432,7 @@ class ServerController {
         }
 
         /**
-         * @brief Get the Clients I D object
+         * @brief Get the Clients ID object
          * @warning this has to iterate through the list of clients
          * 
          * @param fd - The file descriptor you are searching for 
@@ -427,10 +442,12 @@ class ServerController {
         int getClientsID(int fd) {
             assert(fd < clients.size());
 
-            for (int i = 0; i < clients.size(); i++) {
-                if (clients.at(i)->fd() == fd) {
-                    return i;
+            int counter = 0;
+            for (auto& client : clients) {
+                if (client->fd() == fd) {
+                    return counter;
                 }
+                counter++;
             }
 
             return -1;
@@ -582,6 +599,18 @@ class ClientController {
             server->sendPacket(mail);
 
             delete mail;
+            return true;
+        }
+
+         /**
+         * @brief Send the packet from the client
+         * 
+         * @return true - We sent a packet
+         * @return false - There wa nothing to send
+         */
+        bool sendPacket(Packet* p) {
+            assert(server->isOnline());
+            server->sendPacket(p);
             return true;
         }
 

@@ -34,32 +34,8 @@ void Projectile::draw(SDL_Renderer *gRenderer, double update_lag) {
 		dst->h = PROJECTILE_HEIGHT;
 		SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), NULL, dst, theta, NULL, SDL_FLIP_NONE);
 	}
-	else
-	{
-    //finished = true;
-		Uint32 current_time = SDL_GetTicks();
-		dst->w = EXPLOSION_WIDTH;
-		dst->h = EXPLOSION_HEIGHT;
-
-		if(frame == 0 && anim_last_time == 0) {
-			anim_last_time = SDL_GetTicks();
-		}
-
-		if(current_time > anim_last_time + 100) {
-			frame++;
-			anim_last_time = SDL_GetTicks();
-		}
-
-		if(frame < 6)
-			SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), getSprite()->getFrame(frame), dst, theta, NULL, SDL_FLIP_NONE);
-		else {
-			//finished = true;
-      exploding = false;
-		}
-
-		//projectiles currently are not being deleted/removed correctly
-		//When std::cout is uncommented, projectiles will continue outputting to the console past exploding
-		//std::cout << frame << " ";
+	else {
+		finished = true;
 	}
 }
 
@@ -86,8 +62,8 @@ void Projectile::update() {
 	targetNum = 0;
 
 	if(!exploding) {
-		x_vel = speedFactor*180 * cos((theta * M_PI) / 180);
-		y_vel = speedFactor*180 * sin((theta * M_PI) / 180);
+		x_vel = speedFactor * 180 * cos((theta * M_PI) / 180);
+		y_vel = speedFactor * 180 * sin((theta * M_PI) / 180);
 
 		float updateStep = MS_PER_UPDATE/1000;
 		setPos(getX() + (x_vel * updateStep), getY() + (y_vel * updateStep));
@@ -110,41 +86,31 @@ void Projectile::update() {
 			overlap = check_collision(&currentPos, &obstacle);
 			if(overlap != nullptr) {
 
+				// destructible terrain code
+				std::vector<int> coordinate = getTilePosition(obstacle.x, obstacle.y);
+				this->colTileX = coordinate.at(0);
+				this->colTileY = coordinate.at(1);
+
 				theta_v = theta % 90;
 
 				int x_dist = currentPos.x - obstacle.x;
 				int y_dist = currentPos.y - obstacle.y;
 				bool x_bounce = bouncePriority(&currentPos, &obstacle);
 
-				//std::cout << "new\n";
-				//std::cout << "x_dist = " << x_dist << " ; y_dist = " << y_dist << std::endl;
-
 				if(x_bounce) { // collision left or right
-					//std::cout << "SIDES" << std::endl;
 					double num = -1 * cos((theta * M_PI) / 180);
 					if(theta > 180)
 						theta = 270 - (theta - 270);
 					else
 						theta = acos(num) * 180 / M_PI;
-					//std::cout << "num = " << num << std::endl;
-					//std::cout << "theta = " << theta << std::endl << std::endl;
 				}
 				else { // collision up or down
-					//std::cout << "TOPSIES" << std::endl;
 					double num = -1 * sin((theta * M_PI) / 180);
 					if(theta > 90 && theta < 270 || theta < -90)
 						theta = 180 - asin(num) * 180 / M_PI;
 					else
 						theta = asin(num) * 180 / M_PI;
-					//std::cout << "num = " << num << std::endl;
-					//std::cout << "theta = " << theta << std::endl << std::endl;
 				}
-
-				//std::cout << "proj_x = " << currentPos.x << " ; proj_y = " << currentPos.y << std::endl;
-				//std::cout << "proj_x + width = " << currentPos.x + PROJECTILE_WIDTH << " ; proj_y + height = " << currentPos.y + PROJECTILE_HEIGHT << std::endl;
-				//std::cout << "ob.x = " << obstacle.x << " ; ob.y = " << obstacle.y << std::endl;
-				//std::cout << "ob.x + t.size = " << obstacle.x + TILE_SIZE << " ; ob.y + t.size = " << obstacle.y + TILE_SIZE << std::endl << std::endl << std::endl;
-
 				setPos(getX() - (x_vel * updateStep), getY() - (y_vel * updateStep));
 				bounces++;
 
@@ -213,9 +179,6 @@ bool Projectile::bouncePriority(SDL_Rect* proj, SDL_Rect* obst) {
 	int botFacing = proj->y + PROJECTILE_HEIGHT - obst->y;
 	int topFacing = obst->y + TILE_SIZE - proj->y;//abs(proj->y - (obst->y + TILE_SIZE));
 
-	//std::cout << "left = " << leftFacing << " ; right = " << rightFacing << std::endl;
-	//std::cout << "bottom = " << botFacing << " ; top = " << topFacing << std::endl;
-
 	int cnt = 0;
 
 	while(cnt <= 48) {
@@ -275,6 +238,10 @@ void Projectile::setExploding(bool explode){
   this->exploding = explode;
 }
 
+void Projectile::setBounces(int numBounces){
+  this->bounces = numBounces;
+}
+
 bool Projectile::projCollisionCheck(Projectile* bullet2){
   SDL_Rect projBox1 = {(int)getX(), (int)getY(), PROJECTILE_WIDTH, PROJECTILE_HEIGHT};
   SDL_Rect projBox2 = {(int)bullet2->getX(), (int)bullet2->getY(), PROJECTILE_WIDTH, PROJECTILE_HEIGHT};
@@ -283,4 +250,48 @@ bool Projectile::projCollisionCheck(Projectile* bullet2){
 
 void Projectile::setFinished(bool fini) {
   this->finished = fini;
+}
+
+void Projectile::setTileArray(std::vector<std::vector<int>> array)
+{
+	tile_array = array;
+}
+
+// Given the pixel x,y coordinates of an obstacle, returns the tile coordinates of the obstacle.
+// Returns: std::vector<int> length two, first value is X, second is Y coordinate
+std::vector<int> Projectile::getTilePosition(int pixelX, int pixelY)
+{
+	int tileX = (pixelX - 64) / 48;
+	int tileY = (pixelY - 48) / 48;
+
+	std::vector<int> coordinates;
+
+	coordinates.push_back(tileX);
+	coordinates.push_back(tileY);
+
+	return coordinates;
+}
+
+bool Projectile::hasDestructCollision()
+{
+	if(colTileX >= 0 &&
+	   colTileY >= 0)
+	{
+		if(tile_array[colTileX][colTileY] >= 3)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+int Projectile::getColX()
+{
+	return colTileX;
+}
+
+int Projectile::getColY()
+{
+	return colTileY;
 }

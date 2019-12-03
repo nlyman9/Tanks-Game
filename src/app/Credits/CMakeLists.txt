@@ -23,6 +23,7 @@ target_link_libraries(Credits
   Projectile
   Bomb
   Box
+  Explosion
 )
 else()
 target_link_libraries(Credits
@@ -37,5 +38,6 @@ target_link_libraries(Credits
   Projectile
   Box
   Bomb
+  Explosion
 )
 endif()

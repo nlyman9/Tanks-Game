@@ -38,6 +38,16 @@ bool LocalGameLoop::init() {
     bluesplosion =  new Sprite(render->getRenderer(), "src/res/images/bluesplosion.png");
     bluesplosion->init();
     bluesplosion->sheetSetup(48, 48, 6);
+	greensplosion =  new Sprite(render->getRenderer(), "src/res/images/greensplosion.png");
+    greensplosion->init();
+    greensplosion->sheetSetup(48, 48, 6);
+	purplesplosion =  new Sprite(render->getRenderer(), "src/res/images/purplesplosion.png");
+    purplesplosion->init();
+    purplesplosion->sheetSetup(48, 48, 6);
+	whitesplosion =  new Sprite(render->getRenderer(), "src/res/images/whitesplosion.png");
+    whitesplosion->init();
+    whitesplosion->sheetSetup(48, 48, 6);
+
 
     // Set up enemy
     enemy_tank_blue = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
@@ -95,7 +105,7 @@ void LocalGameLoop::generateMap() {
         for (int y = TILE_SIZE, j = 0; y < SCREEN_HEIGHT - TILE_SIZE; y+=TILE_SIZE, j++) {
             SDL_Rect cur_out = { x, y, TILE_SIZE, TILE_SIZE};
             SDL_Rect hole_tile = { x+5, y+5, TILE_SIZE-5, TILE_SIZE-5 }; //does not work, enemy AI needs update
-            if(mapVectors[i][j] == 2) {
+            if(mapVectors[i][j] >= 2) {
                 tileArray.push_back(cur_out);
                 enemyTileArray.push_back(cur_out);
                 projectileObstacles.push_back(cur_out);
@@ -109,9 +119,11 @@ void LocalGameLoop::generateMap() {
     player->setObstacleLocations(&tileArray);
 
     //spawn random number of enemies between 1 - 4
-    int numEnemies = rand() % 4 + 1;
+    //int numEnemies = rand() % 4 + 1;
+	int numEnemies = 4;
     for(int i = 0; i < numEnemies; i++){
       int randEnemyType = rand() % 4;
+	  //int randEnemyType = 2;
       std::vector<int> enemySpawn = spawnEnemies(map, 1);
       enemies.push_back(new Enemy(enemySpawn.at(0), enemySpawn.at(1), player, randEnemyType));
     }
@@ -165,7 +177,7 @@ std::vector<int> LocalGameLoop::spawnEnemies(std::vector<std::vector<int>> *map,
         enemy_x = (rand() % 16) + 4;
         enemy_y = (rand() % 3) + 10;
 
-        if(tileMap[enemy_y][enemy_x] == 0)
+        if(tileMap[enemy_x][enemy_y] == 0)
         {
             if(i < count)
             {
@@ -178,7 +190,7 @@ std::vector<int> LocalGameLoop::spawnEnemies(std::vector<std::vector<int>> *map,
         }
     }
 
-    coords.push_back(enemy_x * 48 + 100);
+    coords.push_back(enemy_x * 48 + 64);
     coords.push_back(enemy_y * 48 + 48);
 
     return coords;
@@ -246,7 +258,7 @@ int LocalGameLoop::run() {
             }
             if (e.key.keysym.sym == SDLK_ESCAPE)
             {
-                return 0; // return to menu
+                // return 0; // return to menu
             }
         }
 
@@ -259,6 +271,7 @@ int LocalGameLoop::run() {
             newBullet->setSprite(bullet);
             newBullet->setObstacleLocations(&projectileObstacles);
             newBullet->setFriendly(true);
+            newBullet->setTileArray(render->getTileMap());
             for(auto enemy : enemies) {
                 newBullet->addTargetLocation(enemy->get_box());
             }
@@ -270,7 +283,7 @@ int LocalGameLoop::run() {
 
         //The player dropped a bomb
         if (player->getBomb() == true) {
-            Bomb* newBomb(new Bomb(player->get_box(), player->getTheta(), bombBlack, bombRed, bombPlayerExplosion));
+            Bomb* newBomb = new Bomb(player->get_box(), player->getTheta(), bombBlack, bombRed, bombPlayerExplosion);
             bombs.push_back(newBomb);
             render->setBombs(bombs);
             player->setBomb(false);
@@ -281,11 +294,12 @@ int LocalGameLoop::run() {
             if(enemy->getFire() == true) {
 
                 Projectile *newBullet;
-                if(enemy->getEnemyType() == 1){
-                      newBullet = new Projectile(enemy->getX() + TANK_WIDTH/4, enemy->getY() + TANK_HEIGHT/4, enemy->getTurretTheta(), 2);
+                if(enemy->getEnemyType() == 1) {
+					newBullet = new Projectile(enemy->getX() + TANK_WIDTH/4, enemy->getY() + TANK_HEIGHT/4, enemy->getTurretTheta(), 2);
                 }
                 else if (enemy->getEnemyType() == 2) {
-                  newBullet = new Projectile(enemy->getX() + TANK_WIDTH/4, enemy->getY() + TANK_HEIGHT/4, enemy->getTurretTheta(), 3);
+					newBullet = new Projectile(enemy->getX() + TANK_WIDTH/4, enemy->getY() + TANK_HEIGHT/4, enemy->getTurretTheta(), 3);
+          newBullet->setBounces(3);
                 }
                 else {
                     newBullet = new Projectile(enemy->getX() + TANK_WIDTH/4, enemy->getY() + TANK_HEIGHT/4, enemy->getTurretTheta(), 1);
@@ -293,6 +307,7 @@ int LocalGameLoop::run() {
                 newBullet->setSprite(shell);
                 newBullet->setObstacleLocations(&projectileObstacles);
                 newBullet->setFriendly(false);
+                newBullet->setTileArray(render->getTileMap());
                 newBullet->addTargetLocation(player->get_box());
                 projectiles.push_back(newBullet);
                 render->setProjectiles(projectiles);
@@ -302,7 +317,7 @@ int LocalGameLoop::run() {
 
             //The enemy dropped a bomb
             if (enemy->getBomb() == true) {
-                Bomb * newBomb(new Bomb(enemy->get_box(), player->getTheta(), bombBlack, bombRed, bombPlayerExplosion));
+                Bomb* newBomb = new Bomb(enemy->get_box(), player->getTheta(), bombBlack, bombRed, bombPlayerExplosion);
                 newBomb->setSprite(bombBlack);
                 bombs.push_back(newBomb);
                 render->setBombs(bombs);
@@ -322,34 +337,22 @@ int LocalGameLoop::run() {
 				//erase player from render
 			}
 			for (int i = 0; i < enemies.size(); i++) {
-        if (enemies.at(i)->getEnemyType() == 2 && shouldMove < 2) {  //Purple tank should not move
-          enemies.at(i)->setProjectiles(projectiles);
-          SDL_Rect* curEnemy = enemies.at(i)->get_box();
-          enemyBoxes.push_back(curEnemy);
-          if(enemies.at(i)->isDestroyed()) {
-            enemies.erase(enemies.begin()+i);
-            render->setEnemies(enemies);
-          }
-          shouldMove++;
-        }
-        else {
-          enemies.at(i)->update();
-          enemies.at(i)->setProjectiles(projectiles);
-          SDL_Rect* curEnemy = enemies.at(i)->get_box();
-          enemyBoxes.push_back(curEnemy);
-          if(enemies.at(i)->isDestroyed()) {
-            enemies.erase(enemies.begin()+i);
-            render->setEnemies(enemies);
-          }
-          shouldMove = 0;         //increment time for purple tank to move
-        }
+				enemies.at(i)->update();
+				enemies.at(i)->setProjectiles(projectiles);
+				enemies.at(i)->setEnemies(enemies);
+				SDL_Rect* curEnemy = enemies.at(i)->get_box();
+				enemyBoxes.push_back(curEnemy);
+				if(enemies.at(i)->isDestroyed()) {
+					enemies.erase(enemies.begin()+i);
+					render->setEnemies(enemies);
+				}
 			}
 			player->setEnemies(enemyBoxes);
 			enemyBoxes.clear();
 
-      // Update every active bomb
-      int count = 0;
-      for (int i = 0; i < projectiles.size(); i++) {
+            // Update every active projectile
+            int count = 0;
+            for (int i = 0; i < projectiles.size(); i++) {
 				projectiles.at(i)->clearTargets();
 				if(projectiles.at(i)->getFriendly() == true) {
 					for(auto enemy : enemies) {
@@ -359,44 +362,89 @@ int LocalGameLoop::run() {
 					projectiles.at(i)->addTargetLocation(player->get_box());
 				}
 				projectiles.at(i)->update();
+
+
+                // check if hitting destructible terrain
+                if(projectiles.at(i)->hasDestructCollision())
+                {
+                    std::vector<std::vector<int>> tile_map = render->getTileMap();
+                    int xIndex = projectiles.at(i)->getColX();
+                    int yIndex = projectiles.at(i)->getColY();
+                    int currValue = tile_map[xIndex][yIndex];
+
+                    if(currValue == 4)
+                    {
+                        tile_map[xIndex][yIndex] = 3;
+                    }
+                    else
+                    {
+                        tile_map[xIndex][yIndex] = 0;
+                    }
+
+                    render->setTileMap(&tile_map);
+
+                    projectiles.at(i)->setExploding(true);
+
+                    // update tile arrays
+                    updateObstacleArrays(tile_map);
+                }
+
 				if(projectiles.at(i)->isHit()) {
 					SDL_Rect* hitObject = projectiles.at(i)->getTarget();
 					SDL_Rect* playerRect = player->get_box();
 					if(playerRect->x == hitObject->x && playerRect->y == hitObject->y && !player->isHit()) {
 						player->setHit(true);
-						player->setSprite(redsplosion);
-						player->resetFrame();
+
+						Explosion* explosion = new Explosion(playerRect->x, playerRect->y, player->getTheta());
+						explosion->setSprite(redsplosion);
+						explosions.push_back(explosion);
+						render->setExplosions(explosions);
+
+						projectiles.at(i)->setFinished(true);
 					}
-          int count = 0;
+
 					for(auto enemy: enemies) {
 						SDL_Rect* enemyRect = enemy->get_box();
 						if(enemyRect->x == hitObject->x && enemyRect->y == hitObject->y && !enemy->isHit()) {
-              if (!enemy->purpHit() && enemy->getEnemyType() == 2) {
-                if (count > 0) {
-                  enemy->setPurpHit(true);
-                }
-                enemy->setHit(true);
-                //std::cout << "hit once\n";
-                projectiles.at(i)->setFinished(true);
-                count++;
-              }
-              else {
-                enemy->setHit(true);
-                //std::cout << "setting hit to true\n";
-                //enemy->setSprite(bluesplosion);
-                enemy->resetFrame();
-              }
+                            if (enemy->getEnemyType() == 2 && !enemy->purpHit()) {
+								enemy->setPurpHit(true);
+                            } else {
+                                enemy->setHit(true);
+
+                                Explosion* explosion = new Explosion(enemyRect->x, enemyRect->y, enemy->getTheta());
+
+								switch(enemy->getEnemyType()) {
+									case 0:
+										explosion->setSprite(bluesplosion);
+										break;
+									case 1:
+										explosion->setSprite(greensplosion);
+										break;
+									case 2:
+										explosion->setSprite(purplesplosion);
+										break;
+									case 3:
+										explosion->setSprite(whitesplosion);
+										break;
+								}
+
+								explosions.push_back(explosion);
+								render->setExplosions(explosions);
+								projectiles.at(i)->setFinished(true);
+                            }
 							break;
 						}
 					}
 				}
 				if(projectiles.at(i)->isExploding()) {
-					projectiles.at(i)->setSprite(pinksplosion);
-          projectiles.at(i)->setFinished(true);
+					Explosion* explosion = new Explosion(projectiles.at(i)->getX(), projectiles.at(i)->getY(), projectiles.at(i)->getTheta());
+					explosion->setSprite(pinksplosion);
+					explosions.push_back(explosion);
+					render->setExplosions(explosions);
+
+					projectiles.at(i)->setFinished(true);
 				}
-        if(projectiles.at(i)->isFinished()){
-          //std::cout << "Projectile being deleted\n";
-					//erase the projectile object from the projectiles vector
+                if(projectiles.at(i)->isFinished()){
 					projectiles.erase(projectiles.begin()+i);
 					render->setProjectiles(projectiles);
 					i--;
@@ -423,6 +471,26 @@ int LocalGameLoop::run() {
 				bomb->update();
 
 				if(bomb->isExploding()) {
+                    // Check if bomb blew up a destructable tile
+                    std::vector<std::vector<int>> tile_map = render->getTileMap();
+                    int xIndex = (bomb->getX() + BOMB_WIDTH / 2 - BORDER_GAP) / TILE_SIZE - 1;
+                    int yIndex = (bomb->getY() + BOMB_HEIGHT / 2) / TILE_SIZE - 1;
+                    int currValue = tile_map[xIndex][yIndex];
+
+                    if(currValue == 4)
+                    {
+                        tile_map[xIndex][yIndex] = 3;
+                    }
+                    if(currValue == 3)
+                    {
+                        tile_map[xIndex][yIndex] = 0;
+                    }
+
+                    render->setTileMap(&tile_map);
+
+                    // update tile arrays
+                    updateObstacleArrays(tile_map);
+
 					// Check if bomb hits player
 					if(player->check_collision(bomb)) {
 						player->setHit(true);
@@ -445,10 +513,22 @@ int LocalGameLoop::run() {
 					bombs.erase(bombs.begin() + bombCount);
 					render->setBombs(bombs);
 					bombCount--;
-					delete bomb; // Potential Seg Fault here
 				}
 				bombCount++;
             }
+
+			int explosionCount = 0;
+			//update Explosions
+			for(auto& explosion : explosions) {
+				explosion->update();
+				render->setExplosions(explosions);
+				if(explosion->isFinished()) {
+					explosions.erase(explosions.begin() + explosionCount);
+					render->setExplosions(explosions);
+					explosionCount--;
+				}
+				explosionCount++;
+			}
 
             lag_time -= MS_PER_UPDATE;
         }
@@ -464,5 +544,46 @@ int LocalGameLoop::run() {
     }
 
     // Exit normally
-    return 0;
+    // return 0;
+}
+
+// Updates player, enemies, and projectiles obstacle arrays
+// Called when destroying destructible terrain
+void LocalGameLoop::updateObstacleArrays(std::vector<std::vector<int>> tile_map)
+{
+    std::vector<SDL_Rect> player_obstacle_array;
+    std::vector<SDL_Rect> enemy_obstacle_array;
+    std::vector<SDL_Rect> projectile_obstacle_array;
+
+    for (int x = BORDER_GAP + TILE_SIZE, i = 0; x < SCREEN_WIDTH - BORDER_GAP - TILE_SIZE; x+=TILE_SIZE, i++) {
+        for (int y = TILE_SIZE, j = 0; y < SCREEN_HEIGHT - TILE_SIZE; y+=TILE_SIZE, j++) {
+            SDL_Rect normal_tile = { x, y, TILE_SIZE, TILE_SIZE};
+            SDL_Rect hole_tile = { x+5, y+5, TILE_SIZE-5, TILE_SIZE-5 }; //does not work, enemy AI needs update
+            if(tile_map[i][j] >= 2) {
+                player_obstacle_array.push_back(normal_tile);
+                enemy_obstacle_array.push_back(normal_tile);
+                projectile_obstacle_array.push_back(normal_tile);
+            } else if(tile_map[i][j] == 1) {
+                player_obstacle_array.push_back(hole_tile);
+                enemy_obstacle_array.push_back(normal_tile);
+            }
+        }
+    }
+
+    player->setObstacleLocations(&player_obstacle_array);
+
+    for(auto enemy : enemies)
+    {
+        enemy->setObstacleLocations(&enemy_obstacle_array);
+        enemy->setTileMap(&tile_map);
+    }
+
+    for(auto projectile : projectiles)
+    {
+        projectile->setObstacleLocations(&projectile_obstacle_array);
+    }
+
+    tileArray = player_obstacle_array;
+    enemyTileArray = enemy_obstacle_array;
+    projectileObstacles = projectile_obstacle_array;
 }

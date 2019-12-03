@@ -8,19 +8,25 @@
 class OnlineGameLoop {
     public:
         OnlineGameLoop(Render* renderer);
-        bool init(Args* options);
+        int init(Args* options);
         int run();
     private:
         // Member Variables 
         std::vector<Player *> players;
         std::vector<Player *> playerEnemies;
     	std::vector<Projectile *> projectiles;
+        std::vector<Bomb *> bombs;
+        std::vector<std::vector<int>> map2D;
 
         Sprite* pinksplosion = nullptr;
 		Sprite* redsplosion = nullptr;
 		Sprite* bluesplosion = nullptr;
         Sprite* bullet = nullptr;
         Sprite* shell = nullptr;
+        Sprite* bombBlack = nullptr;
+        Sprite* bombRed = nullptr;
+        Sprite* bombPlayerExplosion = nullptr;
+        Sprite* bombEnemyExplosion = nullptr;
         SDL_Texture* cursor = nullptr;
         SDL_Texture* loadingScreen1 = nullptr;
         SDL_Texture* loadingScreen2 = nullptr;
@@ -48,9 +54,9 @@ class OnlineGameLoop {
         Client* client;
 
         // Member Functions
-        void buildMap();
+        int buildMap();
         void displayLoadingScreen(int screenCounter);
-
+        void updateObstacleArrays(std::vector<std::vector<int>> tile_map);
 };
 
 #endif
