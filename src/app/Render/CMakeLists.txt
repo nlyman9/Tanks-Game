@@ -20,6 +20,7 @@ target_link_libraries(Render
   Multiplayer
   Box
   Bomb
+  Explosion
 )
 else()
 target_link_libraries(Render
@@ -37,6 +38,7 @@ target_link_libraries(Render
   SDL2_ttf
   Box
   Bomb
+  Explosion
 )
 endif()
 

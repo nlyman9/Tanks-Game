@@ -20,6 +20,7 @@ target_link_libraries(GameLoop
   Multiplayer
   Args
   Bomb
+  Explosion
   ${SDL2_TTF_LIBRARIES}
   Box
 )
@@ -39,6 +40,7 @@ target_link_libraries(GameLoop
   Bomb
   SDL2_ttf
   Box
+  Explosion
 )
 endif()
 

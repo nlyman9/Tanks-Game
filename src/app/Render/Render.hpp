@@ -19,6 +19,7 @@
 #include "ImageLoader.hpp"
 #include "Bomb.hpp"
 #include "Box.hpp"
+#include "Explosion.hpp"
 
 enum {
     MENU_SINGLE,
@@ -44,6 +45,7 @@ class Render {
 		std::vector<Enemy *> gEnemies;
         std::vector<Projectile *> gProjectiles;
         std::vector<Bomb *> gBombs;
+		std::vector<Explosion *> gExplosions;
         int cursorX; 
         int cursorY;
 
@@ -58,6 +60,7 @@ class Render {
         void setProjectiles(std::vector<Projectile *> projectiles);
         void setBombs(std::vector<Bomb *> bombs);
         void setTimer(unsigned int passed_timer); 
+		void setExplosions(std::vector<Explosion *> explosions);
 
         void clear();
 

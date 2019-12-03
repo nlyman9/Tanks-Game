@@ -38,6 +38,16 @@ bool LocalGameLoop::init() {
     bluesplosion =  new Sprite(render->getRenderer(), "src/res/images/bluesplosion.png");
     bluesplosion->init();
     bluesplosion->sheetSetup(48, 48, 6);
+	greensplosion =  new Sprite(render->getRenderer(), "src/res/images/greensplosion.png");
+    greensplosion->init();
+    greensplosion->sheetSetup(48, 48, 6);
+	purplesplosion =  new Sprite(render->getRenderer(), "src/res/images/purplesplosion.png");
+    purplesplosion->init();
+    purplesplosion->sheetSetup(48, 48, 6);
+	whitesplosion =  new Sprite(render->getRenderer(), "src/res/images/whitesplosion.png");
+    whitesplosion->init();
+    whitesplosion->sheetSetup(48, 48, 6);
+
 
     // Set up enemy
     enemy_tank_blue = new Sprite(render->getRenderer(), "src/res/images/blue_tank.png");
@@ -326,15 +336,15 @@ int LocalGameLoop::run() {
 				//erase player from render
 			}
 			for (int i = 0; i < enemies.size(); i++) {
-				  enemies.at(i)->update();
-				  enemies.at(i)->setProjectiles(projectiles);
-          enemies.at(i)->setEnemies(enemies);
-				  SDL_Rect* curEnemy = enemies.at(i)->get_box();
-				  enemyBoxes.push_back(curEnemy);
-				  if(enemies.at(i)->isDestroyed()) {
+				enemies.at(i)->update();
+				enemies.at(i)->setProjectiles(projectiles);
+				enemies.at(i)->setEnemies(enemies);
+				SDL_Rect* curEnemy = enemies.at(i)->get_box();
+				enemyBoxes.push_back(curEnemy);
+				if(enemies.at(i)->isDestroyed()) {
 					enemies.erase(enemies.begin()+i);
 					render->setEnemies(enemies);
-				  }
+				}
 			}
 			player->setEnemies(enemyBoxes);
 			enemyBoxes.clear();
@@ -383,31 +393,54 @@ int LocalGameLoop::run() {
 					SDL_Rect* playerRect = player->get_box();
 					if(playerRect->x == hitObject->x && playerRect->y == hitObject->y && !player->isHit()) {
 						player->setHit(true);
-						player->setSprite(redsplosion);
-						player->resetFrame();
+						
+						Explosion* explosion = new Explosion(playerRect->x, playerRect->y, player->getTheta());
+						explosion->setSprite(redsplosion);
+						explosions.push_back(explosion);
+						render->setExplosions(explosions);
+						
+						projectiles.at(i)->setFinished(true);
 					}
-					int count = 0;
+					
 					for(auto enemy: enemies) {
 						SDL_Rect* enemyRect = enemy->get_box();
 						if(enemyRect->x == hitObject->x && enemyRect->y == hitObject->y && !enemy->isHit()) {
-                            if (!enemy->purpHit() && enemy->getEnemyType() == 2) {
-                                if (count > 0) {
-                                    enemy->setPurpHit(true);
-                                }
-                                enemy->setHit(true);
-                                //std::cout << "hit once\n";
-                                projectiles.at(i)->setFinished(true);
-                                count++;
+                            if (enemy->getEnemyType() == 2 && !enemy->purpHit()) {
+								enemy->setPurpHit(true);
                             } else {
                                 enemy->setHit(true);
-                                enemy->resetFrame();
+								
+                                Explosion* explosion = new Explosion(enemyRect->x, enemyRect->y, enemy->getTheta());
+								
+								switch(enemy->getEnemyType()) {
+									case 0:
+										explosion->setSprite(bluesplosion);
+										break;
+									case 1:
+										explosion->setSprite(greensplosion);
+										break;
+									case 2:
+										explosion->setSprite(purplesplosion);
+										break;
+									case 3:
+										explosion->setSprite(whitesplosion);
+										break;
+								}
+								
+								explosions.push_back(explosion);
+								render->setExplosions(explosions);
+								projectiles.at(i)->setFinished(true);
                             }
 							break;
 						}
 					}
 				}
 				if(projectiles.at(i)->isExploding()) {
-					projectiles.at(i)->setSprite(pinksplosion);
+					Explosion* explosion = new Explosion(projectiles.at(i)->getX(), projectiles.at(i)->getY(), projectiles.at(i)->getTheta());
+					explosion->setSprite(pinksplosion);
+					explosions.push_back(explosion);
+					render->setExplosions(explosions);
+					
 					projectiles.at(i)->setFinished(true);
 				}
                 if(projectiles.at(i)->isFinished()){
@@ -482,6 +515,19 @@ int LocalGameLoop::run() {
 				}
 				bombCount++;
             }
+			
+			int explosionCount = 0;
+			//update Explosions
+			for(auto& explosion : explosions) {
+				explosion->update();
+				render->setExplosions(explosions);
+				if(explosion->isFinished()) {
+					explosions.erase(explosions.begin() + explosionCount);
+					render->setExplosions(explosions);
+					explosionCount--;
+				}
+				explosionCount++;
+			}
 
             lag_time -= MS_PER_UPDATE;
         }

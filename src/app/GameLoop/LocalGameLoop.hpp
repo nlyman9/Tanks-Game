@@ -6,6 +6,7 @@
 #include "Enemy.hpp"
 #include "Projectile.hpp"
 #include "Bomb.hpp"
+#include "Explosion.hpp"
 #include <vector>
 
 class LocalGameLoop {
@@ -21,12 +22,14 @@ class LocalGameLoop {
     	std::vector<Projectile *> projectiles;
         std::vector<Bomb *> bombs;
         std::vector<SDL_Rect *> enemyBoxes;
-		std::vector<SDL_Rect *> explosions;
-        int shouldMove = 0;     //this int controls speed for the purple tank
+		std::vector<Explosion *> explosions;
 
         Sprite* pinksplosion = nullptr;
 		Sprite* redsplosion = nullptr;
 		Sprite* bluesplosion = nullptr;
+		Sprite* greensplosion = nullptr;
+		Sprite* purplesplosion = nullptr;
+		Sprite* whitesplosion = nullptr;
         Sprite* enemy_tank_blue = nullptr;
         Sprite* enemy_tank_green = nullptr;
         Sprite* enemy_tank_purple = nullptr;

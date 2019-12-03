@@ -34,32 +34,8 @@ void Projectile::draw(SDL_Renderer *gRenderer, double update_lag) {
 		dst->h = PROJECTILE_HEIGHT;
 		SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), NULL, dst, theta, NULL, SDL_FLIP_NONE);
 	}
-	else
-	{
-    //finished = true;
-		Uint32 current_time = SDL_GetTicks();
-		dst->w = EXPLOSION_WIDTH;
-		dst->h = EXPLOSION_HEIGHT;
-
-		if(frame == 0 && anim_last_time == 0) {
-			anim_last_time = SDL_GetTicks();
-		}
-
-		if(current_time > anim_last_time + 100) {
-			frame++;
-			anim_last_time = SDL_GetTicks();
-		}
-
-		if(frame < 6)
-			SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), getSprite()->getFrame(frame), dst, theta, NULL, SDL_FLIP_NONE);
-		else {
-			//finished = true;
-      exploding = false;
-		}
-
-		//projectiles currently are not being deleted/removed correctly
-		//When std::cout is uncommented, projectiles will continue outputting to the console past exploding
-		//std::cout << frame << " ";
+	else {
+		finished = true;
 	}
 }
 
@@ -121,35 +97,20 @@ void Projectile::update() {
 				int y_dist = currentPos.y - obstacle.y;
 				bool x_bounce = bouncePriority(&currentPos, &obstacle);
 
-				//std::cout << "new\n";
-				//std::cout << "x_dist = " << x_dist << " ; y_dist = " << y_dist << std::endl;
-
 				if(x_bounce) { // collision left or right
-					//std::cout << "SIDES" << std::endl;
 					double num = -1 * cos((theta * M_PI) / 180);
 					if(theta > 180)
 						theta = 270 - (theta - 270);
 					else
 						theta = acos(num) * 180 / M_PI;
-					//std::cout << "num = " << num << std::endl;
-					//std::cout << "theta = " << theta << std::endl << std::endl;
 				}
 				else { // collision up or down
-					//std::cout << "TOPSIES" << std::endl;
 					double num = -1 * sin((theta * M_PI) / 180);
 					if(theta > 90 && theta < 270 || theta < -90)
 						theta = 180 - asin(num) * 180 / M_PI;
 					else
 						theta = asin(num) * 180 / M_PI;
-					//std::cout << "num = " << num << std::endl;
-					//std::cout << "theta = " << theta << std::endl << std::endl;
 				}
-
-				//std::cout << "proj_x = " << currentPos.x << " ; proj_y = " << currentPos.y << std::endl;
-				//std::cout << "proj_x + width = " << currentPos.x + PROJECTILE_WIDTH << " ; proj_y + height = " << currentPos.y + PROJECTILE_HEIGHT << std::endl;
-				//std::cout << "ob.x = " << obstacle.x << " ; ob.y = " << obstacle.y << std::endl;
-				//std::cout << "ob.x + t.size = " << obstacle.x + TILE_SIZE << " ; ob.y + t.size = " << obstacle.y + TILE_SIZE << std::endl << std::endl << std::endl;
-
 				setPos(getX() - (x_vel * updateStep), getY() - (y_vel * updateStep));
 				bounces++;
 
@@ -217,9 +178,6 @@ bool Projectile::bouncePriority(SDL_Rect* proj, SDL_Rect* obst) {
 	int rightFacing = proj->x + PROJECTILE_WIDTH - obst->x;
 	int botFacing = proj->y + PROJECTILE_HEIGHT - obst->y;
 	int topFacing = obst->y + TILE_SIZE - proj->y;//abs(proj->y - (obst->y + TILE_SIZE));
-
-	//std::cout << "left = " << leftFacing << " ; right = " << rightFacing << std::endl;
-	//std::cout << "bottom = " << botFacing << " ; top = " << topFacing << std::endl;
 
 	int cnt = 0;
 

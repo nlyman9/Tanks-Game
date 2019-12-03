@@ -377,6 +377,11 @@ int Render::draw(double update_lag) {
 	for (auto& bomb : gBombs) {
 		bomb->draw(gRenderer, update_lag);
 	}
+	
+	// Render all explosions
+	for (auto& explosion : gExplosions) {
+		explosion->draw(gRenderer, update_lag);
+	}
 
 	// Draw the cursor on the screen
 	SDL_Rect cursorRect = {cursorX - CROSSHAIR_SIZE/2, cursorY - CROSSHAIR_SIZE/2, CROSSHAIR_SIZE, CROSSHAIR_SIZE};
@@ -417,9 +422,14 @@ void Render::setTimer(unsigned int passed_timer) {
 	timer = passed_timer;
 }
 
+void Render::setExplosions(std::vector<Explosion *> explosions) {
+	gExplosions = explosions;
+}
+
 void Render::clear() {
 	gPlayers.clear();
 	gEnemies.clear();
 	gProjectiles.clear();
 	gBombs.clear();
+	gExplosions.clear();
 }

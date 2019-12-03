@@ -46,17 +46,16 @@ Enemy::~Enemy() {}
  * @param update_lag - the value to extrapolate by
  */
  void Enemy::draw(SDL_Renderer *gRenderer, double update_lag) {
-
    // Create SDL_Rect with current x, y position
    //SDL_Rect dst = {(int)x_enemy_pos, (int)y_enemy_pos, TANK_WIDTH, TANK_HEIGHT};
 	SDL_Rect* dst = get_box();
 
 	if(!hit) {
+		//control for animating the tank's sprite
 		if (SDL_GetTicks() - anim_last_time > 100) {
 			frame = (frame + 1) % 3;
 			anim_last_time = SDL_GetTicks();
 		}
-    //std::cout << "After hit should be printing\n";
 		//draw the tank and turret and use the rect from above as parameters for both calls since turret is centered on tank
 		SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), getSprite()->getFrame(frame), dst, theta, NULL, SDL_FLIP_NONE);
 		SDL_RenderCopyEx(gRenderer, getTurretSprite()->getTexture(), NULL, dst, turretTheta, NULL, SDL_FLIP_NONE);
@@ -65,50 +64,13 @@ Enemy::~Enemy() {}
 		findEndValues(turretTheta);
 
 		//draw the two lines with endpoints that were just calculated
-		//SDL_RenderDrawLine(gRenderer, getX() + TANK_WIDTH/2, getY() + TANK_HEIGHT/2, line1X, line1Y);
-		//SDL_RenderDrawLine(gRenderer, getX() + TANK_WIDTH/2, getY() + TANK_HEIGHT/2, line2X, line2Y);
-    //SDL_RenderDrawLine(gRenderer, getX() + TANK_WIDTH/2, getY() + TANK_HEIGHT/2, tiny1X, tiny1Y);
-    //SDL_RenderDrawLine(gRenderer, getX() + TANK_WIDTH/2, getY() + TANK_HEIGHT/2, tiny2X, tiny2Y);
-  }
-	else {
-		//std::cout << "exploding";
-
-    Uint32 current_time = SDL_GetTicks();
-    dst->w = EXPLOSION_WIDTH;
-    dst->h = EXPLOSION_HEIGHT;
-
-    if(frame == 0 && anim_last_time == 0) {
-      //std::cout << "setting anim for first time\n";
-      anim_last_time = SDL_GetTicks();
-    }
-
-    if(current_time > anim_last_time + 200) {
-      frame++;
-      anim_last_time = SDL_GetTicks();
-      //std::cout << "frame++\n";
-    }
-		if(frame < 6) {
-			//std::cout << "rendering frame = " << frame << "\n";
-			SDL_RenderCopyEx(gRenderer, getSprite()->getTexture(), getSprite()->getFrame(frame), dst, theta, NULL, SDL_FLIP_NONE);
-		}
-		else {
-			//std::cout << "destroyed\n";
-      if (enemyType == 2 && shouldExplode < 1) {
-        //std::cout << "hit\n";
-        if (SDL_GetTicks() - anim_last_time > 100) {
-          frame = (frame + 1) % 3;
-          anim_last_time = SDL_GetTicks();
-        }
-        shouldExplode++;
-        hit = false;
-      }
-      else {
-        //std::cout << "Destroyed\n";
-        destroyed = true;
-      }
-		}
+		SDL_RenderDrawLine(gRenderer, getX() + TANK_WIDTH/2, getY() + TANK_HEIGHT/2, line1X, line1Y);
+		SDL_RenderDrawLine(gRenderer, getX() + TANK_WIDTH/2, getY() + TANK_HEIGHT/2, line2X, line2Y);
 	}
- }
+	else {
+		destroyed = true;
+	}
+}
 
 
 /**
