@@ -104,7 +104,7 @@ void LocalGameLoop::generateMap() {
     for (int x = BORDER_GAP + TILE_SIZE, i = 0; x < SCREEN_WIDTH - BORDER_GAP - TILE_SIZE; x+=TILE_SIZE, i++) {
         for (int y = TILE_SIZE, j = 0; y < SCREEN_HEIGHT - TILE_SIZE; y+=TILE_SIZE, j++) {
             SDL_Rect cur_out = { x, y, TILE_SIZE, TILE_SIZE};
-            SDL_Rect hole_tile = { x+5, y+5, TILE_SIZE-5, TILE_SIZE-5 }; //does not work, enemy AI needs update
+            SDL_Rect hole_tile = { x+5, y+5, TILE_SIZE-10, TILE_SIZE-10 }; //does not work, enemy AI needs update
             if(mapVectors[i][j] >= 2) {
                 tileArray.push_back(cur_out);
                 enemyTileArray.push_back(cur_out);
@@ -258,7 +258,12 @@ int LocalGameLoop::run() {
             }
             if (e.key.keysym.sym == SDLK_ESCAPE)
             {
-                // return 0; // return to menu
+                // check that event type is keyboard (768), otherwise mousing
+                // over left margin of screen will return to main menu
+                if(e.type == 768)
+                {
+                    return 0; // return to menu
+                }
             }
         }
 
