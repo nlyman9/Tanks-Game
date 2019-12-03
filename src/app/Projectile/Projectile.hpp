@@ -31,15 +31,15 @@ class Projectile : public Object {
 		bool hit = false;
 		SDL_Rect targetBox;
         int id;
-        
+
         std::vector<std::vector<int>> tile_array;
         int colTileX = -1;
         int colTileY = -1;
 
     public:
-    
+
         int ticks = 0;
-        
+
         Projectile(Sprite *missile, float x, float y); //constructor, initialize the x, y, and sprite
         Projectile(float x, float y); //constructor, initialize the x, y
 		Projectile(float x, float y, int theta, int speed);	//constructor, initialize with x, y, and theta
@@ -75,6 +75,7 @@ class Projectile : public Object {
 		SDL_Rect* getTarget();
         bool projCollisionCheck(Projectile* bullet2);
         void setExploding(bool explode);
+        void setBounces(int numBounces);
         BoundingBox* getBoundingBox() override;
 
         // methods for breaking destructible blocks
