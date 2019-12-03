@@ -377,14 +377,6 @@ void Enemy::updatePos() {
     }
   }
 
-  for(auto enemy : enemyList){
-    if(enemy != this){
-      int xBlock = findXBlock(enemy->getX());
-      int yBlock = findYBlock(enemy->getY());
-      tile_map[yBlock][xBlock] = 1;
-    }
-  }
-
   //the enemy path it is following will need to be updated frequently when the size of the vector is below a value
   //this value is global randCut variable that will randonly change what this cutoff is in the range 2-6
   //this is done so to give the enemy some sense of randomness as it will change how far it travels down its current path before updating
@@ -394,15 +386,6 @@ void Enemy::updatePos() {
     setPathway(this->tile_map, *this->gPlayer, *this);
     randCut = rand() % 4 + 2;
   }
-
-  for(auto enemy : enemyList){
-    if(enemy != this){
-      int xBlock = findXBlock(enemy->getX());
-      int yBlock = findYBlock(enemy->getY());
-      tile_map[yBlock][xBlock] = 0;
-    }
-  }
-
 
   float x_pos = gPlayer->getX();
   float y_pos = gPlayer->getY();
