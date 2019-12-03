@@ -237,6 +237,21 @@ void Enemy::updatePos() {
       fire_last_time_bullet = current_time;
     }
   }
+  //lay bomb every 5 seconds if green tank
+  if (getEnemyType() == 1) {
+    if (current_time > fire_last_time_bomb_green + 5000 && lay_bomb()){
+      setBomb(true);
+      //reset fire_last_time_bomb so that can lay another in 5 seconds
+      fire_last_time_bomb_green = current_time;
+    }
+  }
+  //lay bomb every 3 seconds if blue tank
+  if (getEnemyType() == 0) {
+    if (current_time > fire_last_time_bomb_blue + 3000 && lay_bomb()) {
+      setBomb(true);
+      fire_last_time_bomb_blue = current_time;
+    }
+  }
 
   //change turret mode every 3 seconds
   //trackOrMonitor will be true if track mode and false if monitor mode
@@ -1291,4 +1306,41 @@ void Enemy::setBombs(std::vector<Bomb *> bombs){
 void Enemy::setEnemies(std::vector<Enemy *> enemies){
   enemyList.clear();
   enemyList = enemies;
+}
+//Return true if the green tank should lay a bomb
+//Should lay a bomb if next to wall or very close to player
+bool Enemy::lay_bomb() {
+  int curX = findXBlock(getX());
+  int curY = findYBlock(getY());
+  Player player = *this->gPlayer;
+  int xPlayer = findXBlock(player.getX());
+  int yPlayer = findYBlock(player.getY());
+  int proximityY;
+  int proximityX;
+  //get tile distance from player
+  if (yPlayer >= curY) {
+    proximityY = yPlayer - curY;
+  }
+  else {
+    proximityY = curY - yPlayer;
+  }
+  if (xPlayer >= curX) {
+    proximityX = xPlayer - curX;
+  }
+  else {
+    proximityX = curX - xPlayer;
+  }
+  int proximity = proximityX + proximityY;
+  //std::cout << "Proximity: " << proximity << std::endl;
+  //if distance is close to player then drop bomb
+  if (proximity < 3){
+    return true;
+  }
+  //lay bomb if next to a wall
+  else if (!isValidBlock(curX-1, curY) || !isValidBlock(curX+1, curY) ||
+      !isValidBlock(curX, curY-1) || !isValidBlock(curX, curY+1)) {
+    //std::cout << "Walls on one side at least" << std::endl;
+    return true;
+  }
+  return false;
 }

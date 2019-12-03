@@ -6,7 +6,7 @@
 #include <chrono>
 
 class Tank {
-    private: 
+    private:
       std::chrono::system_clock::time_point prev_fire_time = std::chrono::system_clock::now() - std::chrono::seconds{3};
       std::chrono::system_clock::time_point prev_bomb_time = std::chrono::system_clock::now() - std::chrono::seconds{5};
     public:
@@ -68,7 +68,8 @@ class Tank {
         bool shotsFired = false;
         bool bombDeployed = false;
         Uint32 fire_last_time_bullet = 0;
-        Uint32 fire_last_time_bomb = 0;
+        Uint32 fire_last_time_bomb_green = 0;
+        Uint32 fire_last_time_bomb_blue = 0;
         int frame = 0;
         Sprite turretSprite;
 		bool hit = false;

@@ -85,7 +85,7 @@ class Enemy : public Object, public Tank {
         std::vector<coordinate> generatePath(std::vector<std::vector<int>> move_map, Player player, Enemy enemy);
 				bool validMove(coordinate moveTo, coordinate currentlyAt);
         std::vector<std::vector<int>> tile_map;
-
+		bool lay_bomb();
 		//void playExplosion(SDL_Renderer *gRenderer, double update_lag);
 
 

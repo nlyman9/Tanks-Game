@@ -314,7 +314,6 @@ int LocalGameLoop::run() {
                 enemy->setFire(false);
 
             }
-
             //The enemy dropped a bomb
             if (enemy->getBomb() == true) {
                 Bomb* newBomb = new Bomb(enemy->get_box(), player->getTheta(), bombBlack, bombRed, bombPlayerExplosion);
@@ -471,12 +470,35 @@ int LocalGameLoop::run() {
 				bomb->update();
 
 				if(bomb->isExploding()) {
+                    //std::cout << "bomb is exploding" << std::endl;
                     // Check if bomb blew up a destructable tile
                     std::vector<std::vector<int>> tile_map = render->getTileMap();
                     int xIndex = (bomb->getX() + BOMB_WIDTH / 2 - BORDER_GAP) / TILE_SIZE - 1;
                     int yIndex = (bomb->getY() + BOMB_HEIGHT / 2) / TILE_SIZE - 1;
                     int currValue = tile_map[xIndex][yIndex];
-
+                    //destroy tile bomb is on
+                    tile_map[xIndex][yIndex] = 0;
+                    //destroy tile above if not border tile
+                    if (yIndex-1 != 0) {
+                      int tileAbove = tile_map[xIndex][yIndex-1];
+                      tile_map[xIndex][yIndex-1] = 0;
+                    }
+                    //destroy tile below bomb within bounds
+                    if (yIndex+1 != 14) {
+                      int tileBelow = tile_map[xIndex][yIndex+1];
+                      tile_map[xIndex][yIndex+1] = 0;
+                    }
+                    //destroy tile left
+                    if (xIndex-1 != 0) {
+                      int tileLeft = tile_map[xIndex-1][yIndex];
+                      tile_map[xIndex-1][yIndex] = 0;
+                    }
+                    //destroy tile right
+                    if (xIndex+1 != 24) {
+                      int tileRight = tile_map[xIndex+1][yIndex];
+                      tile_map[xIndex+1][yIndex] = 0;
+                    }
+                    /*
                     if(currValue == 4)
                     {
                         tile_map[xIndex][yIndex] = 3;
@@ -485,7 +507,7 @@ int LocalGameLoop::run() {
                     {
                         tile_map[xIndex][yIndex] = 0;
                     }
-
+                    */
                     render->setTileMap(&tile_map);
 
                     // update tile arrays
