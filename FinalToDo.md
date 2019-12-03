@@ -5,7 +5,7 @@
 ### Game state
 
 - Players and AI can drop bombs
-- Bombs destroy destructible walls
+- ~~Bombs destroy destructible walls~~
 - ~~Game won / Game Lost end screens~~
 - ~~Smoother transition to playing another map.~~
 - Polish for final demo
@@ -30,9 +30,10 @@
 - ~~Finish two different types of bot tanks (for a total of 3 different AI tanks)~~
 - Finalize the different bullets between player and AI
 - Ai can use bombs
+- AI can shoot 
 
 ### Level Generation
 
 - ~~Implement destructible tiles/walls~~
 - Finish implementation of map generation
-  - Ensure that a player is spawned inside an escapable area.
+  - Ensure that a player is spawned inside an escapable area
