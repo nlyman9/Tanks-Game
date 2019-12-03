@@ -296,6 +296,7 @@ int LocalGameLoop::run() {
                 newBullet->setSprite(shell);
                 newBullet->setObstacleLocations(&projectileObstacles);
                 newBullet->setFriendly(false);
+                newBullet->setTileArray(render->getTileMap());
                 newBullet->addTargetLocation(player->get_box());
                 projectiles.push_back(newBullet);
                 render->setProjectiles(projectiles);
@@ -327,6 +328,7 @@ int LocalGameLoop::run() {
 			for (int i = 0; i < enemies.size(); i++) {
 				  enemies.at(i)->update();
 				  enemies.at(i)->setProjectiles(projectiles);
+          enemies.at(i)->setEnemies(enemies);
 				  SDL_Rect* curEnemy = enemies.at(i)->get_box();
 				  enemyBoxes.push_back(curEnemy);
 				  if(enemies.at(i)->isDestroyed()) {
@@ -358,7 +360,7 @@ int LocalGameLoop::run() {
                     int xIndex = projectiles.at(i)->getColX();
                     int yIndex = projectiles.at(i)->getColY();
                     int currValue = tile_map[xIndex][yIndex];
-                    
+
                     if(currValue == 4)
                     {
                         tile_map[xIndex][yIndex] = 3;

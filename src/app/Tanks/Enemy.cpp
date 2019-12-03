@@ -65,9 +65,11 @@ Enemy::~Enemy() {}
 		findEndValues(turretTheta);
 
 		//draw the two lines with endpoints that were just calculated
-		SDL_RenderDrawLine(gRenderer, getX() + TANK_WIDTH/2, getY() + TANK_HEIGHT/2, line1X, line1Y);
-		SDL_RenderDrawLine(gRenderer, getX() + TANK_WIDTH/2, getY() + TANK_HEIGHT/2, line2X, line2Y);
-	}
+		//SDL_RenderDrawLine(gRenderer, getX() + TANK_WIDTH/2, getY() + TANK_HEIGHT/2, line1X, line1Y);
+		//SDL_RenderDrawLine(gRenderer, getX() + TANK_WIDTH/2, getY() + TANK_HEIGHT/2, line2X, line2Y);
+    //SDL_RenderDrawLine(gRenderer, getX() + TANK_WIDTH/2, getY() + TANK_HEIGHT/2, tiny1X, tiny1Y);
+    //SDL_RenderDrawLine(gRenderer, getX() + TANK_WIDTH/2, getY() + TANK_HEIGHT/2, tiny2X, tiny2Y);
+  }
 	else {
 		//std::cout << "exploding";
 
@@ -125,12 +127,19 @@ Enemy::~Enemy() {}
    //adjust given angle by +- .25 to create a range
    float ang1 = angle + .25;
    float ang2 = angle - .25;
+
+   float tinyang1 = angle + .15;
+   float tinyang2 = angle - .15;
    //caclulate endpoints using unit circle trig
    //sets global variables of each line's endpoints so no return vals
    line1X = cos(ang1) * length + getX();
    line1Y = getY() - sin(ang1) * length;
    line2X = cos(ang2) * length + getX();
    line2Y = getY() - sin(ang2) * length;
+   tiny1X = cos(tinyang1) * 200 + getX();
+   tiny1Y = getY() - sin(tinyang1) * 200;
+   tiny2X = cos(tinyang2) * 200 + getX();
+   tiny2Y = getY() - sin(tinyang2) * 200;
  }
 
 /**
@@ -244,11 +253,24 @@ void Enemy::updatePos() {
   //set the current time as this will be used to check whether or not to carry out certain actions based on elapsed time
   Uint32 current_time = SDL_GetTicks();
 
+  shootWall = false;
+  for(int i = 0; i < 13; i++){
+    for(int j = 0; j < 23; j++){
+      if(tile_map[j][i] > 2){
+        float tileX = BORDER_GAP + TILE_SIZE + TILE_SIZE * i;
+        float tileY = BORDER_GAP + TILE_SIZE + TILE_SIZE * j;
+        if(isInRange(getX() + TANK_WIDTH/2, getY() + TANK_HEIGHT/2, tiny1X, tiny1Y, tiny2X, tiny2Y, tileY, tileX)){
+          shootWall = true;
+        }
+
+      }
+    }
+  }
   //checking if player tank is "in range" of enemy tanks field of view
-  if(isInRange(getX() + TANK_WIDTH/2, getY() + TANK_HEIGHT/2, line1X, line1Y, line2X, line2Y, gPlayer->getX() + TANK_WIDTH/2, gPlayer->getY() + TANK_HEIGHT/2)){
+  if(isInRange(getX() + TANK_WIDTH/2, getY() + TANK_HEIGHT/2, line1X, line1Y, line2X, line2Y, gPlayer->getX() + TANK_WIDTH/2, gPlayer->getY() + TANK_HEIGHT/2) || shootWall){
     //only allowed to shoot every 3 seconds so current time must be greater than last fired time
     if(current_time > fire_last_time_bullet + 3000){
-      //setFire(true);
+      setFire(true);
       //reset fire_last_time to current time so that can fire again in the future
       fire_last_time_bullet = current_time;
     }
@@ -355,14 +377,6 @@ void Enemy::updatePos() {
     }
   }
 
-  /*for(auto enemy : enemyList){
-    if(enemy != this){
-      int xBlock = findXBlock(enemy->getX());
-      int yBlock = findYBlock(enemy->getY());
-      tile_map[yBlock][xBlock] = 1;
-    }
-  }*/
-
   //the enemy path it is following will need to be updated frequently when the size of the vector is below a value
   //this value is global randCut variable that will randonly change what this cutoff is in the range 2-6
   //this is done so to give the enemy some sense of randomness as it will change how far it travels down its current path before updating
@@ -372,15 +386,6 @@ void Enemy::updatePos() {
     setPathway(this->tile_map, *this->gPlayer, *this);
     randCut = rand() % 4 + 2;
   }
-
-  /*for(auto enemy : enemyList){
-    if(enemy != this){
-      int xBlock = findXBlock(enemy->getX());
-      int yBlock = findYBlock(enemy->getY());
-      tile_map[yBlock][xBlock] = 0;
-    }
-  }*/
-
 
   float x_pos = gPlayer->getX();
   float y_pos = gPlayer->getY();
@@ -423,7 +428,7 @@ void Enemy::updatePos() {
         enemyOverlapCheck = true;
       }
     }
-  }
+  }*/
 
   for(auto enemy : enemyList){
     if(enemy != this && enemyPath.size() > 1){
@@ -435,7 +440,7 @@ void Enemy::updatePos() {
         enemyOverlapCheck = true;
       }
     }
-  }*/
+  }
 
   //main moving function of the tank based on the path it currently has
   //need check that size is > 1 since utilize pop and can't pop if size is < 1
