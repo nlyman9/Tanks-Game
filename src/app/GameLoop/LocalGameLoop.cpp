@@ -299,6 +299,7 @@ int LocalGameLoop::run() {
                 }
                 else if (enemy->getEnemyType() == 2) {
 					newBullet = new Projectile(enemy->getX() + TANK_WIDTH/4, enemy->getY() + TANK_HEIGHT/4, enemy->getTurretTheta(), 3);
+          newBullet->setBounces(3);
                 }
                 else {
                     newBullet = new Projectile(enemy->getX() + TANK_WIDTH/4, enemy->getY() + TANK_HEIGHT/4, enemy->getTurretTheta(), 1);
@@ -393,15 +394,15 @@ int LocalGameLoop::run() {
 					SDL_Rect* playerRect = player->get_box();
 					if(playerRect->x == hitObject->x && playerRect->y == hitObject->y && !player->isHit()) {
 						player->setHit(true);
-						
+
 						Explosion* explosion = new Explosion(playerRect->x, playerRect->y, player->getTheta());
 						explosion->setSprite(redsplosion);
 						explosions.push_back(explosion);
 						render->setExplosions(explosions);
-						
+
 						projectiles.at(i)->setFinished(true);
 					}
-					
+
 					for(auto enemy: enemies) {
 						SDL_Rect* enemyRect = enemy->get_box();
 						if(enemyRect->x == hitObject->x && enemyRect->y == hitObject->y && !enemy->isHit()) {
@@ -409,9 +410,9 @@ int LocalGameLoop::run() {
 								enemy->setPurpHit(true);
                             } else {
                                 enemy->setHit(true);
-								
+
                                 Explosion* explosion = new Explosion(enemyRect->x, enemyRect->y, enemy->getTheta());
-								
+
 								switch(enemy->getEnemyType()) {
 									case 0:
 										explosion->setSprite(bluesplosion);
@@ -426,7 +427,7 @@ int LocalGameLoop::run() {
 										explosion->setSprite(whitesplosion);
 										break;
 								}
-								
+
 								explosions.push_back(explosion);
 								render->setExplosions(explosions);
 								projectiles.at(i)->setFinished(true);
@@ -440,7 +441,7 @@ int LocalGameLoop::run() {
 					explosion->setSprite(pinksplosion);
 					explosions.push_back(explosion);
 					render->setExplosions(explosions);
-					
+
 					projectiles.at(i)->setFinished(true);
 				}
                 if(projectiles.at(i)->isFinished()){
@@ -475,7 +476,7 @@ int LocalGameLoop::run() {
                     int xIndex = (bomb->getX() + BOMB_WIDTH / 2 - BORDER_GAP) / TILE_SIZE - 1;
                     int yIndex = (bomb->getY() + BOMB_HEIGHT / 2) / TILE_SIZE - 1;
                     int currValue = tile_map[xIndex][yIndex];
-                    
+
                     if(currValue == 4)
                     {
                         tile_map[xIndex][yIndex] = 3;
@@ -515,7 +516,7 @@ int LocalGameLoop::run() {
 				}
 				bombCount++;
             }
-			
+
 			int explosionCount = 0;
 			//update Explosions
 			for(auto& explosion : explosions) {
