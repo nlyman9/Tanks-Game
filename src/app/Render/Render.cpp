@@ -61,7 +61,7 @@ bool Render::init()
 	// Set renderer draw/clear color
 	SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
 	gTileSheet = loadImage("src/res/images/tiles.png", gRenderer);
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 5; i++) {
 			gTileRects[i].x = i * TILE_SIZE;
 			gTileRects[i].y = 0;
 			gTileRects[i].w = TILE_SIZE;
@@ -296,6 +296,10 @@ int Render::drawTextField(Box toDraw){
 
 void Render::setTileMap(std::vector<std::vector<int>>* tileMap) {
 	tile_map = *tileMap;
+}
+
+std::vector<std::vector<int>> Render::getTileMap() {
+	return tile_map;
 }
 
 int Render::draw(double update_lag) {

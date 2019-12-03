@@ -20,6 +20,8 @@ class MapGenerator{
     std::vector<std::vector<int>> presetHoleMap();
     std::vector<std::vector<int>> generateOpenLineMap();
     std::vector<std::vector<int>> presetCheckerMap();
+    bool checkNeighbors(int x, int y, std::vector<std::vector<int>> tile_array);
+    std::vector<std::vector<int>> addDestructibleTiles(std::vector<std::vector<int>> tile_array);
     int room[X_WIDE][Y_HIGH];
 };
 

@@ -110,8 +110,12 @@ int serverProcess() {
     int y_pos[2] = {50, SCREEN_HEIGHT - 50};
     Player* player1 = new Player(x_pos[0], y_pos[0], false);
     Player* player2 = new Player(x_pos[1], y_pos[1], false);
+    player1->setId(0);
+    player2->setId(1);
     server->addPlayer(player1);
     server->addPlayer(player2);
+    //set time
+    server->setStartTime();
     // Initialize Player Data
     for (int i = 0; i < server->numClients(); i++) {
         // Packet playerID, inital position
@@ -152,6 +156,12 @@ int serverProcess() {
         }
         data.push_back(' ');
 
+        std::string startTimeStr = std::to_string(server->getStartTime()); 
+        for (auto character : startTimeStr) {
+            data.push_back(character); // Time stamp
+        }
+        data.push_back(' ');
+
         std::cout << "Server: Preparing to send init data to player " << i << "!" << std::endl;
         Packet *initPacket = new Packet(PackType::INIT);
         std::cout << "Init packet size is " << data.size() << std::endl;
@@ -176,34 +186,55 @@ int serverProcess() {
     // Game Loop
     // TODO simulate the game on server's side?
     std::vector<ClientConnection*> *pendingClients;
-    //set time
-    server->startTime();
+    server->time_since_last_keyframe = std::chrono::system_clock::now();
+    long gameTimer = TIMER_LENGTH + 2; // +2 to allow for set up time
     while (server->gameOn) {
+        auto current_time = std::chrono::system_clock::now();
+        auto timeSinceStart = current_time.time_since_epoch().count() - server->getStartTime();
+        long timeRemaining = gameTimer - timeSinceStart / 1000000000;
+
+		if(timeRemaining <= 0) {
+            Packet* gameOverPacket = new Packet(PackType::GAME_OVER);
+            server->broadcast(gameOverPacket);
+		}
+
+#ifdef VERBOSE
         std::cout << "\n\nSERVER: GAME - # Clients = " << server->numClients() << std::endl;
         fflush(stdout);
+#endif
 
         // Poll clients for pending messages 
         // This function calls receive! Do not call again unless you have a specific reason
         // The polling (select function) currently waits for a specified timeout value 
         //      @see ServerConnection for timeout value
-        while ( (pendingClients = server->pollClientsAndReceive()) == nullptr) {
+        while ( (pendingClients = server->pollClientsAndReceive()) == nullptr ) {
             // Just go back and pollClientsAndReceive()
             try{
                 if(server->simulate()){
                     //create packet of gamestate and broadcast
-                    Packet* gamestatepacket = server->getGamestatePacket();
-                    std::cout << "SERVER: Sending keyframe - ";
-                    gamestatepacket->printData();
-                    server->broadcast(gamestatepacket);
+                    if((std::chrono::system_clock::now() - server->time_since_last_keyframe) > std::chrono::milliseconds{500}){
+                        server->time_since_last_keyframe - std::chrono::system_clock::now();
+                        Packet* gamestatepacket = server->getGamestatePacket();
+#ifdef VERBOSE                    
+                        std::cout << "SERVER: Sending keyframe - ";
+                        gamestatepacket->printData();
+#endif
+                        server->broadcast(gamestatepacket);
+                    }
                 }else{
+#ifdef VERBOSE
                     std::cout << "Failed to simulate game" << std::endl;
+#endif
+                    server->reset_lag_time();
                 }
             }catch (const std::exception &exc){
                 std::cerr << exc.what();
             }
         }
+#ifdef VERBOSE
         std::cout << "SERVER: Going to check mailbox!!!" << std::endl;
         fflush(stdout);
+#endif
 
         // Get packages from pending clients
         // pendingClients can be null IF:
@@ -211,22 +242,46 @@ int serverProcess() {
         Packet *mail;
         if (pendingClients != nullptr) {
             for (auto client : *pendingClients) {
+#ifdef VERBOSE
                 std::cout << "SERVER: Getting packet from client " << client->id() << std::endl;
                 fflush(stdout);
+#endif
                 mail = server->getPacket(client->id());
                 if (mail != nullptr) {
+#ifdef VERBOSE
                     std::cout << "SERVER: You got mail!" << std::endl;
                     mail->printData();
+#endif
                     if (mail->getType() == PackType::KEYSTATE) {
                         //copy the data of the mail
                         server->setMail(mail, client->id());
                         // If a keystate, Prepare to send that client's keystate to the other clients 
                         server->addPacketFromClientToClients(client->id(), mail);
+                    } else if (mail->getType() == PackType::DISCONNECT) {
+                        // Client has disconnected!
+                        std::cout << "Client [" << client->id() << "] disconnected!!" << std::endl;
+
+                        // TODO destroy tank? tanks explode?
+                        Player *p = server->getPlayer(client->id());
+                        p->setHit(true);
+
+                        server->disconnectClient(client->id());
+                        fflush(stdout);
+                        exit(0);
                     }
-                    fflush(stdout);
+
+                    if(mail->getType() == PackType::GAME_OVER) {
+                        std::vector<char> *mailBody= mail->getBody();
+                        Packet* gameOverPacket = new Packet(PackType::GAME_OVER);
+                        gameOverPacket->appendData((int)mailBody->at(3));
+                        server->broadcast(gameOverPacket);
+                    }
+
                 } else {
+#ifdef VERBOSE
                     std::cout << "SERVER: No mail :(" << std::endl;
                     fflush(stdout);
+#endif
                 }
             }
         }
@@ -240,12 +295,20 @@ int serverProcess() {
         try{
             if(server->simulate()){
                 //create packet of gamestate and broadcast
-                Packet* gamestatepacket = server->getGamestatePacket();
-                std::cout << "SERVER: Sending keyframe - ";
-                gamestatepacket->printData();
-                server->broadcast(gamestatepacket);
-            }else{
+                if((std::chrono::system_clock::now() - server->time_since_last_keyframe) > std::chrono::milliseconds{500}){
+                    server->time_since_last_keyframe - std::chrono::system_clock::now();
+                    Packet* gamestatepacket = server->getGamestatePacket();
+                    server->broadcast(gamestatepacket);
+#ifdef VERBOSE
+                    std::cout << "SERVER: Sending keyframe - ";
+                    gamestatepacket->printData();
+#endif
+                }
+            } else {
+#ifdef VERBOSE
                 std::cout << "Failed to simulate game" << std::endl;
+#endif
+            server->reset_lag_time();
             }
         }catch (const std::exception &exc){
             // catch anything thrown within try block that derives from std::exception
@@ -272,6 +335,23 @@ std::vector<int>* serverMapGen(){
         for(auto val : row) {
             map1D->push_back(val);
         }
+    }
+    std::vector<SDL_Rect> tileArray;
+    int count = 0;
+    for (int x = BORDER_GAP + TILE_SIZE, i = 0; x < SCREEN_WIDTH - BORDER_GAP - TILE_SIZE; x+=TILE_SIZE, i++) {
+        for (int y = TILE_SIZE, j = 0; y < SCREEN_HEIGHT - TILE_SIZE; y+=TILE_SIZE, j++) {
+            SDL_Rect cur_out = { x, y, TILE_SIZE, TILE_SIZE};
+            SDL_Rect hole_tile = { x+5, y+5, TILE_SIZE-5, TILE_SIZE-5 }; //does not work, enemy AI needs update
+            if(map[i][j] == 2) {
+                tileArray.push_back(cur_out);
+                server->getProjectileObstacles().push_back(cur_out);
+            } else if(map[i][j] == 1) {
+                tileArray.push_back(hole_tile);
+            }
+        }
+    }
+    for(int i = 0; i < server->numClients(); i++) {
+        server->getPlayer(i)->setObstacleLocations(&tileArray);
     }
     
     return map1D;

@@ -32,9 +32,9 @@ class Enemy : public Object, public Tank {
         bool left = true;
 		bool anim_last_time = 0;
         std::vector<coordinate> enemyPath;
-				std::vector<Projectile *> enemyProjectiles;
-				std::vector<Bomb *> bombList;
-				std::vector<Enemy *> enemyList;
+		std::vector<Projectile *> enemyProjectiles;
+		std::vector<Bomb *> bombList;
+		std::vector<Enemy *> enemyList;
 
 		float line1X, line1Y, line2X, line2Y;
 		int randCut = 2;

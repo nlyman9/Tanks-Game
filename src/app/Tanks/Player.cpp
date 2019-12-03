@@ -253,7 +253,6 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time,
     x_deltav = 0;
     y_deltav = 0;
     theta_v = 0;
-    shotsFired = false;
 
     //std::cout << "access keystate" << std::endl;
     if (keystate[SDL_SCANCODE_W]) {
@@ -279,16 +278,10 @@ void Player::getEvent(std::chrono::duration<double, std::ratio<1, 1000>> time,
     if(e->type == SDL_MOUSEBUTTONDOWN) {
   		Uint32 current_time = SDL_GetTicks();
         if(e->button.button == SDL_BUTTON_LEFT) {
-            if (current_time > fire_last_time_bullet + 1500) {
-                setFire(true);
-                fire_last_time_bullet = current_time;
-            }
+            setFire(true);
         }
-         if(e->button.button == SDL_BUTTON_RIGHT) {
-            if (current_time > fire_last_time_bomb + 5000) {
-                setBomb(true);
-                fire_last_time_bomb = current_time;
-            }
+        if(e->button.button == SDL_BUTTON_RIGHT) {
+            setBomb(true);
         }
   	}
 

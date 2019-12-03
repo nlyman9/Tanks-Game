@@ -59,7 +59,6 @@ std::vector<int> *unpack(std::vector<char>* packed, std::vector<int> *unPacked, 
 int stripHeader(std::vector<char>* packet){
     int toRet = (int) packet->at(0);
     packet->erase(packet->begin());
-    std::cout << "packet header: " << toRet << std::endl;
     return toRet;
 }
 void appendHeader(std::vector<char>* packet, char toAppend){

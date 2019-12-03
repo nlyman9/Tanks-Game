@@ -96,6 +96,14 @@ int Client::clientProcess(void* data) {
                 }
                 int p2Y_pos = atoi(y_strP2.c_str());
 
+                i++;
+                std::string timeStr = "";
+                while(data->at(i) != ' ') {
+                    timeStr += data->at(i);
+                    i++;
+                }
+                client->setStartTime(timeStr);
+
                 if(currId == p1ID) {
                     std::cout << "Client: ID: " << currId << " Starting Position: (" << p1X_pos << ", " << p1Y_pos << ")" << std::endl;
                     client->initData.push_back(currId);
@@ -133,6 +141,10 @@ int Client::clientProcess(void* data) {
 
                 recvedMap = true;
             }
+
+            if (mail->getType() == PackType::DISCONNECT) {
+                return 0;
+            }
             
             if(recvedInit && recvedMap) {
                 client->initDataReceived = true;
@@ -161,35 +173,55 @@ int Client::clientProcess(void* data) {
         // Receive data from server 
         Packet *mail = client->receiveAndGet();
         if (mail != nullptr) {
+// #ifdef VERBOSE
             std::cout << "CLIENT-NET: Received packet type " << (int)mail->getType() << " -> ";
             mail->printData();
             fflush(stdout);
-
+// #endif
             // If keystate, unpack a load into formable keystate
             // TODO not hardcode id to 0 
             if (mail->getType() == PackType::KEYSTATE) {
                 int turret_theta = mail->getInt(5); // 5 is the starting index of the integer for the turret theta
                 bool hasShot = mail->getBody()->at(10); // 10 is the index of the boolean if the player has shot
-                client->addNetworkKeyState(0, mail->getBody(), turret_theta, hasShot);
-            }
-            if(mail->getType() == PackType::KEYFRAME){
+                bool hasBomb = mail->getBody()->at(11); // 11 is the index of the boolean if the player has dropped a bomb
+                client->addNetworkKeyState(0, mail->getBody(), turret_theta, hasShot, hasBomb);
+            } else if(mail->getType() == PackType::KEYFRAME){
                 //set gamestate vector
                 try{
+#ifdef VERBOSE
                     mail->printData();
                     std::cout << "Body of mail ";
                     for(auto x : *mail->getBody()){
                         std::cout << x << " ";
                     }
                     std::cout << std::endl;
+#endif
                     client->setGameState(mail->getBody());
                 }catch (const std::exception &exc){
                     // catch anything thrown within try block that derives from std::exception
                     std::cerr << exc.what();
                 }
+            } else if(mail->getType() == PackType::GAME_OVER) {
+               if(mail->getBody()->size() == 0) {
+                  client->win = false;
+                  client->gameOver = true;
+               } else {
+                    std::vector<char> *mailBody= mail->getBody();
+
+                    if(client->id == (int)mailBody->at(3)) {
+                        client->win = false;
+                        client->gameOver = true;
+                    } else {
+                        client->win = true;
+                        client->gameOver = true;
+                    }
+                }
+            } else if (mail->getType() == PackType::DISCONNECT) {
+                std::cerr << "You have disconnected from server." << std::endl;
+                client->gameOver = true;
+                break;
             }
         }
-        // TODO wait if we finish early?
     }
-
     return -1;
 }

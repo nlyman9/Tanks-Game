@@ -32,8 +32,13 @@ class Client {
     std::vector<Uint8> keysToCheck =  { SDL_SCANCODE_W, SDL_SCANCODE_A, 
                                         SDL_SCANCODE_S, SDL_SCANCODE_D}; 
     const int PLAYER_STATE_VALUES = 6;
+
+    long startTime = 0;
+
   public:
     int id;
+    bool win = false;
+    bool gameOver = false;
 
     // Network
     ClientController *server;
@@ -48,6 +53,7 @@ class Client {
     std::vector<Uint8*> playerKeystates;
     std::vector<int> playerTurretThetas;
     std::vector<bool> playerShot;
+    std::vector<bool> playerBomb;
     // Game state vector?
     std::vector<char>* gameState;
     std::vector<std::vector<int>>* playerStates;
@@ -73,6 +79,7 @@ class Client {
       playerKeystates.push_back(player2Keystats);
       playerTurretThetas.push_back(0);
       playerShot.push_back(false);
+      playerBomb.push_back(false);
       playerStates = new std::vector<std::vector<int>>();
       playerStates->resize(2, std::vector<int>(PLAYER_STATE_VALUES, 0));
     };
@@ -142,9 +149,11 @@ class Client {
       assert(id < playerKeystates.size());
 
       if (playerKeystates.at(id) == nullptr) {
+#ifdef VERBOSE
         // It should be all zeroes or the last keystate, not Null
         std::cerr << "CLIENT-NET: No keystate for player " << id << "!!" << std::endl;
         fflush(stdout);
+#endif
         return nullptr;
       }
       // std::cout << "Returning player " << id  << "'s keystates... " << std::endl;
@@ -171,9 +180,22 @@ class Client {
      * @return false - They didn't shoot
      */
     bool getPlayerShot(int id) {
-      assert(id < playerTurretThetas.size());
+      assert(id < playerShot.size());
 
       return playerShot.at(id);
+    }
+
+    /**
+     * @brief Get the boolean if the networked player dropped a bomb
+     * 
+     * @param id - Which network player
+     * @return true - They dropped a bomb
+     * @return false - They didn't drop a bomb
+     */
+    bool getPlayerBomb(int id) {
+      assert(id < playerBomb.size());
+
+      return playerBomb.at(id);
     }
 
     /**
@@ -184,26 +206,33 @@ class Client {
      * @param turretTheta - The player's turret angle from the packet
      * @param hasShot - the boolean if the player shot or not
      */
-    void addNetworkKeyState(int id, std::vector<char> *charKeyStates, int turretTheta, bool hasShot) {
+    void addNetworkKeyState(int id, std::vector<char> *charKeyStates, int turretTheta, bool hasShot, bool placedBomb) {
       assert(id < playerKeystates.size());
       assert(id < playerTurretThetas.size());
-
+#ifdef VERBOSE
       std::cout << "Adding keystate from network (client " << id << ") - ";
       fflush(stdout);
-
+#endif
       // This is a little hacky, but I am trying simulate SDL_getKeyboardState
       Uint8 *keystate = playerKeystates.at(id);
 
       for (int i = 0; i < keysToCheck.size(); i++) {
-        keystate[keysToCheck[i]] = (Uint8) charKeyStates->at(i); 
+        if(i >= keysToCheck.size()) {
+          std::cout << "CLIENT VECTOR OVER RUN" << std::endl;
+        } else {
+          keystate[keysToCheck[i]] = (Uint8) charKeyStates->at(i); 
+        }
       }
 
       playerTurretThetas[id] = turretTheta;
       playerShot[id] = hasShot;
+      playerBomb[id] = placedBomb;
 
+#ifdef VERBOSE
       printf("Keystate[W] = %d  -- ", keystate[SDL_SCANCODE_W]);
       printf("Turret = %d\n", playerTurretThetas.at(id));
 			fflush(stdout);
+#endif
     }
 
     /**
@@ -212,7 +241,7 @@ class Client {
      * 
      * @param keystates - Keystates from the local client
      */
-    void addLocalKeyState(const Uint8 *keystates, int turretTheta, bool hasShot) {
+    void addLocalKeyState(const Uint8 *keystates, int turretTheta, bool hasShot, bool placedBomb) {
       Packet *mail = new Packet(PackType::KEYSTATE);
       std::vector<char> charKeyStates;
 
@@ -224,11 +253,12 @@ class Client {
       mail->appendData(turretTheta);
       mail->appendData(' ');
       mail->appendData(hasShot);
-
+      mail->appendData(placedBomb);
+#ifdef VERBOSE
       std::cout << "Sending keystate - ";
       mail->printData();
       fflush(stdout);
-      
+#endif      
       server->addPacket(mail);
     }
 
@@ -240,6 +270,41 @@ class Client {
      */
     bool send() {
       return server->sendPacket();
+    }
+
+    /**
+     * @brief Send a packet from the send buffer to the server
+     * 
+     * @return true - Sent a packet!
+     * @return false - Nothing to send
+     */
+    bool send(Packet* p) {
+      return server->sendPacket(p);
+    }
+
+    void sendGameOver(int id) {
+      Packet* gameOverPacket = new Packet(PackType::GAME_OVER);
+      gameOverPacket->appendData(id);
+      send(gameOverPacket);
+    }
+
+    void updateMap(std::vector<std::vector<int>> map) {
+      std::vector<char> packedMap;
+      std::vector<int>* map1D = new std::vector<int>();
+
+      // Convert the 2D map into a 1D vector for the map packer
+      for(auto row : map) {
+          for(auto val : row) {
+              map1D->push_back(val);
+          }
+      }
+
+      pack(map1D, &packedMap, 3); //pack map into 3 bits
+
+      // Send map to the clients!
+      Packet *mapPacket = new Packet(PackType::MAPSTATE);
+      mapPacket->appendData(packedMap);
+      send(mapPacket);
     }
 
     /**
@@ -273,7 +338,9 @@ class Client {
     static int clientProcess(void *data);
 
     void setGameState(std::vector<char>* state){
+#ifdef VERBOSE
       std::cout << "Setting game state" << std::endl;
+#endif
       int offset = 0;
       int player = 0;
       while(player < 2){ //while less than num players
@@ -286,15 +353,26 @@ class Client {
           offset++;
           playerStates->at(player).at(i) = stoi(value);
         }
+#ifdef VERBOSE
         std::cout << "Printing player state of player : " << player << " state : ";
         for(auto x: playerStates->at(player))
           std::cout << x  << " ";
         std::cout << std::endl;
+#endif
         player++;
       }
       //projectile stuff here - maybe a for x in state loop?
 
       stateSet = true;
     }
+
+    void setStartTime(std::string time) {
+        startTime = stol(time);
+    }
+
+    long getStartTime() {
+      return startTime;
+    }
+
 };
 #endif

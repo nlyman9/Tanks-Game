@@ -12,16 +12,8 @@ bool Tank::getFire() {
     return shotsFired;
 }
 
-void Tank::setFire(bool fire) {
-    shotsFired = fire;
-}
-
 bool Tank::getBomb() {
-    return bombDeloyed;
-}
-
-void Tank::setBomb(bool bomb) {
-    bombDeloyed = bomb;
+    return bombDeployed;
 }
 
 bool Tank::rotate(float t){

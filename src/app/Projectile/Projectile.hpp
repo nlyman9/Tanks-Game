@@ -30,8 +30,16 @@ class Projectile : public Object {
 		int targetNum = 0;
 		bool hit = false;
 		SDL_Rect targetBox;
+        int id;
+        
+        std::vector<std::vector<int>> tile_array;
+        int colTileX = -1;
+        int colTileY = -1;
 
     public:
+    
+        int ticks = 0;
+        
         Projectile(Sprite *missile, float x, float y); //constructor, initialize the x, y, and sprite
         Projectile(float x, float y); //constructor, initialize the x, y
 		Projectile(float x, float y, int theta, int speed);	//constructor, initialize with x, y, and theta
@@ -50,17 +58,31 @@ class Projectile : public Object {
 		bool isHit();
 		bool isExploding();
 		bool isFinished();
-    void setFinished(bool fini);
+        void setFinished(bool fini);
 
 		bool getFriendly(); // returns friendly
 		bool setFriendly(bool a); // modifies and returns the value of friendly
 
+        void setID(int i) {
+            id = i;
+        }
+        int getID() {
+            return id;
+        }
+
         void addTargetLocation(SDL_Rect* targetLoc); // adds a target to the vector of targets
 		void clearTargets(); // resets the vector list of targets
 		SDL_Rect* getTarget();
-    bool projCollisionCheck(Projectile* bullet2);
-    void setExploding(bool explode);
+        bool projCollisionCheck(Projectile* bullet2);
+        void setExploding(bool explode);
         BoundingBox* getBoundingBox() override;
+
+        // methods for breaking destructible blocks
+        std::vector<int> getTilePosition(int pixelX, int pixelY);
+        void setTileArray(std::vector<std::vector<int>> tile_array);
+        bool hasDestructCollision();
+        int getColX();
+        int getColY();
 
         ~Projectile();
 };

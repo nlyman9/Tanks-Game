@@ -14,8 +14,13 @@
 #include <iostream>
 #include <vector>
 #include <unistd.h>
+
+#include "Bomb.hpp"
+#include "Projectile.hpp"
 #include "Multiplayer.hpp"
 #include "Player.hpp"
+#include "Constants.hpp"
+
 
 // #include <SDL2/SDL_thread.h>
 
@@ -97,15 +102,19 @@ class Server {
 
             if (pendingClients == nullptr) {
                 // No messages from clients!
+#ifdef VERBOSE
                 std::cout << "SERVER: No pending clients" << std::endl;
                 fflush(stdout);
+#endif
                 return nullptr;
             }
 
             // if there are clients pending, get their data
             for (auto client : *pendingClients) {
+#ifdef VERBOSE
                 std::cout << "SERVER: Going to receive from " << client->id() << std::endl;
                 fflush(stdout);
+#endif
                 host->receiveFromClient(client->id());
             }
 
@@ -208,6 +217,10 @@ class Server {
             return true;
         }
 
+        void disconnectClient(int id) {
+            host->closeClient(id);
+        }
+
         /**
          * @brief Get the vector of clients connected in the form of Client Connections
          * 
@@ -225,32 +238,79 @@ class Server {
         int numClients() {
             return host->numClients();
         }
-
+        void reset_lag_time(){
+            lag_time = prev_lag_time;
+        }
         //simulate game
         bool simulate(){
             current_time = std::chrono::system_clock::now();
             elapsed_time = current_time - previous_time;
             previous_time = current_time;
+            prev_lag_time = lag_time;
             lag_time += elapsed_time.count();
+            // Check that the last states of the players is not null
+            //  If the server didnt receive packets on the first tick, the server would segfault
+            for (auto& mail : *lastMail) {
+                if (mail == nullptr)
+                    return false;
+            }
+
             //for each player
             //apply latest mail
-            gamestate->clear();
             for(int i = 0; i < numClients(); i++){
-                std::cout << "SERVER: Applying keystates to gamestate" << std::endl;
-                if(!applyKeyStatePacket(lastMail->at(i), players->at(i))){
-                    printf("SERVER Error: could not apply keystate packet\n");
+
+                // Game Over
+                if(players->at(i)->isHit()) {
+                    Packet* gameOverPacket = new Packet(PackType::GAME_OVER);
+                    gameOverPacket->appendData(i); // send ID of losing player
+                    broadcast(gameOverPacket);
                     return false;
                 }
+#ifdef VERBOSE
+                std::cout << "SERVER: Applying keystates to gamestate" << std::endl;
                 lastMail->at(i)->printData();
-                std::vector<char>* playerstate = players->at(i)->getState();
-                gamestate->insert(gamestate->end() , playerstate->begin(), playerstate->end());
                 std::cout << std::endl;
+#endif
+                if(!applyKeyStatePacket(lastMail->at(i), players->at(i), lag_time, i)){
+#ifdef VERBOSE
+                    printf("SERVER Error: could not apply keystate packet\n");
+#endif
+                    return false;
+                }
+
+			    // Update every bomb in the game
+                int bombCount = 0;
+                for(auto& bomb : bombs) {
+                    // Update bombs
+                    players->at(i)->get_box();
+                    if((players->at(i)->check_collision(bomb) != nullptr) && bomb->isExploding()) {
+                        players->at(i)->setHit(true);
+                    }
+                    // Check if bomb is done exploding
+                    if(bomb->getFinished()) {
+                        bombs.erase(bombs.begin() + bombCount);
+                        bombCount--;
+                    }
+                    bombCount++;
+                }
             }
-            //for each projectile
-                //interpolate & add to game state
+
+            //update everything
+            if(lag_time >= MS_PER_UPDATE) {
+                for(auto player: *players) {
+                    player->update();
+                }
+
+                for(auto& bomb : bombs) {
+                    bomb->update();
+                }
+                lag_time -= MS_PER_UPDATE;
+            }
+
             return true;
         }
-        bool applyKeyStatePacket(Packet* packet, Player* player){
+
+        bool applyKeyStatePacket(Packet* packet, Player* player, double lag_time, int playerIdx){
             SDL_Event e;
             if(packet == nullptr)
                 return false;
@@ -258,14 +318,35 @@ class Server {
                 return false;
             if(!(packet->getType() == PackType::KEYSTATE))
                 return false;
+#ifdef VERBOSE
             packet->printData();
+#endif
             Uint8 *keystate = keystateify(packet->getBody());
-            if(keystate == nullptr)
+            bool hasShot = getHasShot(packet->getBody());
+            bool droppedBomb = getDroppedBomb(packet->getBody());
+
+            player->setFire(hasShot);
+            player->setBomb(droppedBomb);
+
+            if(keystate == nullptr) {
                 return false;
-            try{
+            }
+
+            try {
                 player->getEvent(elapsed_time, &e, keystate);
-                player->update();
-            }catch (const std::exception &exc){
+                if(player->getFire()) {
+                    Projectile* projectile = new Projectile(player->getX() + TANK_WIDTH/4, player->getY() + TANK_HEIGHT/4, player->getTurretTheta(), 1);
+                    projectile->setObstacleLocations(&projectileObstacles);
+                    projectile->setID(playerIdx);
+                    projectiles.push_back(projectile);
+                    player->setFire(false);
+                }                
+                if(player->getBomb()) {
+                    Bomb* bomb = new Bomb(player->get_box(), player->getTheta());
+                    bombs.push_back(bomb);
+                    player->setBomb(false);
+                }
+            } catch (const std::exception &exc) {
                 // catch anything thrown within try block that derives from std::exception
                 std::cout << "SERVER ERROR" << std::endl;
                 std::cerr << exc.what() << std::endl;
@@ -273,15 +354,21 @@ class Server {
             }
             return true;
         }
+
         Uint8 *keystateify(std::vector<char>* mail){
             Uint8 *keystate;
             try{
+#ifdef VERBOSE
                 std::cout << "calloc keystate" << std::endl;
-                keystate = (Uint8 *) calloc(27, sizeof(Uint8));
-                
                 std::cout << "for loop on keys" << std::endl;
+#endif
+                keystate = (Uint8 *) calloc(27, sizeof(Uint8));
                 for (int i = 0; i < keysToCheck.size(); i++) {
-                    keystate[keysToCheck[i]] = (Uint8) mail->at(i); 
+                    if(i >= keysToCheck.size()) {
+                        std::cout << "SERVER VECTOR OVER RUN" << std::endl;
+                    } else {
+                        keystate[keysToCheck[i]] = (Uint8) mail->at(i); 
+                    }
                 }
             }
             catch (const std::exception &exc){
@@ -290,17 +377,35 @@ class Server {
             }
             return keystate;
         }
+
+        bool getHasShot(std::vector<char>* mail) {
+            if((int)mail->at(10) == 1) {
+                return true;
+            }
+            return false;
+        }
+
+        bool getDroppedBomb(std::vector<char>* mail) {
+            if((int)mail->at(11) == 1) {
+                return true;
+            }
+            return false;
+        }
+
         //set the player in the player array - make a copy
         void addPlayer(Player* newPlayer){
             players->push_back(newPlayer);
         }
+
         Player* getPlayer(int idx){
             return players->at(idx);
         }
+
         void setMail(Packet* mail, int idx){
             lastMail->at(idx) = new Packet(PackType::KEYSTATE);
             lastMail->at(idx)->appendData(mail->getBodyString());
         }
+
         void initPlayerAndMailLists(){
             //init player list
             players = new std::vector<Player*>();
@@ -310,37 +415,68 @@ class Server {
                 lastMail->push_back(nullptr);
             }
         }
-        void startTime(){
-            std::chrono::system_clock::time_point previous_time = std::chrono::system_clock::now();
+
+        void setStartTime(){
+            start_time = std::chrono::system_clock::now();
         }
+
+        long getStartTime(){
+            return start_time.time_since_epoch().count();
+        }
+
         Packet* getGamestatePacket(){
             Packet* gamestatepacket = new Packet(PackType::KEYFRAME);
             for(auto x : *getGamestate())
                 gamestatepacket->appendData(x);
+#ifdef VERBOSE
             std::cout << "Game state" << std::endl;
             gamestatepacket->printData();
+#endif
             return gamestatepacket;
         }
+
         std::vector<char>* getGamestate(){
+            gamestate->clear();
             std::vector<char>* retVal = new std::vector<char>();
+            for(auto player: *players){
+                std::vector<char>* playerstate = player->getState();
+                gamestate->insert(gamestate->end() , playerstate->begin(), playerstate->end());
+            }
             for(auto x : *gamestate)
                 retVal->push_back(x);
             return retVal;
         }
-        private:
-            //player vector - parallel to clientConnection
-            std::vector<Player*>* players;
-            //latest mail vector - parallel to player
-            std::vector<Packet*>* lastMail;
-            // The keys we want to check for when we add a keystate packet
-            std::vector<Uint8> keysToCheck =  { SDL_SCANCODE_W, SDL_SCANCODE_A, 
-                                        SDL_SCANCODE_S, SDL_SCANCODE_D}; 
-            std::chrono::duration<double, std::ratio<1, 1000>> elapsed_time;
-            std::chrono::system_clock::time_point previous_time;
-            std::chrono::system_clock::time_point current_time;
-            double lag_time;
 
-            std::vector<char>* gamestate;
+        std::vector<SDL_Rect> getProjectileObstacles() {
+            return projectileObstacles;
+        }
+    
+    
+    std::chrono::system_clock::time_point time_since_last_keyframe;
+
+    private:
+        //player vector - parallel to clientConnection
+        std::vector<Player*>* players;
+        //latest mail vector - parallel to player
+        std::vector<Packet*>* lastMail;
+        // Vector of simulated bombs
+        std::vector<Bomb*> bombs;
+        // Vector of simulated projectiles
+        std::vector<Projectile*> projectiles;
+        // Vector of obstacles the projectiles see
+        std::vector<SDL_Rect> projectileObstacles;
+        // The keys we want to check for when we add a keystate packet
+        std::vector<Uint8> keysToCheck =  { SDL_SCANCODE_W, SDL_SCANCODE_A, 
+                                    SDL_SCANCODE_S, SDL_SCANCODE_D}; 
+        std::chrono::duration<double, std::ratio<1, 1000>> elapsed_time;
+        std::chrono::system_clock::time_point previous_time;
+        std::chrono::system_clock::time_point current_time;
+        double lag_time = 0;
+        double prev_lag_time;
+        bool ready_to_update = false;
+        std::vector<char>* gamestate;
+
+        std::chrono::system_clock::time_point start_time;
 };
 
 #endif
