@@ -36,7 +36,7 @@ class Enemy : public Object, public Tank {
 				std::vector<Bomb *> bombList;
 				std::vector<Enemy *> enemyList;
 
-		float line1X, line1Y, line2X, line2Y;
+		float line1X, line1Y, line2X, line2Y, tiny1X, tiny1Y, tiny2X, tiny2Y;
 		int randCut = 2;
 		int updateCalls = 0;
 		bool trackOrMonitor = false;
@@ -49,6 +49,7 @@ class Enemy : public Object, public Tank {
 		bool upDown = false;
 		bool dodgingBullet = false;
 		bool enemyOverlapCheck = false;
+		bool shootWall = false;
 		int moveState = 0;
 		int bulletXblock, bulletYblock, bulletTheta;
 		int bombXblock, bombYblock;
